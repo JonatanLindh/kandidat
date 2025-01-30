@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3 uid="uid://bfly7gucrxb07"]
+
+[ext_resource type="Shader" path="res://Shaders/planet_shader.gdshader" id="1_ayube"]
+
+[sub_resource type="Gradient" id="Gradient_rc45s"]
+offsets = PackedFloat32Array(0, 0.038835, 0.0938511, 0.346278, 0.631068, 0.754045, 1)
+colors = PackedColorArray(0.0117647, 0.156863, 0.784314, 1, 0.506929, 0.449707, 0.306385, 1, 0.0784314, 0.47451, 0.0588235, 1, 0.10748, 0.10748, 0.10748, 1, 0.229187, 0.229187, 0.229187, 1, 0.899894, 0.899894, 0.899894, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_jihv7"]
+gradient = SubResource("Gradient_rc45s")
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_ayube")
+shader_parameter/min_height = 1.0
+shader_parameter/max_height = 1.10771
+shader_parameter/height_color = SubResource("GradientTexture1D_jihv7")

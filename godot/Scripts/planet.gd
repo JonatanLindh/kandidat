@@ -9,6 +9,7 @@ extends Node3D
 			planet_data.connect("changed", generate)
 
 func _ready() -> void:
+	planet_data = planet_data.duplicate()
 	generate()
 
 func generate() -> void:
