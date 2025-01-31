@@ -2,8 +2,8 @@
 extends MeshInstance3D
 class_name PlanetMeshFace
 
-@export var normal : Vector3
-@export var material : Material
+@export var normal: Vector3
+@export var material: Material
 
 func regenerate_mesh(planet_data: PlanetData):
 	var resolution := planet_data.resolution
@@ -18,7 +18,7 @@ func regenerate_mesh(planet_data: PlanetData):
 	for y in resolution:
 		for x in resolution:
 			var percent := Vector2(x, y) / (resolution - 1)
-			var point_on_unit_cube := normal + (percent.x-0.5)*2*axisA + (percent.y-0.5)*2*axisB
+			var point_on_unit_cube := normal + (percent.x - 0.5) * 2 * axisA + (percent.y - 0.5) * 2 * axisB
 			var point_on_unit_sphere = point_on_unit_cube.normalized()
 			var point_on_planet := planet_data.point_on_planet(point_on_unit_sphere)
 			st.add_vertex(point_on_planet)
@@ -27,14 +27,14 @@ func regenerate_mesh(planet_data: PlanetData):
 			planet_data.min_height = min(planet_data.min_height, l)
 			planet_data.max_height = max(planet_data.max_height, l)
 			
-			if x != resolution-1 and y != resolution-1:
+			if x != resolution - 1 and y != resolution - 1:
 				st.add_index(i)
-				st.add_index(i+resolution)
-				st.add_index(i+resolution+1)
+				st.add_index(i + resolution)
+				st.add_index(i + resolution + 1)
 				
 				st.add_index(i)
-				st.add_index(i+resolution+1)
-				st.add_index(i+1)
+				st.add_index(i + resolution + 1)
+				st.add_index(i + 1)
 			i += 1
 	
 	st.generate_normals()

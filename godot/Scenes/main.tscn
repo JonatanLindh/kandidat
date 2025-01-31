@@ -35,21 +35,21 @@ amplitude = 1.0
 min_height = 0.2
 use_layer0_as_mask = true
 
-[sub_resource type="Resource" id="Resource_oy8s0"]
+[sub_resource type="Resource" id="Resource_3wk6t"]
 script = ExtResource("5_iwpoi")
 radius = 1.0
 resolution = 20
 planet_noise = Array[ExtResource("4_jjnto")]([SubResource("Resource_eh3yi"), SubResource("Resource_fsh7h")])
 planet_color = SubResource("GradientTexture1D_jihv7")
 
-[sub_resource type="Resource" id="Resource_5b84s"]
+[sub_resource type="Resource" id="Resource_cnt6b"]
 script = ExtResource("5_iwpoi")
 radius = 1.0
 resolution = 20
 planet_noise = Array[ExtResource("4_jjnto")]([SubResource("Resource_eh3yi"), SubResource("Resource_fsh7h")])
 planet_color = SubResource("GradientTexture1D_jihv7")
 
-[sub_resource type="Resource" id="Resource_tab8c"]
+[sub_resource type="Resource" id="Resource_edvk5"]
 script = ExtResource("5_iwpoi")
 radius = 1.0
 resolution = 20
@@ -65,7 +65,7 @@ mass = 100.0
 affectingGravity = true
 
 [node name="Planet" parent="GravityField/CelestialBody" instance=ExtResource("1_i4srd")]
-planet_data = SubResource("Resource_oy8s0")
+planet_data = SubResource("Resource_3wk6t")
 
 [node name="CelestialBody2" parent="GravityField" instance=ExtResource("2_78qgw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.85802, -0.0975753, -0.414271)
@@ -74,7 +74,7 @@ affectedByGravity = true
 velocity = Vector3(0, 0, 4)
 
 [node name="Planet" parent="GravityField/CelestialBody2" instance=ExtResource("1_i4srd")]
-planet_data = SubResource("Resource_5b84s")
+planet_data = SubResource("Resource_cnt6b")
 
 [node name="CelestialBody3" parent="GravityField" instance=ExtResource("2_78qgw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.274718, -0.568713, 5.65757)
@@ -83,7 +83,7 @@ affectedByGravity = true
 velocity = Vector3(4, 0, 0)
 
 [node name="Planet" parent="GravityField/CelestialBody3" instance=ExtResource("1_i4srd")]
-planet_data = SubResource("Resource_tab8c")
+planet_data = SubResource("Resource_edvk5")
 
 [node name="Camera3D" type="Camera3D" parent="GravityField"]
 transform = Transform3D(1, 0, 0, 0, 0.0717409, 0.997423, 0, -0.997423, 0.0717409, 0, 12.344, 0)

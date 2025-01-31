@@ -15,15 +15,15 @@ func _physics_process(delta: float) -> void:
 	
 	for affectee in bodies:
 		if not affectee.affectedByGravity:
-			continue;
+			continue
 		var acc = Vector3.ZERO
 		
 		for affecter in bodies:
 			if not affecter.affectingGravity:
-				continue;
+				continue
 			if affecter == affectee:
-				continue;
-			acc += accelerationDueToGravity(affecter,affectee)
+				continue
+			acc += accelerationDueToGravity(affecter, affectee)
 			
 		affectee.setAcceleration(acc)
 	
@@ -32,9 +32,7 @@ func _physics_process(delta: float) -> void:
 		b.updatePosition(delta)
 	
 	
-
-func accelerationDueToGravity(affecter :CelestialBody,affectee: CelestialBody) -> Vector3:
-	var r2 = (affecter.position - affectee.position ).length_squared()
+func accelerationDueToGravity(affecter: CelestialBody, affectee: CelestialBody) -> Vector3:
+	var r2 = (affecter.position - affectee.position).length_squared()
 	var dir = (affecter.position - affectee.position).normalized()
-	return dir * gravityStrength * affecter.mass /r2
-	
+	return dir * gravityStrength * affecter.mass / r2
