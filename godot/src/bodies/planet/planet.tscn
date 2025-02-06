@@ -1,10 +1,10 @@
 [gd_scene load_steps=19 format=4 uid="uid://cljv6xv7xjelh"]
 
-[ext_resource type="Script" path="res://Scripts/planet.gd" id="1_w3oq4"]
-[ext_resource type="Script" path="res://Scripts/planet_data.gd" id="2_14d5b"]
-[ext_resource type="Script" path="res://Scripts/planet_noise.gd" id="2_77rt1"]
-[ext_resource type="Script" path="res://Scripts/planet_mesh_face.gd" id="2_mrlx6"]
-[ext_resource type="Material" uid="uid://bfly7gucrxb07" path="res://Assets/planet_shader_material.tres" id="4_0efhv"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet.gd" id="1_w3oq4"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet_data.gd" id="2_14d5b"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet_noise.gd" id="2_77rt1"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet_mesh_face.gd" id="2_mrlx6"]
+[ext_resource type="Material" uid="uid://bfly7gucrxb07" path="res://src/bodies/planet/planet_shader_material.tres" id="4_0efhv"]
 
 [sub_resource type="Gradient" id="Gradient_rc45s"]
 offsets = PackedFloat32Array(0, 0.038835, 0.0938511, 0.346278, 0.631068, 0.754045, 1)
