@@ -1,3 +1,5 @@
+mod physics;
+
 use godot::prelude::*;
 struct MyExtension;
 
