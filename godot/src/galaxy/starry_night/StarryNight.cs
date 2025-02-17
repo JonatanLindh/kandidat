@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class Galaxy : Node3D
+public partial class StarryNight : Node3D
 {
     float breadth = 1000;
     float centerPull = 2f;

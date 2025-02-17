@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://c7akg3xjnxl4q"]
 
-[ext_resource type="Material" uid="uid://5haov76b3va7" path="res://src/galaxy/starry_sky/star.tres" id="1_8ayno"]
+[ext_resource type="Material" uid="uid://5haov76b3va7" path="res://src/galaxy/starry_night/star.tres" id="1_8ayno"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_p7fv2"]
 radius = 1.0
