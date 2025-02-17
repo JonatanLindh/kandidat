@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://bmfrnyhacrq26"]
+
+[ext_resource type="Script" path="res://src/galaxy/starry_sky/Galaxy.cs" id="1_n6nwc"]
+[ext_resource type="PackedScene" uid="uid://c7akg3xjnxl4q" path="res://src/galaxy/starry_sky/star.tscn" id="2_yey2t"]
+
+[node name="Galaxy" type="Node3D"]
+script = ExtResource("1_n6nwc")
+starScene = ExtResource("2_yey2t")
+
+[node name="Camera3D" type="Camera3D" parent="."]
