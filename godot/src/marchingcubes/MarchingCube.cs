@@ -17,7 +17,7 @@ public class MarchingCube
         _vertices = new List<Vector3>();
     }
 
-    public void GenerateMesh()
+    public MeshInstance3D GenerateMesh()
     {
         for (int x = 0; x < _voxels.GetLength(0) - 1; x++)
         {
@@ -29,6 +29,21 @@ public class MarchingCube
                 }
             }
         }
+        var surface_tool = new SurfaceTool();
+        surface_tool.Begin(Mesh.PrimitiveType.Triangles);
+        surface_tool.SetSmoothGroup(UInt32.MaxValue);
+        foreach (var vertex in _vertices)
+        {
+            surface_tool.AddVertex(vertex);
+        }
+        surface_tool.GenerateNormals();
+        surface_tool.Index();
+		
+        Mesh mesh = surface_tool.Commit();
+        MeshInstance3D mesh_instance = new MeshInstance3D();
+        mesh_instance.Mesh = mesh;
+
+        return mesh_instance;
     }
     private void MarchCube(int x, int y, int z)
     {
