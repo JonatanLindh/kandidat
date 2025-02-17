@@ -8,3 +8,4 @@ script = ExtResource("1_v2n04")
 starScene = ExtResource("2_x1kwn")
 
 [node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.956182, -0.292772, 0, 0.292772, 0.956182, 0, 1.46235, 3.46714)

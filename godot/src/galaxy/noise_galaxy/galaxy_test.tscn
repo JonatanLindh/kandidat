@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://cj02xkbycp06w"]
+
+[ext_resource type="PackedScene" uid="uid://vmhj0qhqny6p" path="res://src/galaxy/noise_galaxy/galaxy.tscn" id="2_bhvms"]
+
+[node name="GalaxyTest" type="Node3D"]
+
+[node name="Galaxy" parent="." instance=ExtResource("2_bhvms")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.844963, 0.534824, 0, -0.534824, 0.844963, 0, 250, 400)

@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3 uid="uid://vmhj0qhqny6p"]
+
+[ext_resource type="Script" path="res://src/galaxy/noise_galaxy/Galaxy.cs" id="1_homyg"]
+[ext_resource type="NoiseTexture3D" uid="uid://y8u3an8q1gar" path="res://src/galaxy/noise_galaxy/galaxy_noise_texture.tres" id="2_2sngo"]
+[ext_resource type="PackedScene" uid="uid://c7akg3xjnxl4q" path="res://src/galaxy/starry_night/star.tscn" id="3_frbh6"]
+
+[node name="Galaxy" type="Node3D"]
+script = ExtResource("1_homyg")
+noiseTexture = ExtResource("2_2sngo")
+starScene = ExtResource("3_frbh6")
