@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using Godot.NativeInterop;
 
 public class MarchingCube
 {
@@ -9,7 +10,7 @@ public class MarchingCube
     private float threshold;
     private List<Vector3> _vertices;
 
-    public MarchingCube(float[,,] voxels, int scale = 1, float threshold = 0.5f)
+    public MarchingCube(float[,,] voxels, int scale = 1, float threshold = 0.0f)
     {
         _voxels = voxels;
         _scale = scale;
