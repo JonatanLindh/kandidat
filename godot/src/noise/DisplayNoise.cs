@@ -26,10 +26,7 @@ public partial class DisplayNoise : Node
     private void UpdateNoise()
     {
         GD.Print("Updated noise");
-        Node nod = GetNode<Node>("%CreateNoise");
-        PlanetNoise n = nod as PlanetNoise;
-        //GD.Print(n);
-        //PlanetNoise n = new PlanetNoise();
+        PlanetNoise n = new PlanetNoise();
         GD.Print(n);
 
         foreach (Vector3 pos in n.GetNoise())

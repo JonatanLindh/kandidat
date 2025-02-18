@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class PlanetNoise : Node
+public partial class PlanetNoise
 {
 
     public List<Vector3> GetNoise()
