@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class Galaxy : Node3D
+public partial class DiscGalaxy : Node3D
 {
     [Export] NoiseTexture3D noiseTexture;
     Noise noise;

@@ -1,6 +1,0 @@
-[gd_resource type="NoiseTexture3D" load_steps=2 format=3 uid="uid://y8u3an8q1gar"]
-
-[ext_resource type="FastNoiseLite" uid="uid://dqknsvpwf4tg" path="res://src/galaxy/noise_galaxy/galaxy_noise.tres" id="1_lj18c"]
-
-[resource]
-noise = ExtResource("1_lj18c")
