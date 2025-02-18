@@ -39,11 +39,10 @@ public class MarchingCube
         }
         surface_tool.GenerateNormals();
         surface_tool.Index();
-		
         Mesh mesh = surface_tool.Commit();
+        
         MeshInstance3D mesh_instance = new MeshInstance3D();
         mesh_instance.Mesh = mesh;
-
         return mesh_instance;
     }
     private void MarchCube(int x, int y, int z)

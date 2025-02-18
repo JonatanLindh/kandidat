@@ -2,32 +2,37 @@ using Godot;
 using System;
 using Godot.Collections;
 
+[Tool]
 public partial class McSpawner : Node
 {
 	private MarchingCube mc;
 	[Export] public int CHUNK_SIZE { get; set; } = 16;
+	[Export] public int MAX_HEIGHT { get; set; } = 16;
 	[Export] public int scale { get; set; } = 1;
 	[Export] int RENDER_DISTANCE { get; set; } = 1;
 	[Export] Node3D player { get; set; }
-
+	[Export] FastNoiseLite fastnoise { get; set; }
 	
 	private Vector3 playerposition;
 	private FastNoiseLite noise;
 	private Dictionary<String, MeshInstance3D> loaded_chunks;
 	
+	private Node3D editorCamera;
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		loaded_chunks = new Dictionary<string, MeshInstance3D>();
-		
+		editorCamera = EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D();
+		GD.Print(editorCamera.Position);
 		noise = new FastNoiseLite();
 		noise.SetNoiseType(FastNoiseLite.NoiseTypeEnum.Perlin);
 		noise.SetSeed(31541);
 		noise.SetFrequency(0.1f);
 		noise.SetFractalType(FastNoiseLite.FractalTypeEnum.Fbm);
 		
-		LoadChunk(0,0);
-		LoadChunk(1,0);
+		//LoadChunk(0,0);
+		//LoadChunk(1,0);
 		
 		playerposition = player.GlobalTransform.Origin;
 		
@@ -36,8 +41,16 @@ public partial class McSpawner : Node
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		playerposition = player.GlobalTransform.Origin;
-		
+		if(editorCamera != null)
+		{ 
+			ChunkProcess();
+		}
+		//ChunkProcess();
+	}
+
+	private void ChunkProcess()
+	{
+		playerposition = editorCamera.GlobalTransform.Origin;
 		var player_chunk_x = (int)(playerposition.X / (CHUNK_SIZE));
 		var player_chunk_z = (int)(playerposition.Z / (CHUNK_SIZE));
 
@@ -58,8 +71,6 @@ public partial class McSpawner : Node
 				}
 			}
 		}
-
-		
 		foreach (var key in loaded_chunks.Keys)
 		{
 			var coords = key.Split(",");
@@ -70,21 +81,19 @@ public partial class McSpawner : Node
 				UnloadChunk(chunk_x, chunk_z);
 			}
 		}
-		
 	}
 
-	private float[,,] GenerateDataPoints(int resolution, Vector3 offset)
+	private float[,,] GenerateDataPoints(Vector3I resolution, Vector3 offset)
 	{
-		float[,,] dataPoints = new float[resolution, resolution, resolution];
+		float[,,] dataPoints = new float[resolution.X, resolution.Y, resolution.Z];
 		
-		for (int x = 0; x < resolution; x++)
+		for (int x = 0; x < resolution.X; x++)
 		{
-			for (int y = 0; y < resolution; y++)
+			for (int y = 0; y < resolution.Y; y++)
 			{
-				for (int z = 0; z < resolution; z++)
+				for (int z = 0; z < resolution.Z; z++)
 				{
-					float noi = noise.GetNoise3D(x + offset.X, y + offset.Y, z + offset.Z);
-					float value = noi;
+					float value = fastnoise.GetNoise3D(x + offset.X, y + offset.Y, z + offset.Z);
 					dataPoints[x, y, z] = value;
 				}
 			}
@@ -112,9 +121,18 @@ public partial class McSpawner : Node
 
 	private MeshInstance3D GenerateChunkMesh(int x, int z)
 	{
-		var datapoints = GenerateDataPoints(CHUNK_SIZE, new Vector3(x, 0, z) * (CHUNK_SIZE - 1));	
+		var offset = new Vector3(x, 0, z) * (CHUNK_SIZE - 1);
+		var datapoints = GenerateDataPoints(new Vector3I(CHUNK_SIZE, MAX_HEIGHT, CHUNK_SIZE), offset);	
 		mc = new MarchingCube(datapoints, scale);
-		return mc.GenerateMesh();
+		var meshinstance = mc.GenerateMesh();
+		//RenderGrid(datapoints, offset);
+		
+		// disable backface culling
+		meshinstance.MaterialOverride = new StandardMaterial3D();
+		((StandardMaterial3D)meshinstance.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
+		
+		
+		return meshinstance;
 	}
 	
 	// For debugging
