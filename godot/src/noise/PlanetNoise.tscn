@@ -6,7 +6,6 @@
 
 [node name="DisplayNoise" type="Node3D" parent="."]
 script = ExtResource("1_6lff2")
-reload = true
 
 [node name="CreateNoise" type="Node" parent="."]
 unique_name_in_owner = true

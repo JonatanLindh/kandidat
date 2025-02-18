@@ -7,8 +7,7 @@ public partial class PlanetNoise
 
     public List<Vector3> GetNoise()
     {
-        return new List<Vector3>();
-        //return CreatePlanetNoise();
+        return CreatePlanetNoise();
     }
 
     private List<Vector3> CreatePlanetNoise()
@@ -23,13 +22,14 @@ public partial class PlanetNoise
         float phi = Mathf.Pi;
         float stepSize = 1 / 8;
 
-        for(float i = 0; i < theta; i += stepSize)
+        for(float i = 0; i < 5; i ++)
         {
-            for(float j = 0; j < phi; j += stepSize)
+            for(float j = 0; j < 5; j ++)
             {
-                for(float k = 0; k < radius; k += stepSize)
+                for(float k = 0; k < 5; k ++)
                 {
-                    noise.Add(new Vector3(radius * Mathf.Cos(i) * Mathf.Sin(j), radius * Mathf.Cos(j), radius * Mathf.Sin(theta) * Mathf.Sin(phi))); 
+                    noise.Add(new Vector3(i, j, k));
+                    //noise.Add(new Vector3(radius * Mathf.Cos(i) * Mathf.Sin(j), radius * Mathf.Cos(j), radius * Mathf.Sin(theta) * Mathf.Sin(phi))); 
 
                 }
             }
