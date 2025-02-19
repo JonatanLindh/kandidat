@@ -2,9 +2,12 @@
 
 [ext_resource type="Script" path="res://src/marchingcubes/McSpawner.cs" id="1_dbip6"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_j77yf"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ai2cf"]
 noise_type = 3
+metadata/_preview_in_3d_space_ = true
 
 [node name="MarchingCube" type="Node3D"]
 script = ExtResource("1_dbip6")
-fastnoise = SubResource("FastNoiseLite_j77yf")
+MAX_HEIGHT = 32
+RENDER_DISTANCE = 4
+Noise = SubResource("FastNoiseLite_ai2cf")

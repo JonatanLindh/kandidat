@@ -3,6 +3,10 @@ using System;
 using System.Collections.Generic;
 using Godot.NativeInterop;
 
+// TODO 
+// Add multithreading to the mesh generation
+
+
 public class MarchingCube
 {
     private float[,,] _voxels;
