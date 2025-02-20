@@ -1,7 +1,7 @@
 use std::mem;
 
 use godot::{
-    classes::{ArrayMesh, Engine, MeshInstance3D, StandardMaterial3D, SurfaceTool, mesh},
+    classes::{base_material_3d::ShadingMode, mesh, ArrayMesh, Engine, MeshInstance3D, StandardMaterial3D, SurfaceTool},
     prelude::*,
 };
 use itertools::Itertools;
@@ -203,7 +203,7 @@ impl GravityController {
         // Create material with color
         let mut material = StandardMaterial3D::new_gd();
         material.set_albedo(trajectory.color);
-
+        material.set_shading_mode(ShadingMode::UNSHADED);
         // Commit to an ArrayMesh
         (surface_tool.commit().unwrap(), material)
     }
