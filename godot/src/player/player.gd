@@ -33,21 +33,13 @@ func _input(event):
 func _physics_process(delta: float) -> void:	
 	if Input.is_action_just_pressed("fly"):
 		flying = not flying
-		velocity = Vector3.ZERO if flying else Vector3(0, -10 * delta * current_speed, 0)
+		velocity = Vector3.ZERO if flying else Vector3(0, get_gravity().y * delta * current_speed, 0)
 	
 	if not flying and not is_on_floor():
 		velocity += get_gravity() * delta
 	
-	# handle floating
-	if Input.is_action_just_pressed("up"):
-		velocity.y += float_speed
-	elif Input.is_action_just_pressed("down"):
-		velocity.y += -float_speed
-
-	if Input.is_action_just_released("up"):
-		velocity.y = move_toward(velocity.y, 0, current_speed)
-	elif Input.is_action_just_released("down"):
-		velocity.y = move_toward(velocity.y, 0, current_speed)
+	if flying:
+		handle_flying()
 		
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")
@@ -69,3 +61,15 @@ func _physics_process(delta: float) -> void:
 func apply_velocity(dir : Vector3, speed_multiplier):
 	velocity.x = dir.x * current_speed * speed_multiplier
 	velocity.z = dir.z * current_speed * speed_multiplier
+
+func handle_flying() -> void:
+	# handle floating
+	if Input.is_action_just_pressed("up"):
+		velocity.y += float_speed
+	elif Input.is_action_just_pressed("down"):
+		velocity.y += -float_speed
+
+	if Input.is_action_just_released("up"):
+		velocity.y = move_toward(velocity.y, 0, current_speed)
+	elif Input.is_action_just_released("down"):
+		velocity.y = move_toward(velocity.y, 0, current_speed)
