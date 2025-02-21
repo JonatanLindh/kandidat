@@ -3,13 +3,17 @@ extends CharacterBody3D
 @onready var head: Node3D = $Head
 @onready var camera_3d: Camera3D = $Head/Camera3D
 
-var current_speed = 5.0
+signal updated_status(position, speed)
+
 const JUMP_VELOCITY = 4.5
+var current_speed = 5.0
 var mouse_sensitivity = 0.1
 var sprint_factor = 2
 var float_speed = 5
 var base_fov = 75
 var flying := true
+var last_position := Vector3.ZERO
+var last_speed := 0.0
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -30,10 +34,11 @@ func _input(event):
 	elif Input.is_action_just_pressed("ui_cancel") and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		
-func _physics_process(delta: float) -> void:	
+func _physics_process(delta: float) -> void:
+		
 	if Input.is_action_just_pressed("fly"):
 		flying = not flying
-		velocity = Vector3.ZERO if flying else Vector3(0, get_gravity().y * delta * current_speed, 0)
+		velocity.y = 0 if flying else get_gravity().y * delta * current_speed
 	
 	if not flying and not is_on_floor():
 		velocity += get_gravity() * delta
@@ -47,29 +52,34 @@ func _physics_process(delta: float) -> void:
 	
 	if direction:
 		if Input.is_action_pressed("sprint"):
-			apply_velocity(direction, sprint_factor)
+			apply_velocity_xz(direction, sprint_factor)
 			camera_3d.fov = base_fov * 1.1
 		else:
-			apply_velocity(direction, 1)
+			apply_velocity_xz(direction, 1)
 			camera_3d.fov = base_fov
 	else:
 		velocity.x = move_toward(velocity.x, 0, current_speed)
 		velocity.z = move_toward(velocity.z, 0, current_speed)
-	
+	emit_player_status_changed()
 	move_and_slide()
 
-func apply_velocity(dir : Vector3, speed_multiplier):
+func apply_velocity_xz(dir : Vector3, speed_multiplier):
 	velocity.x = dir.x * current_speed * speed_multiplier
 	velocity.z = dir.z * current_speed * speed_multiplier
 
 func handle_flying() -> void:
-	# handle floating
 	if Input.is_action_just_pressed("up"):
 		velocity.y += float_speed
 	elif Input.is_action_just_pressed("down"):
 		velocity.y += -float_speed
-
 	if Input.is_action_just_released("up"):
 		velocity.y = move_toward(velocity.y, 0, current_speed)
 	elif Input.is_action_just_released("down"):
 		velocity.y = move_toward(velocity.y, 0, current_speed)
+		
+func emit_player_status_changed() -> void:
+	var speed = velocity.length()
+	if position != last_position or abs(speed-last_speed) > 0:
+		updated_status.emit(position, speed)
+		last_position = position
+		last_speed = speed
