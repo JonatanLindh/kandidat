@@ -145,20 +145,19 @@ public partial class McChunkSpawner : Node
 		{
 			RemoveChild(chunkInstance);
 			_loadedChunks.Remove(chunkKey);
-			//GD.Print("x: " + x + " z: " + z + " unloaded");
 		}
 	}
 
 	
 	private float[,,] GenerateDataPoints(Vector3I resolution, Vector3 offset)
 	{
-		float[,,] dataPoints = new float[resolution.X, resolution.Y, resolution.Z];
+		var dataPoints = new float[resolution.X, resolution.Y, resolution.Z];
 		
-		for (int x = 0; x < resolution.X; x++)
+		for (var x = 0; x < resolution.X; x++)
 		{
-			for (int y = 0; y < resolution.Y; y++)
+			for (var y = 0; y < resolution.Y; y++)
 			{
-				for (int z = 0; z < resolution.Z; z++)
+				for (var z = 0; z < resolution.Z; z++)
 				{
 					float value = 0;
 					value += _noise.GetNoise3D(x + offset.X, y + offset.Y, z + offset.Z);

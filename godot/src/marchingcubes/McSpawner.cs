@@ -81,8 +81,6 @@ public partial class McSpawner : Node
 	private float[,,] GenerateDataPoints()
 	{
 		var dataPoints = new float[_size, _maxHeight, _size];
-
-		GD.Print(_size +" " + _maxHeight);
 		
 		for (var x = 0; x < _size; x++)
 		{
