@@ -1,0 +1,102 @@
+[gd_scene load_steps=21 format=3 uid="uid://dru1frs0nrf78"]
+
+[ext_resource type="Script" path="res://src/system/system.gd" id="1_7my1l"]
+[ext_resource type="PackedScene" uid="uid://cljv6xv7xjelh" path="res://src/bodies/planet/planet.tscn" id="2_4fs4i"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet_noise.gd" id="3_871fg"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet_data.gd" id="4_c03sv"]
+[ext_resource type="PackedScene" uid="uid://c4qg4a1uuvy8x" path="res://src/bodies/star/star.tscn" id="5_5coes"]
+[ext_resource type="Script" path="res://src/physics/gravity_controller.gd" id="6_wayc2"]
+
+[sub_resource type="Gradient" id="Gradient_kv8b6"]
+offsets = PackedFloat32Array(0, 0.038835, 0.0938511, 0.346278, 0.631068, 0.754045, 1)
+colors = PackedColorArray(0.0117647, 0.156863, 0.784314, 1, 0.506929, 0.449707, 0.306385, 1, 0.0784314, 0.47451, 0.0588235, 1, 0.10748, 0.10748, 0.10748, 1, 0.229187, 0.229187, 0.229187, 1, 0.899894, 0.899894, 0.899894, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_jihv7"]
+gradient = SubResource("Gradient_kv8b6")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_cerbr"]
+seed = 7
+fractal_octaves = 7
+
+[sub_resource type="Resource" id="Resource_eh3yi"]
+script = ExtResource("3_871fg")
+noise_map = SubResource("FastNoiseLite_cerbr")
+amplitude = 0.2
+min_height = 0.1
+use_layer0_as_mask = false
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_wx0qc"]
+frequency = 0.087
+fractal_octaves = 10
+
+[sub_resource type="Resource" id="Resource_fsh7h"]
+script = ExtResource("3_871fg")
+noise_map = SubResource("FastNoiseLite_wx0qc")
+amplitude = 1.0
+min_height = 0.2
+use_layer0_as_mask = true
+
+[sub_resource type="Resource" id="Resource_1alul"]
+script = ExtResource("4_c03sv")
+radius = 1.0
+resolution = 20
+planet_noise = Array[ExtResource("3_871fg")]([SubResource("Resource_eh3yi"), SubResource("Resource_fsh7h")])
+planet_color = SubResource("GradientTexture1D_jihv7")
+
+[sub_resource type="Gradient" id="Gradient_rc45s"]
+offsets = PackedFloat32Array(0, 0.038835, 0.0938511, 0.346278, 0.631068, 0.754045, 1)
+colors = PackedColorArray(0.0117647, 0.156863, 0.784314, 1, 0.506929, 0.449707, 0.306385, 1, 0.0784314, 0.47451, 0.0588235, 1, 0.10748, 0.10748, 0.10748, 1, 0.229187, 0.229187, 0.229187, 1, 0.899894, 0.899894, 0.899894, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_3elnh"]
+gradient = SubResource("Gradient_rc45s")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_htefh"]
+seed = 7
+fractal_octaves = 7
+
+[sub_resource type="Resource" id="Resource_vn55s"]
+script = ExtResource("3_871fg")
+noise_map = SubResource("FastNoiseLite_htefh")
+amplitude = 0.2
+min_height = 0.1
+use_layer0_as_mask = false
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_dym31"]
+frequency = 0.087
+fractal_octaves = 10
+
+[sub_resource type="Resource" id="Resource_5si5o"]
+script = ExtResource("3_871fg")
+noise_map = SubResource("FastNoiseLite_dym31")
+amplitude = 1.0
+min_height = 0.2
+use_layer0_as_mask = true
+
+[sub_resource type="Resource" id="Resource_qpxgy"]
+script = ExtResource("4_c03sv")
+radius = 4.2151
+resolution = 20
+planet_noise = Array[ExtResource("3_871fg")]([SubResource("Resource_vn55s"), SubResource("Resource_5si5o")])
+planet_color = SubResource("GradientTexture1D_3elnh")
+
+[node name="System" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.141075, 0, 0)
+script = ExtResource("1_7my1l")
+
+[node name="Planet" parent="." groups=["gravity_body"] instance=ExtResource("2_4fs4i")]
+velocity = Vector3(0, 2, 5)
+trajectory_color = Color(0, 0.803922, 0, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.4636, -20.4246, 0.772003)
+planet_data = SubResource("Resource_1alul")
+
+[node name="Star" parent="." instance=ExtResource("5_5coes")]
+mass = 1000.0
+
+[node name="GravityController" type="GravityController" parent="."]
+script = ExtResource("6_wayc2")
+
+[node name="@GravityBody@53052" parent="." instance=ExtResource("2_4fs4i")]
+mass = 1.67291
+velocity = Vector3(1.73509, 0, -3.48142)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59.1511, 0, 29.48)
+planet_data = SubResource("Resource_qpxgy")
