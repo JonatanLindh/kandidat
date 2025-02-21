@@ -6,65 +6,80 @@ using Godot.NativeInterop;
 // TODO 
 // Add multithreading to the mesh generation
 
-
+/// <summary>
+/// The MarchingCube class generates a 3D mesh from a scalar field represented by a 3D array of float values.
+/// </summary>
 public class MarchingCube
 {
-    private float[,,] _voxels;
-    private int _scale;
-    private float threshold;
-    private List<Vector3> _vertices;
 
-    public MarchingCube(float[,,] voxels, int scale = 1, float threshold = 0.0f)
+    private float[,,] _datapoints;
+    private readonly int _scale;
+    private readonly float _threshold;
+    private readonly List<Vector3> _vertices;
+    
+
+    /// <summary>
+    /// Initializes a new instance of the MarchingCube class with the specified scale and threshold.
+    /// </summary>
+    /// <param name="scale">The scale factor for the mesh generation.</param>
+    /// <param name="threshold">The threshold value for determining the surface of the mesh.</param>
+    public MarchingCube(int scale = 1, float threshold = 0.0f)
     {
-        _voxels = voxels;
         _scale = scale;
-        this.threshold = threshold;
+        _threshold = threshold;
         _vertices = new List<Vector3>();
     }
 
-    public MeshInstance3D GenerateMesh()
+    /// <summary>
+    /// Generates a mesh from a 3D array of float values with the Marching Cubes Algorithm
+    /// </summary>
+    /// <param name="datapoints">3D array of float values representing the scalar field</param>
+    /// <returns>A MeshInstance3D object representing the generated mesh</returns>
+    public MeshInstance3D GenerateMesh(float[,,] datapoints)
     {
-        for (int x = 0; x < _voxels.GetLength(0) - 1; x++)
+        _datapoints = datapoints;
+        _vertices.Clear();
+        for (var x = 0; x < _datapoints.GetLength(0) - 1; x++)
         {
-            for (int y = 0; y < _voxels.GetLength(1) - 1; y++)
+            for (var y = 0; y < _datapoints.GetLength(1) - 1; y++)
             {
-                for (int z = 0; z < _voxels.GetLength(2) - 1; z++)
+                for (var z = 0; z < _datapoints.GetLength(2) - 1; z++)
                 {
                     MarchCube(x, y, z);
                 }
             }
         }
-        var surface_tool = new SurfaceTool();
-        surface_tool.Begin(Mesh.PrimitiveType.Triangles);
-        surface_tool.SetSmoothGroup(UInt32.MaxValue);
+        var surfaceTool = new SurfaceTool();
+        surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
+        surfaceTool.SetSmoothGroup(UInt32.MaxValue);
         foreach (var vertex in _vertices)
         {
-            surface_tool.AddVertex(vertex);
+            surfaceTool.AddVertex(vertex);
         }
-        surface_tool.GenerateNormals();
-        surface_tool.Index();
-        Mesh mesh = surface_tool.Commit();
+        surfaceTool.GenerateNormals();
+        surfaceTool.Index();
+        Mesh mesh = surfaceTool.Commit();
         
-        MeshInstance3D mesh_instance = new MeshInstance3D();
-        mesh_instance.Mesh = mesh;
-        return mesh_instance;
+        var meshInstance = new MeshInstance3D();
+        meshInstance.Mesh = mesh;
+        return meshInstance;
     }
     private void MarchCube(int x, int y, int z)
     {
         var tri = GetTriangulation(x, y, z);
-        foreach (var edge_index in tri)
+        foreach (var edgeIndex in tri)
         {
-            if (edge_index == -1) break;
-            var points_indices = MarchingTable.EDGES[edge_index];
+            if (edgeIndex == -1) break;
+            var pointsIndices = MarchingTable.EDGES[edgeIndex];
 
-            var p0 = MarchingTable.POINTS[points_indices.X];
-            var p1 = MarchingTable.POINTS[points_indices.Y];
+            var p0 = MarchingTable.POINTS[pointsIndices.X];
+            var p1 = MarchingTable.POINTS[pointsIndices.Y];
 			
-            var pos_a = new Vector3((x + p0.X) * _scale, (y + p0.Y) * _scale, (z + p0.Z) * _scale);
-            var pos_b = new Vector3((x + p1.X) * _scale, (y + p1.Y) * _scale, (z + p1.Z) * _scale);
+            var posA = new Vector3((x + p0.X) * _scale, (y + p0.Y) * _scale, (z + p0.Z) * _scale);
+            var posB = new Vector3((x + p1.X) * _scale, (y + p1.Y) * _scale, (z + p1.Z) * _scale);
 			
             // TODO: use an actual interpolation function between the two points
-            var position = (pos_a + pos_b) / 2.0f;
+            var position = (posA + posB) / 2.0f;
 			
             _vertices.Add(position);
         }
@@ -74,15 +89,15 @@ public class MarchingCube
     private int[] GetTriangulation(int x, int y, int z)
     {
         var idx = 0b00000000;
-        if (_voxels[x, y, z] >= threshold) idx |= 0b00000001;
-        if (_voxels[x, y, z + 1] >= threshold) idx |= 0b00000010;
-        if (_voxels[x + 1, y, z + 1] >= threshold) idx |= 0b00000100;
-        if (_voxels[x + 1, y, z] >= threshold) idx |= 0b00001000;
+        if (_datapoints[x, y, z] >= _threshold) idx |= 0b00000001;
+        if (_datapoints[x, y, z + 1] >= _threshold) idx |= 0b00000010;
+        if (_datapoints[x + 1, y, z + 1] >= _threshold) idx |= 0b00000100;
+        if (_datapoints[x + 1, y, z] >= _threshold) idx |= 0b00001000;
 		
-        if (_voxels[x, y + 1, z] >= threshold) idx |= 0b00010000;
-        if (_voxels[x, y + 1, z + 1] >= threshold) idx |= 0b00100000;
-        if (_voxels[x + 1, y + 1, z + 1] >= threshold) idx |= 0b01000000;
-        if (_voxels[x + 1, y + 1, z] >= threshold) idx |= 0b10000000;
+        if (_datapoints[x, y + 1, z] >= _threshold) idx |= 0b00010000;
+        if (_datapoints[x, y + 1, z + 1] >= _threshold) idx |= 0b00100000;
+        if (_datapoints[x + 1, y + 1, z + 1] >= _threshold) idx |= 0b01000000;
+        if (_datapoints[x + 1, y + 1, z] >= _threshold) idx |= 0b10000000;
 		
         return MarchingTable.TRIANGULATIONS[idx];
     }
