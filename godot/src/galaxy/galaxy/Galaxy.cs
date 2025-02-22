@@ -27,6 +27,7 @@ public partial class Galaxy : Node3D
     public override void _Process(double delta)
     {
         ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
+
         for (int x = -chunkDistance; x <= chunkDistance; x++)
         {
             for (int y = -chunkDistance; y <= chunkDistance; y++)
@@ -34,13 +35,15 @@ public partial class Galaxy : Node3D
                 for (int z = -chunkDistance; z <= chunkDistance; z++)
                 {
                     ChunkCoord chunk = new ChunkCoord(playerChunk.x + x, playerChunk.y + y, playerChunk.z + z);
-                    if (!IsChunkPosGenerated(chunk))
+                    if (!IsChunkGenerated(chunk))
                     {
                         GenerateChunk(chunk);
                     }
                 }
             }
         }
+
+        CullChunks(playerChunk);
     }
 
     private void GenerateChunk(ChunkCoord pos)
@@ -52,7 +55,7 @@ public partial class Galaxy : Node3D
         AddChild(chunk);
     }
 
-    private bool IsChunkPosGenerated(ChunkCoord chunk)
+    private bool IsChunkGenerated(ChunkCoord chunk)
     {
         foreach (StarChunk c in starChunks)
         {
@@ -63,5 +66,19 @@ public partial class Galaxy : Node3D
         }
 
         return false;
+    }
+
+    private void CullChunks(ChunkCoord playerChunk)
+    {
+        foreach (StarChunk chunk in starChunks)
+        {
+            if (Math.Abs(chunk.GetPos().x - playerChunk.x) > chunkDistance || 
+                Math.Abs(chunk.GetPos().y - playerChunk.y) > chunkDistance || 
+                Math.Abs(chunk.GetPos().z - playerChunk.z) > chunkDistance)
+            {
+                starChunks.Remove(chunk);
+                chunk.QueueFree();
+            }
+        }
     }
 }
