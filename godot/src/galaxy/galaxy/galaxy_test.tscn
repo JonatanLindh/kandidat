@@ -1,11 +1,12 @@
 [gd_scene load_steps=3 format=3 uid="uid://nbkjnqye1v5k"]
 
 [ext_resource type="PackedScene" uid="uid://dpl2k6yof7xst" path="res://src/galaxy/galaxy/galaxy.tscn" id="1_gw4cn"]
-[ext_resource type="FastNoiseLite" uid="uid://b781u0jwrh88d" path="res://src/galaxy/galaxy/galaxy_fast_noise.tres" id="2_s2l6y"]
+[ext_resource type="Script" path="res://free_look_camera.gd" id="3_jqima"]
 
 [node name="GalaxyTest" type="Node3D"]
 
 [node name="Galaxy" parent="." instance=ExtResource("1_gw4cn")]
-noise = ExtResource("2_s2l6y")
 
 [node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(-0.810994, 0.00695613, -0.585013, 0.109455, 0.984078, -0.140035, 0.574725, -0.1776, -0.798843, 4.74217, 5.68922, -12.2318)
+script = ExtResource("3_jqima")
