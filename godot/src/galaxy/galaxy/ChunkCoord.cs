@@ -22,8 +22,24 @@ public partial class ChunkCoord
     /// <returns></returns>
     public static ChunkCoord ToChunkCoord(int chunkSize, Vector3 globalPos)
     {
+        int x = Mathf.FloorToInt(globalPos.X / chunkSize);
+        int y = Mathf.FloorToInt(globalPos.Y / chunkSize);
+        int z = Mathf.FloorToInt(globalPos.Z / chunkSize);
+        return new ChunkCoord(x, y, z);
+    }
 
+    public override bool Equals(object obj)
+    {
+        if (obj is ChunkCoord coord)
+        {
+            return (this.x == coord.x && this.y == coord.y && this.z == coord.z);
+        }
 
-        return new ChunkCoord(0, 0, 0);
+        else if (obj is Vector3 vec)
+        {
+            return (this.x == vec.X && this.y == vec.Y && this.z == vec.Z);
+        }
+
+        return false;
     }
 }

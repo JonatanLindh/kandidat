@@ -11,26 +11,57 @@ public partial class Galaxy : Node3D
     private List<StarChunk> starChunks;
     int chunkSize = 1000;
 
+    int chunkDistance = 1;
+
     public override void _Ready()
     {
         starChunks = new List<StarChunk>();
-
-        GenerateChunk();
     }
 
     public override void _PhysicsProcess(double delta)
     {
 
+
     }
 
-    private void GenerateChunk()
+    public override void _Process(double delta)
+    {
+        ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
+        for (int x = -chunkDistance; x <= chunkDistance; x++)
+        {
+            for (int y = -chunkDistance; y <= chunkDistance; y++)
+            {
+                for (int z = -chunkDistance; z <= chunkDistance; z++)
+                {
+                    ChunkCoord chunk = new ChunkCoord(playerChunk.x + x, playerChunk.y + y, playerChunk.z + z);
+                    if (!IsChunkPosGenerated(chunk))
+                    {
+                        GenerateChunk(chunk);
+                    }
+                }
+            }
+        }
+    }
+
+    private void GenerateChunk(ChunkCoord pos)
     {
         StarChunk chunk = (StarChunk)starChunk.Instantiate();
-        chunk.Generate(chunkSize, ChunkCoord.ToChunkCoord(chunkSize, player.Position));
+        chunk.Generate(chunkSize, pos);
 
         starChunks.Add(chunk);
         AddChild(chunk);
+    }
 
-        GD.Print("Chunk (" + chunk.GetPos().x + ", " + chunk.GetPos().y + ", " + chunk.GetPos().z + ") generated");
+    private bool IsChunkPosGenerated(ChunkCoord chunk)
+    {
+        foreach (StarChunk c in starChunks)
+        {
+            if (c.GetPos().Equals(chunk))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

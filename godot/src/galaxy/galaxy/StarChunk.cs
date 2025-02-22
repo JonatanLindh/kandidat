@@ -8,7 +8,7 @@ public partial class StarChunk : Node3D
 
     [Export] PackedScene starScene;
 
-    float ISOlevel = 0.8f;
+    float ISOlevel = 0.3f;
     int minDistance = 100;
 
     float offsetStrength = 100f;
@@ -27,8 +27,6 @@ public partial class StarChunk : Node3D
 
         starNoise.Seed = seed;
         starOffsetNoise.Seed = seed;
-
-        GD.Print("seed: " + seed);
     }
 
     public void Generate(int size, ChunkCoord pos)
@@ -36,7 +34,6 @@ public partial class StarChunk : Node3D
         this.size = size;
         this.pos = pos;
 
-        int i = 0;
         for (int x = 0; x < size; x += minDistance)
         {
             for (int y = 0; y < size; y += minDistance)
@@ -46,11 +43,10 @@ public partial class StarChunk : Node3D
                     Vector3 point = new Vector3(x, y, z);
                     float noiseVal = starNoise.GetNoise3Dv(point);
 
-                    if (ISOlevel > noiseVal)
+                    if (ISOlevel < noiseVal)
                     {
                         MeshInstance3D star = (MeshInstance3D)starScene.Instantiate();
-                        star.Position = point + NoisePositionOffset(point, noiseVal) + ChunkPositionOffset();
-                        GD.Print("noise pos offset " + NoisePositionOffset(point, noiseVal));
+                        star.Position = point + NoisePositionOffset(point) + ChunkPositionOffset();
                         AddChild(star);
                     }
                 }
@@ -58,7 +54,7 @@ public partial class StarChunk : Node3D
         }
     }
 
-    private Vector3 NoisePositionOffset(Vector3 basePos, float noiseVal)
+    private Vector3 NoisePositionOffset(Vector3 basePos)
     {
         return new Vector3(
             starOffsetNoise.GetNoise3Dv(basePos) * offsetStrength,
