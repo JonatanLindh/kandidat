@@ -70,8 +70,9 @@ public partial class Galaxy : Node3D
 
     private void CullChunks(ChunkCoord playerChunk)
     {
-        foreach (StarChunk chunk in starChunks)
+        for(int i = 0; i < starChunks.Count; i++)
         {
+            StarChunk chunk = starChunks[i];
             if (Math.Abs(chunk.GetPos().x - playerChunk.x) > chunkDistance || 
                 Math.Abs(chunk.GetPos().y - playerChunk.y) > chunkDistance || 
                 Math.Abs(chunk.GetPos().z - playerChunk.z) > chunkDistance)
