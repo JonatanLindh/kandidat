@@ -2,45 +2,65 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class PlanetNoise
+public partial class PlanetNoise : FastNoiseLite
 {
-
-    public List<Vector3> GetNoise()
+    ///<summary>
+    ///<para>
+    /// Returns a List of vector4 (x, y, z, n)
+    /// </para>
+    /// (x, y, z) is a point in the sphere and n is the noise-value for that point 
+    ///</summary>
+    public List<Vector4> GetNoisedSphere(Vector3 vector)
     {
-        return CreatePlanetNoise();
+        FastNoiseLite noise = new FastNoiseLite();
+        noise.NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin;
+
+        List<Vector3> sphere = GetSphere();
+        List<Vector4> sphereAndNoise = new List<Vector4>();
+
+        foreach(Vector3 point in sphere)
+        {
+            float n = noise.GetNoise3Dv(point);
+            sphereAndNoise.Add(new Vector4(point.X, point.Y, point.Z, n));
+        }
+
+        return sphereAndNoise;
     }
 
-    private List<Vector3> CreatePlanetNoise()
+    public List<Vector3> GetSphere()
     {
         List<Vector3> noise = new List<Vector3>();
 
-        FastNoiseLite n = new FastNoiseLite();
-        n.NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin;
+        // amount of layered spheres
+        float depth = 4.0f;
 
-        int radius = 1;
-        float theta = 2 * Mathf.Pi;
+        // for spherical coordinates
+        float theta = 2.0f * Mathf.Pi;
         float phi = Mathf.Pi;
-        float stepSize = 1 / 8;
-
-        for(float i = 0; i < 5; i ++)
+        float stepSize = 0.25f;
+        for(float r = 1; r <= depth; r++)
         {
-            for(float j = 0; j < 5; j ++)
+            for (float the = 0; the <= theta; the += stepSize)
             {
-                for(float k = 0; k < 5; k ++)
+                for (float ph = 0; ph < phi; ph += stepSize)
                 {
-                    noise.Add(new Vector3(i, j, k));
-                    //noise.Add(new Vector3(radius * Mathf.Cos(i) * Mathf.Sin(j), radius * Mathf.Cos(j), radius * Mathf.Sin(theta) * Mathf.Sin(phi))); 
+                    /* 
+                     calculates the x,y,z position on the surface of the sphere with radius r.
+                     r varies between [1, depth].
+                          - this means that the number of spheres created is equal to depth.
+                    */
+
+                    float x = r * Mathf.Cos(the) * MathF.Sin(ph);
+                    float y = r * Mathf.Cos(ph);
+                    float z = r * Mathf.Sin(the) * Mathf.Sin(ph);
+                    noise.Add(new Vector3(x, y, z));
 
                 }
             }
+     
         }
 
-        //TO GET NOISE: n.GetNoise3Dv()
-
-
         return noise;
-
-
     }
 
 }

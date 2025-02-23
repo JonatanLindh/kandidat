@@ -29,7 +29,7 @@ public partial class DisplayNoise : Node
         PlanetNoise n = new PlanetNoise();
         GD.Print(n);
 
-        foreach (Vector3 pos in n.GetNoise())
+        foreach (Vector3 pos in n.CreateSphere())
         {
             Display(pos);
         }
@@ -42,19 +42,23 @@ public partial class DisplayNoise : Node
         int size = 1;
         //Node3D displayNode = GetNode<Node3D>("PlanetNoise/DisplayNoise");
 
-        SphereMesh sphere = new SphereMesh();
-        sphere.RadialSegments = 8;
-        sphere.Rings = 8;
-        sphere.Radius = size;
-        sphere.Height = size * 2;
-
-
         MeshInstance3D node = new MeshInstance3D();
+        SphereMesh sphere = new SphereMesh();
+        var material = new OrmMaterial3D();
 
         node.Mesh = sphere;
         node.Translate(new Vector3(position.X, position.Y, position.Z));
+        node.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
+       // node.Position = position;
 
-        node.Name = "noise";
+        //sphere.RadialSegments = 8;
+        //sphere.Rings = 8;
+        sphere.Radius = 0.1f;
+        sphere.Height = 0.1f * 2.0f;
+        sphere.Material = material;
+
+        material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
+        material.AlbedoColor = Colors.YellowGreen;
 
         this.AddChild(node);
     }
