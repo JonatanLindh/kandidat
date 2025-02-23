@@ -1,5 +1,5 @@
 @tool
-extends Node3D
+extends GravityBody
 
 @onready var star_mesh: MeshInstance3D = $StarMesh
 
