@@ -11,7 +11,7 @@ public partial class StarChunk : Node3D
     float ISOlevel = 0.3f;
     int minDistance = 100;
 
-    float offsetStrength = 100f;
+    float offsetStrength = 300f;
 
     int size;
     ChunkCoord pos;
@@ -56,10 +56,11 @@ public partial class StarChunk : Node3D
 
     private Vector3 NoisePositionOffset(Vector3 basePos)
     {
+        // Offsets star positions based on noise, sampled at basePos + an arbitrary offset, to reduce grid-like patterns
         return new Vector3(
-            starOffsetNoise.GetNoise3Dv(basePos) * offsetStrength,
-            starOffsetNoise.GetNoise3Dv(basePos) * offsetStrength,
-            starOffsetNoise.GetNoise3Dv(basePos) * offsetStrength
+            starOffsetNoise.GetNoise3Dv(basePos + Vector3.Left * 100) * offsetStrength,
+            starOffsetNoise.GetNoise3Dv(basePos + Vector3.Up * 200) * offsetStrength,
+            starOffsetNoise.GetNoise3Dv(basePos + Vector3.Right * 300) * offsetStrength
         );
     }
 
