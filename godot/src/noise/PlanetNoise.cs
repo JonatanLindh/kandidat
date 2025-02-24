@@ -1,66 +1,55 @@
 using Godot;
+using Godot.NativeInterop;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public partial class PlanetNoise : FastNoiseLite
 {
     ///<summary>
-    ///<para>
-    /// Returns a List of vector4 (x, y, z, n)
-    /// </para>
-    /// (x, y, z) is a point in the sphere and n is the noise-value for that point 
+    /// Returns 3d noise of a sphere to be used with marching cubes
     ///</summary>
-    public List<Vector4> GetNoisedSphere(Vector3 vector)
+    public float[,,] GetSphere()
     {
-        FastNoiseLite noise = new FastNoiseLite();
-        noise.NoiseType = FastNoiseLite.NoiseTypeEnum.Perlin;
+        FastNoiseLite fastNoise = new FastNoiseLite();
+        int size = 128;
+        float[,,] points = new float[size, size, size];
 
-        List<Vector3> sphere = GetSphere();
-        List<Vector4> sphereAndNoise = new List<Vector4>();
+        Vector3 centerPoint =  new Vector3I(size, size, size) / 2;
+        Random random = new Random();
+        Vector3 offset = new Vector3(random.Next(size), random.Next(size), random.Next(size));
 
-        foreach(Vector3 point in sphere)
+        // creates a cube of points
+        for (var x = 0; x < size; x++)
         {
-            float n = noise.GetNoise3Dv(point);
-            sphereAndNoise.Add(new Vector4(point.X, point.Y, point.Z, n));
-        }
-
-        return sphereAndNoise;
-    }
-
-    public List<Vector3> GetSphere()
-    {
-        List<Vector3> noise = new List<Vector3>();
-
-        // amount of layered spheres
-        float depth = 4.0f;
-
-        // for spherical coordinates
-        float theta = 2.0f * Mathf.Pi;
-        float phi = Mathf.Pi;
-        float stepSize = 0.25f;
-        for(float r = 1; r <= depth; r++)
-        {
-            for (float the = 0; the <= theta; the += stepSize)
+            for (var y = 0; y < size; y++)
             {
-                for (float ph = 0; ph < phi; ph += stepSize)
+                for (var z = 0; z < size; z++)
                 {
-                    /* 
-                     calculates the x,y,z position on the surface of the sphere with radius r.
-                     r varies between [1, depth].
-                          - this means that the number of spheres created is equal to depth.
-                    */
+                    float radiusOfSphere = size / 2.0f;
+                    Vector3 currentPosition = new Vector3I(x, y, z);
+                    float distanceToCenter = (centerPoint - currentPosition).Length();
 
-                    float x = r * Mathf.Cos(the) * MathF.Sin(ph);
-                    float y = r * Mathf.Cos(ph);
-                    float z = r * Mathf.Sin(the) * Mathf.Sin(ph);
-                    noise.Add(new Vector3(x, y, z));
+                    // see if the point inside or outside the sphere
+                    if (distanceToCenter < radiusOfSphere)
+                    {
+                        // noise-value between 0-1 - will be closer to 1 when the point is close to the surface 
+                        float noise = fastNoise.GetNoise3Dv(currentPosition + offset) * (distanceToCenter / radiusOfSphere);
 
+                        points[x, y, z] = noise;
+                    }
+                    else
+                    {
+                        // if not inside the sphere, just set noise-value to -1 so discard it later
+                        points[x, y, z] = -1;
+                    }
+
+                    
                 }
             }
-     
         }
 
-        return noise;
+        return points;
     }
 
 }
