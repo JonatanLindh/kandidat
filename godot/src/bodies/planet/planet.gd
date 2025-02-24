@@ -1,5 +1,5 @@
 @tool
-extends Node3D
+extends GravityBody
 
 @export var planet_data: PlanetData:
 	set(val):

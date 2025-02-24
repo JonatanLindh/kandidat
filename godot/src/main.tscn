@@ -1,11 +1,10 @@
-[gd_scene load_steps=14 format=3 uid="uid://jk8g1021r4dv"]
+[gd_scene load_steps=13 format=3 uid="uid://jk8g1021r4dv"]
 
-[ext_resource type="PackedScene" uid="uid://cy768hpw8wjmc" path="res://src/physics/gravity_field.tscn" id="1_dfohm"]
-[ext_resource type="PackedScene" uid="uid://1wfvf1ju4w78" path="res://src/physics/celestial_body.tscn" id="2_c2bo3"]
-[ext_resource type="PackedScene" uid="uid://c4qg4a1uuvy8x" path="res://src/bodies/star/star.tscn" id="3_chovr"]
-[ext_resource type="PackedScene" uid="uid://cljv6xv7xjelh" path="res://src/bodies/planet/planet.tscn" id="4_jkme4"]
-[ext_resource type="Script" path="res://src/bodies/planet/planet_noise.gd" id="5_ql2io"]
-[ext_resource type="Script" path="res://src/bodies/planet/planet_data.gd" id="6_and2g"]
+[ext_resource type="PackedScene" uid="uid://c4qg4a1uuvy8x" path="res://src/bodies/star/star.tscn" id="1_7v278"]
+[ext_resource type="PackedScene" uid="uid://cljv6xv7xjelh" path="res://src/bodies/planet/planet.tscn" id="2_5t3f5"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet_noise.gd" id="3_nmrlo"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet_data.gd" id="4_3d45g"]
+[ext_resource type="Script" path="res://src/physics/gravity_controller.gd" id="5_dt1kc"]
 
 [sub_resource type="Gradient" id="Gradient_rc45s"]
 offsets = PackedFloat32Array(0, 0.038835, 0.0938511, 0.346278, 0.631068, 0.754045, 1)
@@ -19,7 +18,7 @@ seed = 7
 fractal_octaves = 7
 
 [sub_resource type="Resource" id="Resource_eh3yi"]
-script = ExtResource("5_ql2io")
+script = ExtResource("3_nmrlo")
 noise_map = SubResource("FastNoiseLite_cerbr")
 amplitude = 0.2
 min_height = 0.1
@@ -30,38 +29,32 @@ frequency = 0.087
 fractal_octaves = 10
 
 [sub_resource type="Resource" id="Resource_fsh7h"]
-script = ExtResource("5_ql2io")
+script = ExtResource("3_nmrlo")
 noise_map = SubResource("FastNoiseLite_wx0qc")
 amplitude = 1.0
 min_height = 0.2
 use_layer0_as_mask = true
 
-[sub_resource type="Resource" id="Resource_6f7rk"]
-script = ExtResource("6_and2g")
+[sub_resource type="Resource" id="Resource_gerk7"]
+script = ExtResource("4_3d45g")
 radius = 1.0
 resolution = 20
-planet_noise = Array[ExtResource("5_ql2io")]([SubResource("Resource_eh3yi"), SubResource("Resource_fsh7h")])
+planet_noise = Array[ExtResource("3_nmrlo")]([SubResource("Resource_eh3yi"), SubResource("Resource_fsh7h")])
 planet_color = SubResource("GradientTexture1D_jihv7")
 
-[node name="Main" type="Node3D"]
+[node name="Node3D" type="Node3D"]
 
-[node name="GravityField" parent="." instance=ExtResource("1_dfohm")]
+[node name="Planet" parent="." groups=["gravity_body"] instance=ExtResource("2_5t3f5")]
+velocity = Vector3(0, 2, 5)
+trajectory_color = Color(0, 0.803922, 0, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.4636, -20.4246, 0.772003)
+planet_data = SubResource("Resource_gerk7")
 
-[node name="CelestialBody" parent="GravityField" instance=ExtResource("2_c2bo3")]
+[node name="Star" parent="." instance=ExtResource("1_7v278")]
 mass = 1000.0
-affectingGravity = true
-affectedByGravity = true
 
-[node name="Star" parent="GravityField/CelestialBody" instance=ExtResource("3_chovr")]
+[node name="GravityController" type="GravityController" parent="."]
+script = ExtResource("5_dt1kc")
 
-[node name="CelestialBody2" parent="GravityField" instance=ExtResource("2_c2bo3")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.1104, -0.0975753, -0.0905596)
-affectingGravity = true
-affectedByGravity = true
-velocity = Vector3(0, 0, 6)
-
-[node name="Planet" parent="GravityField/CelestialBody2" instance=ExtResource("4_jkme4")]
-planet_data = SubResource("Resource_6f7rk")
-
-[node name="Camera3D" type="Camera3D" parent="GravityField"]
-transform = Transform3D(1, 0, 0, 0, 0.0717409, 0.997423, 0, -0.997423, 0.0717409, 0, 36.5257, 0)
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.867887, 0.496762, 0, -0.496762, 0.867887, 0, 30.3618, 74.6883)
