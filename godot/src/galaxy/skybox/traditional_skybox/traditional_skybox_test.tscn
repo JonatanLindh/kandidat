@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://daq1ml1t4oe5x"]
+
+[ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="1_b6jb0"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_smjab"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_o5vs5"]
+
+[node name="TraditionalSkyboxTest" type="Node3D"]
+
+[node name="TraditionalSkybox" parent="." instance=ExtResource("1_b6jb0")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.989093, 1.70139)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_smjab")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.44673, -2.38419e-07, -1.25449)
+mesh = SubResource("BoxMesh_o5vs5")
