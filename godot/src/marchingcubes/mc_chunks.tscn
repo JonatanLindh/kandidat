@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://dvnb52h33h1dg"]
+
+[ext_resource type="Script" path="res://src/marchingcubes/McChunkSpawner.cs" id="1_lynak"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ddpk8"]
+noise_type = 3
+metadata/_preview_in_3d_space_ = true
+
+[node name="McChunks" type="Node3D"]
+script = ExtResource("1_lynak")
+RenderDistance = 4
+Noise = SubResource("FastNoiseLite_ddpk8")
