@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-public partial class Galaxy : Node3D
+public partial class InfiniteGalaxy : Node3D
 {
     [Export] PackedScene starChunk;
     [Export] Node3D player;
