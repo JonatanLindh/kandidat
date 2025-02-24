@@ -1,14 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://dr0tbidpxor8i"]
 
-[ext_resource type="Script" path="res://src/noise/DisplayNoise.cs" id="1_6lff2"]
+[ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="2_rvr5q"]
 
 [node name="PlanetNoise" type="Node3D"]
 
-[node name="DisplayNoise" type="Node3D" parent="."]
-script = ExtResource("1_6lff2")
-
-[node name="CreateNoise" type="Node" parent="."]
-unique_name_in_owner = true
-
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.969208, 1.21111, 2.65401)
+[node name="MarchingCube" parent="." instance=ExtResource("2_rvr5q")]
+Size = 128
+Noise = null
