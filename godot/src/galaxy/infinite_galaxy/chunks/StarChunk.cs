@@ -45,7 +45,7 @@ public partial class StarChunk : Node3D
 
                     if (ISOlevel < noiseVal)
                     {
-                        MeshInstance3D star = (MeshInstance3D)starScene.Instantiate();
+                        Node3D star = (Node3D) starScene.Instantiate();
                         star.Position = point + NoisePositionOffset(point) + ChunkPositionOffset();
                         AddChild(star);
                     }
