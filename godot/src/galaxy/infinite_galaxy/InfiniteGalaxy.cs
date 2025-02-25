@@ -17,6 +17,9 @@ public partial class InfiniteGalaxy : Node3D
 
     public override void _Ready()
     {
+        // Sets a random seed if no seed is provided
+        if (seed == 0) seed = new Random().Next();
+
         starChunks = new List<StarChunk>();
     }
 
