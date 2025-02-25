@@ -13,24 +13,21 @@ public partial class StarChunk : Node3D
 
     float offsetStrength = 300f;
 
+    int seed;
     int size;
     ChunkCoord pos;
 
-    // project global seed
-    const int SEED = 0;
-
     public override void _Ready()
     {
-        // temp random seed
-        Random r = new Random();
-        int seed = r.Next();
 
-        starNoise.Seed = seed;
-        starOffsetNoise.Seed = seed;
     }
 
-    public void Generate(int size, ChunkCoord pos)
+    public void Generate(int seed, int size, ChunkCoord pos)
     {
+        this.seed = seed;
+        starNoise.Seed = seed;
+        starOffsetNoise.Seed = seed;
+
         this.size = size;
         this.pos = pos;
 

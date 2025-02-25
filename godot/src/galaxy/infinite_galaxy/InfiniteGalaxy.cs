@@ -13,15 +13,11 @@ public partial class InfiniteGalaxy : Node3D
 
     int chunkDistance = 1;
 
+    [Export] int seed;
+
     public override void _Ready()
     {
         starChunks = new List<StarChunk>();
-    }
-
-    public override void _PhysicsProcess(double delta)
-    {
-
-
     }
 
     public override void _Process(double delta)
@@ -48,8 +44,8 @@ public partial class InfiniteGalaxy : Node3D
 
     private void GenerateChunk(ChunkCoord pos)
     {
-        StarChunk chunk = (StarChunk)starChunk.Instantiate();
-        chunk.Generate(chunkSize, pos);
+        StarChunk chunk = (StarChunk) starChunk.Instantiate();
+        chunk.Generate(seed, chunkSize, pos);
 
         starChunks.Add(chunk);
         AddChild(chunk);
