@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://bmfrnyhacrq26"]
+
+[ext_resource type="Script" path="res://src/galaxy/starry_night/StarryNight.cs" id="1_v2n04"]
+[ext_resource type="PackedScene" uid="uid://c7akg3xjnxl4q" path="res://src/galaxy/starry_night/star.tscn" id="2_x1kwn"]
+
+[node name="StarryNight" type="Node3D"]
+script = ExtResource("1_v2n04")
+starScene = ExtResource("2_x1kwn")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.956182, -0.292772, 0, 0.292772, 0.956182, 0, 1.46235, 3.46714)

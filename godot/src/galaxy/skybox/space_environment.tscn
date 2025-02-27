@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://duhnlykoj1imx"]
+
+[sub_resource type="Environment" id="Environment_k6nv8"]
+background_mode = 2
+volumetric_fog_enabled = true
+
+[node name="SpaceEnvironment" type="WorldEnvironment"]
+environment = SubResource("Environment_k6nv8")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.435231, 0.366193, -0.822482, 0, 0.913545, 0.406737, 0.900319, 0.177024, -0.397603, 0, 0, 0)
+shadow_enabled = true
