@@ -1,16 +1,20 @@
 @tool
 extends Node3D
 
-var planets = [];
+@export var planets = [];
+@export var numberOfPlanets:int = 0
 @export var generate: bool:
 	set(val):
 		print("dawg");
-		generatePlanet();
+		generatePlanets(self.numberOfPlanets);
 		
 @export var clear: bool:
 	set(val):
 		for p in planets:
-			remove_child(p)
+			var nodeName = "./Planet" + str(p);
+			var pnode = get_node(nodeName)
+			if (is_instance_valid(pnode)):
+				pnode.queue_free()
 		planets.clear();
 		
 
@@ -53,13 +57,21 @@ func generatePlanet(planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpee
 		orbitRadius = randomOrbitRadius();
 	if (orbitSpeed == 0):
 		orbitSpeed = orbitSpeedFromRadius(orbitRadius);
+	var randomID = rand.randi_range(100000, 999999);
 	var planetInstance = PLANET_SCENE.instantiate();
 	planetInstance.mass = planetMass;
 	planetInstance.velocity = Vector3(cos(orbitAngle)*orbitSpeed,0,sin(orbitAngle)*orbitSpeed)
 	planetInstance.position = Vector3(sin(orbitAngle)*orbitRadius,0,cos(orbitAngle)*orbitRadius)
 	planetInstance.planet_data.radius = planetRadius
+	planetInstance.name = "Planet" + str(randomID);
+	planetInstance.trajectory_color = Color(rand.randi_range(0,255),rand.randi_range(0,255),rand.randi_range(0,255))
 	add_child(planetInstance);
 	planetInstance.owner = self
-	planetInstance.add_to_group('gravity_body');
-	planets.append(planetInstance);
+	planets.append(randomID);
 	
+
+func generatePlanets(n:int = 0):
+	var baseDistance = 30;
+	const step = 200;
+	for i in n:
+		generatePlanet(0,0,baseDistance + i*step);
