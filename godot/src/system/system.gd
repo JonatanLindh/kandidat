@@ -11,7 +11,7 @@ extends Node3D
 @export var clear: bool:
 	set(val):
 		for p in planets:
-			var nodeName = "./Planet" + str(p);
+			var nodeName = "./GravityController/Planet" + str(p);
 			var pnode = get_node(nodeName)
 			if (is_instance_valid(pnode)):
 				pnode.queue_free()
@@ -65,7 +65,7 @@ func generatePlanet(planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpee
 	planetInstance.planet_data.radius = planetRadius
 	planetInstance.name = "Planet" + str(randomID);
 	planetInstance.trajectory_color = Color(rand.randi_range(0,255),rand.randi_range(0,255),rand.randi_range(0,255))
-	add_child(planetInstance);
+	$GravityController.add_child(planetInstance);
 	planetInstance.owner = self
 	planets.append(randomID);
 	
