@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://jk8g1021r4dv"]
+[gd_scene load_steps=14 format=3 uid="uid://jk8g1021r4dv"]
 
 [ext_resource type="PackedScene" uid="uid://c4qg4a1uuvy8x" path="res://src/bodies/star/star.tscn" id="1_7v278"]
 [ext_resource type="PackedScene" uid="uid://cljv6xv7xjelh" path="res://src/bodies/planet/planet.tscn" id="2_5t3f5"]
@@ -35,7 +35,14 @@ amplitude = 1.0
 min_height = 0.2
 use_layer0_as_mask = true
 
-[sub_resource type="Resource" id="Resource_gerk7"]
+[sub_resource type="Resource" id="Resource_6rmsr"]
+script = ExtResource("4_3d45g")
+radius = 1.0
+resolution = 20
+planet_noise = Array[ExtResource("3_nmrlo")]([SubResource("Resource_eh3yi"), SubResource("Resource_fsh7h")])
+planet_color = SubResource("GradientTexture1D_jihv7")
+
+[sub_resource type="Resource" id="Resource_uk8go"]
 script = ExtResource("4_3d45g")
 radius = 1.0
 resolution = 20
@@ -44,17 +51,28 @@ planet_color = SubResource("GradientTexture1D_jihv7")
 
 [node name="Node3D" type="Node3D"]
 
-[node name="Planet" parent="." groups=["gravity_body"] instance=ExtResource("2_5t3f5")]
-velocity = Vector3(0, 2, 5)
-trajectory_color = Color(0, 0.803922, 0, 1)
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36.4636, -20.4246, 0.772003)
-planet_data = SubResource("Resource_gerk7")
-
-[node name="Star" parent="." instance=ExtResource("1_7v278")]
-mass = 1000.0
-
-[node name="GravityController" type="GravityController" parent="."]
-script = ExtResource("5_dt1kc")
-
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.867887, 0.496762, 0, -0.496762, 0.867887, 0, 30.3618, 74.6883)
+
+[node name="GravityController2" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
+sim_center_body = NodePath("Star")
+script = ExtResource("5_dt1kc")
+
+[node name="Star" parent="GravityController2" instance=ExtResource("1_7v278")]
+mass = 2000.0
+trajectory_color = Color(0.941176, 0.886275, 0.0235294, 1)
+
+[node name="Planet" parent="GravityController2" instance=ExtResource("2_5t3f5")]
+mass = 100.0
+initial_velocity = Vector3(0, 0, 7.295)
+trajectory_color = Color(0, 0.788235, 0, 1)
+last_position = Vector3(43.8792, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.8792, 0, 0)
+planet_data = SubResource("Resource_6rmsr")
+
+[node name="Planet2" parent="GravityController2" instance=ExtResource("2_5t3f5")]
+initial_velocity = Vector3(0, 0, 3)
+trajectory_color = Color(0.985349, 0.440565, 0.605695, 1)
+last_position = Vector3(49.4314, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.4314, 0, 0)
+planet_data = SubResource("Resource_uk8go")

@@ -11,3 +11,4 @@ godot = { version = "0.2.3" }
 itertools = "0.14.0"
 ndarray = { version = "0.16.1", features = ["rayon"] }
 rayon = "1.10.0"
+proc = { path = "proc" }
