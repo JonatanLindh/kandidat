@@ -52,8 +52,8 @@ struct GravityBody {
     pub mass: f32,
 
     #[export]
-    #[var(get, set = set_initial_velocity)]
-    pub initial_velocity: Vector3,
+    #[var(get, set = set_velocity)]
+    pub velocity: Vector3,
 
     #[export]
     pub trajectory_color: Color,
@@ -112,8 +112,8 @@ impl INode3D for GravityBody {
 #[godot_api]
 impl GravityBody {
     #[func]
-    pub fn set_initial_velocity(&mut self, value: Vector3) {
-        self.initial_velocity = value;
+    pub fn set_velocity(&mut self, value: Vector3) {
+        self.velocity = value;
         self.emit_update_simulation();
     }
 
@@ -133,7 +133,7 @@ impl GravityBody {
 
     fn update_from_sim(&mut self, sim: &SimulatedBody) {
         self.mass = sim.mass;
-        self.initial_velocity = sim.vel;
+        self.velocity = sim.vel;
         self.base_mut().set_position(sim.pos);
     }
 
@@ -155,7 +155,7 @@ impl From<&Gd<GravityBody>> for SimulatedBody {
         Self {
             body_instance_id: body.instance_id(),
             mass: b.mass,
-            vel: b.initial_velocity,
+            vel: b.velocity,
             pos: b.base().get_position(),
         }
     }
