@@ -48,6 +48,7 @@ public partial class InfiniteGalaxy : Node3D
     private void GenerateChunk(ChunkCoord pos)
     {
         StarChunk chunk = (StarChunk) starChunk.Instantiate();
+        chunk.Name = "Chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
         chunk.Generate(seed, chunkSize, pos);
 
         starChunks.Add(chunk);
