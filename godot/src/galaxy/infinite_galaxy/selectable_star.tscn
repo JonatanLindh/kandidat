@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://bq3o3cnuyn20f"]
+[gd_scene load_steps=6 format=3 uid="uid://bq3o3cnuyn20f"]
 
 [ext_resource type="Script" path="res://src/galaxy/infinite_galaxy/SelectableStar.cs" id="1_2bn5i"]
 [ext_resource type="Material" uid="uid://5haov76b3va7" path="res://src/galaxy/starry_night/star.tres" id="1_cl8ax"]
+[ext_resource type="PackedScene" uid="uid://jk8g1021r4dv" path="res://src/main.tscn" id="2_6lbp1"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_21e3v"]
 radius = 1.0
@@ -12,6 +13,7 @@ radius = 5.0
 
 [node name="SelectableStar" type="Node3D"]
 script = ExtResource("1_2bn5i")
+solarSystemScene = ExtResource("2_6lbp1")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 material_override = ExtResource("1_cl8ax")

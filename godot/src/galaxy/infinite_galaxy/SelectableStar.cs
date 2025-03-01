@@ -3,21 +3,35 @@ using System;
 
 public partial class SelectableStar : Node3D
 {
-    // Called when the node enters the scene tree for the first time.
-    public override void _Ready()
-    {
-    }
-
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _Process(double delta)
-    {
-    }
+    [Export] PackedScene solarSystemScene;
+    int seed;
 
     public void OnArea3dInputEvent(Node cam, InputEvent input, Vector3 eventPos, Vector3 normal, int shapeIdx)
     {
         if(input is InputEventMouseButton mouseButton && mouseButton.Pressed)
         {
-            GD.Print("Clicked on star " + this.Position);
+            LoadSolarSystem();
         }
+    }
+
+    private void LoadSolarSystem()
+    {
+        GetTree().ChangeSceneToPacked(solarSystemScene);
+
+        /*
+        SolarSystem solarSystem = (SolarSystem) solarSystemScene.Instantiate();
+        solarSystem.SetSeed(seed);
+        solarSystem.Generate():
+
+        GetTree().Root.AddChild(solarSystem);
+        GetTree().Root.RemoveChild(GetTree().CurrentScene);
+
+        GetTree().CurrentScene = solarSystem;
+        */
+    }
+
+    public void SetSeed(int seed)
+    {
+        this.seed = seed;
     }
 }
