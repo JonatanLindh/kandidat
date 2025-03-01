@@ -3,10 +3,10 @@
 [ext_resource type="Script" path="res://src/galaxy/infinite_galaxy/chunks/StarChunk.cs" id="1_c4x60"]
 [ext_resource type="FastNoiseLite" uid="uid://b781u0jwrh88d" path="res://src/galaxy/infinite_galaxy/noise/galaxy.tres" id="2_ij8sf"]
 [ext_resource type="FastNoiseLite" uid="uid://dpptie045qie2" path="res://src/galaxy/infinite_galaxy/noise/galaxy_offset.tres" id="3_tn7pp"]
-[ext_resource type="PackedScene" uid="uid://c7akg3xjnxl4q" path="res://src/galaxy/starry_night/star.tscn" id="4_37lwf"]
+[ext_resource type="PackedScene" uid="uid://bq3o3cnuyn20f" path="res://src/galaxy/infinite_galaxy/selectable_star.tscn" id="4_svdbq"]
 
 [node name="StarChunk" type="Node3D"]
 script = ExtResource("1_c4x60")
 starNoise = ExtResource("2_ij8sf")
 starOffsetNoise = ExtResource("3_tn7pp")
-starScene = ExtResource("4_37lwf")
+starScene = ExtResource("4_svdbq")

@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://bq3o3cnuyn20f"]
+
+[ext_resource type="Script" path="res://src/galaxy/infinite_galaxy/SelectableStar.cs" id="1_2bn5i"]
+[ext_resource type="Material" uid="uid://5haov76b3va7" path="res://src/galaxy/starry_night/star.tres" id="1_cl8ax"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_21e3v"]
+radius = 1.0
+height = 2.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_1efuf"]
+radius = 5.0
+
+[node name="SelectableStar" type="Node3D"]
+script = ExtResource("1_2bn5i")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = ExtResource("1_cl8ax")
+mesh = SubResource("SphereMesh_21e3v")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("SphereShape3D_1efuf")
+
+[connection signal="input_event" from="Area3D" to="." method="OnArea3dInputEvent"]
