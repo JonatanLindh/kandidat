@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://d0p7x2w85q7qh"]
+
+[ext_resource type="Texture2D" uid="uid://dnf7n3p4dr322" path="res://src/galaxy/skybox/traditional_skybox/panorama/skybox_6000x3000.png" id="1_ei323"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_14deh"]
+panorama = ExtResource("1_ei323")
+
+[sub_resource type="Sky" id="Sky_4qlyv"]
+sky_material = SubResource("PanoramaSkyMaterial_14deh")
+
+[sub_resource type="Environment" id="Environment_x4n8a"]
+background_mode = 2
+sky = SubResource("Sky_4qlyv")
+
+[node name="Skybox" type="WorldEnvironment"]
+environment = SubResource("Environment_x4n8a")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.680721, 0.43676, -0.588098, 0, 0.802817, 0.596225, 0.732543, 0.405863, -0.546495, 0, 0, 0)
+shadow_enabled = true
