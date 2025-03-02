@@ -16,7 +16,7 @@ public class MarchingCube
     private readonly int _scale;
     private readonly float _threshold;
     private readonly List<Vector3> _vertices;
-    
+
 
     /// <summary>
     /// Initializes a new instance of the MarchingCube class with the specified scale and threshold.

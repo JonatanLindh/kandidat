@@ -1,9 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://dr0tbidpxor8i"]
+[gd_scene load_steps=4 format=3 uid="uid://dr0tbidpxor8i"]
 
+[ext_resource type="Script" path="res://src/noise/PlanetNoise.cs" id="1_gfmqb"]
+[ext_resource type="Resource" uid="uid://c05kofpyetmko" path="res://src/noise/CelestialBodyNoise/PlanetNoise/large_planet.tres" id="2_5jwpt"]
 [ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="2_rvr5q"]
 
 [node name="PlanetNoise" type="Node3D"]
 
-[node name="MarchingCube" parent="." instance=ExtResource("2_rvr5q")]
-Size = 128
-Noise = null
+[node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("2_rvr5q")]
+CelestialBody = NodePath("../Planet")
+
+[node name="Planet" type="Node" parent="."]
+script = ExtResource("1_gfmqb")
+PlanetNoiseResource = ExtResource("2_5jwpt")

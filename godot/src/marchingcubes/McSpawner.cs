@@ -8,41 +8,11 @@ using System;
 [Tool]
 public partial class McSpawner : Node
 {
-	[ExportCategory("Marching Cubes Settings")]
-	[Export] public int Size
-	{
-		get => _size;
-		set
-		{
-			_size = value;
-			OnResourceSet();
-		} 
-		
-	} 
+	[Export] private Node CelestialBody;
+	private CelestialBodyNoise celestialBody;
 
-	[Export] public int MaxHeight 
-	{ 
-		get => _maxHeight; 
-		set
-		{
-			_maxHeight = value;
-			OnResourceSet();
-		}
-	}
-	[ExportCategory("Noise Settings")]
-	[Export] FastNoiseLite Noise
-	{
-		get => _noise;
-		set
-		{
-			_noise = value;
-			OnResourceSet();
-		}
-	}
-	
-	private int _maxHeight = 16;
+    private int _maxHeight = 16;
 	private int _size = 32;
-	private FastNoiseLite _noise;
 	private MarchingCube _marchingCube;
 	private MeshInstance3D _meshInstance3D;
 	
@@ -50,6 +20,7 @@ public partial class McSpawner : Node
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		GD.Print("Ready");
 		_marchingCube = new MarchingCube();
 		SpawnMesh();
 	}
@@ -68,14 +39,22 @@ public partial class McSpawner : Node
 	{
 		if(_meshInstance3D != null) RemoveChild(_meshInstance3D);
 		_marchingCube ??= new MarchingCube();
-		var dataPoints = GenerateDataPoints();
-		_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
-		
-		// Disable backface culling
-		_meshInstance3D.MaterialOverride = new StandardMaterial3D();
-		((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
-		
-		AddChild(_meshInstance3D);
+
+        celestialBody = CelestialBody as CelestialBodyNoise;
+		GD.Print(celestialBody);
+		if(celestialBody != null)
+		{
+            GD.Print("is CelestialBodyNoise");
+
+            float[,,] dataPoints = celestialBody.GetNoise(); ;
+			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
+
+			// Disable backface culling
+			_meshInstance3D.MaterialOverride = new StandardMaterial3D();
+			((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
+
+			AddChild(_meshInstance3D);
+        }
 	}
 
 	private float[,,] GenerateDataPoints()
