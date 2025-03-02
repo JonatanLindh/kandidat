@@ -14,11 +14,14 @@ public partial class DiscGalaxy : Node3D
     float radius = 1000;
 
     [Export] int seed;
+    Random random;
 
     public override void _Ready()
     {
         // Sets a random seed if no seed is provided
         if (seed == 0) seed = new Random().Next();
+        
+        random = new Random(seed);
         noise.Seed = seed;
 
         Generate();
@@ -36,7 +39,6 @@ public partial class DiscGalaxy : Node3D
 
     private void Generate()
     {
-        Random random = new Random();
         int starsGenerated = 0;
 
         while (starsGenerated < starCount)
@@ -56,8 +58,6 @@ public partial class DiscGalaxy : Node3D
 
     private Vector3 SamplePointInSphere()
     {
-        Random random = new Random();
-
         double u = random.NextDouble();
         double v = random.NextDouble();
         double w = random.NextDouble();
