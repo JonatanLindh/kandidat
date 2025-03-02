@@ -8,8 +8,29 @@ using System;
 [Tool]
 public partial class McSpawner : Node
 {
-	[Export] private Node CelestialBody;
-	private CelestialBodyNoise celestialBody;
+    private bool _reload;
+    [Export]
+    public bool reload
+    {
+        get => _reload;
+        set
+        {
+            _reload = !value;
+            OnResourceSet();
+        }
+    }
+
+    private CelestialBodyNoise celestialBody;
+	private Node cb;
+    [Export] private Node CelestialBody
+	{
+		get => cb;
+		set
+		{
+			cb = value;
+			SpawnMesh();
+		}
+	}
 
     private int _maxHeight = 16;
 	private int _size = 32;
@@ -20,15 +41,19 @@ public partial class McSpawner : Node
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		GD.Print("Ready");
 		_marchingCube = new MarchingCube();
 		SpawnMesh();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
+	public override void _PhysicsProcess(double delta)
 	{
-	}
+        if (Input.IsActionPressed("ui_right"))
+        {
+			GD.Print("Reloaded");
+			SpawnMesh();
+        }
+    }
 	
 	private void OnResourceSet()
 	{
@@ -44,19 +69,23 @@ public partial class McSpawner : Node
 		GD.Print(celestialBody);
 		if(celestialBody != null)
 		{
-            GD.Print("is CelestialBodyNoise");
-
             float[,,] dataPoints = celestialBody.GetNoise(); ;
 			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
 
-			// Disable backface culling
-			_meshInstance3D.MaterialOverride = new StandardMaterial3D();
-			((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
+            // Disable backface culling
+            //_meshInstance3D.MaterialOverride = new StandardMaterial3D();
+            //((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
 
-			AddChild(_meshInstance3D);
+            var material = new OrmMaterial3D();
+            _meshInstance3D.MaterialOverride = material;
+			material.CullMode = BaseMaterial3D.CullModeEnum.Back;
+            material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
+            material.AlbedoColor = Colors.YellowGreen;
+            this.AddChild(_meshInstance3D);
         }
 	}
 
+	// Old test method for generating datapoints
 	private float[,,] GenerateDataPoints()
 	{
 		var dataPoints = new float[_size, _maxHeight, _size];
