@@ -23,6 +23,12 @@ Bus="*res://src/physics/bus.gd"
 
 project/assembly_name="Kandidat"
 
+[file_customization]
+
+folder_colors={
+"res://src/galaxy/": "orange"
+}
+
 [input]
 
 forward={
