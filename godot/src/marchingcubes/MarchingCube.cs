@@ -34,8 +34,9 @@ public class MarchingCube
     /// Generates a mesh from a 3D array of float values with the Marching Cubes Algorithm
     /// </summary>
     /// <param name="datapoints">3D array of float values representing the scalar field</param>
+    /// <param name="uvscale">Scale factor for UV coordinates</param>
     /// <returns>A MeshInstance3D object representing the generated mesh</returns>
-    public MeshInstance3D GenerateMesh(float[,,] datapoints)
+    public MeshInstance3D GenerateMesh(float[,,] datapoints, float uvscale = 1f)
     {
         _datapoints = datapoints;
         _vertices.Clear();
@@ -51,12 +52,24 @@ public class MarchingCube
         }
         var surfaceTool = new SurfaceTool();
         surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
-        surfaceTool.SetSmoothGroup(UInt32.MaxValue);
+        
+        //surfaceTool.SetSmoothGroup(UInt32.MaxValue);
+        surfaceTool.SetSmoothGroup(0);
+        
         foreach (var vertex in _vertices)
         {
+            // Calculate UV coordinates (example: planar mapping)
+            var uv = new Vector2(vertex.X, vertex.Z) * uvscale;
+            surfaceTool.SetUV(uv);
+            
             surfaceTool.AddVertex(vertex);
         }
+        
+        
         surfaceTool.GenerateNormals();
+        surfaceTool.GenerateTangents();
+        
+        
         surfaceTool.Index();
         Mesh mesh = surfaceTool.Commit();
         

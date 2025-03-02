@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://ckitx7rndvp5l"]
+
+[ext_resource type="Script" path="res://src/bodies/moon/MoonMesh.cs" id="1_7s32x"]
+[ext_resource type="Texture2D" uid="uid://baumtwp4xbxxb" path="res://src/bodies/moon/textures/Rock_041_normal.jpg" id="2_q7iy4"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_h3lf2"]
+normal_enabled = true
+normal_texture = ExtResource("2_q7iy4")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_twofu"]
+
+[node name="Moon" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0691032, 0, 0.0115662)
+script = ExtResource("1_7s32x")
+Radius = 40
+NormalMap = ExtResource("2_q7iy4")
+UVScale = 0.05
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(27.135, 0, 0, 0, 27.135, 0, 0, 0, 27.135, 127.915, 0, 47.8682)
+material_override = SubResource("StandardMaterial3D_h3lf2")
+mesh = SubResource("PlaneMesh_twofu")
