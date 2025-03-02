@@ -11,12 +11,16 @@ public partial class Skybox : Node3D
 
     [Export] int removeStarsTooCloseDistance = 500;
 
-    // should be project global seed
-    const int SEED = 0;
+    [Export] int seed;
 
     public override void _Ready()
     {
-        GD.Seed(SEED);
+        // Sets a random seed if no seed is provided
+        if (seed == 0) seed = new Random().Next();
+
+        ulong seedU = Convert.ToUInt64(seed);
+        GD.Seed(seedU);
+
         Generate();
     }
 
