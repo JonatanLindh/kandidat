@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 public partial class InfiniteGalaxy : Node3D
 {
@@ -14,6 +13,8 @@ public partial class InfiniteGalaxy : Node3D
     int chunkDistance = 1;
 
     [Export] int seed;
+
+    [Export] UISelectableStar selectedStarUI;
 
     public override void _Ready()
     {
@@ -81,5 +82,10 @@ public partial class InfiniteGalaxy : Node3D
                 chunk.QueueFree();
             }
         }
+    }
+
+    public void SelectedStarUI(SelectableStar star)
+    {
+        selectedStarUI.SetStar(star);
     }
 }
