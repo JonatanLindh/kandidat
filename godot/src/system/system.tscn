@@ -8,10 +8,12 @@
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.141075, 0, 0)
 script = ExtResource("1_7my1l")
 
-[node name="GravityController" type="GravityController" parent="."]
+[node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
+sim_center_body = NodePath("Star")
 script = ExtResource("6_wayc2")
 
 [node name="Star" parent="GravityController" groups=["gravity_body"] instance=ExtResource("5_5coes")]
-mass = 1000.0
+mass = 20000.0
 last_position = Vector3(0.625992, 0, 0.313004)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.625992, 0, 0.313004)
+radius = 25.0
