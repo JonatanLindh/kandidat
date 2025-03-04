@@ -158,20 +158,15 @@ impl GravityController {
 
 #[godot_api]
 impl INode3D for GravityController {
-    fn ready(&mut self) {
-        self.setup_editor();
-    }
-
     fn on_notification(&mut self, notification: Node3DNotification) {
         use Node3DNotification::*;
 
-        match notification {
-            READY | CHILD_ORDER_CHANGED => {
-                // Update list of gravity bodies
-                self.get_massive_nodes();
-            }
+        if let READY = notification {
+            self.setup_editor();
+        }
 
-            _ => {}
+        if let READY | CHILD_ORDER_CHANGED = notification {
+            self.get_gravity_bodies();
         }
     }
 
