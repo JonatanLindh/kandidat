@@ -3,7 +3,7 @@ extends GravityController
 
 @export var run_simulation: bool:
 	set(val):
-		self.simulate_trajectory()
+		self.simulate_trajectories()
 
 @export var ClearTrajectories: bool:
 	set(val):
