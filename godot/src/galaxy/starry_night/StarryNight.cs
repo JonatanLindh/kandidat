@@ -12,8 +12,16 @@ public partial class StarryNight : Node3D
     float visibleBeginDistance = 50;
     float visibleEndDistance = 700; // To lessen distant stars flickering
 
+    [Export] int seed;
+
     public override void _Ready()
     {
+        // Sets a random seed if no seed is provided
+        if (seed == 0) seed = new Random().Next();
+
+        ulong seedU = Convert.ToUInt64(seed);
+        GD.Seed(seedU);
+
         Generate();
     }
 
