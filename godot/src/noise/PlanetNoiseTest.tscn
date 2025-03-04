@@ -1,8 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://dr0tbidpxor8i"]
 
-[ext_resource type="PackedScene" uid="uid://cc3fpt0u5jmex" path="res://src/noise/CelestialBodyNoise/PlanetNoise/BasicPlanet.tscn" id="4_sbs6e"]
+[ext_resource type="PackedScene" uid="uid://cc3fpt0u5jmex" path="res://src/noise/CelestialBodyNoise/PlanetNoise/BasicPlanet.tscn" id="1_ycu4v"]
 
-[node name="PlanetNoise" type="Node3D"]
+[node name="PlanetNoiseTest" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 300, 15.748)
@@ -10,11 +10,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 300, 15.748)
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 32, 256)
 
-[node name="BasicPlanet" parent="." instance=ExtResource("4_sbs6e")]
+[node name="BasicPlanet" parent="." instance=ExtResource("1_ycu4v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -277.346, -403.048, -1052.13)
 
-[node name="BasicPlanet3" parent="." instance=ExtResource("4_sbs6e")]
+[node name="BasicPlanet3" parent="." instance=ExtResource("1_ycu4v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128.585, -111.38, -83.4777)
 
-[node name="BasicPlanet2" parent="." instance=ExtResource("4_sbs6e")]
+[node name="BasicPlanet2" parent="." instance=ExtResource("1_ycu4v")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 57.9961, 0)
