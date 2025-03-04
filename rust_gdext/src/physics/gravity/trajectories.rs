@@ -28,7 +28,7 @@ use godot::{
 use itertools::Itertools;
 use std::mem;
 
-/// Simple struct to hold information about a bodies trajectory
+/// Simple struct to hold information about a body's trajectory
 struct Trajectory {
     color: Color,
     points: Vec<Vector3>,
