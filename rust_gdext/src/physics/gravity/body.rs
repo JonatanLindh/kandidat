@@ -2,21 +2,35 @@ use super::controller::{GravityController, SimulatedBody};
 use godot::{builtin::math::ApproxEq, classes::notify::Node3DNotification, prelude::*};
 use proc::editor;
 
+/// A gravity-affected node in a physics simulation.
+///
+/// `GravityBody` represents an object with mass and velocity that interacts with a [`GravityController`].
+/// It automatically connects to a parent controller when added to the scene tree and notifies
+/// the controller when its properties change to update trajectory calculations.
+///
+///
+/// # Notes
+/// This node automatically detects its parent [`GravityController`] and registers with it.
+/// Position changes are tracked to update simulations and trajectory visualizations.
 #[derive(GodotClass)]
 #[class(tool, init, base = Node3D)]
 pub struct GravityBody {
+    /// The mass of the body
     #[export]
     #[var(get, set = set_mass)]
     #[init(val = 1.0)]
     pub mass: f32,
 
+    /// The current velocity vector of the body
     #[export]
     #[var(get, set = set_velocity)]
     pub velocity: Vector3,
 
+    /// The color used to render this body's trajectory
     #[export]
     pub trajectory_color: Color,
 
+    /// The ancestor controller, if any
     controller: Option<Gd<GravityController>>,
 
     /// Track the last position to detect changes
