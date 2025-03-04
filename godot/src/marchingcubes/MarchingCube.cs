@@ -62,7 +62,6 @@ public class MarchingCube
         
         
         surfaceTool.GenerateNormals();
-        surfaceTool.GenerateTangents();
         
         
         surfaceTool.Index();
