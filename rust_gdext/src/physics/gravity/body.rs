@@ -35,8 +35,12 @@ impl INode3D for GravityBody {
                 self.last_position = self.base().get_position();
 
                 self.setup_editor();
-            }
 
+                self.emit_update_trajectories();
+            }
+            EXIT_TREE => {
+                self.emit_update_trajectories();
+            }
             // Will only happen in editor
             TRANSFORM_CHANGED => {
                 let current_pos = self.base().get_position();
