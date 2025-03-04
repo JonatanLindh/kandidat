@@ -1,10 +1,9 @@
 @tool
 extends Node3D
 
-@export var planets = [];
 @export var numberOfPlanets:int = 5;
-@export var distanceBetweenPlanets = 25;
-@export var baseDistanceFromSun = 50;
+@export var distanceBetweenPlanets = 50;
+@export var baseDistanceFromSun = 100;
 @export var generate: bool:
 	set(val):
 		print("dawg");
@@ -19,6 +18,8 @@ extends Node3D
 const G = 1.0;
 var PLANET_SCENE:PackedScene = load("res://src/bodies/planet/planet.tscn");
 var rand = RandomNumberGenerator.new();
+var planets = [];
+
 
 func clearPlanets():
 	for p in planets:
@@ -28,10 +29,11 @@ func clearPlanets():
 			pnode.queue_free()
 	planets.clear();
 
-#func _ready() -> void:
-
-	#clearPlanets();
-	#generatePlanets(5)
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		return;
+	clearPlanets();
+	generatePlanets(numberOfPlanets)
 
 func orbitRadiusFromSpeed(v:float):
 	return SUN.mass*G/pow(v,2)
@@ -72,7 +74,7 @@ func generatePlanet(planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpee
 	planetInstance.position = Vector3(sin(orbitAngle)*orbitRadius,0,cos(orbitAngle)*orbitRadius)
 	planetInstance.planet_data.radius = planetRadius
 	planetInstance.name = "Planet" + str(randomID);
-	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0,1),0.80,0.80);
+	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0,1),0.80,0.80)*3;
 	$GravityController.add_child(planetInstance);
 	planetInstance.owner = self
 	planets.append(randomID);
@@ -80,4 +82,4 @@ func generatePlanet(planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpee
 
 func generatePlanets(n:int = 0):
 	for i in n:
-		generatePlanet(0,0,distanceBetweenPlanets + i*distanceBetweenPlanets);
+		generatePlanet(0,0,baseDistanceFromSun + i*distanceBetweenPlanets);
