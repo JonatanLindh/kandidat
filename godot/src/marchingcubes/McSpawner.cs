@@ -28,7 +28,7 @@ public partial class McSpawner : Node
 		set
 		{
 			cb = value;
-			SpawnMesh();
+			OnResourceSet();
 		}
 	}
 
@@ -44,16 +44,6 @@ public partial class McSpawner : Node
 		_marchingCube = new MarchingCube();
 		SpawnMesh();
 	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _PhysicsProcess(double delta)
-	{
-        if (Input.IsActionPressed("ui_right"))
-        {
-			GD.Print("Reloaded");
-			SpawnMesh();
-        }
-    }
 	
 	private void OnResourceSet()
 	{
@@ -66,7 +56,6 @@ public partial class McSpawner : Node
 		_marchingCube ??= new MarchingCube();
 
         celestialBody = CelestialBody as CelestialBodyNoise;
-		GD.Print(celestialBody);
 		if(celestialBody != null)
 		{
             float[,,] dataPoints = celestialBody.GetNoise(); ;

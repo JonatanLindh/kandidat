@@ -13,10 +13,8 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
 
     public float[,,] GetNoise()
     {
-        GD.Print("GetNoise()");
         if (PlanetNoiseResource is Planet planet)
         {
-            GD.Print("PlanetResource is Planet");
             int diameter = 2 * planet.GetRadius();
             float[,,] points = new float[diameter, diameter, diameter];
 

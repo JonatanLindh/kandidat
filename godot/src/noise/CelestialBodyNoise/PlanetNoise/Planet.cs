@@ -1,6 +1,9 @@
 using Godot;
 using System;
 
+/// <summary>
+/// Resource for a planet. To be used together with some noise type for planets such as PlanetNoise
+/// </summary>
 [GlobalClass]
 public partial class Planet : Resource
 {

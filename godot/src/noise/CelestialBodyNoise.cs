@@ -1,6 +1,9 @@
 using Godot;
 using System;
 
+/// <summary>
+/// Interface should be implemented by noise which is to be used for celestial bodies
+/// </summary>
 public interface CelestialBodyNoise
 {
     ///<summary>
