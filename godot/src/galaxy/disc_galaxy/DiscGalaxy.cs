@@ -3,8 +3,7 @@ using System;
 
 public partial class DiscGalaxy : Node3D
 {
-    [Export] NoiseTexture3D noiseTexture;
-    Noise noise;
+    [Export] FastNoiseLite noise;
 
     int starCount = 10000;
     [Export] PackedScene starScene;
@@ -14,9 +13,17 @@ public partial class DiscGalaxy : Node3D
     float baseISOLevel = 0.5f;
     float radius = 1000;
 
+    [Export] int seed;
+    Random random;
+
     public override void _Ready()
     {
-        this.noise = noiseTexture.Noise;
+        // Sets a random seed if no seed is provided
+        if (seed == 0) seed = new Random().Next();
+        
+        random = new Random(seed);
+        noise.Seed = seed;
+
         Generate();
     }
 
@@ -32,7 +39,6 @@ public partial class DiscGalaxy : Node3D
 
     private void Generate()
     {
-        Random random = new Random();
         int starsGenerated = 0;
 
         while (starsGenerated < starCount)
@@ -52,8 +58,6 @@ public partial class DiscGalaxy : Node3D
 
     private Vector3 SamplePointInSphere()
     {
-        Random random = new Random();
-
         double u = random.NextDouble();
         double v = random.NextDouble();
         double w = random.NextDouble();
