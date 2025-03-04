@@ -99,7 +99,7 @@ impl GravityController {
             .connect(Self::UPDATE_TRAJECTORY_SIGNAL, &callable);
     }
 
-    fn get_massive_nodes(&mut self) {
+    fn get_gravity_bodies(&mut self) {
         fn collect_bodies_rec(node: Gd<Node>, bodies: &mut Vec<Gd<GravityBody>>) {
             match node.try_cast::<GravityBody>() {
                 Ok(body) => bodies.push(body),
