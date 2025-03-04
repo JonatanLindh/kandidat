@@ -117,7 +117,10 @@ impl GravityController {
         }
     }
 
-    /// Emit this signal to notify the controller that it should update it's trajectories
+    /// Signal emitted when trajectories should be recalculated.
+    ///
+    /// This signal is used to notify the controller that trajectory predictions
+    /// need to be updated, typically after changes to bodies or simulation parameters.
     #[signal]
     fn UPDATE_TRAJECTORIES();
     pub const UPDATE_TRAJECTORY_SIGNAL: &str = "UPDATE_TRAJECTORIES";
