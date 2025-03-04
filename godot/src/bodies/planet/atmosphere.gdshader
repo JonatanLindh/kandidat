@@ -28,16 +28,16 @@ void vertex() {
 }
 
 void fragment() {
+	vec3 cam_dir = VIEW;
+	vec3 sphere_origin = NODE_POSITION_WORLD;
+	// TODO change this to match planet actually
+	float sphere_radius = 1.2;
+	
 	float depth = texture(depth_texture, SCREEN_UV).x;
 	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth);
 	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
 	view.xyz /= view.w;
 	float max_depth = length(view.xyz);
-	
-	vec3 cam_dir = VIEW;
-	vec3 sphere_origin = NODE_POSITION_WORLD;
-	// TODO change this to match planet actually
-	float sphere_radius = 1.5;
 	
 	vec2 rsi = raySphereIntersectBasic(cam_pos, cam_dir, sphere_origin, sphere_radius, max_depth);
 	

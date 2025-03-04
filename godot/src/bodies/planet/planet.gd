@@ -17,4 +17,6 @@ func generate() -> void:
 	planet_data.max_height = 0.0
 	for child in get_children():
 		var face := child as PlanetMeshFace
-		face.regenerate_mesh(planet_data)
+		if face:
+			face.regenerate_mesh(planet_data)
+			print(face)
