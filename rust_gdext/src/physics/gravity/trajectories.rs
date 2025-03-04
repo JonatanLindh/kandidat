@@ -1,3 +1,21 @@
+//! Trajectory visualization for the n-body gravity simulation.
+//!
+//! This module provides functionality to simulate and visualize the orbital paths
+//! of celestial bodies in a gravitational system. It extends the `GravityController`
+//! with methods to:
+//!
+//! - Generate predicted orbital trajectories through n-body simulation
+//! - Visualize these trajectories as colored 3D paths
+//! - Manage trajectory display including automatic updates
+//!
+//! Trajectories are represented as sequences of points in 3D space and rendered
+//! using Godot's mesh rendering capabilities. The simulation can be centered on a
+//! specific body to show relative motion from that body's perspective.
+//!
+//! The implementation uses `ArrayMesh` and `SurfaceTool` to efficiently generate
+//! line-based visualizations of each body's predicted path, with customizable
+//! colors for each trajectory.
+
 use super::controller::{GravityController, SimulatedBody};
 use crate::physics::gravity::controller::__gdext_GravityController_Funcs;
 use godot::{
@@ -10,6 +28,7 @@ use godot::{
 use itertools::Itertools;
 use std::mem;
 
+/// Simple struct to hold information about a body's trajectory
 struct Trajectory {
     color: Color,
     points: Vec<Vector3>,
@@ -98,12 +117,20 @@ impl GravityController {
         }
     }
 
+    /// Signal emitted when trajectories should be recalculated.
+    ///
+    /// This signal is used to notify the controller that trajectory predictions
+    /// need to be updated, typically after changes to bodies or simulation parameters.
     #[signal]
     fn UPDATE_TRAJECTORIES();
     pub const UPDATE_TRAJECTORY_SIGNAL: &str = "UPDATE_TRAJECTORIES";
 }
 
 impl GravityController {
+    /// Replaces existing trajectories with new ones, creating meshes for visualization.
+    ///
+    /// Each valid trajectory (with at least 2 points) is converted into a mesh instance
+    /// and added as a child to the controller. Old trajectory meshes are properly freed.
     fn replace_trajectories(&mut self, new_trajectories: Vec<Trajectory>) {
         let new_meshes = new_trajectories
             .iter()
@@ -132,6 +159,15 @@ impl GravityController {
         }
     }
 
+    /// Builds a mesh representation of a trajectory for visualization.
+    ///
+    /// Creates a line strip mesh from trajectory points and a material with the
+    /// trajectory's color. The material is set to unshaded rendering mode.
+    ///
+    ///  ### Returns
+    /// A tuple containing:
+    /// * The generated `ArrayMesh`
+    /// * A `StandardMaterial3D` with appropriate color settings
     fn build_trajectory_mesh(trajectory: &Trajectory) -> (Gd<ArrayMesh>, Gd<StandardMaterial3D>) {
         let mut surface_tool = SurfaceTool::new_gd();
         surface_tool.begin(mesh::PrimitiveType::LINE_STRIP);

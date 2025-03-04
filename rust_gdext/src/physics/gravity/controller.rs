@@ -65,14 +65,36 @@ pub struct GravityController {
     pub trajectories: Vec<Gd<MeshInstance3D>>,
 }
 
+/// Simulated representation of a [`GravityBody`] for physics calculations.
+///
+/// This struct acts as a lightweight, detached copy of a [`GravityBody`] for efficient
+/// simulation of gravitational interactions without accessing the original nodes during
+/// physics calculations.
+///
+///  ### Usage
+///
+/// `SimulatedBody` instances are created from [`GravityBody`] nodes during physics
+/// calculations and trajectory predictions, then their updated states can be
+/// transferred back to the original nodes.
 #[derive(Clone)]
 pub struct SimulatedBody {
+    /// Unique identifier of the original `GravityBody` node
     pub body_instance_id: InstanceId,
+
+    /// Mass of the body
     pub mass: f32,
+
+    /// Current position in 3D space
     pub pos: Vector3,
+
+    /// Current velocity vector
     pub vel: Vector3,
 }
 
+/// Converts a gravity body node reference into its simulation representation.
+///
+/// This implementation provides a clean way to extract the essential physical properties
+/// from a [`GravityBody`] node for use in physics simulations.
 impl From<&Gd<GravityBody>> for SimulatedBody {
     fn from(body: &Gd<GravityBody>) -> Self {
         let b = body.bind();
@@ -86,6 +108,13 @@ impl From<&Gd<GravityBody>> for SimulatedBody {
 }
 
 impl GravityController {
+    /// Configures the controller for use in the Godot editor.
+    ///
+    /// This method:
+    /// - Disables physics processing to prevent simulation while in the editor
+    /// - Connects the trajectory update signal to the appropriate handler
+    ///
+    /// Only runs in the editor context due to the `#[editor(only)]` attribute.
     #[editor(only)]
     fn setup_editor(&mut self) {
         // Disable physics in editor
@@ -99,7 +128,18 @@ impl GravityController {
             .connect(Self::UPDATE_TRAJECTORY_SIGNAL, &callable);
     }
 
-    fn get_massive_nodes(&mut self) {
+    /// Recursively collects all [`GravityBody`] instances that are descendants of this controller.
+    ///
+    /// This method traverses the scene tree starting from the controller node and adds all
+    /// [`GravityBody`] instances it finds to the controller's internal `bodies` collection.
+    /// It handles nested nodes at any depth, allowing for flexible scene organization.
+    ///
+    /// # Implementation Details
+    ///
+    /// - Uses depth-first traversal to find all gravity bodies
+    /// - Clears and rebuilds the entire collection each time it's called
+    /// - Automatically called when the node is ready or when child nodes change
+    fn get_gravity_bodies(&mut self) {
         fn collect_bodies_rec(node: Gd<Node>, bodies: &mut Vec<Gd<GravityBody>>) {
             match node.try_cast::<GravityBody>() {
                 Ok(body) => bodies.push(body),
@@ -119,6 +159,20 @@ impl GravityController {
         self.bodies = bodies;
     }
 
+    /// Calculates the acceleration vector for a body due to gravitational forces.
+    ///
+    /// This method computes the net gravitational acceleration acting on a body by:
+    /// 1. Finding the direction and distance to each other body
+    /// 2. Applying the gravitational force formula (F = G * m1 * m2 / r²)
+    /// 3. Converting force to acceleration and summing all contributions
+    ///
+    /// # Parameters
+    /// - `grav_const`: The gravitational constant to use in calculations
+    /// - `body`: The body for which to calculate acceleration
+    /// - `bodies`: All bodies in the system that exert gravitational force
+    ///
+    /// # Returns
+    /// The net acceleration vector resulting from all gravitational interactions
     fn calc_acc(grav_const: f32, body: &SimulatedBody, bodies: &[SimulatedBody]) -> Vector3 {
         bodies
             .iter()
@@ -133,6 +187,20 @@ impl GravityController {
             .sum()
     }
 
+    /// Advances the physical simulation by one time step.
+    ///
+    /// This method:
+    /// 1. Calculates acceleration for each body in parallel
+    /// 2. Updates velocities based on the calculated accelerations
+    /// 3. Updates positions based on the new velocities
+    ///
+    /// Uses parallel processing through Rayon to optimize performance for many bodies.
+    ///
+    /// # Parameters
+    /// - `grav_const`: The gravitational constant to use in calculations
+    /// - `delta`: The time step duration in seconds
+    /// - `bodies_sim`: The bodies to simulate, will be updated in-place
+    /// - `accelerations`: A reusable buffer for storing the calculated accelerations
     pub fn step_time(
         grav_const: f32,
         delta: f32,
@@ -158,23 +226,30 @@ impl GravityController {
 
 #[godot_api]
 impl INode3D for GravityController {
-    fn ready(&mut self) {
-        self.setup_editor();
-    }
-
+    /// Handles node notifications from the Godot engine.
     fn on_notification(&mut self, notification: Node3DNotification) {
         use Node3DNotification::*;
 
-        match notification {
-            READY | CHILD_ORDER_CHANGED => {
-                // Update list of gravity bodies
-                self.get_massive_nodes();
-            }
+        if let READY = notification {
+            self.setup_editor();
+        }
 
-            _ => {}
+        if let READY | CHILD_ORDER_CHANGED = notification {
+            self.get_gravity_bodies();
         }
     }
 
+    /// Performs the physics update for all gravity bodies.
+    ///
+    /// This method is called every physics frame by the Godot engine and:
+    /// 1. Creates lightweight simulation counterparts for all managed bodies
+    /// 2. Simulates a single physics step using the current gravity constant
+    /// 3. Applies the simulation results back to the actual bodies in the scene
+    ///
+    /// If no bodies are present, this method returns early to avoid unnecessary processing.
+    ///
+    /// # Parameters
+    /// - `delta`: Time elapsed since the previous physics frame in seconds
     fn physics_process(&mut self, delta: f64) {
         if self.bodies.is_empty() {
             return;
