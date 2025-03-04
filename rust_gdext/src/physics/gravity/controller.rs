@@ -79,7 +79,7 @@ impl From<&Gd<GravityBody>> for SimulatedBody {
         Self {
             body_instance_id: body.instance_id(),
             mass: b.mass,
-            vel: b.initial_velocity,
+            vel: b.velocity,
             pos: b.base().get_position(),
         }
     }

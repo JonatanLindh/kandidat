@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://dru1frs0nrf78"]
+
+[ext_resource type="Script" path="res://src/system/system.gd" id="1_7my1l"]
+[ext_resource type="PackedScene" uid="uid://c4qg4a1uuvy8x" path="res://src/bodies/star/star.tscn" id="5_5coes"]
+[ext_resource type="Script" path="res://src/physics/gravity_controller.gd" id="6_wayc2"]
+
+[node name="System" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.141075, 0, 0)
+script = ExtResource("1_7my1l")
+
+[node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
+sim_center_body = NodePath("Star")
+script = ExtResource("6_wayc2")
+
+[node name="Star" parent="GravityController" groups=["gravity_body"] instance=ExtResource("5_5coes")]
+mass = 20000.0
+last_position = Vector3(0.625992, 0, 0.313004)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.625992, 0, 0.313004)
+radius = 25.0
