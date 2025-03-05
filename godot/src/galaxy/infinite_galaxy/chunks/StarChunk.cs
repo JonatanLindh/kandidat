@@ -24,18 +24,6 @@ public partial class StarChunk : Node3D
 
     public void Generate(int seed, int size, ChunkCoord pos)
     {
-        if(starScene == null)
-        {
-            GD.PrintErr("StarChunk: Star scene not set");
-            return;
-        }
-
-        if(starNoise == null)
-        {
-            GD.PrintErr("StarChunk: Star noise not set");
-            return;
-        }
-
         this.seed = seed;
         starNoise.Seed = seed;
         starOffsetNoise.Seed = seed;
