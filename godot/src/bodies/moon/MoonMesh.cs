@@ -66,8 +66,19 @@ public partial class MoonMesh : Node
 			OnResourceSet();
 		}
 	}
-	
+
 	[ExportCategory("Crater Settings")]
+	[Export]
+	public int AmountOfCraters
+	{
+		get => _amountOfCraters; 
+		set
+		{
+			_amountOfCraters = value;
+			OnResourceSet();
+		} 
+		
+	}
 	[Export]
 	public float RimWidth
 	{
@@ -138,19 +149,20 @@ public partial class MoonMesh : Node
 	private float _blendSharpness = 1f;
 	private float _mappingScale = 0.1f;
 	
-	private float _rimWidth = 10f;
+	private int _amountOfCraters = 10;
+	private float _rimWidth = 2f;
 	private float _rimSteepness = 0.5f;	
 	private float _floorHeight = -1f;
-	private float _craterRadius = 1f;
+	private float _craterRadius = 3f;
 	private float _smoothness = 0.1f;
 	private Vector3 _craterCentre = new Vector3(20, 20, 10);
 	private Crater[] _craters;
 
-
+	private Node3D _craterList;
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-
 		_marchingCube = new MarchingCube();
 		SpawnMesh();
 	}
@@ -201,25 +213,22 @@ public partial class MoonMesh : Node
 
 	private void SpawnMesh()
 	{
-		_craters = new Crater[1];
-		_craters[0] = new Crater(_craterRadius, _craterCentre);
 		if (_mesh != null)
 		{
 			RemoveChild(_mesh);
 			_mesh.QueueFree();
 			_mesh = null;
 		}
-
-		_marchingCube ??= new MarchingCube();
 		var dataPoints = GenerateDataPoints(_radius);
+		_marchingCube ??= new MarchingCube();
 		_mesh = _marchingCube.GenerateMesh(dataPoints);
 		
+		_craters = GenerateCraterCenters(_amountOfCraters);
 		GenerateCraters();
-
-		//ApplyMaterial();
+		
+		ApplyMaterial();
 		AddChild(_mesh);
 	}
-}
 
 	private void ApplyMaterial()
 	{
@@ -284,8 +293,42 @@ public partial class MoonMesh : Node
 	}
 
 
-	
-	
+	private Crater[] GenerateCraterCenters(int amount, bool renderCrates = false)
+	{
+		if (_craterList != null)
+		{
+			RemoveChild(_craterList);
+			_craterList.QueueFree();
+			_craterList = null;
+		}
+
+		if(renderCrates)
+			_craterList = new Node3D();
+		
+		
+		var craters = new Crater[amount];
+		for(int i = 0; i < amount; i++)
+		{
+			var centre = RandomVector3(_radius - 5, _radius,_radius * Vector3.One);
+			craters[i] = new Crater(_craterRadius, centre);
+			
+			
+			if (renderCrates)
+			{
+				var meshInstance = new MeshInstance3D();
+				var mesh = new SphereMesh();
+				meshInstance.Mesh = mesh;
+				meshInstance.Scale = 2 * _craterRadius * Vector3.One;
+				meshInstance.Transform = new Transform3D(meshInstance.Transform.Basis, craters[i].Centre);
+				_craterList.AddChild(meshInstance);
+			}
+		}
+		
+		if(renderCrates)
+			AddChild(_craterList);
+		
+		return craters;
+	}
 	
 	private static float SmoothMax(float a, float b, float k)
 	{
@@ -302,6 +345,23 @@ public partial class MoonMesh : Node
 		return a * h + b * (1f - h) - k * h * (1.0f - h);
 	}
 
+	private static Vector3 RandomVector3(float minLength, float maxLength, Vector3 origin = default)
+	{
+		var random = new Random();
+        
+		// Generate a random direction
+		float x = (float)(random.NextDouble() * 2.0 - 1.0);
+		float y = (float)(random.NextDouble() * 2.0 - 1.0);
+		float z = (float)(random.NextDouble() * 2.0 - 1.0);
+		Vector3 direction = new Vector3(x, y, z).Normalized();
+        
+		// Generate a random length within the specified range
+		float length = (float)(random.NextDouble() * (maxLength - minLength) + minLength);
+        
+		// Scale the direction by the length
+		return direction * length + origin;
+	}
+	
 }
 
 
