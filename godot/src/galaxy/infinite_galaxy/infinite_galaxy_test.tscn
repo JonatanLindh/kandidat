@@ -1,11 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://nbkjnqye1v5k"]
+[gd_scene load_steps=3 format=3 uid="uid://nbkjnqye1v5k"]
 
 [ext_resource type="PackedScene" uid="uid://dpl2k6yof7xst" path="res://src/galaxy/infinite_galaxy/infinite_galaxy.tscn" id="1_r7vsn"]
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="2_ix1v3"]
 
 [node name="InfiniteGalaxyTest" type="Node3D"]
 
 [node name="InfiniteGalaxy" parent="." node_paths=PackedStringArray("player") instance=ExtResource("1_r7vsn")]
-player = NodePath("../Camera3D")
+player = NodePath("../Player")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 4.74217, 5.68922, -12.2318)
+[node name="Player" parent="." instance=ExtResource("2_ix1v3")]
