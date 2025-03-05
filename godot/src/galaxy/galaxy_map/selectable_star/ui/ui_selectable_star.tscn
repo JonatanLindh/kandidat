@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cycjumpx1yadr"]
 
-[ext_resource type="Script" path="res://src/galaxy/infinite_galaxy/selectable_star/ui/UISelectableStar.cs" id="1_6q8y8"]
+[ext_resource type="Script" path="res://src/galaxy/galaxy_map/selectable_star/ui/UISelectableStar.cs" id="1_6q8y8"]
 
 [node name="UiSelectableStar" type="CanvasLayer" node_paths=PackedStringArray("control", "starNameLabel", "starPosLabel", "closeButton", "visitButton")]
 script = ExtResource("1_6q8y8")

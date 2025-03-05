@@ -5,6 +5,8 @@ using System.Collections.Generic;
 public partial class InfiniteGalaxy : Node3D
 {
     [Export] PackedScene starChunk;
+    [Export] PackedScene starScene;
+
     [Export] Node3D player;
 
     private List<StarChunk> starChunks;
@@ -13,8 +15,6 @@ public partial class InfiniteGalaxy : Node3D
     int chunkDistance = 1;
 
     [Export] int seed;
-
-    [Export] UISelectableStar selectedStarUI;
 
     public override void _Ready()
     {
@@ -49,6 +49,7 @@ public partial class InfiniteGalaxy : Node3D
     private void GenerateChunk(ChunkCoord pos)
     {
         StarChunk chunk = (StarChunk) starChunk.Instantiate();
+        chunk.SetStarScene(starScene);
         chunk.Name = "Chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
         chunk.Generate(seed, chunkSize, pos);
 
@@ -84,8 +85,8 @@ public partial class InfiniteGalaxy : Node3D
         }
     }
 
-    public void SelectedStarUI(SelectableStar star)
+    public void SetPlayer(Node3D player)
     {
-        selectedStarUI.SetStar(star);
+        this.player = player;
     }
 }

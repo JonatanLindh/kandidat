@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://c4ltpp1jnow8j"]
+
+[ext_resource type="PackedScene" uid="uid://qbrs85sp3ds4" path="res://src/galaxy/galaxy_map/galaxy_map.tscn" id="1_xbp6i"]
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="2_f3twl"]
+
+[node name="GalaxyMapTest" type="Node3D"]
+
+[node name="GalaxyMap" parent="." node_paths=PackedStringArray("player") instance=ExtResource("1_xbp6i")]
+player = NodePath("../Player")
+
+[node name="Player" parent="." instance=ExtResource("2_f3twl")]

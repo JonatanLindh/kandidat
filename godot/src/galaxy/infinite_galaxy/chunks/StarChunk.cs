@@ -6,7 +6,7 @@ public partial class StarChunk : Node3D
     [Export] FastNoiseLite starNoise;
     [Export] FastNoiseLite starOffsetNoise;
 
-    [Export] PackedScene starScene;
+    PackedScene starScene;
 
     float ISOlevel = 0.3f;
     int minDistance = 100;
@@ -24,6 +24,18 @@ public partial class StarChunk : Node3D
 
     public void Generate(int seed, int size, ChunkCoord pos)
     {
+        if(starScene == null)
+        {
+            GD.PrintErr("StarChunk: Star scene not set");
+            return;
+        }
+
+        if(starNoise == null)
+        {
+            GD.PrintErr("StarChunk: Star noise not set");
+            return;
+        }
+
         this.seed = seed;
         starNoise.Seed = seed;
         starOffsetNoise.Seed = seed;
@@ -74,5 +86,10 @@ public partial class StarChunk : Node3D
     public ChunkCoord GetPos()
     {
         return this.pos;
+    }
+
+    public void SetStarScene(PackedScene star)
+    {
+        this.starScene = star;
     }
 }
