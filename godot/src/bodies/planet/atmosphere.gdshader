@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode unshaded;
+render_mode unshaded, depth_test_disabled;
 
 uniform vec3 atmosphere_color : source_color = vec3(0.5, 0.7, 1.0);
 uniform float thickness_scale : hint_range(0.0, 1.0, 0.01);
@@ -38,8 +38,9 @@ void fragment() {
 	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
 	view.xyz /= view.w;
 	float max_depth = length(view.xyz);
-	
+		
 	vec2 rsi = raySphereIntersectBasic(cam_pos, cam_dir, sphere_origin, sphere_radius, max_depth);
+
 	
 	ALPHA = clamp((rsi.y-rsi.x) * thickness_scale, 0.0, 1.0);
 	ALBEDO = atmosphere_color;
