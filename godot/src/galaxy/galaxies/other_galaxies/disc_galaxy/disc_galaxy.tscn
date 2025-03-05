@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3 uid="uid://vmhj0qhqny6p"]
+
+[ext_resource type="Script" path="res://src/galaxy/galaxies/other_galaxies/disc_galaxy/DiscGalaxy.cs" id="1_homyg"]
+[ext_resource type="FastNoiseLite" uid="uid://dqknsvpwf4tg" path="res://src/galaxy/galaxies/other_galaxies/disc_galaxy/galaxy_noise.tres" id="2_hejh1"]
+[ext_resource type="PackedScene" uid="uid://c7akg3xjnxl4q" path="res://src/galaxy/galaxies/_resources/star/star.tscn" id="3_frbh6"]
+
+[node name="DiscGalaxy" type="Node3D"]
+script = ExtResource("1_homyg")
+noise = ExtResource("2_hejh1")
+starScene = ExtResource("3_frbh6")

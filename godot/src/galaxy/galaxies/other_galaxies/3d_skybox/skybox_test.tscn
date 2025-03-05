@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://cece33v310aop"]
 
-[ext_resource type="PackedScene" uid="uid://exwmody34u02" path="res://src/galaxy/skybox/3d_skybox/skybox.tscn" id="1_u8esa"]
+[ext_resource type="PackedScene" uid="uid://exwmody34u02" path="res://src/galaxy/galaxies/other_galaxies/3d_skybox/skybox.tscn" id="1_u8esa"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_lgh4l"]
 
