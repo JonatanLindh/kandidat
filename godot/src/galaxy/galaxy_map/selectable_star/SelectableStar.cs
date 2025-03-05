@@ -10,12 +10,9 @@ public partial class SelectableStar : Node3D
     {
         if (input is InputEventMouseButton mouseButton && mouseButton.Pressed)
         {
-            // Get the galaxy map node, kind of ugly but works
-            GalaxyMap galaxyMap = (GalaxyMap) GetNode<Node3D>("/root/GalaxyMap");
-            galaxyMap.SelectedStarUI(this);
-
-            // Send signal instead that GalaxyMap.cs listens for
-            // EmitSignal("selected_star", this);
+            // GalaxyMap is part of the group "GalaxyMap", so we can call the SelectedStarUI method of it
+            // Kind of meh, but for now it works
+            GetTree().CallGroup("GalaxyMap", "SelectedStarUI", this);
         }
     }
 

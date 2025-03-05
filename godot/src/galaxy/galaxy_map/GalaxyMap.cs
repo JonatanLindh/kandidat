@@ -12,15 +12,11 @@ public partial class GalaxyMap : Node3D
     public override void _Ready()
 	{
         galaxy = GetNode<InfiniteGalaxy>("%InfiniteGalaxy");
-        uiSelectableStar = GetNode<UISelectableStar>("%UiSelectableStar");
-
         galaxy.SetPlayer(player);
-    }
 
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _Process(double delta)
-	{
-	}
+        uiSelectableStar = GetNode<UISelectableStar>("%UiSelectableStar");
+        AddToGroup("GalaxyMap");
+    }
 
     public void SelectedStarUI(SelectableStar star)
     {
