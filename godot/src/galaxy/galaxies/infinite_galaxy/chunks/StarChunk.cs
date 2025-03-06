@@ -24,9 +24,6 @@ public partial class StarChunk : Node3D
 
     public void Generate(int seed, int size, ChunkCoord pos)
     {
-        int chunkSeed = HashCode.Combine(seed, pos.x, pos.y, pos.z);
-        GD.Print("Chunk seed: " + chunkSeed);
-
         this.seed = seed;
         starNoise.Seed = seed;
         starOffsetNoise.Seed = seed;

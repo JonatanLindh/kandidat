@@ -53,7 +53,9 @@ public partial class InfiniteGalaxy : Node3D
         StarChunk chunk = (StarChunk) starChunk.Instantiate();
         chunk.SetStarScene(starScene);
         chunk.Name = "Chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
-        chunk.Generate(seed, chunkSize, pos);
+
+        int newSeed = HashCode.Combine(seed, pos.x, pos.y, pos.z);
+        chunk.Generate(newSeed, chunkSize, pos);
 
         starChunks.Add(chunk);
         AddChild(chunk);
