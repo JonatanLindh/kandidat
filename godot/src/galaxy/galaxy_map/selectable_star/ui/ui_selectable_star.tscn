@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://cycjumpx1yadr"]
+[gd_scene load_steps=2 format=3 uid="uid://dwh1scqca2t72"]
 
 [ext_resource type="Script" path="res://src/galaxy/galaxy_map/selectable_star/ui/UISelectableStar.cs" id="1_6q8y8"]
 
