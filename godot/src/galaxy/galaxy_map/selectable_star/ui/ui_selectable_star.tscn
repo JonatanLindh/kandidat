@@ -2,11 +2,12 @@
 
 [ext_resource type="Script" path="res://src/galaxy/galaxy_map/selectable_star/ui/UISelectableStar.cs" id="1_6q8y8"]
 
-[node name="UiSelectableStar" type="CanvasLayer" node_paths=PackedStringArray("control", "starNameLabel", "starPosLabel", "closeButton", "visitButton")]
+[node name="UiSelectableStar" type="CanvasLayer" node_paths=PackedStringArray("control", "starNameLabel", "starPosLabel", "starSeed", "closeButton", "visitButton")]
 script = ExtResource("1_6q8y8")
 control = NodePath("Control")
 starNameLabel = NodePath("Control/Panel/StarName")
 starPosLabel = NodePath("Control/Panel/StarPos")
+starSeed = NodePath("Control/Panel/StarSeed")
 closeButton = NodePath("Control/Panel/CloseButton")
 visitButton = NodePath("Control/Panel/VisitButton")
 
@@ -34,7 +35,7 @@ offset_left = 3.0
 offset_top = 3.0
 offset_right = 249.0
 offset_bottom = 26.0
-text = "Star"
+text = "Name"
 
 [node name="StarPos" type="Label" parent="Control/Panel"]
 layout_mode = 1
@@ -46,7 +47,20 @@ offset_top = -49.0
 offset_right = 249.0
 offset_bottom = -24.0
 grow_vertical = 2
-text = "Star"
+text = "Position"
+clip_text = true
+
+[node name="StarSeed" type="Label" parent="Control/Panel"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 3.0
+offset_top = -23.0
+offset_right = 249.0
+offset_bottom = 2.0
+grow_vertical = 2
+text = "Seed"
 clip_text = true
 
 [node name="CloseButton" type="Button" parent="Control/Panel"]
