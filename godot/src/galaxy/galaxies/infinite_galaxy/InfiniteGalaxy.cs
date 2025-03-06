@@ -22,8 +22,6 @@ public partial class InfiniteGalaxy : Node3D
         if (seed == 0) seed = new Random().Next();
 
         starChunks = new List<StarChunk>();
-
-        GD.Print("Galaxy seed: " + seed);
     }
 
     public override void _Process(double delta)
