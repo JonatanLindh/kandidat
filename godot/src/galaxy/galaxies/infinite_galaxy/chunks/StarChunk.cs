@@ -45,6 +45,14 @@ public partial class StarChunk : Node3D
                     {
                         Node3D star = (Node3D) starScene.Instantiate();
                         star.Position = localPoint + NoisePositionOffset(globalPoint) + ChunkPositionOffset();
+
+                        if(star is SelectableStar)
+                        {
+                            SelectableStar selectableStar = (SelectableStar)star;
+                            int starSeed = HashCode.Combine(seed, star.Position);
+                            selectableStar.SetSeed(starSeed);
+                        }
+
                         AddChild(star);
                     }
                 }
