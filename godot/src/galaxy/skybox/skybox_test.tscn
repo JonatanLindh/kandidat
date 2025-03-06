@@ -6,9 +6,9 @@
 
 [sub_resource type="BoxMesh" id="BoxMesh_o5vs5"]
 
-[node name="TraditionalSkyboxTest" type="Node3D"]
+[node name="SkyboxTest" type="Node3D"]
 
-[node name="TraditionalSkybox" parent="." instance=ExtResource("1_b6jb0")]
+[node name="Skybox" parent="." instance=ExtResource("1_b6jb0")]
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.989093, 1.70139)
