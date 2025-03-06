@@ -1,11 +1,12 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 public partial class InfiniteGalaxy : Node3D
 {
     [Export] PackedScene starChunk;
+    [Export] PackedScene starScene;
+
     [Export] Node3D player;
 
     private List<StarChunk> starChunks;
@@ -48,6 +49,8 @@ public partial class InfiniteGalaxy : Node3D
     private void GenerateChunk(ChunkCoord pos)
     {
         StarChunk chunk = (StarChunk) starChunk.Instantiate();
+        chunk.SetStarScene(starScene);
+        chunk.Name = "Chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
         chunk.Generate(seed, chunkSize, pos);
 
         starChunks.Add(chunk);
@@ -80,5 +83,10 @@ public partial class InfiniteGalaxy : Node3D
                 chunk.QueueFree();
             }
         }
+    }
+
+    public void SetPlayer(Node3D player)
+    {
+        this.player = player;
     }
 }

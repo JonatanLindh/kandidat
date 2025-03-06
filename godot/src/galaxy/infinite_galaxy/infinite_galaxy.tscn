@@ -1,8 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://dpl2k6yof7xst"]
+[gd_scene load_steps=4 format=3 uid="uid://dpl2k6yof7xst"]
 
 [ext_resource type="Script" path="res://src/galaxy/infinite_galaxy/InfiniteGalaxy.cs" id="1_t5qkq"]
 [ext_resource type="PackedScene" uid="uid://56op0q07yym7" path="res://src/galaxy/infinite_galaxy/chunks/star_chunk.tscn" id="2_27471"]
+[ext_resource type="PackedScene" uid="uid://c7akg3xjnxl4q" path="res://src/galaxy/starry_night/star.tscn" id="3_oxcjq"]
 
 [node name="InfiniteGalaxy" type="Node3D"]
 script = ExtResource("1_t5qkq")
 starChunk = ExtResource("2_27471")
+starScene = ExtResource("3_oxcjq")
