@@ -8,9 +8,19 @@ extends GravityBody
 		if planet_data != null && !planet_data.is_connected("changed", generate):
 			planet_data.connect("changed", generate)
 
+
 func _ready() -> void:
 	planet_data = planet_data.duplicate()
 	generate()
+	generate_atmosphere()
+	
+func generate_atmosphere() -> void:
+	var atmosphere = $Atmosphere
+	if atmosphere == null:
+		return
+	var radius = planet_data.radius
+	atmosphere.set("radius", radius)
+
 
 func generate() -> void:
 	planet_data.min_height = 99999.0
@@ -19,3 +29,4 @@ func generate() -> void:
 		var face := child as PlanetMeshFace
 		if face:
 			face.regenerate_mesh(planet_data)
+	generate_atmosphere()
