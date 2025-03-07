@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bmfrnyhacrq26"]
 
-[ext_resource type="Script" path="res://src/galaxy/starry_night/StarryNight.cs" id="1_v2n04"]
-[ext_resource type="PackedScene" uid="uid://c7akg3xjnxl4q" path="res://src/galaxy/starry_night/star.tscn" id="2_x1kwn"]
+[ext_resource type="Script" path="res://src/galaxy/galaxies/other_galaxies/starry_night/StarryNight.cs" id="1_v2n04"]
+[ext_resource type="PackedScene" uid="uid://c7akg3xjnxl4q" path="res://src/galaxy/galaxies/_resources/star/star.tscn" id="2_x1kwn"]
 
 [node name="StarryNight" type="Node3D"]
 script = ExtResource("1_v2n04")

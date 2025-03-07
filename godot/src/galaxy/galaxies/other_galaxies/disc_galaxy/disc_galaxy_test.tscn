@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cj02xkbycp06w"]
 
-[ext_resource type="PackedScene" uid="uid://vmhj0qhqny6p" path="res://src/galaxy/disc_galaxy/disc_galaxy.tscn" id="1_b7vvk"]
+[ext_resource type="PackedScene" uid="uid://vmhj0qhqny6p" path="res://src/galaxy/galaxies/other_galaxies/disc_galaxy/disc_galaxy.tscn" id="1_b7vvk"]
 
 [node name="DiscGalaxyTest" type="Node3D"]
 
