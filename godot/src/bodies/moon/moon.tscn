@@ -1,16 +1,11 @@
 [gd_scene load_steps=4 format=3 uid="uid://ckitx7rndvp5l"]
 
 [ext_resource type="Script" path="res://src/bodies/moon/MoonMesh.cs" id="1_7s32x"]
-[ext_resource type="Texture2D" uid="uid://baumtwp4xbxxb" path="res://src/bodies/moon/textures/Rock_041_normal.jpg" id="2_q7iy4"]
-[ext_resource type="Shader" path="res://src/bodies/moon/triplanar.gdshader" id="3_oe217"]
+[ext_resource type="Texture2D" uid="uid://baumtwp4xbxxb" path="res://src/bodies/moon/textures/Rock_041_normal.jpg" id="2_ccvk6"]
+[ext_resource type="Shader" path="res://src/bodies/moon/shader/triplanar.gdshader" id="3_lqxmc"]
 
 [node name="Moon" type="Node3D"]
 script = ExtResource("1_7s32x")
 Radius = 40
-NormalMap = ExtResource("2_q7iy4")
-ShaderMaterial = ExtResource("3_oe217")
-BlendSharpness = 5.0
-MappingScale = 0.05
-AmountOfCraters = 20
-CraterCentre = Vector3(20.135, 20, 12)
-Smoothness = 1.0
+NormalMap = ExtResource("2_ccvk6")
+ShaderMaterial = ExtResource("3_lqxmc")

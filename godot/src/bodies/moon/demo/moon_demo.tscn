@@ -1,0 +1,15 @@
+[gd_scene load_steps=5 format=3 uid="uid://bk08dcpc2f8j2"]
+
+[ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="1_dir51"]
+[ext_resource type="PackedScene" uid="uid://ckitx7rndvp5l" path="res://src/bodies/moon/moon.tscn" id="2_dq2k1"]
+[ext_resource type="Texture2D" uid="uid://baumtwp4xbxxb" path="res://src/bodies/moon/textures/Rock_041_normal.jpg" id="3_0ys2m"]
+[ext_resource type="Shader" path="res://src/bodies/moon/shader/triplanar.gdshader" id="4_nig84"]
+
+[node name="MoonDemo" type="Node3D"]
+
+[node name="Skybox" parent="." instance=ExtResource("1_dir51")]
+
+[node name="Moon" parent="." instance=ExtResource("2_dq2k1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56.342, 0, 0)
+NormalMap = ExtResource("3_0ys2m")
+ShaderMaterial = ExtResource("4_nig84")

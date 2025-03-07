@@ -111,9 +111,9 @@ public partial class MoonMesh : Node
 	}
 	
 	[Export]
-	public float CraterRadius
+	public float MinCraterRadius
 	{
-		get => _craterRadius;
+		get => _minCraterRadius;
 		set
 		{
 			_craterRadius = value;
@@ -121,15 +121,16 @@ public partial class MoonMesh : Node
 		}
 	}
 	[Export]
-	public Vector3 CraterCentre
+	public float MaxCraterRadius
 	{
-		get => _craterCentre;
+		get => _maxCraterRadius;
 		set
 		{
-			_craterCentre = value;
+			_craterRadius = value;
 			OnResourceSet();
 		}
 	}
+	
 	[Export]
 	public float Smoothness
 	{
@@ -141,10 +142,10 @@ public partial class MoonMesh : Node
 		}
 	}
 
-	private float _testValue = 0.5f;
 	private MarchingCube _marchingCube;
 	private int _radius = 50;
 	private MeshInstance3D _mesh;
+	
 	private float _normalScale = 1f;
 	private float _blendSharpness = 1f;
 	private float _mappingScale = 0.1f;
@@ -154,10 +155,11 @@ public partial class MoonMesh : Node
 	private float _rimSteepness = 0.5f;	
 	private float _floorHeight = -1f;
 	private float _craterRadius = 3f;
+	private float _minCraterRadius = 1f;
+	private float _maxCraterRadius = 3f;
 	private float _smoothness = 0.1f;
-	private Vector3 _craterCentre = new Vector3(20, 20, 10);
+	
 	private Crater[] _craters;
-
 	private Node3D _craterList;
 	
 	// Called when the node enters the scene tree for the first time.
@@ -191,13 +193,7 @@ public partial class MoonMesh : Node
 					{
 						value = -1;
 					}
-
-
-					// if (y == 0)
-					// {
-					// 	value = 1;
-					// }
-
+					
 					dataPoints[x, y, z] = value;
 				}
 			}
@@ -233,6 +229,8 @@ public partial class MoonMesh : Node
 	private void ApplyMaterial()
 	{
 		var shaderMaterial = new ShaderMaterial();
+		var blendingShader = new ShaderMaterial();
+		var triplanarShader = new ShaderMaterial();
 
 		// Set material properties
 		//material.SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
@@ -242,9 +240,7 @@ public partial class MoonMesh : Node
 			shaderMaterial.SetShaderParameter("blend_sharpness", _blendSharpness);
 			shaderMaterial.SetShaderParameter("mapping_scale", _mappingScale);
 			shaderMaterial.SetShaderParameter("normal", NormalMap);
-
 		}
-
 		_mesh.MaterialOverlay = shaderMaterial;
 	}
 
@@ -277,13 +273,10 @@ public partial class MoonMesh : Node
 
 				positions[i] += normal[i] * craterHeight;
 				
+				// Calculate the Normal
+				normal[i] = (positions[i] - crater.Centre).Normalized();
+				
 
-			}
-		}
-		for(int i = 0; i < positions.Length; i++)
-		{
-			foreach (var crater in _craters)
-			{
 			}
 		}
 		meshData[(int)Mesh.ArrayType.Vertex] = positions;
@@ -309,8 +302,11 @@ public partial class MoonMesh : Node
 		var craters = new Crater[amount];
 		for(int i = 0; i < amount; i++)
 		{
+			// Randomize the Crater Radius
+			var craterRadius =_craterRadius = Mathf.Lerp(_minCraterRadius, _maxCraterRadius, (float)GD.RandRange(0f, 1f));
+			
 			var centre = RandomVector3(_radius - 5, _radius,_radius * Vector3.One);
-			craters[i] = new Crater(_craterRadius, centre);
+			craters[i] = new Crater(craterRadius, centre);
 			
 			
 			if (renderCrates)
@@ -318,7 +314,7 @@ public partial class MoonMesh : Node
 				var meshInstance = new MeshInstance3D();
 				var mesh = new SphereMesh();
 				meshInstance.Mesh = mesh;
-				meshInstance.Scale = 2 * _craterRadius * Vector3.One;
+				meshInstance.Scale = 2 * craterRadius * Vector3.One;
 				meshInstance.Transform = new Transform3D(meshInstance.Transform.Basis, craters[i].Centre);
 				_craterList.AddChild(meshInstance);
 			}
@@ -361,6 +357,8 @@ public partial class MoonMesh : Node
 		// Scale the direction by the length
 		return direction * length + origin;
 	}
+
+	
 	
 }
 
