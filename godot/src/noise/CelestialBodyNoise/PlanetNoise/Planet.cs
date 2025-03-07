@@ -19,12 +19,21 @@ public partial class Planet : Resource
             _noise.Seed = new Random().Next();
         }
     }
+
     [Export] private int radius;
 
-
+    /// <summary>
+    /// Returns the noise value from the given position <paramref name="pos"/>
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns>
+    /// a float value in the range [0, 1]
+    /// </returns>
     public float GetNoise3Dv(Vector3 pos)
     {
-        return noise.GetNoise3Dv(pos);
+        // FastNoiseLite.GetNoise returns a value between [-1, 1]. It feels more natural with [0, 1], hence the absolute value.
+        // The distribution of values should still be the same
+        return Mathf.Abs(noise.GetNoise3Dv(pos));
     }
 
     public int GetRadius()
