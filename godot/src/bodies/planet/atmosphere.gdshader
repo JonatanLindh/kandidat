@@ -7,7 +7,7 @@ uniform sampler2D depth_texture : hint_depth_texture;
 
 varying vec3 cam_pos;
 
-vec2 raySphereIntersectBasic(vec3 ro, vec3 rd, vec3 so, float sr, float max_depth) {
+vec2 raySphereIntersect(vec3 ro, vec3 rd, vec3 so, float sr, float max_depth) {
 	float t = dot(so-ro, rd);
 	vec3 P = ro + rd * t;
 	float y = length(so-P);
@@ -29,6 +29,7 @@ void vertex() {
 
 void fragment() {
 	vec3 cam_dir = VIEW;
+	// TODO get from planet
 	vec3 sphere_origin = NODE_POSITION_WORLD;
 	// TODO change this to match planet actually
 	float sphere_radius = 1.2;
@@ -39,7 +40,7 @@ void fragment() {
 	view.xyz /= view.w;
 	float max_depth = length(view.xyz);
 		
-	vec2 rsi = raySphereIntersectBasic(cam_pos, cam_dir, sphere_origin, sphere_radius, max_depth);
+	vec2 rsi = raySphereIntersect(cam_pos, cam_dir, sphere_origin, sphere_radius, max_depth);
 
 	
 	ALPHA = clamp((rsi.y-rsi.x) * thickness_scale, 0.0, 1.0);
