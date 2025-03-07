@@ -19,4 +19,3 @@ func generate() -> void:
 		var face := child as PlanetMeshFace
 		if face:
 			face.regenerate_mesh(planet_data)
-			print(face)
