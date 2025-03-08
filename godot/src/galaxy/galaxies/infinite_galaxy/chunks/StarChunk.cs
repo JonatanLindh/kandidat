@@ -19,7 +19,7 @@ public partial class StarChunk : Node3D
         this.ISOlevel = ISOlevel;
         this.chunkPos = pos;
 
-        uint placementSeed = (uint) HashCode.Combine(galaxySeed, chunkPos);
+        uint placementSeed = SeedGenerator.GenerateSeed(galaxySeed, chunkPos);
         GD.Seed(placementSeed);
 
         for (int i = 0; i < starCount; i++)
