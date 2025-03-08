@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public partial class InfiniteGalaxy : Node3D
 {
-    [Export] PackedScene starChunk;
     [Export] PackedScene starScene;
     [Export] FastNoiseLite noise;
     [Export] Node3D player;
@@ -12,11 +11,12 @@ public partial class InfiniteGalaxy : Node3D
     private List<StarChunk> starChunks;
     [Export] uint seed;
 
-    [ExportGroup("Chunking")]
-    [Export] int viewDistance = 1;
+    [ExportCategory("Chunks")]
+    [Export] PackedScene starChunk;
+    [Export(PropertyHint.Range, "1, 10, 1")] int viewDistance = 1;
+    [Export(PropertyHint.Range, "-1, 1, 0.01")] float IsoLevel = 0.3f;
     [Export] int chunkSize = 1000;
     [Export] int starCount = 1000;
-    [Export] float IsoLevel = 0.3f;
 
     public override void _Ready()
     {

@@ -7,6 +7,6 @@
 
 [node name="InfiniteGalaxy" type="Node3D"]
 script = ExtResource("1_t5qkq")
-starChunk = ExtResource("2_27471")
 starScene = ExtResource("3_oxcjq")
 noise = ExtResource("4_xti1w")
+starChunk = ExtResource("2_27471")
