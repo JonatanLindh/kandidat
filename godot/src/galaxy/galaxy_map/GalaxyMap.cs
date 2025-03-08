@@ -21,5 +21,6 @@ public partial class GalaxyMap : Node3D
     public void SelectedStarUI(SelectableStar star)
     {
         uiSelectableStar.SetStar(star);
+        uiSelectableStar.SetPlayer(player);
     }
 }
