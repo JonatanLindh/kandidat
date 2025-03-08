@@ -41,7 +41,7 @@ public partial class StarChunk : Node3D
                 if (star is SelectableStar)
                 {
                     SelectableStar selectableStar = (SelectableStar)star;
-                    uint starSeed = (uint)HashCode.Combine(galaxySeed, globalPoint);
+                    uint starSeed = SeedGenerator.GenerateSeed(galaxySeed, globalPoint);
                     selectableStar.SetSeed(starSeed);
                 }
 
