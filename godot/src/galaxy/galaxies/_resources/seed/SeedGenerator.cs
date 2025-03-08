@@ -16,4 +16,10 @@ public static class SeedGenerator
             return hash;
         }
     }
+
+    public static uint GenerateSeed(uint seed, ChunkCoord pos)
+    {
+        Vector3 chunkPos = new Vector3(pos.x, pos.y, pos.z);
+        return GenerateSeed(seed, chunkPos);
+    }
 }
