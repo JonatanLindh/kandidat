@@ -6,6 +6,7 @@ public partial class InfiniteGalaxy : Node3D
 {
     [Export] PackedScene starChunk;
     [Export] PackedScene starScene;
+    [Export] FastNoiseLite noise;
 
     [Export] Node3D player;
 
@@ -14,12 +15,12 @@ public partial class InfiniteGalaxy : Node3D
 
     int chunkDistance = 1;
 
-    [Export] int seed;
+    [Export] uint seed;
 
     public override void _Ready()
     {
         // Sets a random seed if no seed is provided
-        if (seed == 0) seed = new Random().Next();
+        if (seed == 0) seed = (uint) new Random().Next();
 
         starChunks = new List<StarChunk>();
     }
@@ -51,7 +52,9 @@ public partial class InfiniteGalaxy : Node3D
         StarChunk chunk = (StarChunk) starChunk.Instantiate();
         chunk.Name = "Chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
 
-        chunk.SetStarScene(starScene);
+        chunk.starScene = starScene;
+        chunk.galaxyNoise = noise;
+
         chunk.Generate(seed, chunkSize, pos);
 
         starChunks.Add(chunk);

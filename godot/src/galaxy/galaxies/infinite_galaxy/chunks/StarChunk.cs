@@ -3,84 +3,58 @@ using System;
 
 public partial class StarChunk : Node3D
 {
-    [Export] FastNoiseLite starNoise;
-    [Export] FastNoiseLite starOffsetNoise;
+    public FastNoiseLite galaxyNoise { private get; set; }
+    public PackedScene starScene { private get; set; }
 
-    PackedScene starScene;
-
+    int starCount = 1000;
     float ISOlevel = 0.3f;
-    int minDistance = 100;
 
-    float offsetStrength = 300f;
-
-    int seed;
-    int size;
     public ChunkCoord chunkPos { get; private set; }
+    int chunkSize;
 
-    public override void _Ready()
+    public void Generate(uint galaxySeed, int chunkSize, ChunkCoord pos)
     {
-
-    }
-
-    public void Generate(int seed, int size, ChunkCoord pos)
-    {
-        this.seed = seed;
-        starNoise.Seed = seed;
-        starOffsetNoise.Seed = seed;
-
-        this.size = size;
+        galaxyNoise.Seed = (int)galaxySeed;
+        this.chunkSize = chunkSize;
         this.chunkPos = pos;
 
-        for (int x = 0; x < size; x += minDistance)
+        uint placementSeed = (uint) HashCode.Combine(galaxySeed, chunkPos);
+        GD.Seed(placementSeed);
+
+        for (int i = 0; i < starCount; i++)
         {
-            for (int y = 0; y < size; y += minDistance)
+            Vector3 localPoint = new Vector3(
+                (float)GD.RandRange(0f, chunkSize),
+                (float)GD.RandRange(0f, chunkSize),
+                (float)GD.RandRange(0f, chunkSize)
+            );
+
+            Vector3 globalPoint = localPoint + ChunkPositionOffset();
+            float noiseVal = galaxyNoise.GetNoise3Dv(globalPoint);
+
+            if (ISOlevel < noiseVal)
             {
-                for (int z = 0; z < size; z += minDistance)
+                Node3D star = (Node3D)starScene.Instantiate();
+                star.Position = localPoint + ChunkPositionOffset();
+
+                if (star is SelectableStar)
                 {
-                    Vector3 localPoint = new Vector3(x, y, z);
-                    Vector3 globalPoint = localPoint + ChunkPositionOffset();
-                    float noiseVal = starNoise.GetNoise3Dv(globalPoint);
-
-                    if (ISOlevel < noiseVal)
-                    {
-                        Node3D star = (Node3D) starScene.Instantiate();
-                        star.Position = localPoint + NoisePositionOffset(globalPoint) + ChunkPositionOffset();
-
-                        if(star is SelectableStar)
-                        {
-                            SelectableStar selectableStar = (SelectableStar)star;
-                            int starSeed = HashCode.Combine(seed, star.Position);
-                            selectableStar.SetSeed(starSeed);
-                        }
-
-                        AddChild(star);
-                    }
+                    SelectableStar selectableStar = (SelectableStar)star;
+                    uint starSeed = (uint)HashCode.Combine(galaxySeed, globalPoint);
+                    selectableStar.SetSeed(starSeed);
                 }
+
+                AddChild(star);
             }
         }
-    }
-
-    private Vector3 NoisePositionOffset(Vector3 basePos)
-    {
-        // Offsets star positions based on noise, sampled at basePos + an arbitrary offset, to reduce grid-like patterns
-        return new Vector3(
-            starOffsetNoise.GetNoise3Dv(basePos + Vector3.Left * 100) * offsetStrength,
-            starOffsetNoise.GetNoise3Dv(basePos + Vector3.Up * 200) * offsetStrength,
-            starOffsetNoise.GetNoise3Dv(basePos + Vector3.Right * 300) * offsetStrength
-        );
     }
 
     private Vector3 ChunkPositionOffset()
     {
         return new Vector3(
-            this.chunkPos.x * size,
-            this.chunkPos.y * size,
-            this.chunkPos.z * size
+            this.chunkPos.x * chunkSize,
+            this.chunkPos.y * chunkSize,
+            this.chunkPos.z * chunkSize
         );
-    }
-
-    public void SetStarScene(PackedScene star)
-    {
-        this.starScene = star;
     }
 }
