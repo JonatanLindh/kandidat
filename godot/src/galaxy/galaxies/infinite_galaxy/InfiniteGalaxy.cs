@@ -7,15 +7,16 @@ public partial class InfiniteGalaxy : Node3D
     [Export] PackedScene starChunk;
     [Export] PackedScene starScene;
     [Export] FastNoiseLite noise;
-
     [Export] Node3D player;
 
     private List<StarChunk> starChunks;
-    int chunkSize = 1000;
-
-    int chunkDistance = 1;
-
     [Export] uint seed;
+
+    [ExportGroup("Chunking")]
+    [Export] int viewDistance = 1;
+    [Export] int chunkSize = 1000;
+    [Export] int starCount = 1000;
+    [Export] float IsoLevel = 0.3f;
 
     public override void _Ready()
     {
@@ -29,11 +30,11 @@ public partial class InfiniteGalaxy : Node3D
     {
         ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
 
-        for (int x = -chunkDistance; x <= chunkDistance; x++)
+        for (int x = -viewDistance; x <= viewDistance; x++)
         {
-            for (int y = -chunkDistance; y <= chunkDistance; y++)
+            for (int y = -viewDistance; y <= viewDistance; y++)
             {
-                for (int z = -chunkDistance; z <= chunkDistance; z++)
+                for (int z = -viewDistance; z <= viewDistance; z++)
                 {
                     ChunkCoord chunkPos = new ChunkCoord(playerChunk.x + x, playerChunk.y + y, playerChunk.z + z);
                     if (!IsChunkGenerated(chunkPos))
@@ -55,7 +56,7 @@ public partial class InfiniteGalaxy : Node3D
         chunk.starScene = starScene;
         chunk.galaxyNoise = noise;
 
-        chunk.Generate(seed, chunkSize, pos);
+        chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos);
 
         starChunks.Add(chunk);
         AddChild(chunk);
@@ -79,9 +80,9 @@ public partial class InfiniteGalaxy : Node3D
         for(int i = 0; i < starChunks.Count; i++)
         {
             StarChunk chunk = starChunks[i];
-            if (Math.Abs(chunk.chunkPos.x - playerChunk.x) > chunkDistance || 
-                Math.Abs(chunk.chunkPos.y - playerChunk.y) > chunkDistance || 
-                Math.Abs(chunk.chunkPos.z - playerChunk.z) > chunkDistance)
+            if (Math.Abs(chunk.chunkPos.x - playerChunk.x) > viewDistance || 
+                Math.Abs(chunk.chunkPos.y - playerChunk.y) > viewDistance || 
+                Math.Abs(chunk.chunkPos.z - playerChunk.z) > viewDistance)
             {
                 starChunks.Remove(chunk);
                 chunk.QueueFree();

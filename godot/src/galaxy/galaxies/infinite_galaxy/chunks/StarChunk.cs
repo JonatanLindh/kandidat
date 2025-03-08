@@ -6,16 +6,17 @@ public partial class StarChunk : Node3D
     public FastNoiseLite galaxyNoise { private get; set; }
     public PackedScene starScene { private get; set; }
 
-    int starCount = 1000;
-    float ISOlevel = 0.3f;
-
-    public ChunkCoord chunkPos { get; private set; }
     int chunkSize;
+    int starCount;
+    float ISOlevel;
+    public ChunkCoord chunkPos { get; private set; }
 
-    public void Generate(uint galaxySeed, int chunkSize, ChunkCoord pos)
+    public void Generate(uint galaxySeed, int chunkSize, int starCount, float ISOlevel, ChunkCoord pos)
     {
         galaxyNoise.Seed = (int)galaxySeed;
         this.chunkSize = chunkSize;
+        this.starCount = starCount;
+        this.ISOlevel = ISOlevel;
         this.chunkPos = pos;
 
         uint placementSeed = (uint) HashCode.Combine(galaxySeed, chunkPos);
