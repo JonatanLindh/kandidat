@@ -62,7 +62,7 @@ public partial class InfiniteGalaxy : Node3D
     {
         foreach (StarChunk c in starChunks)
         {
-            if (c.GetPos().Equals(chunk))
+            if (c.chunkPos.Equals(chunk))
             {
                 return true;
             }
@@ -76,9 +76,9 @@ public partial class InfiniteGalaxy : Node3D
         for(int i = 0; i < starChunks.Count; i++)
         {
             StarChunk chunk = starChunks[i];
-            if (Math.Abs(chunk.GetPos().x - playerChunk.x) > chunkDistance || 
-                Math.Abs(chunk.GetPos().y - playerChunk.y) > chunkDistance || 
-                Math.Abs(chunk.GetPos().z - playerChunk.z) > chunkDistance)
+            if (Math.Abs(chunk.chunkPos.x - playerChunk.x) > chunkDistance || 
+                Math.Abs(chunk.chunkPos.y - playerChunk.y) > chunkDistance || 
+                Math.Abs(chunk.chunkPos.z - playerChunk.z) > chunkDistance)
             {
                 starChunks.Remove(chunk);
                 chunk.QueueFree();

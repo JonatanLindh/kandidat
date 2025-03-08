@@ -15,7 +15,7 @@ public partial class StarChunk : Node3D
 
     int seed;
     int size;
-    ChunkCoord pos;
+    public ChunkCoord chunkPos { get; private set; }
 
     public override void _Ready()
     {
@@ -29,7 +29,7 @@ public partial class StarChunk : Node3D
         starOffsetNoise.Seed = seed;
 
         this.size = size;
-        this.pos = pos;
+        this.chunkPos = pos;
 
         for (int x = 0; x < size; x += minDistance)
         {
@@ -73,15 +73,10 @@ public partial class StarChunk : Node3D
     private Vector3 ChunkPositionOffset()
     {
         return new Vector3(
-            this.pos.x * size,
-            this.pos.y * size,
-            this.pos.z * size
+            this.chunkPos.x * size,
+            this.chunkPos.y * size,
+            this.chunkPos.z * size
         );
-    }
-
-    public ChunkCoord GetPos()
-    {
-        return this.pos;
     }
 
     public void SetStarScene(PackedScene star)
