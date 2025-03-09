@@ -37,4 +37,9 @@ public partial class SelectableStar : Node3D
     {
         this.seed = seed;
     }
+
+    public int GetSeed()
+    {
+        return seed;
+    }
 }

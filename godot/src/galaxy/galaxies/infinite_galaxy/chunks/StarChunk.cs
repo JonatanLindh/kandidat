@@ -17,6 +17,8 @@ public partial class StarChunk : Node3D
     int size;
     ChunkCoord pos;
 
+    SeedGenerator seedGen = new SeedGenerator();
+
     public override void _Ready()
     {
 
@@ -45,6 +47,14 @@ public partial class StarChunk : Node3D
                     {
                         Node3D star = (Node3D) starScene.Instantiate();
                         star.Position = localPoint + NoisePositionOffset(globalPoint) + ChunkPositionOffset();
+
+                        if(star is SelectableStar)
+                        {
+                            SelectableStar selectableStar = (SelectableStar)star;
+                            uint starSeed = seedGen.GenerateSeed((uint)seed, star.Position);
+                            selectableStar.SetSeed((int)starSeed);
+                        }
+
                         AddChild(star);
                     }
                 }

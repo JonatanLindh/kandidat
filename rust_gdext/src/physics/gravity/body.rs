@@ -1,4 +1,6 @@
-use super::controller::{GravityController, SimulatedBody};
+use super::controller::{
+    __gdext_GravityController_Funcs as GravityController_Funcs, GravityController, SimulatedBody,
+};
 use godot::{builtin::math::ApproxEq, classes::notify::Node3DNotification, prelude::*};
 use proc::editor;
 
@@ -132,10 +134,7 @@ impl GravityBody {
         }
 
         if let Some(controller) = self.controller.as_mut() {
-            controller.call_deferred(
-                "emit_signal",
-                &[GravityController::UPDATE_TRAJECTORY_SIGNAL.to_variant()],
-            );
+            controller.call_deferred(GravityController_Funcs::update_trajectories, &[]);
         }
     }
 }
