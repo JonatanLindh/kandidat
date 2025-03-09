@@ -3,6 +3,11 @@ using System;
 
 public class SeedGenerator
 {
+    /// <summary>
+    /// Generates a new seed based on an initial seed and a vector.
+    /// </summary>
+    /// 
+    /// <returns> A generated seed as a uint. </returns>
     public uint GenerateSeed(uint seed, Vector3 pos)
     {
         unchecked
