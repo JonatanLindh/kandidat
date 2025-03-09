@@ -104,7 +104,6 @@ impl GravityController {
         let (result_tx, result_rx) = channel();
 
         let handle = thread::spawn(move || {
-            godot_print!("Trajectory worker thread started");
             Self::trajectory_worker_loop(cmd_rx, result_tx);
         });
 
@@ -145,12 +144,9 @@ impl GravityController {
         cmd_rx: Receiver<TrajectoryCommand>,
         result_tx: Sender<Vec<Trajectory>>,
     ) {
-        godot_print!("Trajectory worker started");
-
         while let Ok(command) = cmd_rx.recv() {
             match command {
                 TrajectoryCommand::Calculate(info) => {
-                    godot_print!("Calculating trajectories...");
                     let trajectories = Self::simulate_trajectories_inner(info);
 
                     if let Err(e) = result_tx.send(trajectories) {
@@ -169,15 +165,12 @@ impl GravityController {
     /// and sends them to the worker thread for asynchronous trajectory calculation.
     #[func]
     fn queue_simulate_trajectories(&mut self) {
-        godot_print!("Queueing trajectory calculation");
         if let Some(worker) = &self.trajectory_worker {
             let info = self.get_simulation_info();
 
             let _ = worker
                 .command_sender
                 .send(TrajectoryCommand::Calculate(info));
-
-            godot_print!("Queued!");
         }
     }
 
@@ -194,7 +187,6 @@ impl GravityController {
             .map(|worker| &worker.result_receiver)
         {
             if let Ok(trajectories) = rx.try_recv() {
-                godot_print!("Received trajectory results");
                 self.replace_trajectories(trajectories);
             }
         }
