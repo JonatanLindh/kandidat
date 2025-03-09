@@ -13,7 +13,9 @@ public partial class UISelectableStar : CanvasLayer
     float travelDistance = 10.0f;
 
     [Export] Control control;
+
     [Export] Panel starSelect;
+    float starSelectOffsetStrength = 600;
 
     [Export] Label starNameLabel;
     [Export] Label starPosLabel;
@@ -45,10 +47,10 @@ public partial class UISelectableStar : CanvasLayer
         if (star != null)
         {
             Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
-            Vector2 posOffset = new Vector2(0, -30);
+            Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
             
             float distance = player.Position.DistanceTo(targetPosition);
-            float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * 600;
+            float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * starSelectOffsetStrength;
             Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
 
             Vector2 offset = distanceOffset + posOffset;
