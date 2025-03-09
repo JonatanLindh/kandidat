@@ -1,73 +1,112 @@
 shader_type spatial;
 
-uniform sampler2D albedo : source_color;
-uniform sampler2D normal: hint_normal;
+// Normal Mapping for a Triplanar Shader - Based on Ben Golus 2017 Unity shader
+// https://bgolus.medium.com/normal-mapping-for-a-triplanar-shader-10bf39dca05a
 
-uniform float blend_sharpness = 8.0;
-uniform float mapping_scale = 1.0;
+// Properties
+uniform sampler2D albedo_texture : source_color;
+uniform sampler2D normal_texture : hint_normal;
+uniform sampler2D occlusion_texture : hint_default_white;
+uniform float smoothness : hint_range(0.0, 1.0) = 0.5;
+uniform float metallic : hint_range(0.0, 1.0) = 0.0;
+uniform float occlusion_strength : hint_range(0.0, 1.0) = 1.0;
+uniform vec2 texture_scale = vec2(1.0, 1.0);
+uniform vec2 texture_offset = vec2(0.0, 0.0);
 
-uniform sampler2D normal_map1 : hint_normal;
-uniform sampler2D normal_map2 : hint_normal;
-uniform float blend_factor = 0.5;
 
+// Uncomment to offset UVs to prevent obvious mirroring
+#define TRIPLANAR_UV_OFFSET
 
+// Reoriented Normal Mapping
+// http://blog.selfshadow.com/publications/blending-in-detail/
+// Altered to take normals (-1 to 1 ranges) rather than unsigned normal maps (0 to 1 ranges)
+vec3 blend_rnm(vec3 n1, vec3 n2) {
+    n1.z += 1.0;
+    n2.xy = -n2.xy;
+    
+    return n1 * dot(n1, n2) / n1.z - n2;
+}
 
 void fragment() {
+    // Get world normal for triplanar projection
+    vec3 world_normal = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
+    
+    // Calculate triplanar blend weights
+    vec3 triblend = pow(abs(world_normal), vec3(4.0));
+    triblend /= max(triblend.x + triblend.y + triblend.z, 0.0001);
+    
+    // Get world position for texture coordinates
     vec3 world_pos = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-    vec3 world_normal = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
-
-    vec3 blend_weights = pow(abs(world_normal), vec3(blend_sharpness));
-
-    blend_weights = blend_weights / (blend_weights.x + blend_weights.y + blend_weights.z);
-
-    vec3 scaled_pos = world_pos * mapping_scale;
-
-    vec3 col_x = texture(albedo, scaled_pos.yz).rgb;
-    vec3 col_y = texture(albedo, scaled_pos.xz).rgb;
-    vec3 col_z = texture(albedo, scaled_pos.xy).rgb;
-
-
-    vec3 tnormal_x = texture(normal, scaled_pos.yz).rgb * 2.0 - 1.0;
-    vec3 tnormal_y = texture(normal, scaled_pos.xz).rgb * 2.0 - 1.0;
-    vec3 tnormal_z = texture(normal, scaled_pos.xy).rgb * 2.0 - 1.0;
-
-    vec3 world_normal_x = vec3(world_normal.x >= 0.0 ? tnormal_x.z : -tnormal_x.z,
-                               tnormal_x.y,
-                               world_normal.x >= 0.0 ? tnormal_x.x : -tnormal_x.x);
-
-    vec3 world_normal_y = vec3(tnormal_y.x,
-                               world_normal.y >= 0.0 ? tnormal_y.z : -tnormal_y.z,
-                               world_normal.y >= 0.0 ? tnormal_y.y : -tnormal_y.y);
-
-    vec3 world_normal_z = vec3(tnormal_z.x,
-                               tnormal_z.y,
-                               world_normal.z >= 0.0 ? tnormal_z.z : -tnormal_z.z);
-
-    vec3 tangent_x = normalize(vec3(0.0, -world_normal_x.z, world_normal_x.y));
-    vec3 bitangent_x = normalize(cross(world_normal_x, tangent_x));
-    mat3 tbn_x = mat3(tangent_x, bitangent_x, normalize(world_normal_x));
-
-    vec3 tangent_y = normalize(vec3(-world_normal_y.z, 0.0, world_normal_y.x));
-    vec3 bitangent_y = normalize(cross(world_normal_y, tangent_y));
-    mat3 tbn_y = mat3(tangent_y, bitangent_y, normalize(world_normal_y));
-
-    vec3 tangent_z = normalize(vec3(-world_normal_z.y, world_normal_z.x, 0.0));
-    vec3 bitangent_z = normalize(cross(world_normal_z, tangent_z));
-    mat3 tbn_z = mat3(tangent_z, bitangent_z, normalize(world_normal_z));
-
-    vec3 normal_x_world = normalize(tbn_x * tnormal_x);
-    vec3 normal_y_world = normalize(tbn_y * tnormal_y);
-    vec3 normal_z_world = normalize(tbn_z * tnormal_z);
-
+    
+    // Calculate triplanar UVs with scale and offset
+    vec2 uvX = (world_pos.zy * texture_scale + texture_offset);
+    vec2 uvY = (world_pos.xz * texture_scale + texture_offset);
+    vec2 uvZ = (world_pos.xy * texture_scale + texture_offset);
+    
+    // Offset UVs to prevent obvious mirroring
+    #ifdef TRIPLANAR_UV_OFFSET
+        uvY += 0.33;
+        uvZ += 0.67;
+    #endif
+    
+    // Determine axis sign for UV correction
+    vec3 axis_sign = sign(world_normal);
+    
+    // Flip UVs horizontally to correct for back side projection
+    uvX.x *= axis_sign.x;
+    uvY.x *= axis_sign.y;
+    uvZ.x *= -axis_sign.z;
+    
+    // Sample textures for each projection direction
+    vec4 colX = texture(albedo_texture, uvX);
+    vec4 colY = texture(albedo_texture, uvY);
+    vec4 colZ = texture(albedo_texture, uvZ);
+    
+    // Blend albedo
+    vec4 col = colX * triblend.x + colY * triblend.y + colZ * triblend.z;
+    
+    // Sample and blend occlusion
+    float occX = texture(occlusion_texture, uvX).g;
+    float occY = texture(occlusion_texture, uvY).g;
+    float occZ = texture(occlusion_texture, uvZ).g;
+    float occ = mix(1.0, occX * triblend.x + occY * triblend.y + occZ * triblend.z, occlusion_strength);
+    
+    // Sample normal maps
+    vec3 tnormalX = texture(normal_texture, uvX).rgb * 2.0 - 1.0;
+    vec3 tnormalY = texture(normal_texture, uvY).rgb * 2.0 - 1.0;
+    vec3 tnormalZ = texture(normal_texture, uvZ).rgb * 2.0 - 1.0;
+    
+    // Flip normal maps' x axis to account for flipped UVs
+    tnormalX.x *= axis_sign.x;
+    tnormalY.x *= axis_sign.y;
+    tnormalZ.x *= -axis_sign.z;
+    
+    vec3 absVertNormal = abs(world_normal);
+    
+    // Apply reoriented normal mapping blend
+    tnormalX = blend_rnm(vec3(world_normal.zy, absVertNormal.x), tnormalX);
+    tnormalY = blend_rnm(vec3(world_normal.xz, absVertNormal.y), tnormalY);
+    tnormalZ = blend_rnm(vec3(world_normal.xy, absVertNormal.z), tnormalZ);
+    
+    // Apply world space sign to tangent space Z
+    tnormalX.z *= axis_sign.x;
+    tnormalY.z *= axis_sign.y;
+    tnormalZ.z *= axis_sign.z;
+    
+    // Sizzle tangent normals to match world normal and blend
     vec3 final_normal = normalize(
-        normal_x_world * blend_weights.x +
-        normal_y_world * blend_weights.y +
-        normal_z_world * blend_weights.z
+        tnormalX.zyx * triblend.x +
+        tnormalY.xzy * triblend.y +
+        tnormalZ.xyz * triblend.z
     );
-
-    vec3 final_color = col_x * blend_weights.x + col_y * blend_weights.y + col_z * blend_weights.z;
-
-    ALBEDO = final_color;
-    NORMAL = final_normal;
-    ROUGHNESS = 0.7;
+    
+    // Convert world normal to view space for Godot
+    vec3 view_normal = normalize((VIEW_MATRIX * vec4(final_normal, 0.0)).xyz);
+    
+    // Set material properties
+    ALBEDO = col.rgb;
+    METALLIC = metallic;
+    ROUGHNESS = 1.0 - smoothness; // Convert smoothness to roughness
+    AO = occ;
+    NORMAL = view_normal;
 }
