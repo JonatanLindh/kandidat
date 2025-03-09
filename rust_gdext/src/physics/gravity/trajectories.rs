@@ -17,7 +17,10 @@
 //! colors for each trajectory.
 
 use super::controller::{GravityController, SimulatedBody};
-use crate::physics::gravity::controller::__gdext_GravityController_Funcs;
+use crate::{
+    physics::gravity::controller::__gdext_GravityController_Funcs,
+    worker::{Worker, WorkerResponse},
+};
 use godot::{
     classes::{
         ArrayMesh, MeshInstance3D, StandardMaterial3D, SurfaceTool, base_material_3d::ShadingMode,
@@ -26,11 +29,7 @@ use godot::{
     prelude::*,
 };
 use itertools::Itertools;
-use std::{
-    mem,
-    sync::mpsc::{Receiver, Sender, channel},
-    thread::{self, JoinHandle},
-};
+use std::mem;
 
 /// Represents a single body's trajectory path with visual styling information.
 ///
@@ -48,18 +47,23 @@ pub struct Trajectory {
 /// This struct encapsulates all the data needed to perform an n-body gravity simulation
 /// for trajectory prediction, including the initial state of bodies, simulation parameters,
 /// and reference frame information.
-struct SimulationInfo {
+pub struct SimulationInfo {
     /// Current state of all bodies for simulation
     bodies_sim: Vec<SimulatedBody>,
+
     /// Trajectory data structures to populate during simulation
     trajectories: Vec<Trajectory>,
+
     /// Optional reference body index and initial position for relative trajectories
     /// When present, (index, initial_position) is used to make trajectories relative to the body
     offset_info: Option<(usize, Vector3)>,
+
     /// Time increment per simulation step in seconds
     delta: f32,
+
     /// Gravitational constant for force calculations
     grav_const: f32,
+
     /// Number of steps to simulate
     n_steps: usize,
 }
@@ -68,20 +72,13 @@ struct SimulationInfo {
 ///
 /// This worker handles trajectory simulations asynchronously, allowing the main game thread
 /// to continue running smoothly while calculations are performed in the background.
-pub struct TrajectoryWorker {
-    /// Thread handle for the worker
-    handle: JoinHandle<()>,
-    /// Channel for sending commands to the worker thread
-    command_sender: Sender<TrajectoryCommand>,
-    /// Channel for receiving calculated trajectories from the worker thread
-    result_receiver: Receiver<Vec<Trajectory>>,
-}
+pub type TrajectoryWorker = Worker<Vec<Trajectory>, TrajectoryCommand>;
 
 /// Commands that can be sent to the trajectory worker thread.
 ///
 /// This enum defines the communication protocol between the main thread and
 /// the trajectory calculation thread.
-enum TrajectoryCommand {
+pub enum TrajectoryCommand {
     /// Request to calculate trajectories with the provided simulation information
     Calculate(SimulationInfo),
     /// Signal the worker thread to terminate
@@ -100,18 +97,21 @@ impl GravityController {
             return;
         }
 
-        let (cmd_tx, cmd_rx) = channel();
-        let (result_tx, result_rx) = channel();
+        let worker = Worker::new(|command, result_tx| match command {
+            TrajectoryCommand::Shutdown => WorkerResponse::Shutdown,
 
-        let handle = thread::spawn(move || {
-            Self::trajectory_worker_loop(cmd_rx, result_tx);
-        });
+            TrajectoryCommand::Calculate(info) => {
+                let trajectories = Self::simulate_trajectories_inner(info);
 
-        self.trajectory_worker = Some(TrajectoryWorker {
-            handle,
-            command_sender: cmd_tx,
-            result_receiver: result_rx,
+                if let Err(e) = result_tx.send(trajectories) {
+                    godot_error!("Failed to send trajectory results: {}", e);
+                }
+
+                // Continue processing commands
+                WorkerResponse::Continue
+            }
         });
+        self.trajectory_worker = Some(worker);
 
         self.queue_simulate_trajectories();
     }
@@ -127,36 +127,12 @@ impl GravityController {
                 godot_error!("Failed to send shutdown command: {}", e);
             }
 
-            if worker.handle.join().is_err() {
+            if worker.join().is_err() {
                 godot_error!("Failed to join trajectory worker thread on shutdown");
             }
         }
 
         self.clear_trajectories();
-    }
-
-    /// Worker thread main loop for processing trajectory calculation commands.
-    ///
-    /// This function runs on a separate thread and processes commands to calculate
-    /// trajectories or shut down the thread. Calculated trajectories are sent back
-    /// to the main thread via the result channel.
-    fn trajectory_worker_loop(
-        cmd_rx: Receiver<TrajectoryCommand>,
-        result_tx: Sender<Vec<Trajectory>>,
-    ) {
-        while let Ok(command) = cmd_rx.recv() {
-            match command {
-                TrajectoryCommand::Calculate(info) => {
-                    let trajectories = Self::simulate_trajectories_inner(info);
-
-                    if let Err(e) = result_tx.send(trajectories) {
-                        godot_error!("Failed to send trajectory results: {}", e);
-                    }
-                }
-
-                TrajectoryCommand::Shutdown => break,
-            }
-        }
     }
 
     /// Queues a new trajectory calculation request to the worker thread.
@@ -181,12 +157,8 @@ impl GravityController {
     /// are available, they are used to update the visualization.
     #[func]
     fn poll_trajectory_results(&mut self) {
-        if let Some(rx) = self
-            .trajectory_worker
-            .as_ref()
-            .map(|worker| &worker.result_receiver)
-        {
-            if let Ok(trajectories) = rx.try_recv() {
+        if let Some(worker) = self.trajectory_worker.as_ref() {
+            if let Ok(trajectories) = worker.try_recv() {
                 self.replace_trajectories(trajectories);
             }
         }
