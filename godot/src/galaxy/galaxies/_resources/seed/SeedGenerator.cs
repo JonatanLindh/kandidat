@@ -1,9 +1,9 @@
 using Godot;
 using System;
 
-public static class SeedGenerator
+public class SeedGenerator
 {
-    public static uint GenerateSeed(uint seed, Vector3 pos)
+    public uint GenerateSeed(uint seed, Vector3 pos)
     {
         unchecked
         {
