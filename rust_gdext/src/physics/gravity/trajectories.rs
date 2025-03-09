@@ -126,7 +126,6 @@ impl GravityController {
         if let Some(worker) = self.trajectory_worker.take() {
             if let Err(e) = worker.command_sender.send(TrajectoryCommand::Shutdown) {
                 godot_error!("Failed to send shutdown command: {}", e);
-                return;
             }
 
             if worker.handle.join().is_err() {
