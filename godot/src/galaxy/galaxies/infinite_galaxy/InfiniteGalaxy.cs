@@ -4,22 +4,24 @@ using System.Collections.Generic;
 
 public partial class InfiniteGalaxy : Node3D
 {
-    [Export] PackedScene starChunk;
     [Export] PackedScene starScene;
-
+    [Export] FastNoiseLite noise;
     [Export] Node3D player;
 
     private List<StarChunk> starChunks;
-    int chunkSize = 1000;
+    [Export] uint seed;
 
-    int chunkDistance = 1;
-
-    [Export] int seed;
+    [ExportCategory("Chunks")]
+    [Export] PackedScene starChunk;
+    [Export(PropertyHint.Range, "1, 10, 1")] int viewDistance = 1;
+    [Export(PropertyHint.Range, "-1, 1, 0.01")] float IsoLevel = 0.3f;
+    [Export] int chunkSize = 1000;
+    [Export] int starCount = 1000;
 
     public override void _Ready()
     {
         // Sets a random seed if no seed is provided
-        if (seed == 0) seed = new Random().Next();
+        if (seed == 0) seed = (uint) new Random().Next();
 
         starChunks = new List<StarChunk>();
     }
@@ -28,11 +30,11 @@ public partial class InfiniteGalaxy : Node3D
     {
         ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
 
-        for (int x = -chunkDistance; x <= chunkDistance; x++)
+        for (int x = -viewDistance; x <= viewDistance; x++)
         {
-            for (int y = -chunkDistance; y <= chunkDistance; y++)
+            for (int y = -viewDistance; y <= viewDistance; y++)
             {
-                for (int z = -chunkDistance; z <= chunkDistance; z++)
+                for (int z = -viewDistance; z <= viewDistance; z++)
                 {
                     ChunkCoord chunkPos = new ChunkCoord(playerChunk.x + x, playerChunk.y + y, playerChunk.z + z);
                     if (!IsChunkGenerated(chunkPos))
@@ -51,8 +53,10 @@ public partial class InfiniteGalaxy : Node3D
         StarChunk chunk = (StarChunk) starChunk.Instantiate();
         chunk.Name = "Chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
 
-        chunk.SetStarScene(starScene);
-        chunk.Generate(seed, chunkSize, pos);
+        chunk.starScene = starScene;
+        chunk.galaxyNoise = noise;
+
+        chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos);
 
         starChunks.Add(chunk);
         AddChild(chunk);
@@ -62,7 +66,7 @@ public partial class InfiniteGalaxy : Node3D
     {
         foreach (StarChunk c in starChunks)
         {
-            if (c.GetPos().Equals(chunk))
+            if (c.chunkPos.Equals(chunk))
             {
                 return true;
             }
@@ -73,14 +77,14 @@ public partial class InfiniteGalaxy : Node3D
 
     private void CullChunks(ChunkCoord playerChunk)
     {
-        for(int i = 0; i < starChunks.Count; i++)
+        for(int i = starChunks.Count - 1; i >= 0; i--)
         {
             StarChunk chunk = starChunks[i];
-            if (Math.Abs(chunk.GetPos().x - playerChunk.x) > chunkDistance || 
-                Math.Abs(chunk.GetPos().y - playerChunk.y) > chunkDistance || 
-                Math.Abs(chunk.GetPos().z - playerChunk.z) > chunkDistance)
+            if (Math.Abs(chunk.chunkPos.x - playerChunk.x) > viewDistance || 
+                Math.Abs(chunk.chunkPos.y - playerChunk.y) > viewDistance || 
+                Math.Abs(chunk.chunkPos.z - playerChunk.z) > viewDistance)
             {
-                starChunks.Remove(chunk);
+                starChunks.RemoveAt(i);
                 chunk.QueueFree();
             }
         }
