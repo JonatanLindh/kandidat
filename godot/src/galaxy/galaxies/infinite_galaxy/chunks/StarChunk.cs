@@ -11,6 +11,8 @@ public partial class StarChunk : Node3D
     float ISOlevel;
     public ChunkCoord chunkPos { get; private set; }
 
+    SeedGenerator seedGen = new SeedGenerator();
+
     public void Generate(uint galaxySeed, int chunkSize, int starCount, float ISOlevel, ChunkCoord pos)
     {
         galaxyNoise.Seed = (int)galaxySeed;
@@ -41,8 +43,8 @@ public partial class StarChunk : Node3D
                 if (star is SelectableStar)
                 {
                     SelectableStar selectableStar = (SelectableStar)star;
-                    uint starSeed = SeedGenerator.GenerateSeed(galaxySeed, globalPoint);
-                    selectableStar.SetSeed(starSeed);
+                    uint starSeed = seedGen.GenerateSeed((uint)seed, star.Position);
+                    selectableStar.SetSeed((int)starSeed);
                 }
 
                 AddChild(star);

@@ -1,9 +1,14 @@
 using Godot;
 using System;
 
-public static class SeedGenerator
+public class SeedGenerator
 {
-    public static uint GenerateSeed(uint seed, Vector3 pos)
+    /// <summary>
+    /// Generates a new seed based on an initial seed and a vector.
+    /// </summary>
+    /// 
+    /// <returns> A generated seed as a uint. </returns>
+    public uint GenerateSeed(uint seed, Vector3 pos)
     {
         unchecked
         {
