@@ -107,23 +107,13 @@ impl GravityController {
         self.replace_trajectories(Vec::new());
     }
 
-    /// Function connected to the signal `UPDATE_TRAJECTORIES`
-    ///
     /// Updates trajectory visualizations if auto_update_trajectories is enabled
     #[func]
-    fn _on_update_trajectories(&mut self) {
+    fn update_trajectories(&mut self) {
         if self.auto_update_trajectories {
             self.simulate_trajectories();
         }
     }
-
-    /// Signal emitted when trajectories should be recalculated.
-    ///
-    /// This signal is used to notify the controller that trajectory predictions
-    /// need to be updated, typically after changes to bodies or simulation parameters.
-    #[signal]
-    fn UPDATE_TRAJECTORIES();
-    pub const UPDATE_TRAJECTORY_SIGNAL: &str = "UPDATE_TRAJECTORIES";
 }
 
 impl GravityController {
