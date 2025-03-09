@@ -124,12 +124,14 @@ impl GravityController {
     #[func]
     fn disable_trajectories(&mut self) {
         if let Some(worker) = self.trajectory_worker.take() {
-            worker
-                .command_sender
-                .send(TrajectoryCommand::Shutdown)
-                .unwrap();
+            if let Err(e) = worker.command_sender.send(TrajectoryCommand::Shutdown) {
+                godot_error!("Failed to send shutdown command: {}", e);
+                return;
+            }
 
-            worker.handle.join().unwrap();
+            if worker.handle.join().is_err() {
+                godot_error!("Failed to join trajectory worker thread on shutdown");
+            }
         }
 
         self.clear_trajectories();
@@ -151,7 +153,10 @@ impl GravityController {
                 TrajectoryCommand::Calculate(info) => {
                     godot_print!("Calculating trajectories...");
                     let trajectories = Self::simulate_trajectories_inner(info);
-                    result_tx.send(trajectories).unwrap();
+
+                    if let Err(e) = result_tx.send(trajectories) {
+                        godot_error!("Failed to send trajectory results: {}", e);
+                    }
                 }
 
                 TrajectoryCommand::Shutdown => break,
