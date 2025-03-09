@@ -70,7 +70,6 @@ public partial class UISelectableStar : CanvasLayer
         starSeed.Text = star.GetSeed().ToString();
 
         Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
-        GD.Print(screenPosition);
         starSelect.Position = screenPosition;
 
         Show();
