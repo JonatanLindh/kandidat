@@ -2,6 +2,9 @@ using Godot;
 using System;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Generates a mesh for a moon surface with craters using the Marching Cubes algorithm.
+/// </summary>
 [Tool]
 public partial class MoonMesh : Node
 {
@@ -30,42 +33,8 @@ public partial class MoonMesh : Node
 	}
 	
 	[ExportCategory("Material Settings")]
-	[Export] public Texture2D NormalMap { get; set; }
-	[Export] public Shader ShaderMaterial { get; set; }
+	[Export] public Material MeshMaterial { get; set; }
 
-	[Export]
-	public float NormalScale
-	{
-		get => _normalScale;
-		set
-		{
-			_normalScale = value;
-			OnResourceSet();
-		}
-
-	}
-	
-	[Export]
-	public float BlendSharpness
-	{
-		get => _blendSharpness;
-		set
-		{
-			_blendSharpness = value;
-			OnResourceSet();
-		}
-	}
-
-	[Export]
-	public float MappingScale
-	{
-		get => _mappingScale;
-		set
-		{
-			_mappingScale = value;
-			OnResourceSet();
-		}
-	}
 
 	[ExportCategory("Crater Settings")]
 	[Export]
@@ -116,7 +85,7 @@ public partial class MoonMesh : Node
 		get => _minCraterRadius;
 		set
 		{
-			_craterRadius = value;
+			_minCraterRadius = value;
 			OnResourceSet();
 		}
 	}
@@ -126,7 +95,7 @@ public partial class MoonMesh : Node
 		get => _maxCraterRadius;
 		set
 		{
-			_craterRadius = value;
+			_maxCraterRadius = value;
 			OnResourceSet();
 		}
 	}
@@ -146,9 +115,6 @@ public partial class MoonMesh : Node
 	private int _radius = 50;
 	private MeshInstance3D _mesh;
 	
-	private float _normalScale = 1f;
-	private float _blendSharpness = 1f;
-	private float _mappingScale = 0.1f;
 	
 	private int _amountOfCraters = 10;
 	private float _rimWidth = 2f;
@@ -160,7 +126,6 @@ public partial class MoonMesh : Node
 	private float _smoothness = 0.1f;
 	
 	private Crater[] _craters;
-	private Node3D _craterList;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -218,31 +183,14 @@ public partial class MoonMesh : Node
 		var dataPoints = GenerateDataPoints(_radius);
 		_marchingCube ??= new MarchingCube();
 		_mesh = _marchingCube.GenerateMesh(dataPoints);
-		
 		_craters = GenerateCraterCenters(_amountOfCraters);
-		GenerateCraters();
 		
-		ApplyMaterial();
+		if(MeshMaterial != null)
+			_mesh.MaterialOverride = MeshMaterial;
+		GenerateCraters();
 		AddChild(_mesh);
 	}
-
-	private void ApplyMaterial()
-	{
-		var shaderMaterial = new ShaderMaterial();
-		var blendingShader = new ShaderMaterial();
-		var triplanarShader = new ShaderMaterial();
-
-		// Set material properties
-		//material.SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
-		if (NormalMap != null && ShaderMaterial != null)
-		{
-			shaderMaterial.SetShader(ShaderMaterial);
-			shaderMaterial.SetShaderParameter("blend_sharpness", _blendSharpness);
-			shaderMaterial.SetShaderParameter("mapping_scale", _mappingScale);
-			shaderMaterial.SetShaderParameter("normal", NormalMap);
-		}
-		_mesh.MaterialOverlay = shaderMaterial;
-	}
+	
 
 	private void GenerateCraters()
 	{
@@ -271,14 +219,25 @@ public partial class MoonMesh : Node
 				// Modify the Crater Height
 				craterHeight += craterShape * crater.Radius;
 
-				positions[i] += normal[i] * craterHeight;
+				positions[i] += positions[i].Normalized() * craterHeight;
 				
 				// Calculate the Normal
-				normal[i] = (positions[i] - crater.Centre).Normalized();
-				
+				//normal[i] = (positions[i] - crater.Centre).Normalized();
+				normal[i] = positions[i].Normalized();
 
 			}
 		}
+		
+		SurfaceTool surfaceTool = new SurfaceTool();
+		surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
+		foreach (var pos in positions)
+		{
+			surfaceTool.AddVertex(pos);
+		}
+		surfaceTool.GenerateNormals();
+		surfaceTool.Index();
+		var mesh = surfaceTool.Commit();
+		
 		meshData[(int)Mesh.ArrayType.Vertex] = positions;
 		var newMesh = new ArrayMesh();
 		newMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles,meshData);
@@ -286,19 +245,8 @@ public partial class MoonMesh : Node
 	}
 
 
-	private Crater[] GenerateCraterCenters(int amount, bool renderCrates = false)
+	private Crater[] GenerateCraterCenters(int amount)
 	{
-		if (_craterList != null)
-		{
-			RemoveChild(_craterList);
-			_craterList.QueueFree();
-			_craterList = null;
-		}
-
-		if(renderCrates)
-			_craterList = new Node3D();
-		
-		
 		var craters = new Crater[amount];
 		for(int i = 0; i < amount; i++)
 		{
@@ -307,43 +255,24 @@ public partial class MoonMesh : Node
 			
 			var centre = RandomVector3(_radius - 5, _radius,_radius * Vector3.One);
 			craters[i] = new Crater(craterRadius, centre);
-			
-			
-			if (renderCrates)
-			{
-				var meshInstance = new MeshInstance3D();
-				var mesh = new SphereMesh();
-				meshInstance.Mesh = mesh;
-				meshInstance.Scale = 2 * craterRadius * Vector3.One;
-				meshInstance.Transform = new Transform3D(meshInstance.Transform.Basis, craters[i].Centre);
-				_craterList.AddChild(meshInstance);
-			}
 		}
-		
-		if(renderCrates)
-			AddChild(_craterList);
-		
 		return craters;
 	}
 	
 	private static float SmoothMax(float a, float b, float k)
 	{
-		//float h = Mathf.Clamp((b - a + k) / (2.0f * k), 0.0f, 1.0f);
-		//return Mathf.Lerp(b, a, h) + k * h * (1.0f - h);
 		return SmoothMin(a, b, -k);
 	}
 
 	private static float SmoothMin(float a, float b, float k)
 	{
-		//float h = Mathf.Clamp((a - b + k) / (2.0f * k), 0.0f, 1.0f);
-		//return Mathf.Lerp(a, b, h) - k * h * (1.0f - h);
 		var h = Mathf.Clamp((b - a + k) / (2.0f * k), 0.0f, 1.0f);
 		return a * h + b * (1f - h) - k * h * (1.0f - h);
 	}
 
-	private static Vector3 RandomVector3(float minLength, float maxLength, Vector3 origin = default)
+	private static Vector3 RandomVector3(float minLength, float maxLength, Vector3 origin = default, int seed = -1)
 	{
-		var random = new Random();
+		var random = seed == -1 ? new Random() : new Random(seed);
         
 		// Generate a random direction
 		float x = (float)(random.NextDouble() * 2.0 - 1.0);
