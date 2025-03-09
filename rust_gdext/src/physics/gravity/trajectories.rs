@@ -26,16 +26,176 @@ use godot::{
     prelude::*,
 };
 use itertools::Itertools;
-use std::mem;
+use std::{
+    mem,
+    sync::mpsc::{Receiver, Sender, channel},
+    thread::{self, JoinHandle},
+};
 
-/// Simple struct to hold information about a body's trajectory
-struct Trajectory {
+/// Represents a single body's trajectory path with visual styling information.
+///
+/// A trajectory consists of a collection of 3D points that form the predicted path
+/// of a celestial body over time, along with a color used for visualization.
+pub struct Trajectory {
+    /// Color used to render this trajectory
     color: Color,
+    /// Sequential 3D positions forming the predicted path
     points: Vec<Vector3>,
+}
+
+/// Contains all necessary information for simulating body trajectories.
+///
+/// This struct encapsulates all the data needed to perform an n-body gravity simulation
+/// for trajectory prediction, including the initial state of bodies, simulation parameters,
+/// and reference frame information.
+struct SimulationInfo {
+    /// Current state of all bodies for simulation
+    bodies_sim: Vec<SimulatedBody>,
+    /// Trajectory data structures to populate during simulation
+    trajectories: Vec<Trajectory>,
+    /// Optional reference body index and initial position for relative trajectories
+    /// When present, (index, initial_position) is used to make trajectories relative to the body
+    offset_info: Option<(usize, Vector3)>,
+    /// Time increment per simulation step in seconds
+    delta: f32,
+    /// Gravitational constant for force calculations
+    grav_const: f32,
+    /// Number of steps to simulate
+    n_steps: usize,
+}
+
+/// Manages a background thread for trajectory calculations.
+///
+/// This worker handles trajectory simulations asynchronously, allowing the main game thread
+/// to continue running smoothly while calculations are performed in the background.
+pub struct TrajectoryWorker {
+    /// Thread handle for the worker
+    handle: JoinHandle<()>,
+    /// Channel for sending commands to the worker thread
+    command_sender: Sender<TrajectoryCommand>,
+    /// Channel for receiving calculated trajectories from the worker thread
+    result_receiver: Receiver<Vec<Trajectory>>,
+}
+
+/// Commands that can be sent to the trajectory worker thread.
+///
+/// This enum defines the communication protocol between the main thread and
+/// the trajectory calculation thread.
+enum TrajectoryCommand {
+    /// Request to calculate trajectories with the provided simulation information
+    Calculate(SimulationInfo),
+    /// Signal the worker thread to terminate
+    Shutdown,
 }
 
 #[godot_api]
 impl GravityController {
+    /// Enables trajectory visualization and starts the worker thread.
+    ///
+    /// This function initializes a background thread for trajectory calculation if not already running.
+    /// It sets up communication channels and queues an initial trajectory calculation.
+    #[func]
+    fn enable_trajectories(&mut self) {
+        if self.trajectory_worker.is_some() {
+            return;
+        }
+
+        let (cmd_tx, cmd_rx) = channel();
+        let (result_tx, result_rx) = channel();
+
+        let handle = thread::spawn(move || {
+            godot_print!("Trajectory worker thread started");
+            Self::trajectory_worker_loop(cmd_rx, result_tx);
+        });
+
+        self.trajectory_worker = Some(TrajectoryWorker {
+            handle,
+            command_sender: cmd_tx,
+            result_receiver: result_rx,
+        });
+
+        self.queue_simulate_trajectories();
+    }
+
+    /// Disables trajectory visualization and shuts down the worker thread.
+    ///
+    /// This function gracefully terminates the background trajectory calculation thread
+    /// and removes any existing trajectory visualizations from the scene.
+    #[func]
+    fn disable_trajectories(&mut self) {
+        if let Some(worker) = self.trajectory_worker.take() {
+            worker
+                .command_sender
+                .send(TrajectoryCommand::Shutdown)
+                .unwrap();
+
+            worker.handle.join().unwrap();
+        }
+
+        self.clear_trajectories();
+    }
+
+    /// Worker thread main loop for processing trajectory calculation commands.
+    ///
+    /// This function runs on a separate thread and processes commands to calculate
+    /// trajectories or shut down the thread. Calculated trajectories are sent back
+    /// to the main thread via the result channel.
+    fn trajectory_worker_loop(
+        cmd_rx: Receiver<TrajectoryCommand>,
+        result_tx: Sender<Vec<Trajectory>>,
+    ) {
+        godot_print!("Trajectory worker started");
+
+        while let Ok(command) = cmd_rx.recv() {
+            match command {
+                TrajectoryCommand::Calculate(info) => {
+                    godot_print!("Calculating trajectories...");
+                    let trajectories = Self::simulate_trajectories_inner(info);
+                    result_tx.send(trajectories).unwrap();
+                }
+
+                TrajectoryCommand::Shutdown => break,
+            }
+        }
+    }
+
+    /// Queues a new trajectory calculation request to the worker thread.
+    ///
+    /// This function collects the current simulation parameters and body states,
+    /// and sends them to the worker thread for asynchronous trajectory calculation.
+    #[func]
+    fn queue_simulate_trajectories(&mut self) {
+        godot_print!("Queueing trajectory calculation");
+        if let Some(worker) = &self.trajectory_worker {
+            let info = self.get_simulation_info();
+
+            let _ = worker
+                .command_sender
+                .send(TrajectoryCommand::Calculate(info));
+
+            godot_print!("Queued!");
+        }
+    }
+
+    /// Polls for and applies any newly calculated trajectories.
+    ///
+    /// This function should be called periodically from the main thread to check if
+    /// the worker thread has completed any trajectory calculations. If new trajectories
+    /// are available, they are used to update the visualization.
+    #[func]
+    fn poll_trajectory_results(&mut self) {
+        if let Some(rx) = self
+            .trajectory_worker
+            .as_ref()
+            .map(|worker| &worker.result_receiver)
+        {
+            if let Ok(trajectories) = rx.try_recv() {
+                godot_print!("Received trajectory results");
+                self.replace_trajectories(trajectories);
+            }
+        }
+    }
+
     /// Simulates and visualizes orbital trajectories for all registered celestial bodies.
     ///
     /// This function performs an n-body gravity simulation for the specified number of steps,
@@ -51,50 +211,8 @@ impl GravityController {
     /// orbital movement of each body.
     #[func]
     fn simulate_trajectories(&mut self) {
-        let n_steps = self.simulation_steps as usize;
-        let delta = self.simulation_step_delta;
-        let grav_const = self.grav_const;
-
-        let (mut bodies_sim, mut trajectories): (Vec<_>, Vec<_>) = self
-            .bodies
-            .iter()
-            .map(|b| (SimulatedBody::from(b), b.bind().trajectory_color))
-            .map(|(b, color)| {
-                let mut points = Vec::with_capacity(n_steps);
-                points.push(b.pos);
-
-                (b, Trajectory { color, points })
-            })
-            .unzip();
-
-        let offset_info = self
-            .sim_center_body
-            .as_ref()
-            .and_then(|b| {
-                let id = b.instance_id();
-                bodies_sim
-                    .iter()
-                    .find_position(|b| id == b.body_instance_id)
-            })
-            .map(|(idx, b)| (idx, b.pos));
-
-        let n_bodies = bodies_sim.len();
-        let mut accelerations = Vec::with_capacity(n_bodies);
-
-        for _ in 1..n_steps {
-            // Step
-            Self::step_time(grav_const, delta, &mut bodies_sim, &mut accelerations);
-
-            let offset = offset_info
-                .map(|(idx, init)| bodies_sim[idx].pos - init)
-                .unwrap_or(Vector3::ZERO);
-
-            // Store positions
-            for (i, body) in bodies_sim.iter().enumerate() {
-                trajectories[i].points.push(body.pos - offset);
-            }
-        }
-
+        let info = self.get_simulation_info();
+        let trajectories = Self::simulate_trajectories_inner(info);
         self.replace_trajectories(trajectories);
     }
 
@@ -117,10 +235,102 @@ impl GravityController {
 }
 
 impl GravityController {
+    /// Collects simulation parameters and prepares data for trajectory calculation.
+    ///
+    /// This function gathers the current state of all bodies, creates empty trajectory
+    /// structures, and determines the reference frame for relative trajectories if needed.
+    ///
+    /// # Returns
+    ///
+    /// A `SimulationInfo` struct containing all data needed for trajectory simulation.
+    fn get_simulation_info(&self) -> SimulationInfo {
+        let n_steps = self.simulation_steps as usize;
+        let delta = self.simulation_step_delta;
+        let grav_const = self.grav_const;
+
+        let (bodies_sim, trajectories): (Vec<_>, Vec<_>) = self
+            .bodies
+            .iter()
+            .map(|b| (SimulatedBody::from(b), b.bind().trajectory_color))
+            .map(|(b, color)| {
+                let mut points = Vec::with_capacity(n_steps);
+                points.push(b.pos);
+
+                (b, Trajectory { color, points })
+            })
+            .unzip();
+
+        let offset_info = self
+            .sim_center_body
+            .as_ref()
+            .and_then(|b| {
+                let id = b.instance_id();
+                bodies_sim
+                    .iter()
+                    .find_position(|b| id == b.body_instance_id)
+            })
+            .map(|(idx, b)| (idx, b.pos));
+
+        SimulationInfo {
+            bodies_sim,
+            trajectories,
+            offset_info,
+            delta,
+            grav_const,
+            n_steps,
+        }
+    }
+
+    /// Performs the n-body gravity simulation to generate trajectory data.
+    ///
+    /// This function runs the actual physics simulation, updating positions and velocities
+    /// for all bodies over multiple time steps and recording the resulting trajectories.
+    ///
+    /// # Parameters
+    ///
+    /// * `SimulationInfo` - Contains all simulation parameters and bodies' initial states
+    ///
+    /// # Returns
+    ///
+    /// A vector of `Trajectory` objects containing the simulated orbital paths
+    fn simulate_trajectories_inner(
+        SimulationInfo {
+            mut bodies_sim,
+            mut trajectories,
+            offset_info,
+            delta,
+            grav_const,
+            n_steps,
+        }: SimulationInfo,
+    ) -> Vec<Trajectory> {
+        let n_bodies = bodies_sim.len();
+        let mut accelerations = Vec::with_capacity(n_bodies);
+
+        for _ in 1..n_steps {
+            // Step
+            Self::step_time(grav_const, delta, &mut bodies_sim, &mut accelerations);
+
+            let offset = offset_info
+                .map(|(idx, init)| bodies_sim[idx].pos - init)
+                .unwrap_or(Vector3::ZERO);
+
+            // Store positions
+            for (i, body) in bodies_sim.iter().enumerate() {
+                trajectories[i].points.push(body.pos - offset);
+            }
+        }
+
+        trajectories
+    }
+
     /// Replaces existing trajectories with new ones, creating meshes for visualization.
     ///
     /// Each valid trajectory (with at least 2 points) is converted into a mesh instance
     /// and added as a child to the controller. Old trajectory meshes are properly freed.
+    ///
+    /// # Parameters
+    ///
+    /// * `new_trajectories` - Vector of trajectories to visualize
     fn replace_trajectories(&mut self, new_trajectories: Vec<Trajectory>) {
         let new_meshes = new_trajectories
             .iter()
@@ -149,15 +359,20 @@ impl GravityController {
         }
     }
 
-    /// Builds a mesh representation of a trajectory for visualization.
+    /// Creates a mesh and material for visualizing a trajectory.
     ///
-    /// Creates a line strip mesh from trajectory points and a material with the
-    /// trajectory's color. The material is set to unshaded rendering mode.
+    /// This function converts a trajectory's points into a line strip mesh and creates
+    /// a material with the trajectory's color for rendering.
     ///
-    ///  ### Returns
+    /// # Parameters
+    ///
+    /// * `trajectory` - The trajectory to convert into a mesh
+    ///
+    /// # Returns
+    ///
     /// A tuple containing:
-    /// * The generated `ArrayMesh`
-    /// * A `StandardMaterial3D` with appropriate color settings
+    /// * The generated mesh for the trajectory
+    /// * A material with the trajectory's color
     fn build_trajectory_mesh(trajectory: &Trajectory) -> (Gd<ArrayMesh>, Gd<StandardMaterial3D>) {
         let mut surface_tool = SurfaceTool::new_gd();
         surface_tool.begin(mesh::PrimitiveType::LINE_STRIP);

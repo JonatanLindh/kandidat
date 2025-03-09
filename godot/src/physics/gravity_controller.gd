@@ -9,19 +9,21 @@ extends GravityController
 	set(val):
 		self.clear_trajectories()
 
-var _t := 0.;
 var show_trajectories_ingame := false :
-	set(val):
-		show_trajectories_ingame = val
-		if !val:
-			self.clear_trajectories()
+	set(enabled):
+		show_trajectories_ingame = enabled
+		if enabled:
+			self.enable_trajectories()
 		else:
-			self.simulate_trajectories()
-			_t = 0;
+			self.disable_trajectories();
 
+var _dt := 0.
 func _process(delta: float) -> void:
-	_t += delta;
-	#FIXME: Should NOT block main thread
-	if _t >= 1  && show_trajectories_ingame:
-		_t = 0.;
-		self.simulate_trajectories()
+	if show_trajectories_ingame:
+		self.poll_trajectory_results()
+		
+		_dt += delta
+		if _dt > 1.:
+			_dt = 0.;
+			self.queue_simulate_trajectories()
+	
