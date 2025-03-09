@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://src/galaxy/galaxies/infinite_galaxy/chunks/StarChunk.cs" id="1_c4x60"]
 [ext_resource type="FastNoiseLite" uid="uid://b781u0jwrh88d" path="res://src/galaxy/galaxies/infinite_galaxy/noise/galaxy.tres" id="2_ij8sf"]
-[ext_resource type="FastNoiseLite" uid="uid://dpptie045qie2" path="res://src/galaxy/galaxies/infinite_galaxy/noise/galaxy_offset.tres" id="3_tn7pp"]
+[ext_resource type="FastNoiseLite" path="res://src/galaxy/galaxies/infinite_galaxy/noise/galaxy_offset.tres" id="3_tn7pp"]
 
 [node name="StarChunk" type="Node3D"]
 script = ExtResource("1_c4x60")

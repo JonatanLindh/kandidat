@@ -34,10 +34,10 @@ public partial class InfiniteGalaxy : Node3D
             {
                 for (int z = -chunkDistance; z <= chunkDistance; z++)
                 {
-                    ChunkCoord chunk = new ChunkCoord(playerChunk.x + x, playerChunk.y + y, playerChunk.z + z);
-                    if (!IsChunkGenerated(chunk))
+                    ChunkCoord chunkPos = new ChunkCoord(playerChunk.x + x, playerChunk.y + y, playerChunk.z + z);
+                    if (!IsChunkGenerated(chunkPos))
                     {
-                        GenerateChunk(chunk);
+                        GenerateChunk(chunkPos);
                     }
                 }
             }
@@ -49,8 +49,9 @@ public partial class InfiniteGalaxy : Node3D
     private void GenerateChunk(ChunkCoord pos)
     {
         StarChunk chunk = (StarChunk) starChunk.Instantiate();
-        chunk.SetStarScene(starScene);
         chunk.Name = "Chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
+
+        chunk.SetStarScene(starScene);
         chunk.Generate(seed, chunkSize, pos);
 
         starChunks.Add(chunk);
