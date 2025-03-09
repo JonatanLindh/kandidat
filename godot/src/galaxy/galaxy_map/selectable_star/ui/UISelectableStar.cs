@@ -66,7 +66,7 @@ public partial class UISelectableStar : CanvasLayer
         this.targetPosition = star.Position;
 
         starNameLabel.Text = "Star"; // todo, set actual name
-        starPosLabel.Text = star.Position.ToString();
+        starPosLabel.Text = star.Position.ToString("F2");
         starSeed.Text = star.GetSeed().ToString();
 
         Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
