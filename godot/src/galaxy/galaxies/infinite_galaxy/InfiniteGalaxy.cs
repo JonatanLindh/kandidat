@@ -77,14 +77,14 @@ public partial class InfiniteGalaxy : Node3D
 
     private void CullChunks(ChunkCoord playerChunk)
     {
-        for(int i = 0; i < starChunks.Count; i++)
+        for(int i = starChunks.Count - 1; i >= 0; i--)
         {
             StarChunk chunk = starChunks[i];
             if (Math.Abs(chunk.chunkPos.x - playerChunk.x) > viewDistance || 
                 Math.Abs(chunk.chunkPos.y - playerChunk.y) > viewDistance || 
                 Math.Abs(chunk.chunkPos.z - playerChunk.z) > viewDistance)
             {
-                starChunks.Remove(chunk);
+                starChunks.RemoveAt(i);
                 chunk.QueueFree();
             }
         }
