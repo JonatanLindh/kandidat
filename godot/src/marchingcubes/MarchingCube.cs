@@ -16,14 +16,14 @@ public class MarchingCube
     private readonly int _scale;
     private readonly float _threshold;
     private readonly List<Vector3> _vertices;
-    
+
 
     /// <summary>
     /// Initializes a new instance of the MarchingCube class with the specified scale and threshold.
     /// </summary>
     /// <param name="scale">The scale factor for the mesh generation.</param>
     /// <param name="threshold">The threshold value for determining the surface of the mesh.</param>
-    public MarchingCube(int scale = 1, float threshold = 0.0f)
+    public MarchingCube(int scale = 1, float threshold = 0.1f)
     {
         _scale = scale;
         _threshold = threshold;
@@ -51,12 +51,19 @@ public class MarchingCube
         }
         var surfaceTool = new SurfaceTool();
         surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
-        surfaceTool.SetSmoothGroup(UInt32.MaxValue);
+        
+        //surfaceTool.SetSmoothGroup(UInt32.MaxValue);
+        surfaceTool.SetSmoothGroup(0);
+        
         foreach (var vertex in _vertices)
         {
             surfaceTool.AddVertex(vertex);
         }
+        
+        
         surfaceTool.GenerateNormals();
+        
+        
         surfaceTool.Index();
         Mesh mesh = surfaceTool.Commit();
         

@@ -112,20 +112,12 @@ impl GravityController {
     ///
     /// This method:
     /// - Disables physics processing to prevent simulation while in the editor
-    /// - Connects the trajectory update signal to the appropriate handler
     ///
     /// Only runs in the editor context due to the `#[editor(only)]` attribute.
     #[editor(only)]
     fn setup_editor(&mut self) {
         // Disable physics in editor
         self.base_mut().set_physics_process(false);
-
-        let callable = self
-            .base()
-            .callable(__gdext_GravityController_Funcs::_on_update_trajectories);
-
-        self.base_mut()
-            .connect(Self::UPDATE_TRAJECTORY_SIGNAL, &callable);
     }
 
     /// Recursively collects all [`GravityBody`] instances that are descendants of this controller.
