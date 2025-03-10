@@ -7,9 +7,9 @@ public partial class UISelectableStar : CanvasLayer
 	
 	[Export] Control control;
 
-    [Export] Label starNameLabel;
-    [Export] Label starPosLabel;
-    [Export] Label starSeed;
+	[Export] Label starNameLabel;
+	[Export] Label starPosLabel;
+	[Export] Label starSeed;
 
 	[Export] Button closeButton;
 	[Export] Button visitButton;
@@ -33,9 +33,9 @@ public partial class UISelectableStar : CanvasLayer
 	{
 		this.star = star;
 
-        starNameLabel.Text = "Star"; // todo, set actual name
-        starPosLabel.Text = star.Position.ToString();
-        starSeed.Text = star.GetSeed().ToString();
+		starNameLabel.Text = "Star"; // todo, set actual name
+		starPosLabel.Text = star.Position.ToString();
+		starSeed.Text = star.GetSeed().ToString();
 
 		Show();
 	}

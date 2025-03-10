@@ -3,8 +3,8 @@ using System;
 
 public partial class SelectableStar : Node3D
 {
-    [Export] PackedScene solarSystemScene;
-    uint seed;
+	[Export] PackedScene solarSystemScene;
+	uint seed;
 
 	public void OnArea3dInputEvent(Node cam, InputEvent input, Vector3 eventPos, Vector3 normal, int shapeIdx)
 	{
@@ -33,13 +33,13 @@ public partial class SelectableStar : Node3D
 		*/
 	}
 
-    public void SetSeed(uint seed)
-    {
-        this.seed = seed;
-    }
+	public void SetSeed(uint seed)
+	{
+		this.seed = seed;
+	}
 
-    public uint GetSeed()
-    {
-        return seed;
-    }
+	public uint GetSeed()
+	{
+		return seed;
+	}
 }
