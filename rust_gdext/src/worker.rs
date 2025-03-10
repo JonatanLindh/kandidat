@@ -7,7 +7,7 @@
 //! # Usage Example
 //!
 //! ```rust
-//! use crate::worker::{Worker, WorkerResponse};
+//! use crate::worker::{Worker, WorkerLifecycle};
 //! use std::sync::mpsc::Sender;
 //!
 //! // Define command types
@@ -28,10 +28,10 @@
 //!         }
 //!         
 //!         // Continue processing commands
-//!         WorkerResponse::Continue
+//!         WorkerLifecycle::Continue
 //!     },
 //!     
-//!     CalculationCommand::Shutdown => WorkerResponse::Shutdown,
+//!     CalculationCommand::Shutdown => WorkerLifecycle::Shutdown,
 //! });
 //!
 //! // Send a command to the worker
@@ -55,7 +55,7 @@
 //! - Receives commands from the main thread
 //! - Performs the actual work
 //! - Sends results back via the provided channel
-//! - Returns a `WorkerResponse` (or a type convertible to it) to indicate whether to continue or shut down
+//! - Returns a `WorkerLifecycle` (or a type convertible to it) to indicate whether to continue or shut down
 //!
 //! ## Handler Function Requirements
 //!
@@ -65,10 +65,10 @@
 //!    - `command`: A value of type `Command` - represents a task to be performed
 //!    - `result_tx`: A `Sender<Output>` - used to send results back to the main thread
 //!
-//! 2. Return a value that can be converted into a `WorkerResponse`:
-//!    - Return `WorkerResponse::Continue` to keep processing commands
-//!    - Return `WorkerResponse::Shutdown` to exit the worker thread
-//!    - Return `()` (unit) which automatically converts to `WorkerResponse::Continue`
+//! 2. Return a value that can be converted into a `WorkerLifecycle`:
+//!    - Return `WorkerLifecycle::Continue` to keep processing commands
+//!    - Return `WorkerLifecycle::Shutdown` to exit the worker thread
+//!    - Return `()` (unit) which automatically converts to `WorkerLifecycle::Continue`
 
 use std::{
     any::Any,
@@ -138,21 +138,21 @@ where
     /// * A command of type `Command` to process
     /// * A `Sender<Res>` to send results back to the main thread
     ///
-    /// The handler should return a value convertible to `WorkerResponse`:
-    /// * `WorkerResponse::Continue` to keep processing commands
-    /// * `WorkerResponse::Shutdown` to terminate the worker thread
-    /// * `()` (unit) which automatically converts to `WorkerResponse::Continue`
+    /// The handler should return a value convertible to `WorkerLifecycle`:
+    /// * `WorkerLifecycle::Continue` to keep processing commands
+    /// * `WorkerLifecycle::Shutdown` to terminate the worker thread
+    /// * `()` (unit) which automatically converts to `WorkerLifecycle::Continue`
     ///
     /// # Example
     ///
-    /// ```
+    /// ```no_run
     /// let worker = Worker::new(|command, result_tx| match command {
     ///     CalculationCommand::Calculate(data) => {
     ///         let result = data.iter().sum::<f32>();
     ///         result_tx.send(result).unwrap();
-    ///         WorkerResponse::Continue
+    ///         WorkerLifecycle::Continue
     ///     },
-    ///     CalculationCommand::Shutdown => WorkerResponse::Shutdown,
+    ///     CalculationCommand::Shutdown => WorkerLifecycle::Shutdown,
     /// });
     /// ```
     pub fn new<Handler, S>(worker_handler: Handler) -> Self
