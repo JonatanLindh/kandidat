@@ -34,7 +34,14 @@ public partial class UISelectableStar : CanvasLayer
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if (isTraveling)
+        // If the chunk the star was a part of was unloaded, the star is no longer valid
+        if (!IsInstanceValid(star))
+        {
+            star = null;
+            Hide();
+        }
+
+        if (isTraveling)
 		{
 			player.Position = player.Position.Lerp(targetPosition, (float)delta * 0.01f * travelSpeed);
 
