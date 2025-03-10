@@ -2,7 +2,7 @@ shader_type spatial;
 render_mode unshaded, depth_test_disabled;
 
 uniform vec3 atmosphere_color : source_color = vec3(0.5, 0.7, 1.0);
-uniform float thickness_scale : hint_range(0.0, 1.0, 0.01);
+uniform float thickness_scale : hint_range(0.0, 0.5, 0.001);
 uniform sampler2D depth_texture : hint_depth_texture;
 uniform vec3 planet_position;
 uniform float planet_radius;
@@ -34,7 +34,7 @@ void fragment() {
 
 	vec3 sphere_origin = planet_position;
 
-	float sphere_radius = planet_radius * 2.;
+	float sphere_radius = planet_radius * 1.2;
 
 	float depth = texture(depth_texture, SCREEN_UV).x;
 	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth);
@@ -42,7 +42,7 @@ void fragment() {
 	view.xyz /= view.w;
 	float max_depth = length(view.xyz);
 
-	vec2 rsi = raySphereIntersect(cam_pos, cam_dir, planet_position, planet_radius*1.5, max_depth);
+	vec2 rsi = raySphereIntersect(cam_pos, cam_dir, planet_position, sphere_radius, max_depth);
 
 	ALPHA = clamp((rsi.y-rsi.x) * thickness_scale, 0.0, 1.0);
 	ALBEDO = atmosphere_color;

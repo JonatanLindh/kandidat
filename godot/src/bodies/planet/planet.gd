@@ -12,15 +12,13 @@ extends GravityBody
 func _ready() -> void:
 	planet_data = planet_data.duplicate()
 	generate()
-	generate_atmosphere()
 	
 func generate_atmosphere() -> void:
 	var atmosphere = $Atmosphere
 	if atmosphere == null:
 		return
 	var radius = planet_data.radius
-	atmosphere.set("radius", radius)
-
+	atmosphere.radius = radius
 
 func generate() -> void:
 	planet_data.min_height = 99999.0
