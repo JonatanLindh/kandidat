@@ -127,13 +127,13 @@ impl GravityController {
     #[func]
     fn disable_trajectories(&mut self) {
         if let Some(worker) = self.trajectory_worker.take() {
-            if let Err(e) = worker.send_command(TrajectoryCommand::Shutdown) {
-                godot_error!("Failed to send shutdown command: {}", e);
-            }
+            worker
+                .send_command(TrajectoryCommand::Shutdown)
+                .unwrap_or_else(|e| godot_error!("Failed to send shutdown command: {}", e));
 
-            if worker.join().is_err() {
-                godot_error!("Failed to join trajectory worker thread on shutdown");
-            }
+            worker.join().unwrap_or_else(|_| {
+                godot_error!("Failed to join trajectory worker thread on shutdown")
+            });
         }
 
         self.clear_trajectories();
@@ -147,7 +147,6 @@ impl GravityController {
     fn queue_simulate_trajectories(&mut self) {
         if let Some(worker) = &self.trajectory_worker {
             let info = self.get_simulation_info();
-
             let _ = worker.send_command(TrajectoryCommand::Calculate(info));
         }
     }
@@ -159,10 +158,12 @@ impl GravityController {
     /// are available, they are used to update the visualization.
     #[func]
     fn poll_trajectory_results(&mut self) {
-        if let Some(worker) = self.trajectory_worker.as_ref() {
-            if let Ok(trajectories) = worker.try_recv() {
-                self.replace_trajectories(trajectories);
-            }
+        if let Some(trajectories) = self
+            .trajectory_worker
+            .as_ref()
+            .and_then(|worker| worker.try_recv().ok())
+        {
+            self.replace_trajectories(trajectories)
         }
     }
 
