@@ -120,7 +120,6 @@ public partial class MoonMesh : Node
 	private float _rimWidth = 2f;
 	private float _rimSteepness = 0.5f;	
 	private float _floorHeight = -1f;
-	private float _craterRadius = 3f;
 	private float _minCraterRadius = 1f;
 	private float _maxCraterRadius = 3f;
 	private float _smoothness = 0.1f;
@@ -222,21 +221,10 @@ public partial class MoonMesh : Node
 				positions[i] += positions[i].Normalized() * craterHeight;
 				
 				// Calculate the Normal
-				//normal[i] = (positions[i] - crater.Centre).Normalized();
 				normal[i] = positions[i].Normalized();
 
 			}
 		}
-		
-		SurfaceTool surfaceTool = new SurfaceTool();
-		surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
-		foreach (var pos in positions)
-		{
-			surfaceTool.AddVertex(pos);
-		}
-		surfaceTool.GenerateNormals();
-		surfaceTool.Index();
-		var mesh = surfaceTool.Commit();
 		
 		meshData[(int)Mesh.ArrayType.Vertex] = positions;
 		var newMesh = new ArrayMesh();
@@ -251,8 +239,7 @@ public partial class MoonMesh : Node
 		for(int i = 0; i < amount; i++)
 		{
 			// Randomize the Crater Radius
-			var craterRadius =_craterRadius = Mathf.Lerp(_minCraterRadius, _maxCraterRadius, (float)GD.RandRange(0f, 1f));
-			
+			var craterRadius = Mathf.Lerp(_minCraterRadius, _maxCraterRadius, (float)GD.RandRange(0f, 1f));
 			var centre = RandomVector3(_radius - 5, _radius,_radius * Vector3.One);
 			craters[i] = new Crater(craterRadius, centre);
 		}
