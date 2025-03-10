@@ -6,8 +6,8 @@ using System;
 /// </summary>
 public interface CelestialBodyNoise
 {
-    ///<summary>
-    /// Returns the 3d noise of a celestial body to be used with marching cubes
-    ///</summary>
-    public float[,,] GetNoise();
+	///<summary>
+	/// Returns the 3d noise of a celestial body to be used with marching cubes
+	///</summary>
+	public float[,,] GetNoise();
 }
