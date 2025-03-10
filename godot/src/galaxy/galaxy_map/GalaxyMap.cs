@@ -12,7 +12,7 @@ public partial class GalaxyMap : Node3D
 	public override void _Ready()
 	{
 		galaxy = GetNode<InfiniteGalaxy>("%InfiniteGalaxy");
-		this.player = GetTree().Root.GetNode<Node3D>("Main/Player");
+		this.player = GetTree().CurrentScene.GetNode<Node3D>("Player");
 		galaxy.SetPlayer(player);
 
 		uiSelectableStar = GetNode<UISelectableStar>("%UiSelectableStar");
