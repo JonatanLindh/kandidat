@@ -15,7 +15,7 @@ public partial class UISelectableStar : CanvasLayer
 	[Export] Control control;
 
 	[Export] Panel starSelect;
-	float starSelectOffsetStrength = 600;
+	float starSelectOffsetStrength = 800;
 
 	[Export] Label starNameLabel;
 	[Export] Label starPosLabel;
@@ -53,11 +53,32 @@ public partial class UISelectableStar : CanvasLayer
 			float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * starSelectOffsetStrength;
 			Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
 
-			Vector2 offset = distanceOffset + posOffset;
-			starSelect.Position = screenPosition + offset;
-			
-			starDistance.Text = "Distance: " + ((int)distance).ToString() + " LY";
-		}
+            Vector2 newPos = screenPosition + (distanceOffset + posOffset);
+            Vector2 viewportSize = GetViewport().GetVisibleRect().Size;
+
+            // Check if the star is behind the player
+            Vector3 toStar = targetPosition - player.Position;
+            Vector3 forward = player.GlobalTransform.Basis.Z;
+            bool isBehind = forward.Dot(toStar) > 0;
+
+            if (isBehind)
+            {
+                // Adjust the position to the side of the screen
+                newPos.X = viewportSize.X - starSelect.Size.X - 10; // 10 pixels from the right edge
+                newPos.Y = viewportSize.Y / 2 - starSelect.Size.Y / 2; // Center vertically
+            }
+
+            else
+            {
+                // Clamp the position to keep the panel within the screen bounds
+                newPos.X = Mathf.Clamp(newPos.X, 0, viewportSize.X - starSelect.Size.X);
+                newPos.Y = Mathf.Clamp(newPos.Y, 0, viewportSize.Y - starSelect.Size.Y);
+            }
+
+            starSelect.Position = newPos;
+
+            starDistance.Text = "Distance: " + ((int)distance).ToString() + " LY";
+        }
 	}
 
 	public void SetStar(SelectableStar star)
