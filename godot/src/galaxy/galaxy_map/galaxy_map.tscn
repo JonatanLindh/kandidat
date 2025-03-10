@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://src/galaxy/galaxy_map/GalaxyMap.cs" id="1_8ccs1"]
 [ext_resource type="PackedScene" uid="uid://dpl2k6yof7xst" path="res://src/galaxy/galaxies/infinite_galaxy/infinite_galaxy.tscn" id="2_3xdco"]
-[ext_resource type="PackedScene" uid="uid://cycjumpx1yadr" path="res://src/galaxy/galaxy_map/selectable_star/ui/ui_selectable_star.tscn" id="3_51kxb"]
+[ext_resource type="PackedScene" uid="uid://dwh1scqca2t72" path="res://src/galaxy/galaxy_map/selectable_star/ui/ui_selectable_star.tscn" id="3_51kxb"]
 [ext_resource type="PackedScene" uid="uid://bq3o3cnuyn20f" path="res://src/galaxy/galaxy_map/selectable_star/selectable_star.tscn" id="3_jn6v0"]
 
 [node name="GalaxyMap" type="Node3D"]

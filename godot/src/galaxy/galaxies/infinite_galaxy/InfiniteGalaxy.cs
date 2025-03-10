@@ -28,6 +28,11 @@ public partial class InfiniteGalaxy : Node3D
 
 	public override void _Process(double delta)
 	{
+		if (player == null)
+			{
+				GD.PrintErr("Player object is null.");
+				return;
+			}
 		ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
 
 		for (int x = -viewDistance; x <= viewDistance; x++)

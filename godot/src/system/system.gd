@@ -7,7 +7,7 @@ extends Node3D
 @export var generate: bool:
 	set(val):
 		print("dawg");
-		generatePlanets(self.numberOfPlanets);
+		generatePlanets(self.rand,self.numberOfPlanets);
 		
 @export var clear: bool:
 	set(val):
@@ -29,11 +29,20 @@ func clearPlanets():
 			pnode.queue_free()
 	planets.clear();
 
+func getSystemRadius():
+	var maxR = 0;
+	for p in planets:
+		var nodeName = "./GravityController/Planet" + str(p);
+		var pnode = get_node(nodeName)
+		if (is_instance_valid(pnode)):
+			maxR = max(maxR,pnode.position.distance_to(Vector3.ZERO));
+	return maxR;
+
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return;
-	clearPlanets();
-	generatePlanets(numberOfPlanets)
+	#clearPlanets();
+	#generatePlanets(numberOfPlanets, rand)
 
 func orbitRadiusFromSpeed(v:float):
 	return SUN.mass*G/pow(v,2)
@@ -41,30 +50,30 @@ func orbitRadiusFromSpeed(v:float):
 func orbitSpeedFromRadius(r:float):
 	return sqrt(SUN.mass*G/r)
 
-func randomOrbitRadius():
-	return rand.randf_range(2,80);
+func randomOrbitRadius(r):
+	return r.randf_range(2,80);
 	
-func randomOrbitAngle():
-	return rand.randf_range(0, 2*PI);
+func randomOrbitAngle(r):
+	return r.randf_range(0, 2*PI);
 	
-func randomPlanetMass():
-	return rand.randf_range(1,2);
+func randomPlanetMass(r):
+	return r.randf_range(1,2);
 
-func randomPlanetRadius():
-	return rand.randf_range(1,2);
+func randomPlanetRadius(r):
+	return r.randf_range(5,20);
 
 
-func generatePlanet(planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpeed= 0):
+func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpeed= 0):
 	#Planet stuff
 	if (planetRadius == 0):
-		planetRadius = randomPlanetRadius();
+		planetRadius = randomPlanetRadius(r);
 	if (planetMass == 0):
-		planetMass = randomPlanetMass();
+		planetMass = randomPlanetMass(r);
 	
 	#Orbit stuff
-	var orbitAngle = randomOrbitAngle();
+	var orbitAngle = randomOrbitAngle(r);
 	if (orbitRadius == 0):
-		orbitRadius = randomOrbitRadius();
+		orbitRadius = randomOrbitRadius(r);
 	if (orbitSpeed == 0):
 		orbitSpeed = orbitSpeedFromRadius(orbitRadius);
 	var randomID = rand.randi_range(100000, 999999);
@@ -79,7 +88,16 @@ func generatePlanet(planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpee
 	planetInstance.owner = self
 	planets.append(randomID);
 	
-
-func generatePlanets(n:int = 0):
+	
+func generatePlanets(n:int, r):
 	for i in n:
-		generatePlanet(0,0,baseDistanceFromSun + i*distanceBetweenPlanets);
+		generatePlanet(r, 0,0,baseDistanceFromSun + i*distanceBetweenPlanets);
+
+func generateSystemFromSeed(s:int):
+	print(s);
+	clearPlanets();
+	var r = RandomNumberGenerator.new();
+	r.seed = s;
+	
+	var n = r.randi_range(3,10);
+	generatePlanets(n,r)
