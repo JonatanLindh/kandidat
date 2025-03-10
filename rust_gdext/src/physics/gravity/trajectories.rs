@@ -19,7 +19,7 @@
 use super::controller::{GravityController, SimulatedBody};
 use crate::{
     physics::gravity::controller::__gdext_GravityController_Funcs,
-    worker::{Worker, WorkerLifecycle},
+    worker::{CommandProcessingStrategy, Worker, WorkerLifecycle},
 };
 use godot::{
     classes::{
@@ -72,7 +72,8 @@ pub struct SimulationInfo {
 ///
 /// This worker handles trajectory simulations asynchronously, allowing the main game thread
 /// to continue running smoothly while calculations are performed in the background.
-pub type TrajectoryWorker = Worker<Vec<Trajectory>, TrajectoryCommand>;
+pub type TrajectoryWorker =
+    Worker<Vec<Trajectory>, TrajectoryCommand, { CommandProcessingStrategy::Latest }>;
 
 /// Commands that can be sent to the trajectory worker thread.
 ///
@@ -161,7 +162,7 @@ impl GravityController {
         if let Some(trajectories) = self
             .trajectory_worker
             .as_ref()
-            .and_then(|worker| worker.try_recv().ok())
+            .and_then(|worker| worker.try_recv_latest())
         {
             self.replace_trajectories(trajectories)
         }
