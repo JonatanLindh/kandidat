@@ -1,5 +1,7 @@
+#![feature(adt_const_params)]
+
 mod physics;
-mod worker;
+pub mod worker;
 
 use godot::prelude::*;
 struct MyExtension;
