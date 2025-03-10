@@ -86,7 +86,7 @@ public partial class UISelectableStar : CanvasLayer
 		this.star = star;
 		this.targetPosition = star.Position;
 
-		starNameLabel.Text = "Star"; // todo, set actual name
+		starNameLabel.Text = "Solar system"; // todo, set actual name
 		starPosLabel.Text = star.Position.ToString("F2");
 		starSeed.Text = star.GetSeed().ToString();
 
