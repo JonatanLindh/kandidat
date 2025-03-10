@@ -14,9 +14,13 @@ public partial class UISelectableStar : CanvasLayer
 
     [Export] Control control;
 
+    [Export] Panel starSelect;
+    float starSelectOffsetStrength = 600;
+
     [Export] Label starNameLabel;
     [Export] Label starPosLabel;
     [Export] Label starSeed;
+    [Export] Label starDistance;
 
     [Export] Button closeButton;
     [Export] Button visitButton;
@@ -39,6 +43,21 @@ public partial class UISelectableStar : CanvasLayer
                 isTraveling = false;
             }
         }
+
+        if (star != null)
+        {
+            Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
+            Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
+            
+            float distance = player.Position.DistanceTo(targetPosition);
+            float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * starSelectOffsetStrength;
+            Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
+
+            Vector2 offset = distanceOffset + posOffset;
+            starSelect.Position = screenPosition + offset;
+            
+            starDistance.Text = "Distance: " + ((int)distance).ToString() + " LY";
+        }
     }
 
     public void SetStar(SelectableStar star)
@@ -47,8 +66,11 @@ public partial class UISelectableStar : CanvasLayer
         this.targetPosition = star.Position;
 
         starNameLabel.Text = "Star"; // todo, set actual name
-        starPosLabel.Text = star.Position.ToString();
+        starPosLabel.Text = star.Position.ToString("F2");
         starSeed.Text = star.GetSeed().ToString();
+
+        Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
+        starSelect.Position = screenPosition;
 
         Show();
     }
