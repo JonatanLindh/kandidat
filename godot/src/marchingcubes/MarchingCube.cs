@@ -51,12 +51,19 @@ public class MarchingCube
         }
         var surfaceTool = new SurfaceTool();
         surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
-        surfaceTool.SetSmoothGroup(UInt32.MaxValue);
+        
+        //surfaceTool.SetSmoothGroup(UInt32.MaxValue);
+        surfaceTool.SetSmoothGroup(0);
+        
         foreach (var vertex in _vertices)
         {
             surfaceTool.AddVertex(vertex);
         }
+        
+        
         surfaceTool.GenerateNormals();
+        
+        
         surfaceTool.Index();
         Mesh mesh = surfaceTool.Commit();
         
