@@ -44,7 +44,7 @@ pub struct GravityController {
 
     /// Number of steps to compute when simulating trajectories
     #[export]
-    #[init(val = 2000)]
+    #[init(val = 4000)]
     pub simulation_steps: u32,
 
     /// Time increment (in seconds) between each simulation step
