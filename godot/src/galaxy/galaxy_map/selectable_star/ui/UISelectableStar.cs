@@ -9,7 +9,7 @@ public partial class UISelectableStar : CanvasLayer
 
     bool isTraveling = false;
     Vector3 targetPosition;
-    float travelSpeed = 500.0f;
+    [Export] float travelSpeed = 500.0f;
     float travelDistance = 10.0f;
 
     [Export] Control control;
@@ -32,7 +32,7 @@ public partial class UISelectableStar : CanvasLayer
     {
         if (isTraveling)
         {
-            player.Position = player.Position.Lerp(targetPosition, 0.01f);
+            player.Position = player.Position.Lerp(targetPosition, (float)delta * 0.01f * travelSpeed);
 
             if (player.Position.DistanceTo(targetPosition) < travelDistance)
             {
