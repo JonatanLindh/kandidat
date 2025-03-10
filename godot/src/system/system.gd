@@ -29,6 +29,15 @@ func clearPlanets():
 			pnode.queue_free()
 	planets.clear();
 
+func getSystemRadius():
+	var maxR = 0;
+	for p in planets:
+		var nodeName = "./GravityController/Planet" + str(p);
+		var pnode = get_node(nodeName)
+		if (is_instance_valid(pnode)):
+			maxR = max(maxR,pnode.position.distance_to(Vector3.ZERO));
+	return maxR;
+
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return;

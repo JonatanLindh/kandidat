@@ -10,3 +10,4 @@ script = ExtResource("1_obfe4")
 [node name="GalaxyMap" parent="." instance=ExtResource("2_50tai")]
 
 [node name="System" parent="." instance=ExtResource("3_crbrn")]
+visible = false
