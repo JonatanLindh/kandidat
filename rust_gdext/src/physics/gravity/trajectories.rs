@@ -19,7 +19,7 @@
 use super::controller::{GravityController, SimulatedBody};
 use crate::{
     physics::gravity::controller::__gdext_GravityController_Funcs,
-    worker::{Worker, WorkerResponse},
+    worker::{Worker, WorkerLifecycle},
 };
 use godot::{
     classes::{
@@ -93,12 +93,14 @@ impl GravityController {
     /// It sets up communication channels and queues an initial trajectory calculation.
     #[func]
     fn enable_trajectories(&mut self) {
+        // If the worker is already running, do nothing
         if self.trajectory_worker.is_some() {
             return;
         }
 
+        // Create a new worker thread for trajectory calculations
         let worker = Worker::new(|command, result_tx| match command {
-            TrajectoryCommand::Shutdown => WorkerResponse::Shutdown,
+            TrajectoryCommand::Shutdown => WorkerLifecycle::Shutdown,
 
             TrajectoryCommand::Calculate(info) => {
                 let trajectories = Self::simulate_trajectories_inner(info);
@@ -108,11 +110,13 @@ impl GravityController {
                 }
 
                 // Continue processing commands
-                WorkerResponse::Continue
+                WorkerLifecycle::Continue
             }
         });
+
         self.trajectory_worker = Some(worker);
 
+        // Queue the first trajectory calculation
         self.queue_simulate_trajectories();
     }
 

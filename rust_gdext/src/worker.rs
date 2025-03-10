@@ -102,12 +102,12 @@ pub struct Worker<Res, Command> {
     result_receiver: Receiver<Res>,
 }
 
-/// Response from a worker handler function that controls thread behavior.
+/// Response from a worker handler function that controls worker lifecycle.
 ///
 /// When returned from a worker handler function, this enum indicates whether
 /// the worker thread should continue processing commands or shut down.
 #[derive(PartialEq, Eq)]
-pub enum WorkerResponse {
+pub enum WorkerLifecycle {
     /// Continue processing commands
     Continue,
     /// Shut down the worker thread
@@ -115,9 +115,9 @@ pub enum WorkerResponse {
 }
 
 // Make () default to Continue for convenience
-impl From<()> for WorkerResponse {
+impl From<()> for WorkerLifecycle {
     fn from(_: ()) -> Self {
-        WorkerResponse::Continue
+        WorkerLifecycle::Continue
     }
 }
 
@@ -157,7 +157,7 @@ where
     /// ```
     pub fn new<Handler, S>(worker_handler: Handler) -> Self
     where
-        S: Into<WorkerResponse>,
+        S: Into<WorkerLifecycle>,
         Handler: Fn(Command, Sender<Res>) -> S + Send + 'static,
     {
         let (cmd_tx, cmd_rx) = channel::<Command>();
@@ -172,7 +172,7 @@ where
                     let response = worker_handler(command, result_tx.clone());
 
                     // Check if the handler wants to shut down
-                    if response.into() == WorkerResponse::Shutdown {
+                    if response.into() == WorkerLifecycle::Shutdown {
                         break;
                     }
                 }
