@@ -8,7 +8,6 @@
 
 [node name="SpaceEnvironment" parent="." instance=ExtResource("3_5d0vu")]
 
-[node name="GalaxyMap" parent="." node_paths=PackedStringArray("player") instance=ExtResource("1_xbp6i")]
-player = NodePath("../Player")
+[node name="GalaxyMap" parent="." instance=ExtResource("1_xbp6i")]
 
 [node name="Player" parent="." instance=ExtResource("2_f3twl")]
