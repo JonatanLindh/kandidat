@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://b1tnbk5es8mnt"]
+
+[ext_resource type="Script" path="res://src/system_manager/system_manager.gd" id="1_obfe4"]
+[ext_resource type="PackedScene" uid="uid://qbrs85sp3ds4" path="res://src/galaxy/galaxy_map/galaxy_map.tscn" id="2_50tai"]
+[ext_resource type="PackedScene" uid="uid://dru1frs0nrf78" path="res://src/system/system.tscn" id="3_crbrn"]
+
+[node name="SystemManager" type="Node3D"]
+script = ExtResource("1_obfe4")
+
+[node name="GalaxyMap" parent="." instance=ExtResource("2_50tai")]
+
+[node name="System" parent="." instance=ExtResource("3_crbrn")]
+visible = false

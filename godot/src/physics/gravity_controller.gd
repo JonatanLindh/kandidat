@@ -9,7 +9,7 @@ extends GravityController
 	set(val):
 		self.clear_trajectories()
 
-var show_trajectories_ingame := false :
+var show_trajectories_ingame := false:
 	set(enabled):
 		show_trajectories_ingame = enabled
 		if enabled:
@@ -23,7 +23,6 @@ func _process(delta: float) -> void:
 		self.poll_trajectory_results()
 		
 		_dt += delta
-		if _dt > 1.:
+		if _dt > 2.:
 			_dt = 0.;
 			self.queue_simulate_trajectories()
-	

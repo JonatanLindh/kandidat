@@ -10,6 +10,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.141075, 0, 0)
 script = ExtResource("1_7my1l")
 
 [node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
+simulation_steps = 1000
 sim_center_body = NodePath("Star")
 script = ExtResource("6_wayc2")
 

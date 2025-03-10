@@ -25,6 +25,9 @@ public partial class UISelectableStar : CanvasLayer
 	[Export] Button closeButton;
 	[Export] Button visitButton;
 
+	[Signal]
+	public delegate void ExploreStarEventHandler(int seed);
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -46,9 +49,6 @@ public partial class UISelectableStar : CanvasLayer
 
 		if (star != null)
 		{
-			Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
-			Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
-			
 			float distance = player.Position.DistanceTo(targetPosition);
 			float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * starSelectOffsetStrength;
 			Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
@@ -108,9 +108,12 @@ public partial class UISelectableStar : CanvasLayer
 
 	public void OnVisitButtonPressed()
 	{
-		if (star != null) star.LoadSolarSystem();
+		if (star != null) {
+			EmitSignal(nameof(ExploreStar), this.star.GetSeed());
+			// star.LoadSolarSystem();z
+		}
+		
 	}
-
 	public void OnTravelButtonPressed()
 	{
 		if (player != null)
