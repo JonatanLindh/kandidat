@@ -72,7 +72,8 @@
 
 use std::{
     any::Any,
-    panic::AssertUnwindSafe,
+    marker::ConstParamTy,
+    panic::{AssertUnwindSafe, UnwindSafe},
     sync::mpsc::{Receiver, SendError, Sender, TryRecvError, channel},
     thread::JoinHandle,
 };
@@ -91,7 +92,11 @@ use std::{
 /// # Thread Safety
 ///
 /// Both `Res` and `Command` must be `Send + 'static` to ensure safe cross-thread communication.
-pub struct Worker<Res, Command> {
+pub struct Worker<
+    Res,
+    Command,
+    const PROCESSING_STRATEGY: CommandProcessingStrategy = { CommandProcessingStrategy::All },
+> {
     /// Thread handle for joining the worker thread
     handle: JoinHandle<()>,
 
@@ -102,6 +107,16 @@ pub struct Worker<Res, Command> {
     result_receiver: Receiver<Res>,
 }
 
+/// This enum defines how commands are processed in the worker thread.
+#[derive(ConstParamTy, PartialEq, Eq)]
+pub enum CommandProcessingStrategy {
+    /// All commands are processed sequentially
+    All,
+
+    /// Only the latest command is processed, discarding any previous ones
+    Latest,
+}
+
 /// Response from a worker handler function that controls worker lifecycle.
 ///
 /// When returned from a worker handler function, this enum indicates whether
@@ -110,6 +125,7 @@ pub struct Worker<Res, Command> {
 pub enum WorkerLifecycle {
     /// Continue processing commands
     Continue,
+
     /// Shut down the worker thread
     Shutdown,
 }
@@ -121,7 +137,8 @@ impl From<()> for WorkerLifecycle {
     }
 }
 
-impl<Res, Command> Worker<Res, Command>
+impl<Res, Command, const PROCESSING_STRATEGY: CommandProcessingStrategy>
+    Worker<Res, Command, PROCESSING_STRATEGY>
 where
     Command: Send + 'static,
     Res: Send + 'static,
@@ -158,17 +175,16 @@ where
     pub fn new<Handler, S>(worker_handler: Handler) -> Self
     where
         S: Into<WorkerLifecycle>,
-        Handler: Fn(Command, Sender<Res>) -> S + Send + 'static,
+        Handler: Fn(Command, Sender<Res>) -> S,
+        Handler: UnwindSafe + Send + 'static,
     {
         let (cmd_tx, cmd_rx) = channel::<Command>();
         let (result_tx, result_rx) = channel::<Res>();
 
         // Spawn a thread to handle the worker function
         let handle = std::thread::spawn(move || {
-            // Use `catch_unwind` to handle panics in the worker thread
-            if let Err(e) = std::panic::catch_unwind(AssertUnwindSafe(|| {
-                // Loop to receive commands and process them
-                while let Ok(command) = cmd_rx.recv() {
+            Self::catch_unwind(move || {
+                while let Some(command) = Self::recv_command(&cmd_rx) {
                     let response = worker_handler(command, result_tx.clone());
 
                     // Check if the handler wants to shut down
@@ -176,16 +192,7 @@ where
                         break;
                     }
                 }
-            })) {
-                // If a panic occurs, handle it here
-                let message = e
-                    .downcast_ref::<String>()
-                    .map(|s| s.as_str())
-                    .or_else(|| e.downcast_ref::<&str>().copied())
-                    .unwrap_or("unknown error");
-
-                eprintln!("Worker thread panicked: {:?}", message);
-            }
+            })
         });
 
         Self {
@@ -195,7 +202,56 @@ where
         }
     }
 
+    /// Catches panics in the worker thread and handles them gracefully.
+    fn catch_unwind<F>(f: F)
+    where
+        F: FnOnce() + UnwindSafe,
+    {
+        if let Err(e) = std::panic::catch_unwind(AssertUnwindSafe(f)) {
+            // If a panic occurs, handle it here
+            let message = e
+                .downcast_ref::<String>()
+                .map(|s| s.as_str())
+                .or_else(|| e.downcast_ref::<&str>().copied())
+                .unwrap_or("unknown error");
+
+            eprintln!("Worker thread panicked: {:?}", message);
+        }
+    }
+
+    /// Receives a command from the worker thread.
+    /// This function blocks until a command is received.
+    fn recv_command(cmd_rx: &Receiver<Command>) -> Option<Command> {
+        match PROCESSING_STRATEGY {
+            // Wait for the next command from the channel
+            CommandProcessingStrategy::All => cmd_rx.recv().ok(),
+
+            // Wait for the next command and return the latest one
+            CommandProcessingStrategy::Latest => {
+                cmd_rx
+                    .recv()
+                    .ok()
+                    .map(|cmd| match cmd_rx.try_iter().last() {
+                        // If there are more commands, keep the latest one
+                        Some(latest_cmd) => latest_cmd,
+
+                        // Otherwise, just use the current command
+                        None => cmd,
+                    })
+            }
+        }
+    }
+
     /// Sends a command to the worker thread.
+    ///
+    /// # Parameters
+    ///
+    /// * `command` - The command to be sent to the worker for processing
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(())` - If the command was sent successfully
+    /// * `Err(SendError<Command>)` - If the command could not be sent (e.g., if the channel is closed)
     #[inline(always)]
     pub fn send_command(&self, command: Command) -> Result<(), SendError<Command>> {
         self.command_sender.send(command)
@@ -214,6 +270,17 @@ where
     #[inline(always)]
     pub fn try_recv(&self) -> Result<Res, TryRecvError> {
         self.result_receiver.try_recv()
+    }
+
+    /// Tries to receive the latest result from the worker without blocking.
+    ///
+    /// # Returns
+    ///
+    /// * `Some(result)` - The latest result from the worker
+    /// * `None` - No results are currently available
+    #[inline(always)]
+    pub fn try_recv_latest(&self) -> Option<Res> {
+        self.result_receiver.try_iter().last()
     }
 
     /// Joins the worker thread, waiting for it to finish.
