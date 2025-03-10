@@ -23,13 +23,17 @@ public partial class InfiniteGalaxy : Node3D
 		// Sets a random seed if no seed is provided
 		if (seed == 0) seed = (uint) new Random().Next();
 
-		this.player = GetTree().Root.GetNode<Node3D>("Main/Player");
 		starChunks = new List<StarChunk>();
 	}
 
 	public override void _Process(double delta)
 	{
-		ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, this.player.Position);
+		if (player == null)
+			{
+				GD.PrintErr("Player object is null.");
+				return;
+			}
+		ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
 
 		for (int x = -viewDistance; x <= viewDistance; x++)
 		{

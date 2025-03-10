@@ -8,21 +8,21 @@ using System;
 [Tool]
 public partial class McSpawner : Node
 {
-    private bool _reload;
-    [Export]
-    public bool reload
-    {
-        get => _reload;
-        set
-        {
-            _reload = !value;
-            OnResourceSet();
-        }
-    }
+	private bool _reload;
+	[Export]
+	public bool reload
+	{
+		get => _reload;
+		set
+		{
+			_reload = !value;
+			OnResourceSet();
+		}
+	}
 
-    private CelestialBodyNoise celestialBody;
+	private CelestialBodyNoise celestialBody;
 	private Node cb;
-    [Export] private Node CelestialBody
+	[Export] private Node CelestialBody
 	{
 		get => cb;
 		set
@@ -32,7 +32,7 @@ public partial class McSpawner : Node
 		}
 	}
 
-    private int _maxHeight = 16;
+	private int _maxHeight = 16;
 	private int _size = 32;
 	private MarchingCube _marchingCube;
 	private MeshInstance3D _meshInstance3D;
@@ -55,23 +55,23 @@ public partial class McSpawner : Node
 		if(_meshInstance3D != null) RemoveChild(_meshInstance3D);
 		_marchingCube ??= new MarchingCube();
 
-        celestialBody = CelestialBody as CelestialBodyNoise;
+		celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody != null)
 		{
-            float[,,] dataPoints = celestialBody.GetNoise();
+			float[,,] dataPoints = celestialBody.GetNoise();
 			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
 
-            // Disable backface culling
-            //_meshInstance3D.MaterialOverride = new StandardMaterial3D();
-            //((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
+			// Disable backface culling
+			//_meshInstance3D.MaterialOverride = new StandardMaterial3D();
+			//((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
 
-            var material = new OrmMaterial3D();
-            _meshInstance3D.MaterialOverride = material;
+			var material = new OrmMaterial3D();
+			_meshInstance3D.MaterialOverride = material;
 			material.CullMode = BaseMaterial3D.CullModeEnum.Back;
-            material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
-            material.AlbedoColor = Colors.YellowGreen;
-            this.AddChild(_meshInstance3D);
-        }
+			material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
+			material.AlbedoColor = Colors.YellowGreen;
+			this.AddChild(_meshInstance3D);
+		}
 	}
 
 	// Old test method for generating datapoints
