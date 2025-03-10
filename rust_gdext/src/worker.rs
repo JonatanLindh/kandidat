@@ -73,7 +73,7 @@
 use std::{
     any::Any,
     panic::AssertUnwindSafe,
-    sync::mpsc::{Receiver, Sender, TryRecvError, channel},
+    sync::mpsc::{Receiver, SendError, Sender, TryRecvError, channel},
     thread::JoinHandle,
 };
 
@@ -94,10 +94,12 @@ use std::{
 pub struct Worker<Res, Command> {
     /// Thread handle for joining the worker thread
     handle: JoinHandle<()>,
+
     /// Channel for sending commands to the worker thread
-    pub command_sender: Sender<Command>,
+    command_sender: Sender<Command>,
+
     /// Channel for receiving results from the worker thread
-    pub result_receiver: Receiver<Res>,
+    result_receiver: Receiver<Res>,
 }
 
 /// Response from a worker handler function that controls thread behavior.
@@ -193,6 +195,12 @@ where
         }
     }
 
+    /// Sends a command to the worker thread.
+    #[inline(always)]
+    pub fn send_command(&self, command: Command) -> Result<(), SendError<Command>> {
+        self.command_sender.send(command)
+    }
+
     /// Tries to receive a result from the worker without blocking.
     ///
     /// Returns `Ok(result)` if a result is available, or an error if
@@ -203,6 +211,7 @@ where
     /// * `Ok(Res)` - A result from the worker
     /// * `Err(TryRecvError::Empty)` - No results are currently available
     /// * `Err(TryRecvError::Disconnected)` - The worker thread has terminated
+    #[inline(always)]
     pub fn try_recv(&self) -> Result<Res, TryRecvError> {
         self.result_receiver.try_recv()
     }
@@ -216,6 +225,7 @@ where
     ///
     /// * `Ok(())` - The thread terminated normally
     /// * `Err(...)` - The thread panicked with the given payload
+    #[inline(always)]
     pub fn join(self) -> Result<(), Box<dyn Any + Send>> {
         self.handle.join()
     }

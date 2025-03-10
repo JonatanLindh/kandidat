@@ -123,7 +123,7 @@ impl GravityController {
     #[func]
     fn disable_trajectories(&mut self) {
         if let Some(worker) = self.trajectory_worker.take() {
-            if let Err(e) = worker.command_sender.send(TrajectoryCommand::Shutdown) {
+            if let Err(e) = worker.send_command(TrajectoryCommand::Shutdown) {
                 godot_error!("Failed to send shutdown command: {}", e);
             }
 
@@ -144,9 +144,7 @@ impl GravityController {
         if let Some(worker) = &self.trajectory_worker {
             let info = self.get_simulation_info();
 
-            let _ = worker
-                .command_sender
-                .send(TrajectoryCommand::Calculate(info));
+            let _ = worker.send_command(TrajectoryCommand::Calculate(info));
         }
     }
 
