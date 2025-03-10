@@ -75,12 +75,13 @@ func apply_velocity(dir : Vector3, speed_multiplier):
 
 
 func handle_flying() -> void:
+	var vertical_multiplier = 0.1;
 	if Input.is_action_just_pressed("up"):
 		floating_flag = true
-		velocity.y += float_speed
+		velocity.y += float_speed * current_speed * vertical_multiplier;
 	elif Input.is_action_just_pressed("down"):
 		floating_flag = true
-		velocity.y += -float_speed
+		velocity.y += -float_speed * current_speed * vertical_multiplier;
 	if Input.is_action_just_released("up"):
 		floating_flag = false
 		velocity.y = move_toward(velocity.y, 0, float_speed)
