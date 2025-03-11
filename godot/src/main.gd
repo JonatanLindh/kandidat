@@ -8,7 +8,7 @@ func _process(delta: float):
 	if systemManager.currentSeed != 0 and playerIsInOuterSpace():
 		systemManager.goToGalaxyMap();
 		skybox.environment= load("res://src/galaxy/skybox/_resources/space_no_stars.tres");
-		player.position = Vector3.ZERO;
+		player.position = systemManager.getLastGalaxyMapPosition()
 	
 
 func playerIsInOuterSpace():
