@@ -17,10 +17,7 @@
 //! colors for each trajectory.
 
 use super::controller::{GravityController, SimulatedBody};
-use crate::{
-    physics::gravity::controller::__gdext_GravityController_Funcs,
-    worker::{CommandProcessingStrategy, Worker, WorkerLifecycle},
-};
+use crate::{physics::gravity::controller::__gdext_GravityController_Funcs, worker::Worker};
 use godot::{
     classes::{
         ArrayMesh, MeshInstance3D, StandardMaterial3D, SurfaceTool, base_material_3d::ShadingMode,
@@ -72,8 +69,7 @@ pub struct SimulationInfo {
 ///
 /// This worker handles trajectory simulations asynchronously, allowing the main game thread
 /// to continue running smoothly while calculations are performed in the background.
-pub type TrajectoryWorker =
-    Worker<Vec<Trajectory>, TrajectoryCommand, { CommandProcessingStrategy::Latest }>;
+pub type TrajectoryWorker = Worker<Vec<Trajectory>, TrajectoryCommand>;
 
 /// Commands that can be sent to the trajectory worker thread.
 ///
@@ -100,18 +96,19 @@ impl GravityController {
         }
 
         // Create a new worker thread for trajectory calculations
-        let worker = Worker::new(|command, result_tx| match command {
-            TrajectoryCommand::Shutdown => WorkerLifecycle::Shutdown,
+        let worker = TrajectoryWorker::new(|cmd_receiver, result_tx| {
+            while let Ok(batch) = cmd_receiver.recv_batch() {
+                match batch.find_or_latest(|c| matches!(c, TrajectoryCommand::Shutdown)) {
+                    TrajectoryCommand::Shutdown => break,
 
-            TrajectoryCommand::Calculate(info) => {
-                let trajectories = Self::simulate_trajectories_inner(info);
+                    TrajectoryCommand::Calculate(info) => {
+                        let trajectories = Self::simulate_trajectories_inner(info);
 
-                if let Err(e) = result_tx.send(trajectories) {
-                    godot_error!("Failed to send trajectory results: {}", e);
+                        if let Err(e) = result_tx.send(trajectories) {
+                            godot_error!("Failed to send trajectory results: {}", e);
+                        }
+                    }
                 }
-
-                // Continue processing commands
-                WorkerLifecycle::Continue
             }
         });
 
