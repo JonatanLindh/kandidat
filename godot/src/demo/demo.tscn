@@ -1,0 +1,135 @@
+[gd_scene load_steps=20 format=3 uid="uid://rffhwermae8t"]
+
+[ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="1_lohlp"]
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="2_i6nx7"]
+[ext_resource type="Script" path="res://src/physics/gravity_controller.gd" id="3_0ueen"]
+[ext_resource type="PackedScene" uid="uid://c4qg4a1uuvy8x" path="res://src/bodies/star/star.tscn" id="3_adyqe"]
+[ext_resource type="PackedScene" uid="uid://cljv6xv7xjelh" path="res://src/bodies/planet/planet.tscn" id="4_hpg8r"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet_noise.gd" id="5_w436f"]
+[ext_resource type="Script" path="res://src/bodies/planet/planet_data.gd" id="6_kk130"]
+[ext_resource type="PackedScene" uid="uid://ckitx7rndvp5l" path="res://src/bodies/moon/moon.tscn" id="8_8rvdw"]
+[ext_resource type="Script" path="res://src/system/toggle_trajectories.gd" id="9_o6qby"]
+
+[sub_resource type="Gradient" id="Gradient_rc45s"]
+offsets = PackedFloat32Array(0, 0.038835, 0.0938511, 0.346278, 0.631068, 0.754045, 1)
+colors = PackedColorArray(0.0117647, 0.156863, 0.784314, 1, 0.506929, 0.449707, 0.306385, 1, 0.0784314, 0.47451, 0.0588235, 1, 0.10748, 0.10748, 0.10748, 1, 0.229187, 0.229187, 0.229187, 1, 0.899894, 0.899894, 0.899894, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_3elnh"]
+gradient = SubResource("Gradient_rc45s")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_htefh"]
+seed = 7
+fractal_octaves = 7
+
+[sub_resource type="Resource" id="Resource_vn55s"]
+script = ExtResource("5_w436f")
+noise_map = SubResource("FastNoiseLite_htefh")
+amplitude = 0.2
+min_height = 0.1
+use_layer0_as_mask = false
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_dym31"]
+frequency = 0.087
+fractal_octaves = 10
+
+[sub_resource type="Resource" id="Resource_5si5o"]
+script = ExtResource("5_w436f")
+noise_map = SubResource("FastNoiseLite_dym31")
+amplitude = 1.0
+min_height = 0.2
+use_layer0_as_mask = true
+
+[sub_resource type="Resource" id="Resource_mpxwl"]
+resource_local_to_scene = true
+script = ExtResource("6_kk130")
+radius = 4.2151
+resolution = 20
+planet_noise = Array[ExtResource("5_w436f")]([SubResource("Resource_vn55s"), SubResource("Resource_5si5o")])
+planet_color = SubResource("GradientTexture1D_3elnh")
+
+[sub_resource type="Resource" id="Resource_sfs31"]
+resource_local_to_scene = true
+script = ExtResource("6_kk130")
+radius = 4.2151
+resolution = 20
+planet_noise = Array[ExtResource("5_w436f")]([SubResource("Resource_vn55s"), SubResource("Resource_5si5o")])
+planet_color = SubResource("GradientTexture1D_3elnh")
+
+[sub_resource type="Resource" id="Resource_doues"]
+resource_local_to_scene = true
+script = ExtResource("6_kk130")
+radius = 4.2151
+resolution = 20
+planet_noise = Array[ExtResource("5_w436f")]([SubResource("Resource_vn55s"), SubResource("Resource_5si5o")])
+planet_color = SubResource("GradientTexture1D_3elnh")
+
+[sub_resource type="Resource" id="Resource_fdv5n"]
+resource_local_to_scene = true
+script = ExtResource("6_kk130")
+radius = 4.2151
+resolution = 20
+planet_noise = Array[ExtResource("5_w436f")]([SubResource("Resource_vn55s"), SubResource("Resource_5si5o")])
+planet_color = SubResource("GradientTexture1D_3elnh")
+
+[node name="Demo" type="Node3D"]
+
+[node name="Skybox" parent="." instance=ExtResource("1_lohlp")]
+
+[node name="Player" parent="." instance=ExtResource("2_i6nx7")]
+
+[node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
+simulation_steps = 15000
+simulation_step_delta = 0.05
+sim_center_body = NodePath("Star")
+script = ExtResource("3_0ueen")
+
+[node name="Star" parent="GravityController" instance=ExtResource("3_adyqe")]
+mass = 20000.0
+
+[node name="Planet" parent="GravityController" instance=ExtResource("4_hpg8r")]
+velocity = Vector3(0, 0, 19.215)
+trajectory_color = Color(0.545098, 0.341176, 0.360784, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 63.6202, -27.442, 0)
+planet_data = SubResource("Resource_mpxwl")
+
+[node name="Planet2" parent="GravityController" instance=ExtResource("4_hpg8r")]
+velocity = Vector3(0, 0, 12.825)
+trajectory_color = Color(0.788235, 0.537255, 0.52549, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180.616, 36.5086, 0)
+planet_data = SubResource("Resource_sfs31")
+
+[node name="Planet3" parent="GravityController" instance=ExtResource("4_hpg8r")]
+mass = 200.0
+velocity = Vector3(0, 0, 10.455)
+trajectory_color = Color(0.964706, 0.741176, 0.819608, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 271.748, -100.901, 0)
+planet_data = SubResource("Resource_doues")
+
+[node name="Planet4" parent="GravityController" instance=ExtResource("4_hpg8r")]
+velocity = Vector3(0, 0, 5.385)
+trajectory_color = Color(0.964706, 0.894118, 0.964706, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172.716, 141.413, 0)
+planet_data = SubResource("Resource_fdv5n")
+
+[node name="Moon" parent="GravityController" instance=ExtResource("8_8rvdw")]
+velocity = Vector3(0, 0, 6.51)
+trajectory_color = Color(0.956863, 0.956863, 0.956863, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 285.48, -102.532, 0)
+Radius = 3
+MinCraterRadius = 0.2
+MaxCraterRadius = 0.5
+
+[node name="CheckButton" type="CheckButton" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -44.0
+offset_top = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Toggle Trajectories"
+script = ExtResource("9_o6qby")
+
+[connection signal="toggled" from="CheckButton" to="CheckButton" method="_on_toggled"]

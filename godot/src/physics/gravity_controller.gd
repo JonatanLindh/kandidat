@@ -23,6 +23,6 @@ func _process(delta: float) -> void:
 		self.poll_trajectory_results()
 		
 		_dt += delta
-		if _dt > 2.:
+		if _dt > 1.:
 			_dt = 0.;
 			self.queue_simulate_trajectories()

@@ -16,7 +16,7 @@ shader_parameter/texture_offset = Vector2(0, 0)
 shader_parameter/albedo_texture = ExtResource("3_47726")
 shader_parameter/normal_texture = ExtResource("2_7wtx1")
 
-[node name="Moon" type="Node3D"]
+[node name="Moon" type="GravityBody"]
 script = ExtResource("1_7s32x")
 Radius = 40
 MeshMaterial = SubResource("ShaderMaterial_b3avl")

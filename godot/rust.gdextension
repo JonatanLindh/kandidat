@@ -4,7 +4,7 @@ compatibility_minimum = 4.3
 reloadable = true
 
 [libraries]
-linux.debug.x86_64 =     "res://../rust_gdext/target/debug/librust_gdext.so"
+linux.debug.x86_64 =     "res://../rust_gdext/target/release/librust_gdext.so"
 linux.release.x86_64 =   "res://../rust_gdext/target/release/librust_gdext.so"
 windows.debug.x86_64 =   "res://../rust_gdext/target/debug/rust_gdext.dll"
 windows.release.x86_64 = "res://../rust_gdext/target/release/rust_gdext.dll"
