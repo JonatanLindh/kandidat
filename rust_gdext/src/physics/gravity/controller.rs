@@ -119,9 +119,6 @@ impl GravityController {
     /// Only runs in the editor context due to the `#[editor(only)]` attribute.
     #[editor(only)]
     fn setup_editor(&mut self) {
-        // Simulate less steps in the editor for "snappyness"
-        self.simulation_steps = 1000;
-
         // Disable physics in editor
         self.base_mut().set_physics_process(false);
     }
