@@ -1,6 +1,8 @@
 @tool
 extends GravityBody
 
+var atmosphere
+
 @export var planet_data: PlanetData:
 	set(val):
 		planet_data = val
@@ -8,18 +10,27 @@ extends GravityBody
 		if planet_data != null && !planet_data.is_connected("changed", generate):
 			planet_data.connect("changed", generate)
 
-
 func _ready() -> void:
 	planet_data = planet_data.duplicate()
 	generate()
 	
+func _process(delta: float) -> void:
+	set_atmopshere_sun_dir()
+	
 func generate_atmosphere() -> void:
-	var atmosphere = $Atmosphere
+	atmosphere = $Atmosphere
 	if atmosphere == null:
 		return
+
 	var radius = planet_data.radius
 	atmosphere.radius = radius
+	
+	set_atmopshere_sun_dir()
 
+func set_atmopshere_sun_dir() -> void:
+	var sun_dir = (planet_data.sun_position - position).normalized()
+	atmosphere.sun_dir = sun_dir
+	
 func generate() -> void:
 	planet_data.min_height = 99999.0
 	planet_data.max_height = 0.0

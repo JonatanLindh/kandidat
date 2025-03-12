@@ -73,6 +73,7 @@ func generatePlanet(planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpee
 	planetInstance.velocity = Vector3(cos(orbitAngle)*orbitSpeed,0,-sin(orbitAngle)*orbitSpeed)
 	planetInstance.position = Vector3(sin(orbitAngle)*orbitRadius,0,cos(orbitAngle)*orbitRadius)
 	planetInstance.planet_data.radius = planetRadius
+	planetInstance.planet_data.sun_position = SUN.position
 	planetInstance.name = "Planet" + str(randomID);
 	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0,1),0.80,0.80)*3;
 	$GravityController.add_child(planetInstance);
