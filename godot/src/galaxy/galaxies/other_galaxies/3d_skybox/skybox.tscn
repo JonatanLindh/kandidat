@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://exwmody34u02"]
 
 [ext_resource type="PackedScene" uid="uid://duhnlykoj1imx" path="res://src/galaxy/skybox/space_environment.tscn" id="1_e5jop"]
-[ext_resource type="Script" path="res://src/galaxy/galaxies/other_galaxies/3d_skybox/Skybox.cs" id="1_o2xjy"]
+[ext_resource type="Script" uid="uid://7exblgdor2hi" path="res://src/galaxy/galaxies/other_galaxies/3d_skybox/Skybox.cs" id="1_o2xjy"]
 [ext_resource type="PackedScene" uid="uid://c7akg3xjnxl4q" path="res://src/galaxy/galaxies/_resources/star/star.tscn" id="2_yen3c"]
 
 [node name="Skybox" type="Node3D"]
