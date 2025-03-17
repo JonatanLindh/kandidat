@@ -18,12 +18,15 @@ var floating_flag := false
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	
+	PlayerVariables.player_position = camera_3d.global_transform.origin
+	PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
+
 func _input(event):
 	if event is InputEventMouseMotion and Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
 		rotate_y(deg_to_rad(-event.relative.x * mouse_sensitivity))
 		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
 		head.rotation.x = clamp(head.rotation.x,deg_to_rad(-89),deg_to_rad(89) )
+		PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 	
 	if Input.is_action_just_pressed("speedup"):
 		current_speed = current_speed + 1
@@ -63,7 +66,7 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0, current_speed)
 		if not floating_flag and flying:
 			velocity.y = move_toward(velocity.y, 0, current_speed)
-
+	
 	emit_player_status_changed()
 	move_and_slide()
 
@@ -95,9 +98,12 @@ func emit_player_status_changed() -> void:
 		updated_status.emit(position, speed)
 		last_position = position
 		last_speed = speed
+	PlayerVariables.player_position = camera_3d.global_transform.origin
+	PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 
 func toggle_mouse_lock():
 	if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	

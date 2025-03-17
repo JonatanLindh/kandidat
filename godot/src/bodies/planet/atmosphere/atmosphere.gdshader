@@ -1,9 +1,12 @@
 shader_type spatial;
 render_mode unshaded, depth_test_disabled;
 
+uniform vec3 camera_position;
+uniform vec3 camera_direction;
+
 uniform vec3 atmosphere_color : source_color = vec3(0.5, 0.7, 1.0);
 uniform vec3 planet_position;
-uniform vec3 sun_direction = vec3(0.,0.,-1.);
+uniform vec3 sun_direction;
 uniform float thickness_scale : hint_range(0.0, 0.5, 0.001);
 uniform sampler2D depth_texture : hint_depth_texture;
 uniform float planet_radius;
@@ -27,12 +30,14 @@ vec2 ray_sphere_intersect(vec3 ro, vec3 rd, vec3 so, float sr, float max_depth) 
 	float t1 = max(t-x, 0.0);
 	float t2 = min(t+x,max_depth);
 
+	vec3 np = ro + rd*max((min(t, t2)), 0.0);
+
 	return vec2(t1,t2);
 }
 
 vec2 raySphere2(vec3 sphereCenter, float sphereRadius, vec3 rayOrigin, vec3 rayDir){
 	vec3 offset = rayOrigin - sphereCenter;
-	float a = dot(rayDir, rayDir);
+	float a = 1.;
 	float b = 2. * dot(offset, rayDir);
 	float c = dot(offset,offset) - sphereRadius * sphereRadius;
 	float d = b * b - 4. * a * c;
@@ -42,13 +47,31 @@ vec2 raySphere2(vec3 sphereCenter, float sphereRadius, vec3 rayOrigin, vec3 rayD
 		float dstToSphereNear = max(0, (-b-s) / (2. * a));
 		float dstToSphereFar = (-b + s) / (2. * a);
 
-		if (dstToSphereFar >= 0.){
+		if (dstToSphereFar > 0.){
 			return vec2(dstToSphereNear, dstToSphereFar-dstToSphereNear);
 		}
 	}
-	return vec2(100000., 0);
+	return vec2(100000., 0.);
 }
 
+vec2 raySphere3(vec3 sphereCenter, float sphereRadius, vec3 rayOrigin, vec3 rayDir, float maxDepth){
+	vec3 offset = rayOrigin - sphereCenter;
+	float a = 1.;
+	float b = 2. * dot(offset, rayDir);
+	float c = dot(offset,offset) - sphereRadius * sphereRadius;
+	float d = b * b - 4. * a * c;
+
+	if(d > 0.){
+		float s = sqrt(d);
+		float dstToSphereNear = max(0, (-b-s) / (2. * a));
+		float dstToSphereFar = (-b + s) / (2. * a);
+
+		if (dstToSphereFar > 0.){
+			return vec2(dstToSphereNear, min(dstToSphereFar,maxDepth));
+		}
+	}
+	return vec2(100000., 0.);
+}
 
 float density_at_point(vec3 density_sample_point){
 	float height_above_surface = length(density_sample_point - planet_position) - planet_radius;
@@ -76,9 +99,10 @@ float calculate_light(vec3 ray_origin, vec3 ray_dir, float ray_length){
 	float step_size = ray_length / (float(num_in_scattering_points)-1.);
 	float in_scattered_light = 0.;
 	for(int i = 0; i < num_in_scattering_points; i++){
-		//float sun_ray_length = ray_sphere_intersect(in_scatter_point, sun_direction, planet_position, atmosphere_radius, 10000.).y;
-		float sun_ray_length = raySphere2(planet_position, atmosphere_radius, in_scatter_point, -sun_direction).y;
-		float sun_ray_optical_depth = optical_depth(in_scatter_point, sun_direction, sun_ray_length);
+		//float sun_ray_length = ray_sphere_intersect(in_scatter_point, -sun_direction, planet_position, atmosphere_radius, 10000.).y;
+		//float sun_ray_length = raySphere2(planet_position, atmosphere_radius, in_scatter_point, -sun_direction).y;
+		float sun_ray_length = raySphere3(planet_position, atmosphere_radius, in_scatter_point, -sun_direction, 10000.).y;
+		float sun_ray_optical_depth = optical_depth(in_scatter_point, -sun_direction, sun_ray_length);
 		float view_ray_optical_depth = optical_depth(in_scatter_point, -ray_dir, step_size*float(i));
 		float transmittance = exp(-(sun_ray_optical_depth + view_ray_optical_depth));
 		float local_density = density_at_point(in_scatter_point);
@@ -91,13 +115,17 @@ float calculate_light(vec3 ray_origin, vec3 ray_dir, float ray_length){
 
 void vertex() {
 	cam_pos = MODELVIEW_MATRIX[3].xyz;
-
+	//cam_pos = CAMERA_POSITION_WORLD;
+	//cam_pos = camera_position;
 }
 
 void fragment() {
 	atmosphere_radius = planet_radius * 2.;
 
 	vec3 cam_dir = VIEW;
+	//vec3 cam_dir = camera_direction;
+	//vec3 cam_dir = CAMERA_DIRECTION_WORLD;
+	//vec3 cam_dir = normalize(cam_pos - planet_position);
 
 	vec3 sphere_origin = planet_position;
 
@@ -108,23 +136,25 @@ void fragment() {
 	float max_depth = length(view.xyz);
 
 	//vec2 rsi = ray_sphere_intersect(cam_pos, cam_dir, planet_position, atmosphere_radius, max_depth);
-	vec2 rsi = raySphere2(planet_position, atmosphere_radius, cam_pos, cam_dir);
+	//vec2 rsi = raySphere2(planet_position, atmosphere_radius, cam_pos, cam_dir);
+	vec2 rsi = raySphere3(planet_position, atmosphere_radius, cam_pos, cam_dir, max_depth);
 
 	float dist_through_atmosphere = min(rsi.y, max_depth - rsi.x);
 
-	//ALPHA = smoothstep(0.0, 1.0, (rsi.y-rsi.x) * thickness_scale);
 	ALPHA = clamp((rsi.y-rsi.x)*thickness_scale, 0.0, 1.0);
+
 	if(dist_through_atmosphere > 0.) {
 		const float epsilon = 0.0001;
 		vec3 point_in_atmosphere = cam_pos + cam_dir * rsi.x - epsilon;
 		float light = calculate_light(point_in_atmosphere, sun_direction, dist_through_atmosphere - epsilon * 2.);
 		ALBEDO = atmosphere_color * (1.-light) + light;
-		//ALBEDO = vec3(rsi.x, rsi.y, 0.);
-
+		//ALBEDO = vec3(cam_pos.x, cam_pos.y, cam_pos.z);
+		//ALBEDO = vec3(planet_position.x, planet_position.y, planet_position.z);
 	}
 	else{
 		ALBEDO = atmosphere_color;
 	}
+	
 }
 
 //void light() {
