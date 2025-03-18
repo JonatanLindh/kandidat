@@ -13,10 +13,15 @@ uniform float planet_radius;
 uniform float density_falloff : hint_range(-10.0, 20.0, 0.1);
 uniform int num_in_scattering_points : hint_range(0, 100, 1);
 uniform int num_optical_depth_points : hint_range(0, 100, 1);
+uniform vec3 wavelengths;
+uniform float scattering_strenght: hint_range(0.0, 100.0, 0.01);
+
+
 
 varying vec3 cam_pos;
 varying float atmosphere_radius;
 varying vec3 sunDirView;
+varying vec3 scattering_coefficients;
 
 vec2 ray_sphere_intersect(vec3 ro, vec3 rd, vec3 so, float sr, float max_depth) {
 	float t = dot(so-ro, rd);
@@ -67,6 +72,7 @@ vec2 raySphere3(vec3 sphereCenter, float sphereRadius, vec3 rayOrigin, vec3 rayD
 		float dstToSphereNear = max(0, (-b-s) / (2. * a));
 		float dstToSphereFar = (-b + s) / (2. * a);
 
+
 		if (dstToSphereFar > 0.){
 			return vec2(dstToSphereNear, min(dstToSphereFar,maxDepth));
 		}
@@ -95,32 +101,42 @@ float optical_depth(vec3 ray_origin, vec3 ray_dir, float ray_length){
 	return optical_depth;
 }
 
-float calculate_light(vec3 ray_origin, vec3 ray_dir, float ray_length){
+vec3 calculate_light(vec3 ray_origin, vec3 ray_dir, float ray_length, vec3 original_col){
 	vec3 in_scatter_point = ray_origin;
-	float step_size = ray_length / (float(num_in_scattering_points)-1.);
-	float in_scattered_light = 0.;
+	float step_size = ray_length / max(float(num_in_scattering_points) - 1.0, 1.0);
+	step_size = min(step_size, 1.0);
+	vec3 in_scattered_light = vec3(0.);
+	float view_ray_optical_depth = 0.;
 
 	for(int i = 0; i < num_in_scattering_points; i++){
 		float sun_ray_length = raySphere3(planet_position, atmosphere_radius, in_scatter_point, -sunDirView, 10000.).y;
 		float sun_ray_optical_depth = optical_depth(in_scatter_point, -sunDirView, sun_ray_length);
-		float view_ray_optical_depth = optical_depth(in_scatter_point, -ray_dir, step_size*float(i));
-		float transmittance = exp(-(sun_ray_optical_depth + view_ray_optical_depth));
+		view_ray_optical_depth = optical_depth(in_scatter_point, -ray_dir, step_size*float(i));
+		vec3 transmittance = exp(-(sun_ray_optical_depth + view_ray_optical_depth) * scattering_coefficients);
 		float local_density = density_at_point(in_scatter_point);
 
-		in_scattered_light += local_density * transmittance * step_size;
+		in_scattered_light += local_density * transmittance * scattering_coefficients * step_size;
 		in_scatter_point += ray_dir * step_size;
 	}
-	return in_scattered_light;
+	float original_col_transmittance = exp(-view_ray_optical_depth);
+	return original_col * original_col_transmittance + in_scattered_light;
+}
+
+vec3 calculate_wavelengths() {
+	float scatterR = pow(400. / wavelengths.x, 4) * scattering_strenght;
+	float scatterG = pow(400. / wavelengths.y, 4) * scattering_strenght;
+	float scatterB = pow(400. / wavelengths.z, 4) * scattering_strenght;
+	return vec3(scatterR, scatterG, scatterB);
 }
 
 void vertex() {
 	cam_pos = MODELVIEW_MATRIX[3].xyz;
-	//cam_pos = CAMERA_POSITION_WORLD;
-	//cam_pos = camera_position;
 }
 
 void fragment() {
+	scattering_coefficients = calculate_wavelengths();
 	atmosphere_radius = planet_radius * 1.5;
+
 	// transform sun direction to view space
 	sunDirView = normalize(VIEW_MATRIX * vec4(sun_direction,0.0)).xyz;
 
@@ -136,8 +152,6 @@ void fragment() {
 	view.xyz /= view.w;
 	float max_depth = length(view.xyz);
 
-	//vec2 rsi = ray_sphere_intersect(cam_pos, cam_dir, planet_position, atmosphere_radius, max_depth);
-	//vec2 rsi = raySphere2(planet_position, atmosphere_radius, cam_pos, cam_dir);
 	vec2 rsi = raySphere3(planet_position, atmosphere_radius, cam_pos, cam_dir, max_depth);
 
 	float dist_through_atmosphere = min(rsi.y, max_depth - rsi.x);
@@ -145,17 +159,9 @@ void fragment() {
 	if(dist_through_atmosphere >= 0.) {
 		const float epsilon = 0.0001;
 		vec3 point_in_atmosphere = cam_pos + cam_dir * rsi.x - epsilon;
-		float light = calculate_light(point_in_atmosphere, cam_dir, dist_through_atmosphere - epsilon * 2.);
+		vec3 light = calculate_light(point_in_atmosphere, cam_dir, dist_through_atmosphere - epsilon * 2., atmosphere_color);
 		//ALBEDO = mix(vec3(0.0), atmosphere_color, light);
-		// Lambertian shading (light based on sun direction and view direction)
-        float lambertian = max(dot(sunDirView, cam_dir), 0.0);
-
-        // Final color mix: more white where the sun hits, dark where it doesn't, and atmospheric scattering added
-        vec3 final_color = mix(atmosphere_color, vec3(1.0), lambertian);  // White where the sun hits
-        final_color = mix(final_color, atmosphere_color, light);  // Darken based on scattering
-	}
-	else{
-		ALBEDO = atmosphere_color;
+		ALBEDO = light;
 	}
 	ALPHA = clamp((rsi.y-rsi.x)*thickness_scale, 0.0, 1.0);
 
