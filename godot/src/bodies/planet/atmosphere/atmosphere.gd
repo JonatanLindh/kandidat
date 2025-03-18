@@ -31,14 +31,14 @@ func _process(delta: float) -> void:
 
 func _atmosphere_changed():
 	_update_shader_params()
-	scale = Vector3(radius * 4, radius * 4, radius * 4)
+	scale = Vector3(radius, radius, radius)
 
 func _update_shader_params():
 	var cam_pos = PlayerVariables.player_position
 	var cam_dir = PlayerVariables.camera_direction
 
 	if mesh and mesh.material:
-		mesh.material.set_shader_parameter("sun_direction", sun_direction)
+		mesh.material.set_shader_parameter("sun_direction", sun_direction.normalized())
 		mesh.material.set_shader_parameter("planet_position", position)
 		mesh.material.set_shader_parameter("planet_radius", radius)
 		mesh.material.set_shader_parameter("camera_position", cam_pos)

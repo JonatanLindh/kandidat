@@ -29,7 +29,7 @@ func generate_atmosphere() -> void:
 	set_atmosphere_sun_dir()
 
 func set_atmosphere_sun_dir() -> void:
-	var sun_dir = (planet_data.sun_position - position).normalized()
+	var sun_dir = (planet_data.sun_position - global_position).normalized()
 	atmosphere.sun_direction = sun_dir
 
 	
