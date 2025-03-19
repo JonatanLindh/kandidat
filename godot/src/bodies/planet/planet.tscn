@@ -137,7 +137,7 @@ shader_parameter/num_in_scattering_points = 15
 shader_parameter/num_optical_depth_points = 15
 shader_parameter/wavelengths = Vector3(700, 530, 440)
 shader_parameter/scattering_strenght = 18.02
-shader_parameter/atmosphere_scale = 1.5
+shader_parameter/atmosphere_scale = 1.2
 
 [sub_resource type="BoxMesh" id="BoxMesh_n1sh7"]
 resource_local_to_scene = true

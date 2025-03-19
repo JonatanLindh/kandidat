@@ -12,7 +12,6 @@ var atmosphere
 
 func _ready() -> void:
 	planet_data = planet_data.duplicate()
-	print(atmosphere, " is type ", typeof(atmosphere))
 	generate()
 	
 func _process(delta: float) -> void:
