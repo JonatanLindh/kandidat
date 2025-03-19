@@ -19,24 +19,6 @@ varying float atmosphere_radius;
 varying vec3 sunDirView;
 varying vec3 scattering_coefficients;
 
-vec2 ray_sphere_intersect(vec3 ro, vec3 rd, vec3 so, float sr, float max_depth) {
-	float t = dot(so-ro, rd);
-	vec3 P = ro + rd * t;
-	float y = length(so-P);
-
-	if (y > sr){
-		return vec2(-1.0);
-	}
-
-	float x = sqrt(sr*sr - y*y);
-	float t1 = max(t-x, 0.0);
-	float t2 = min(t+x,max_depth);
-
-	vec3 np = ro + rd*max((min(t, t2)), 0.0);
-
-	return vec2(t1,t2);
-}
-
 vec2 raySphere(vec3 sphereCenter, float sphereRadius, vec3 rayOrigin, vec3 rayDir, float maxDepth){
 	vec3 offset = rayOrigin - sphereCenter;
 	float a = 1.;
@@ -87,7 +69,6 @@ vec3 calculate_light(vec3 ray_origin, vec3 ray_dir, float ray_length, vec3 origi
 
 	for(int i = 0; i < num_in_scattering_points; i++){
 		float sun_ray_length = raySphere(planet_position, atmosphere_radius, in_scatter_point, -sunDirView, 10000.).y;
-		//float sun_ray_length = ray_sphere_intersect(in_scatter_point, -sunDirView, planet_position, atmosphere_radius, 10000.).y;
 		float sun_ray_optical_depth = optical_depth(in_scatter_point, -sunDirView, sun_ray_length);
 		view_ray_optical_depth = optical_depth(in_scatter_point, -ray_dir, step_size*float(i));
 		vec3 transmittance = exp(-(sun_ray_optical_depth + view_ray_optical_depth) * scattering_coefficients);
@@ -134,10 +115,10 @@ void fragment() {
 	
 	// calculate raysphere intersection
 	vec2 rsi = raySphere(planet_position, atmosphere_radius, cam_pos, cam_dir, max_depth);
-	//vec2 rsi = ray_sphere_intersect(cam_pos, cam_dir, planet_position, atmosphere_radius, max_depth);
 
 	float dist_through_atmosphere = min(rsi.y, max_depth - rsi.x);
 
+	// if ray misses atmosphere, dont colour it
 	if(dist_through_atmosphere >= 0.) {
 		const float epsilon = 0.0001;
 		vec3 point_in_atmosphere = cam_pos + cam_dir * rsi.x - epsilon;
