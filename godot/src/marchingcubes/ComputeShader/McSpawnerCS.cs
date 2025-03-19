@@ -1,31 +1,42 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using Godot.Collections;
 using Array = Godot.Collections.Array;
 
 [Tool]
 public partial class McSpawnerCS : Node
 {
+	private float _isoLevel = 0.5f;
+	private int _size = 2;
+	private int _scale = 1;
+	private List<Vector3> _vertices;
 	
+	// Shader Variables
 	private RenderingDevice _renderingDevice;
 	private Rid _shaderRid;
-	private Rid _uniformSet;
 	private Rid _pipeline;
+	private Rid _uniformSet;
 	private Rid _triangleBuffer;
 	private Rid _dataPointsBuffer;
 	private Rid _counterBuffer;
 	private Rid _paramBuffer;
+	
+	// Data received from Compute Shader
+	private float[] _triangles;
+	private int _triangleCount;
 
-	private float _isoLevel;
-	private int _size = 2;
-	private int _scale = 1;
+
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		_vertices = new List<Vector3>();
+		
 		InitGpu();
 		RunCompute();
 		ProcessComputeData();
+		CreateMesh();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -48,6 +59,7 @@ public partial class McSpawnerCS : Node
 		_renderingDevice.ComputeListBindUniformSet(computeList, _uniformSet, 0);
 
 		uint groupsNeeded = (uint)Math.Ceiling(_size / 8.0f);
+		groupsNeeded = 1;
 		_renderingDevice.ComputeListDispatch(computeList, 
 			xGroups: groupsNeeded, 
 			yGroups: groupsNeeded, 
@@ -108,13 +120,54 @@ public partial class McSpawnerCS : Node
 		
 		// Get Output Data
 		var counterData = _renderingDevice.BufferGetData(_counterBuffer);
-		var counter = BitConverter.ToUInt32(counterData, 0);
-		GD.Print(counter);
+		_triangleCount = BitConverter.ToInt32(counterData, 0);
+		GD.Print("Counter: ", _triangleCount);
 		
 		var triangleData = _renderingDevice.BufferGetData(_triangleBuffer);
-		var triangles = new float[triangleData.Length / sizeof(float)];
-		Buffer.BlockCopy(triangleData, 0, triangles, 0, triangleData.Length);
+		_triangles = new float[triangleData.Length / sizeof(float)];
+		Buffer.BlockCopy(triangleData, 0, _triangles, 0, triangleData.Length);
+		for (int i = 0; i < 6 * 4; i += 4)
+		{
+			GD.Print("Vertex ", i / 4, ": (", _triangles[i], ", ", 
+				_triangles[i + 1], ", ", _triangles[i + 2], ")");
+		}
+	}
 
+	private void CreateMesh()
+	{
+		var numVertices = _triangleCount * 3;
+		_vertices.Capacity = numVertices;
+		
+		for (int i = 0; i < _triangleCount; i++)
+		{
+			var triIndex = i * 12;
+			_vertices.Add(new Vector3(_triangles[triIndex], _triangles[triIndex + 1], _triangles[triIndex + 2]));
+			_vertices.Add(new Vector3(_triangles[triIndex + 4], _triangles[triIndex + 5], _triangles[triIndex+ 6]));
+			_vertices.Add(new Vector3(_triangles[triIndex + 8], _triangles[triIndex + 9], _triangles[triIndex + 10]));
+		}
+
+		foreach (var vertex in _vertices)
+		{
+			GD.Print(vertex);
+		}
+		
+		
+		var surfaceTool = new SurfaceTool();
+		surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
+		
+		//surfaceTool.SetSmoothGroup(UInt32.MaxValue);
+		surfaceTool.SetSmoothGroup(0);
+		
+		foreach (var vertex in _vertices)
+		{
+			surfaceTool.AddVertex(vertex);
+		}
+		surfaceTool.GenerateNormals();
+		surfaceTool.Index();
+		Mesh mesh = surfaceTool.Commit();
+		var meshInstance = new MeshInstance3D();
+		meshInstance.Mesh = mesh;
+		AddChild(meshInstance);
 		
 	}
 	
@@ -132,7 +185,8 @@ public partial class McSpawnerCS : Node
 		int maxTriangles = maxTrisPerVoxel * (int)Math.Pow(8*8, 3);
 		int floatsPerTriangle = sizeof(float) * 3;
 		int bytesPerTriangle = floatsPerTriangle * sizeof(float);
-		var maxBytes = new byte[bytesPerTriangle * maxTriangles];
+		//var maxBytes = new byte[bytesPerTriangle * maxTriangles];
+		var maxBytes = new byte[512 * sizeof(float)];
 		
 		_triangleBuffer = _renderingDevice.StorageBufferCreate((uint)maxBytes.Length, maxBytes);
 		var triangleUniform = new RDUniform
@@ -149,6 +203,9 @@ public partial class McSpawnerCS : Node
 		{
 			datapoints[i] = 1.0f; // Default value
 		}
+
+		datapoints[0] = 0.0f;
+		datapoints[1] = 0.0f;
 		var dataPointsBytes = new byte[datapoints.Length * sizeof(float)];
 		Buffer.BlockCopy(datapoints, 0, dataPointsBytes, 0, dataPointsBytes.Length);
 		

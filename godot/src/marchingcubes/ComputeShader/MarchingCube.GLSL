@@ -2,9 +2,9 @@
 #version 450
 
 struct Triangle{
-    vec3 p1;
-    vec3 p2;
-    vec3 p3;
+    vec4 p1;
+    vec4 p2;
+    vec4 p3;
 };
 
 layout(set = 0, binding = 0, std430) restrict buffer TriangleBuffer {
@@ -18,7 +18,7 @@ layout(set = 0, binding = 1, std430) buffer DataPointsBuffer {
 dataPointsBuffer;
 
 
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 
 // holy moly, that's a lot of lines
@@ -337,7 +337,7 @@ vec3 evaluateTriangle(int tri, vec3 pos){
 void main(){
     vec3 pos = gl_GlobalInvocationID.xyz;
     if (pos.x >= uniforms.sizeX - 1 || pos.y >= uniforms.sizeY - 1 || pos.z >= uniforms.sizeZ - 1) return;
-        
+    
     int cubeIndex = 0;
     float isoLevel = uniforms.isoLevel;
     if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y), int(pos.z))] < isoLevel) cubeIndex |= 1;
@@ -349,20 +349,16 @@ void main(){
     if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y + 1), int(pos.z + 1))] < isoLevel) cubeIndex |= 64;
     if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z + 1))] < isoLevel) cubeIndex |= 128;
     
-    
     int[] tri = TRIANGLE_TABLE[cubeIndex];
     for(int i = 0; i < 16; i += 3){
         if(tri[i] == -1) break;
 
         Triangle triangle;
-        triangle.p1 = evaluateTriangle(tri[i], pos);
-        triangle.p2 = evaluateTriangle(tri[i + 1], pos);
-        triangle.p3 = evaluateTriangle(tri[i + 2], pos);
+        triangle.p1 = vec4(evaluateTriangle(tri[i], pos), 0);
+        triangle.p2 = vec4(evaluateTriangle(tri[i + 1], pos), 0);
+        triangle.p3 = vec4(evaluateTriangle(tri[i + 2], pos), 0);
         
         uint index = atomicAdd(counter, 1u);
         triangleBuffer.triangles[index] = triangle;
     }
-    
-
-    
 }
