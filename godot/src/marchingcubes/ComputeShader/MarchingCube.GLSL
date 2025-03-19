@@ -18,7 +18,7 @@ layout(set = 0, binding = 1, std430) buffer DataPointsBuffer {
 dataPointsBuffer;
 
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 
 // holy moly, that's a lot of lines
@@ -333,8 +333,7 @@ vec3 evaluateTriangle(int tri, vec3 pos){
 
     vec3 v0 = pos + p0;
     vec3 v1 = pos + p1;
-    return (v0 + v1) / 2.0f;
-    //return mix(v0, v1, 0.5);
+    return mix(v0, v1, 0.5);
 }
 
 void main(){
@@ -351,11 +350,11 @@ void main(){
     if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z))] >= isoLevel) cubeIndex |= 16;
     if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z + 1))] >= isoLevel) cubeIndex |= 32;
     if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y + 1), int(pos.z + 1))] >= isoLevel) cubeIndex |= 64;
-    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z))] >= isoLevel) cubeIndex |= 128;
+    if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y + 1), int(pos.z))] >= isoLevel) cubeIndex |= 128;
     
     // (9, 10, 8), (10, 11, 8)
     
-    int[] tri = TRIANGLE_TABLE[240];
+    int[] tri = TRIANGLE_TABLE[cubeIndex];
     for(int i = 0; i < 16; i += 3){
         if(tri[i] == -1) break;
 

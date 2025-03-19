@@ -1,14 +1,15 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot.Collections;
 using Array = Godot.Collections.Array;
 
 [Tool]
 public partial class McSpawnerCS : Node
 {
-	private float _isoLevel = 0.5f;
-	private int _size = 2;
+	private float _isoLevel = 0f;
+	private int _size = 41;
 	private int _scale = 1;
 	private List<Vector3> _vertices;
 	
@@ -25,8 +26,6 @@ public partial class McSpawnerCS : Node
 	// Data received from Compute Shader
 	private float[] _triangles;
 	private int _triangleCount;
-
-
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -58,8 +57,7 @@ public partial class McSpawnerCS : Node
 		_renderingDevice.ComputeListBindComputePipeline(computeList, _pipeline);
 		_renderingDevice.ComputeListBindUniformSet(computeList, _uniformSet, 0);
 
-		uint groupsNeeded = (uint)Math.Ceiling(_size / 8.0f);
-		groupsNeeded = 1;
+		var groupsNeeded = (uint)Math.Ceiling(_size / 8.0f);
 		_renderingDevice.ComputeListDispatch(computeList, 
 			xGroups: groupsNeeded, 
 			yGroups: groupsNeeded, 
@@ -126,10 +124,11 @@ public partial class McSpawnerCS : Node
 		var triangleData = _renderingDevice.BufferGetData(_triangleBuffer);
 		_triangles = new float[triangleData.Length / sizeof(float)];
 		Buffer.BlockCopy(triangleData, 0, _triangles, 0, triangleData.Length);
+		GD.Print(triangleData.Length);
 		/*
 		for (int i = 0; i < 6 * 4; i += 4)
 		{
-			GD.Print("Vertex ", i / 4, ": (", _triangles[i], ", ", 
+			GD.Print("Vertex ", i / 4, ": (", _triangles[i], ", ",
 				_triangles[i + 1], ", ", _triangles[i + 2], ")");
 		}
 		*/
@@ -138,7 +137,7 @@ public partial class McSpawnerCS : Node
 		for (int i = 0; i < _triangleCount; i++)
 		{
 			var triIndex = i * 12;
-			GD.Print("Triangle ", i, ": (", _triangles[triIndex], ", ", 
+			GD.Print("Triangle ", i, ": (", _triangles[triIndex], ", ",
 				_triangles[triIndex + 1], ", ", _triangles[triIndex + 2], "), (",
 				_triangles[triIndex + 4], ", ", _triangles[triIndex + 5], ", ", _triangles[triIndex + 6], "), (",
 				_triangles[triIndex + 8], ", ", _triangles[triIndex + 9], ", ", _triangles[triIndex + 10], ")");
@@ -167,13 +166,19 @@ public partial class McSpawnerCS : Node
 		
 		foreach (var vertex in _vertices)
 		{
-			surfaceTool.AddVertex(vertex);
+			surfaceTool.AddVertex(vertex); 
 		}
 		surfaceTool.GenerateNormals();
 		surfaceTool.Index();
 		Mesh mesh = surfaceTool.Commit();
+		
+		
 		var meshInstance = new MeshInstance3D();
 		meshInstance.Mesh = mesh;
+		// Disable backface culling
+		meshInstance.MaterialOverride = new StandardMaterial3D { CullMode = BaseMaterial3D.CullModeEnum.Disabled };
+		
+		
 		AddChild(meshInstance);
 		
 	}
@@ -189,11 +194,12 @@ public partial class McSpawnerCS : Node
 	{
 		// Create Triangle Buffer
 		int maxTrisPerVoxel = 5;
-		int maxTriangles = maxTrisPerVoxel * (int)Math.Pow(8*8, 3);
+		int maxTriangles = maxTrisPerVoxel * (int)Math.Pow(_size, 3);
 		int floatsPerTriangle = sizeof(float) * 3;
 		int bytesPerTriangle = floatsPerTriangle * sizeof(float);
-		//var maxBytes = new byte[bytesPerTriangle * maxTriangles];
-		var maxBytes = new byte[512 * sizeof(float)];
+		var maxBytes = new byte[bytesPerTriangle * maxTriangles];
+		//GD.Print(maxBytes.Length);
+		//var maxBytes = new byte[512 * sizeof(float)];
 		
 		_triangleBuffer = _renderingDevice.StorageBufferCreate((uint)maxBytes.Length, maxBytes);
 		var triangleUniform = new RDUniform
@@ -204,6 +210,7 @@ public partial class McSpawnerCS : Node
 		triangleUniform.AddId(_triangleBuffer);
 		
 		// Create Data Points Buffer
+		/*
 		float[,,] dataPoints =
 		{
 			{
@@ -225,10 +232,12 @@ public partial class McSpawnerCS : Node
 		GD.Print(dataPoints[1, 1, 0]);
 		GD.Print(dataPoints[0, 1, 1]);
 		GD.Print(dataPoints[1, 1, 1]);
-		
-		
+		*/
+		var dataPoints = GenerateDataPoints(_size);
 		int totalDataPoints = dataPoints.GetLength(0) * dataPoints.GetLength(1) * dataPoints.GetLength(2);
 		var dataPointsBytes = new byte[totalDataPoints * sizeof(float)];
+		//DebugDraw(dataPoints.Cast<float>().ToArray());
+
 		Buffer.BlockCopy(dataPoints, 0, dataPointsBytes, 0, totalDataPoints * sizeof(float));
 		
 		_dataPointsBuffer = _renderingDevice.StorageBufferCreate((uint)dataPointsBytes.Length, dataPointsBytes);
@@ -291,7 +300,7 @@ public partial class McSpawnerCS : Node
 				{
 					float value = 0;
 					
-					if(new Vector3(10, 10, 10).DistanceTo(new Vector3(x, y, z)) < 10)
+					if(new Vector3(20, 20, 20).DistanceTo(new Vector3(x, y, z)) < 20)
 					{
 						value = 1;
 					}
@@ -313,5 +322,38 @@ public partial class McSpawnerCS : Node
 		
 	}
 	
+	private void DebugDraw(float[] dataPoints)
+	{
+		int index(Vector3 pos)
+		{
+			return (int)(pos.X + pos.Y * _size + pos.Z * _size * _size);
+		}
+		
+		
+		
+		for (var x = 0; x < _size; x++)
+		{
+			for (var y = 0; y < _size; y++)
+			{
+				for (var z = 0; z < _size; z++)
+				{
+					var value = dataPoints[index(new Vector3(x,y,z))];
+					if (value > 0)
+					{
+						var cube = new BoxMesh();
+						cube.Size = new Vector3(1, 1, 1);
+						var cubeInstance = new MeshInstance3D();
+						cubeInstance.Mesh = cube;
+						cubeInstance.Translate(new Vector3(x, y, z));
+						cubeInstance.Scale = 0.5f * Vector3.One;
+						AddChild(cubeInstance);
+					}
+				}
+			}
+		}
+		
+		
+		
+	}
 	
 }
