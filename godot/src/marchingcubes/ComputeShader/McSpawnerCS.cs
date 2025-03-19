@@ -126,11 +126,24 @@ public partial class McSpawnerCS : Node
 		var triangleData = _renderingDevice.BufferGetData(_triangleBuffer);
 		_triangles = new float[triangleData.Length / sizeof(float)];
 		Buffer.BlockCopy(triangleData, 0, _triangles, 0, triangleData.Length);
+		/*
 		for (int i = 0; i < 6 * 4; i += 4)
 		{
 			GD.Print("Vertex ", i / 4, ": (", _triangles[i], ", ", 
 				_triangles[i + 1], ", ", _triangles[i + 2], ")");
 		}
+		*/
+		/*
+		// Print Triangles
+		for (int i = 0; i < _triangleCount; i++)
+		{
+			var triIndex = i * 12;
+			GD.Print("Triangle ", i, ": (", _triangles[triIndex], ", ", 
+				_triangles[triIndex + 1], ", ", _triangles[triIndex + 2], "), (",
+				_triangles[triIndex + 4], ", ", _triangles[triIndex + 5], ", ", _triangles[triIndex + 6], "), (",
+				_triangles[triIndex + 8], ", ", _triangles[triIndex + 9], ", ", _triangles[triIndex + 10], ")");
+		}
+		*/
 	}
 
 	private void CreateMesh()
@@ -145,12 +158,6 @@ public partial class McSpawnerCS : Node
 			_vertices.Add(new Vector3(_triangles[triIndex + 4], _triangles[triIndex + 5], _triangles[triIndex+ 6]));
 			_vertices.Add(new Vector3(_triangles[triIndex + 8], _triangles[triIndex + 9], _triangles[triIndex + 10]));
 		}
-
-		foreach (var vertex in _vertices)
-		{
-			GD.Print(vertex);
-		}
-		
 		
 		var surfaceTool = new SurfaceTool();
 		surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
@@ -197,17 +204,32 @@ public partial class McSpawnerCS : Node
 		triangleUniform.AddId(_triangleBuffer);
 		
 		// Create Data Points Buffer
-		int totalDataPoints = (_size + 1) * (_size + 1) * (_size + 1);
-		float[] datapoints = new float[totalDataPoints];
-		for (int i = 0; i < totalDataPoints; i++)
+		float[,,] dataPoints =
 		{
-			datapoints[i] = 1.0f; // Default value
-		}
+			{
+				{0, 0}, 
+				{1, 1}
+			}, 
+			{ 
+				{0, 0}, 
+				{1, 1} 
+			}
+		};
 
-		datapoints[0] = 0.0f;
-		datapoints[1] = 0.0f;
-		var dataPointsBytes = new byte[datapoints.Length * sizeof(float)];
-		Buffer.BlockCopy(datapoints, 0, dataPointsBytes, 0, dataPointsBytes.Length);
+		GD.Print(dataPoints[0, 0, 0]);
+		GD.Print(dataPoints[1, 0, 0]);
+		GD.Print(dataPoints[0, 0, 1]);
+		GD.Print(dataPoints[1, 0, 1]);
+		GD.Print("----");
+		GD.Print(dataPoints[0, 1, 0]);
+		GD.Print(dataPoints[1, 1, 0]);
+		GD.Print(dataPoints[0, 1, 1]);
+		GD.Print(dataPoints[1, 1, 1]);
+		
+		
+		int totalDataPoints = dataPoints.GetLength(0) * dataPoints.GetLength(1) * dataPoints.GetLength(2);
+		var dataPointsBytes = new byte[totalDataPoints * sizeof(float)];
+		Buffer.BlockCopy(dataPoints, 0, dataPointsBytes, 0, totalDataPoints * sizeof(float));
 		
 		_dataPointsBuffer = _renderingDevice.StorageBufferCreate((uint)dataPointsBytes.Length, dataPointsBytes);
 		var dataPointsUniform = new RDUniform()

@@ -299,9 +299,9 @@ const ivec2[12] EDGE_TABLE = {
 
 const ivec3[8] POINTS_TABLE = {
     ivec3(0, 0, 0),
-    ivec3(1, 0, 0),
-    ivec3(1, 0, 1),
     ivec3(0, 0, 1),
+    ivec3(1, 0, 1),
+    ivec3(1, 0, 0),
 
     ivec3(0, 1, 0),
     ivec3(0, 1, 1),
@@ -326,12 +326,15 @@ uint index(int x, int y, int z){
 }
 
 vec3 evaluateTriangle(int tri, vec3 pos){
-    vec3 p0 = pos + POINTS_TABLE[EDGE_TABLE[tri].x];
-    vec3 p1 = pos + POINTS_TABLE[EDGE_TABLE[tri].y];
+    ivec2 pointsIndices = EDGE_TABLE[tri];
+    
+    vec3 p0 = POINTS_TABLE[pointsIndices.x];
+    vec3 p1 = POINTS_TABLE[pointsIndices.y];
 
-    vec3 v0 = vec3(p0) * uniforms.scale;
-    vec3 v1 = vec3(p1) * uniforms.scale;
-    return mix(v0, v1, 0.5);
+    vec3 v0 = pos + p0;
+    vec3 v1 = pos + p1;
+    return (v0 + v1) / 2.0f;
+    //return mix(v0, v1, 0.5);
 }
 
 void main(){
@@ -340,22 +343,29 @@ void main(){
     
     int cubeIndex = 0;
     float isoLevel = uniforms.isoLevel;
-    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y), int(pos.z))] < isoLevel) cubeIndex |= 1;
-    if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y), int(pos.z))] < isoLevel) cubeIndex |= 2;
-    if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y), int(pos.z + 1))] < isoLevel) cubeIndex |= 4;
-    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y), int(pos.z + 1))] < isoLevel) cubeIndex |= 8;
-    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z))] < isoLevel) cubeIndex |= 16;
-    if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y + 1), int(pos.z))] < isoLevel) cubeIndex |= 32;
-    if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y + 1), int(pos.z + 1))] < isoLevel) cubeIndex |= 64;
-    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z + 1))] < isoLevel) cubeIndex |= 128;
+    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y), int(pos.z))] >= isoLevel) cubeIndex |= 1;
+    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y), int(pos.z + 1))] >= isoLevel) cubeIndex |= 2;
+    if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y), int(pos.z + 1))] >= isoLevel) cubeIndex |= 4;
+    if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y), int(pos.z))] >= isoLevel) cubeIndex |= 8;
+  
+    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z))] >= isoLevel) cubeIndex |= 16;
+    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z + 1))] >= isoLevel) cubeIndex |= 32;
+    if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y + 1), int(pos.z + 1))] >= isoLevel) cubeIndex |= 64;
+    if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z))] >= isoLevel) cubeIndex |= 128;
     
-    int[] tri = TRIANGLE_TABLE[cubeIndex];
+    // (9, 10, 8), (10, 11, 8)
+    
+    int[] tri = TRIANGLE_TABLE[240];
     for(int i = 0; i < 16; i += 3){
         if(tri[i] == -1) break;
 
+        ivec2 pointsIndices = EDGE_TABLE[tri[i]];
+        
         Triangle triangle;
         triangle.p1 = vec4(evaluateTriangle(tri[i], pos), 0);
+        //triangle.p1 = vec4(tri[i], tri[i + 1], tri[i + 2], 0);
         triangle.p2 = vec4(evaluateTriangle(tri[i + 1], pos), 0);
+        //triangle.p2 = vec4(pointsIndices.x, pointsIndices.y, 0, 0);
         triangle.p3 = vec4(evaluateTriangle(tri[i + 2], pos), 0);
         
         uint index = atomicAdd(counter, 1u);
