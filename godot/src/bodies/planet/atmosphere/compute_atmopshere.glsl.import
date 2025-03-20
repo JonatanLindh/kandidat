@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://wcqrih1myite"
+path="res://.godot/imported/compute_atmopshere.glsl-e0e53648f568e4956612894182412567.res"
+
+[deps]
+
+source_file="res://src/bodies/planet/atmosphere/compute_atmopshere.glsl"
+dest_files=["res://.godot/imported/compute_atmopshere.glsl-e0e53648f568e4956612894182412567.res"]
+
+[params]
+
