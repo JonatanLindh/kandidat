@@ -61,17 +61,15 @@ public partial class McSpawner : Node
             float[,,] dataPoints = celestialBody.GetNoise();
 			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
 
-            // Disable backface culling
-            //_meshInstance3D.MaterialOverride = new StandardMaterial3D();
-            //((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
+			// Disable backface culling
+			StandardMaterial3D material = new StandardMaterial3D();
+			material.AlbedoColor = Colors.Gray;
+			material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
+			_meshInstance3D.MaterialOverride = material;
+			((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
 
-            var material = new OrmMaterial3D();
-            _meshInstance3D.MaterialOverride = material;
-			material.CullMode = BaseMaterial3D.CullModeEnum.Back;
-            material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
-            material.AlbedoColor = Colors.YellowGreen;
-            this.AddChild(_meshInstance3D);
-        }
+			this.AddChild(_meshInstance3D);
+		}
 	}
 
 	// Old test method for generating datapoints
