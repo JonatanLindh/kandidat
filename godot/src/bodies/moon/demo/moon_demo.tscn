@@ -1,0 +1,27 @@
+[gd_scene load_steps=6 format=3 uid="uid://bk08dcpc2f8j2"]
+
+[ext_resource type="Texture2D" uid="uid://dnf7n3p4dr322" path="res://src/galaxy/skybox/traditional_skybox/panorama/skybox_6000x3000.png" id="1_j8447"]
+[ext_resource type="PackedScene" uid="uid://ckitx7rndvp5l" path="res://src/bodies/moon/moon.tscn" id="2_dq2k1"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_ddj5a"]
+panorama = ExtResource("1_j8447")
+
+[sub_resource type="Sky" id="Sky_oo5cl"]
+sky_material = SubResource("PanoramaSkyMaterial_ddj5a")
+
+[sub_resource type="Environment" id="Environment_6v2qm"]
+background_mode = 2
+sky = SubResource("Sky_oo5cl")
+
+[node name="MoonDemo" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_6v2qm")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(-0.680721, 0.43676, -0.588098, 0, 0.802817, 0.596225, 0.732543, 0.405863, -0.546495, 0, 0, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 2000.0
+
+[node name="Moon" parent="." instance=ExtResource("2_dq2k1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56.342, 0, 0)

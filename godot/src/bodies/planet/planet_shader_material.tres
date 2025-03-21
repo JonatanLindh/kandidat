@@ -10,6 +10,7 @@ colors = PackedColorArray(0.0117647, 0.156863, 0.784314, 1, 0.506929, 0.449707, 
 gradient = SubResource("Gradient_rc45s")
 
 [resource]
+resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("1_ayube")
 shader_parameter/min_height = 4.2151

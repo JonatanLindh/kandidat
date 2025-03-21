@@ -14,7 +14,7 @@ void fragment() {
 	float t = (height / (max_height-min_height)) - (min_height / (max_height-min_height));
 	t += 0.01;
 	vec3 color = texture(height_color, vec2(t, 0.)).rgb;
-	
+
 	ALBEDO = color;
 }
 

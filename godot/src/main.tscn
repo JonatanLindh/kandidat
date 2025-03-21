@@ -1,13 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://jk8g1021r4dv"]
+[gd_scene load_steps=5 format=3 uid="uid://d3wlkwtb2exko"]
 
-[ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="1_hvwwk"]
-[ext_resource type="PackedScene" uid="uid://dru1frs0nrf78" path="res://src/system/system.tscn" id="2_ngn7d"]
-[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="2_x23uw"]
+[ext_resource type="Script" path="res://src/main.gd" id="1_g1htn"]
+[ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="1_u50xt"]
+[ext_resource type="PackedScene" uid="uid://b1tnbk5es8mnt" path="res://src/system_manager/system_manager.tscn" id="2_w3rat"]
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="2_x40xi"]
 
-[node name="Node3D" type="Node3D"]
+[node name="Main" type="Node3D"]
+script = ExtResource("1_g1htn")
 
-[node name="Skybox" parent="." instance=ExtResource("1_hvwwk")]
+[node name="Skybox" parent="." instance=ExtResource("1_u50xt")]
 
-[node name="Player" parent="." instance=ExtResource("2_x23uw")]
+[node name="Player" parent="." instance=ExtResource("2_x40xi")]
 
-[node name="System" parent="." instance=ExtResource("2_ngn7d")]
+[node name="SystemManager" parent="." instance=ExtResource("2_w3rat")]

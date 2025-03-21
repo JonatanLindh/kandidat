@@ -15,6 +15,7 @@ var flying := true
 var last_position := Vector3.ZERO
 var last_speed := 0.0
 var floating_flag := false
+var vertical_multiplier = 0.1
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -80,10 +81,10 @@ func apply_velocity(dir : Vector3, speed_multiplier):
 func handle_flying() -> void:
 	if Input.is_action_just_pressed("up"):
 		floating_flag = true
-		velocity.y += float_speed
+		velocity.y += float_speed * current_speed * vertical_multiplier;
 	elif Input.is_action_just_pressed("down"):
 		floating_flag = true
-		velocity.y += -float_speed
+		velocity.y += -float_speed * current_speed * vertical_multiplier;
 	if Input.is_action_just_released("up"):
 		floating_flag = false
 		velocity.y = move_toward(velocity.y, 0, float_speed)

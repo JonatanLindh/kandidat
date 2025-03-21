@@ -1,4 +1,4 @@
-use super::body::GravityBody;
+use super::{body::GravityBody, trajectories::TrajectoryWorker};
 use godot::{
     classes::{MeshInstance3D, notify::Node3DNotification},
     prelude::*,
@@ -44,7 +44,7 @@ pub struct GravityController {
 
     /// Number of steps to compute when simulating trajectories
     #[export]
-    #[init(val = 1000)]
+    #[init(val = 4000)]
     pub simulation_steps: u32,
 
     /// Time increment (in seconds) between each simulation step
@@ -56,6 +56,8 @@ pub struct GravityController {
     #[export]
     #[init(val = true)]
     pub auto_update_trajectories: bool,
+
+    pub trajectory_worker: Option<TrajectoryWorker>,
 
     /// Optional body to use as the reference point for trajectory calculations
     #[export]
@@ -98,11 +100,12 @@ pub struct SimulatedBody {
 impl From<&Gd<GravityBody>> for SimulatedBody {
     fn from(body: &Gd<GravityBody>) -> Self {
         let b = body.bind();
+
         Self {
             body_instance_id: body.instance_id(),
             mass: b.mass,
             vel: b.velocity,
-            pos: b.base().get_position(),
+            pos: body.get_position(),
         }
     }
 }
@@ -112,20 +115,15 @@ impl GravityController {
     ///
     /// This method:
     /// - Disables physics processing to prevent simulation while in the editor
-    /// - Connects the trajectory update signal to the appropriate handler
     ///
     /// Only runs in the editor context due to the `#[editor(only)]` attribute.
     #[editor(only)]
     fn setup_editor(&mut self) {
+        // Simulate less steps in the editor for "snappyness"
+        self.simulation_steps = 1000;
+
         // Disable physics in editor
         self.base_mut().set_physics_process(false);
-
-        let callable = self
-            .base()
-            .callable(__gdext_GravityController_Funcs::_on_update_trajectories);
-
-        self.base_mut()
-            .connect(Self::UPDATE_TRAJECTORY_SIGNAL, &callable);
     }
 
     /// Recursively collects all [`GravityBody`] instances that are descendants of this controller.
