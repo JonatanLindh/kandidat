@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public partial class InfiniteGalaxy : Node3D
 {
-	[Export] PackedScene starScene;
+	[Export] Mesh starMesh;
 	[Export] FastNoiseLite noise;
 	[Export] Node3D player;
 
@@ -58,7 +58,7 @@ public partial class InfiniteGalaxy : Node3D
 		StarChunk chunk = (StarChunk) starChunk.Instantiate();
 		chunk.Name = "Chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
 
-		chunk.starScene = starScene;
+		chunk.starMesh = starMesh;
 		chunk.galaxyNoise = noise;
 
 		chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos);

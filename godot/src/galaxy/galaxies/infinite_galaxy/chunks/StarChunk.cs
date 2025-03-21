@@ -1,10 +1,14 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class StarChunk : Node3D
 {
 	public FastNoiseLite galaxyNoise { private get; set; }
-	public PackedScene starScene { private get; set; }
+	public Mesh starMesh { private get; set; }
+
+	[Export] StarChunkMultiMesh chunkMultiMesh;
+	List<Transform3D> starTransforms = new List<Transform3D>();
 
 	int chunkSize;
 	int starCount;
@@ -24,6 +28,7 @@ public partial class StarChunk : Node3D
 		uint placementSeed = seedGen.GenerateSeed(galaxySeed, chunkPos);
 		GD.Seed(placementSeed);
 
+		int starIndex = 0;
 		for (int i = 0; i < starCount; i++)
 		{
 			Vector3 localPoint = new Vector3(
@@ -37,9 +42,11 @@ public partial class StarChunk : Node3D
 
 			if (ISOlevel < noiseVal)
 			{
-				Node3D star = (Node3D)starScene.Instantiate();
-				star.Position = localPoint + ChunkPositionOffset();
+				Transform3D starTransform = new Transform3D(Basis.Identity, localPoint + ChunkPositionOffset());
+				starTransforms.Add(starTransform);
+				starIndex++;
 
+				/*
 				if (star is SelectableStar)
 				{
 					SelectableStar selectableStar = (SelectableStar)star;
@@ -47,9 +54,12 @@ public partial class StarChunk : Node3D
 					selectableStar.SetSeed(starSeed);
 				}
 
-				AddChild(star);
+				//AddChild(star);
+				*/
 			}
 		}
+
+		chunkMultiMesh.DrawStars(starTransforms, starIndex, starMesh);
 	}
 
 	private Vector3 ChunkPositionOffset()
