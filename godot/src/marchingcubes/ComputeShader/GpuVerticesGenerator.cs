@@ -81,6 +81,10 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 		int maxTriangles = maxTrisPerVoxel * (int)Math.Pow(_size, 3);
 		int floatsPerTriangle = sizeof(float) * 3;
 		int bytesPerTriangle = floatsPerTriangle * sizeof(float);
+		const int maxTrisPerVoxel = 5;
+		int maxTriangles = maxTrisPerVoxel * _sizeX * _sizeY * _sizeZ;
+		const int floatsPerTriangle = sizeof(float) * 3;
+		const int bytesPerTriangle = floatsPerTriangle * sizeof(float);
 		var maxBytes = new byte[bytesPerTriangle * maxTriangles];
 		
 		_triangleBuffer = _renderingDevice.StorageBufferCreate((uint)maxBytes.Length, maxBytes);
@@ -152,11 +156,14 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 		_renderingDevice.ComputeListBindComputePipeline(computeList, _pipeline);
 		_renderingDevice.ComputeListBindUniformSet(computeList, _uniformSet, 0);
 
-		var groupsNeeded = (uint)Math.Ceiling(_size / 8.0f);
+		var groupsNeeded = (uint)Math.Ceiling(_sizeX / 8.0f);
+		var groupsNeededX = (uint)Math.Ceiling(_sizeX / 8.0f);
+		var groupsNeededY = (uint)Math.Ceiling(_sizeY / 8.0f);
+		var groupsNeededZ = (uint)Math.Ceiling(_sizeZ / 8.0f);
 		_renderingDevice.ComputeListDispatch(computeList, 
-			xGroups: groupsNeeded, 
-			yGroups: groupsNeeded, 
-			zGroups: groupsNeeded);
+			xGroups: groupsNeededX, 
+			yGroups: groupsNeededY, 
+			zGroups: groupsNeededZ);
 		_renderingDevice.ComputeListEnd();
 
 		_renderingDevice.Submit();
