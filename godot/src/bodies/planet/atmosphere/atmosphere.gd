@@ -9,6 +9,12 @@ extends MeshInstance3D
 	set(new_dir):
 		sun_direction = new_dir
 		_update_shader_params()
+
+@export var od_tex_filename : String:
+	set(value):
+		od_tex_filename = value
+		var od_tex := _get_od_tex()
+		if mesh and mesh.material: mesh.material.set_shader_parameter("optical_depth_texture", od_tex)
 		
 #TODO will be changed to depend on rays
 var atmosphere_color := Vector3(
@@ -16,13 +22,15 @@ var atmosphere_color := Vector3(
 		randf_range(-10, 10), 
 		randf_range(-10, 10)
 	)
-
+	
+	
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# Duplicate shader to allow uniuqe parameters
 	if mesh.material:
 		mesh.material = mesh.material.duplicate()
 	_update_shader_params()
+	_update_shader_od()
 	mesh.size = Vector3(radius*3,radius*3,radius*3)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -43,3 +51,21 @@ func _update_shader_params():
 		mesh.material.set_shader_parameter("planet_radius", radius)
 		mesh.material.set_shader_parameter("camera_position", cam_pos)
 		mesh.material.set_shader_parameter("camera_direction", cam_dir)
+
+func _get_od_tex() -> ImageTexture:
+	if od_tex_filename.is_empty(): return
+
+	var img_in = FileAccess.open("res://src/bodies/planet/atmosphere/textures/%s.i" % od_tex_filename, FileAccess.READ)
+	var dat_in = FileAccess.open("res://src/bodies/planet/atmosphere/textures/%s.idat" % od_tex_filename, FileAccess.READ)
+
+	var dat = JSON.parse_string(dat_in.get_line())
+	var inbytes = img_in.get_buffer(dat.blen)
+
+	var od_img := Image.create_from_data(dat.width, dat.height, false, dat.format, inbytes)
+	var od_tex := ImageTexture.create_from_image(od_img)
+
+	return od_tex
+
+func _update_shader_od():
+	var od_tex := _get_od_tex() 
+	mesh.material.set_shader_parameter("optical_depth_texture", od_tex)
