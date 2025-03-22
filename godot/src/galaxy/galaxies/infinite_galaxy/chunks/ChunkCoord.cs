@@ -47,4 +47,9 @@ public partial class ChunkCoord
 	{
 		return HashCode.Combine(x, y, z);
 	}
+
+	public override string ToString()
+	{
+		return $"{x}, {y}, {z}";
+	}
 }
