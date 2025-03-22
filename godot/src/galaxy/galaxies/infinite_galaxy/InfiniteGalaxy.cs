@@ -96,6 +96,16 @@ public partial class InfiniteGalaxy : Node3D
 		}
 	}
 
+	public IStarChunkData[] GetGeneratedChunks()
+	{
+		return starChunks.ToArray();
+	}
+
+	public uint GetSeed()
+	{
+		return seed;
+	}
+
 	public void SetPlayer(Node3D player)
 	{
 		this.player = player;
