@@ -3,7 +3,7 @@ using System;
 
 public partial class UISelectableStar : CanvasLayer
 {
-	SelectableStar star;
+	Star star;
 
 	Node3D player;
 
@@ -70,14 +70,14 @@ public partial class UISelectableStar : CanvasLayer
 		}
 	}
 
-	public void SetStar(SelectableStar star)
+	public void SetStar(Star star)
 	{
 		this.star = star;
-		this.targetPosition = star.Position;
+		this.targetPosition = star.transform.Origin;
 
-		starNameLabel.Text = "Star"; // todo, set actual name
-		starPosLabel.Text = star.Position.ToString("F2");
-		starSeed.Text = star.GetSeed().ToString();
+		starNameLabel.Text = star.name;
+		starPosLabel.Text = star.transform.Origin.ToString("F2");
+		starSeed.Text = star.seed.ToString();
 
 		Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
 		starSelect.Position = screenPosition;
@@ -98,11 +98,11 @@ public partial class UISelectableStar : CanvasLayer
 	public void OnVisitButtonPressed()
 	{
 		if (star != null) {
-			EmitSignal(nameof(ExploreStar), this.star.GetSeed());
-			// star.LoadSolarSystem();z
+			EmitSignal(nameof(ExploreStar), this.star.seed);
+			GD.Print("Emits signal to enter solar system, of seed " + this.star.seed);
 		}
-		
 	}
+
 	public void OnTravelButtonPressed()
 	{
 		if (player != null)
