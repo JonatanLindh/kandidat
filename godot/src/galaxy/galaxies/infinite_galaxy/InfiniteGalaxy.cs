@@ -29,10 +29,11 @@ public partial class InfiniteGalaxy : Node3D
 	public override void _Process(double delta)
 	{
 		if (player == null)
-			{
-				GD.PrintErr("Player object is null.");
-				return;
-			}
+		{
+			GD.PrintErr("Player object is null.");
+			return;
+		}
+
 		ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
 
 		for (int x = -viewDistance; x <= viewDistance; x++)
@@ -71,7 +72,7 @@ public partial class InfiniteGalaxy : Node3D
 	{
 		foreach (StarChunk c in starChunks)
 		{
-			if (c.chunkPos.Equals(chunk))
+			if (c.pos.Equals(chunk))
 			{
 				return true;
 			}
@@ -85,9 +86,9 @@ public partial class InfiniteGalaxy : Node3D
 		for(int i = starChunks.Count - 1; i >= 0; i--)
 		{
 			StarChunk chunk = starChunks[i];
-			if (Math.Abs(chunk.chunkPos.x - playerChunk.x) > viewDistance || 
-				Math.Abs(chunk.chunkPos.y - playerChunk.y) > viewDistance || 
-				Math.Abs(chunk.chunkPos.z - playerChunk.z) > viewDistance)
+			if (Math.Abs(chunk.pos.x - playerChunk.x) > viewDistance || 
+				Math.Abs(chunk.pos.y - playerChunk.y) > viewDistance || 
+				Math.Abs(chunk.pos.z - playerChunk.z) > viewDistance)
 			{
 				starChunks.RemoveAt(i);
 				chunk.QueueFree();
