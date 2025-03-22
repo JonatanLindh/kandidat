@@ -9,8 +9,8 @@ public partial class StarChunk : Node3D, IStarChunkData
 
 	[Export] StarChunkMultiMesh chunkMultiMesh;
 
-	public Transform3D[] stars { get; private set; }
-	Transform3D[] localStars;
+	public Vector3[] stars { get; private set; }
+	Vector3[] localStars;
 
 	public int size { get; private set; }
 	int starCount;
@@ -27,7 +27,7 @@ public partial class StarChunk : Node3D, IStarChunkData
 		this.ISOlevel = ISOlevel;
 		this.pos = pos;
 
-		localStars = new Transform3D[starCount];
+		localStars = new Vector3[starCount];
 
 		uint placementSeed = seedGen.GenerateSeed(galaxySeed, pos);
 		GD.Seed(placementSeed);
@@ -46,25 +46,14 @@ public partial class StarChunk : Node3D, IStarChunkData
 
 			if (ISOlevel < noiseVal)
 			{
-				Transform3D starTransform = new Transform3D(Basis.Identity, localPoint + ChunkPositionOffset());
-				localStars[starIndex] = starTransform;
+				Vector3 starPos = localPoint + ChunkPositionOffset();
+				localStars[starIndex] = starPos;
 				starIndex++;
-
-				/*
-				if (star is SelectableStar)
-				{
-					SelectableStar selectableStar = (SelectableStar)star;
-					uint starSeed = seedGen.GenerateSeed(galaxySeed, globalPoint);
-					selectableStar.SetSeed(starSeed);
-				}
-				*/
-
-				//AddChild(star);
 			}
 		}
 
 		Array.Resize(ref localStars, starIndex);
-		stars = new Transform3D[localStars.Length];
+		stars = new Vector3[localStars.Length];
 		stars = localStars;
 
 		chunkMultiMesh.DrawStars(stars, starMesh);
