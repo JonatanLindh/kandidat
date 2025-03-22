@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dvnb52h33h1dg"]
 
-[ext_resource type="Script" path="res://src/marchingcubes/McChunkSpawner.cs" id="1_lynak"]
+[ext_resource type="Script" uid="uid://cbilwujatcvxy" path="res://src/marchingcubes/McChunkSpawner.cs" id="1_lynak"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_ddpk8"]
 noise_type = 3
