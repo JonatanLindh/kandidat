@@ -30,7 +30,15 @@ func _ready() -> void:
 	if mesh.material:
 		mesh.material = mesh.material.duplicate()
 	_update_shader_params()
-	_update_shader_od()
+	
+	# Really slow OD baking
+	#var od_generator = OdGenerator.new()
+	#od_generator.atmosphere_radius = radius * 1.5
+	#od_generator.planet_radius = radius
+	#od_generator.filename = str(get_instance_id())
+	#od_generator.generate_od_img()
+	#od_tex_filename = od_generator.filename
+	
 	mesh.size = Vector3(radius*3,radius*3,radius*3)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

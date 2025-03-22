@@ -5,8 +5,10 @@ class_name OdGenerator
 
 @export var filename : String = "od_tex.png" :
 	set(value):
-		filename = value
+		filename = "od_tex" + value + ".png"
 		print("Filename set to: ", filename)
+	get():
+		return filename
 
 @export_category("Optical Depth Data")
 @export var optical_depth_sample_size : int = 50 :
@@ -53,16 +55,6 @@ class_name OdGenerator
 	set(value):
 		planet_radius = value
 		print("Planet radius set to: ", planet_radius)
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
 
 func _calculate_optical_depth() -> Image:
 	# create image
