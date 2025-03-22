@@ -7,8 +7,7 @@ public partial class GalaxyMap : Node3D
 	UISelectableStar uiSelectableStar;
 	
 	StarFinder starFinder;
-	float range = 1000;
-	float radius = 100;
+	float radius = 10;
 
 	Node3D player;
 
@@ -33,7 +32,7 @@ public partial class GalaxyMap : Node3D
 			if(eventButton.Pressed && eventButton.ButtonIndex == MouseButton.Left)
 			{
 				Vector3 worldDir = GetViewport().GetCamera3D().ProjectPosition(eventButton.Position, 1).Normalized();
-				Star star = starFinder.FindStar(this.player.Position, worldDir * range, radius, radius);
+				Star star = starFinder.FindStar(this.player.Position, worldDir, radius, radius);
 
 				if(star != null)
 				{

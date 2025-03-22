@@ -10,20 +10,37 @@ public partial class StarFinder : Node
 	/// Checking at set intervals with a given radius.
 	/// 
 	/// radius should probably equal interval to avoid most misses
+	/// 
+	/// range is the maximum distance to check, 0 for infinite (until chunks run out)
 	/// </summary>
-	public Star FindStar(Vector3 from, Vector3 to, float radius, float interval)
+	public Star FindStar(Vector3 from, Vector3 dir, float radius, float interval, float range = 0)
 	{
-		IStarChunkData[] chunks = galaxy.GetGeneratedChunks();
-		IStarChunkData currentChunk = chunks[0];
+		IStarChunkData currentChunk = GetChunkData(from);
+		Vector3 currentPos = from;
 
-		// TODO get actual star
-		//
+		while (range == 0 || from.DistanceTo(currentPos) < range)
+		{
+			currentChunk = GetChunkData(currentPos);
 
-		//ChunkCoord pos = ChunkCoord.ToChunkCoord(currentChunk.size, from);
-		//GD.Print(pos.ToString());
+			if (currentChunk == null)
+			{
+				GD.Print("No star found & done checking chunks");
+				return null;
+			}
 
-		Star star = CreateStar(currentChunk.stars[0], galaxy.GetSeed());
-		return star;
+			foreach (Vector3 starPos in currentChunk.stars)
+			{
+				if ((starPos - currentPos).Length() < radius)
+				{
+					Star star = CreateStar(starPos, galaxy.GetSeed());
+					return star;
+				}
+			}
+
+			currentPos += dir * interval;
+		}
+
+		return null;
 	}
 
 	private Star CreateStar(Vector3 position, uint seed)
@@ -37,5 +54,28 @@ public partial class StarFinder : Node
 
 		Star star = new Star(starTransform, starSeed);
 		return star;
+	}
+
+	private IStarChunkData GetChunkData(Vector3 position)
+	{
+		IStarChunkData[] chunks = galaxy.GetGeneratedChunks();
+
+		if (chunks.Length == 0)
+		{
+			GD.PrintErr("No chunks found in galaxy");
+			return null;
+		}
+
+		ChunkCoord chunkPos = ChunkCoord.ToChunkCoord(chunks[0].size, position);
+
+		foreach (IStarChunkData chunk in chunks)
+		{
+			if (chunk.pos.Equals(chunkPos))
+			{
+				return chunk;
+			}
+		}
+
+		return null;
 	}
 }
