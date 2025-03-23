@@ -31,10 +31,12 @@ public partial class GalaxyMap : Node3D
 		{
 			if(eventButton.Pressed && eventButton.ButtonIndex == MouseButton.Left)
 			{
-				Vector3 worldDir = GetViewport().GetCamera3D().ProjectPosition(eventButton.Position, 1).Normalized();
-				Star star = starFinder.FindStar(this.player.Position, worldDir, radius, radius);
+				Camera3D camera = GetViewport().GetCamera3D();
+				Vector3 dir = camera.ProjectRayNormal(eventButton.Position);
 
-				if(star != null)
+				Star star = starFinder.FindStar(this.player.Position, dir, radius, radius);
+
+				if (star != null)
 				{
 					GD.Print($"Selected star: [Name: {star.name} | Position: {star.transform.Origin} | Seed: {star.seed}]");
 

@@ -9,7 +9,7 @@ public partial class StarFinder : Node
 	/// Finds along a line from one point to another.
 	/// Checking at set intervals with a given radius.
 	/// 
-	/// radius should probably equal interval to avoid most misses
+	/// radius should probably at least equal interval to avoid most misses
 	/// 
 	/// range is the maximum distance to check, 0 for infinite (until chunks run out)
 	/// </summary>
