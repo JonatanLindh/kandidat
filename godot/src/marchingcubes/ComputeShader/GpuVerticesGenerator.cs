@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Threading;
 using Godot.Collections;
 using Array = Godot.Collections.Array;
 
@@ -9,7 +11,6 @@ namespace Kandidat.marchingcubes.ComputeShader;
 public class GpuVerticesGenerator : IVerticesGenerationStrategy
 {
 	private float _isoLevel = 0f;
-	private int _size = 41;
 	private int _sizeX;
 	private int _sizeY;
 	private int _sizeZ;
@@ -31,7 +32,18 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
     private float[] _triangles;
     private int _triangleCount;
     
+    private const int ChunkSize = 32;
+    private const int WorkGroupSize = 8;
+    private const int NumVoxelPerAxis = ChunkSize * WorkGroupSize;
 
+
+    private Thread thread;
+
+    public GpuVerticesGenerator()
+	{
+		thread = new Thread(InitGpu);
+		thread.Start();
+	}
     ~GpuVerticesGenerator()
 	{
 		CleanupGpu();
@@ -44,12 +56,35 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 	    _sizeX = datapoints.GetLength(0);
 	    _sizeY = datapoints.GetLength(1);
 	    _sizeZ = datapoints.GetLength(2);
-	    InitGpu();
-	    RunCompute();
-	    ProcessComputeData();
-	    CreateVertices();
-	    
-	    
+	    try
+	    {
+		    thread.Join();
+		    for (int xOffset = 0; xOffset < _sizeX; xOffset += ChunkSize - 1)
+		    {
+			    for (int yOffset = 0; yOffset < _sizeY; yOffset += ChunkSize - 1)
+			    {
+				    for (int zOffset = 0; zOffset < _sizeZ; zOffset += ChunkSize - 1)
+				    {
+					    // Update uniform buffer with current chunk information
+					    int chunkXSize = Math.Min(ChunkSize, _sizeX - xOffset);
+					    int chunkYSize = Math.Min(ChunkSize, _sizeY - yOffset);
+					    int chunkZSize = Math.Min(ChunkSize, _sizeZ - zOffset);
+
+					    UpdateChunkUniforms(new Vector3I(xOffset, yOffset, zOffset), 
+						    new Vector3I(chunkXSize, chunkYSize, chunkZSize));
+
+					    RunCompute(new Vector3(chunkXSize, chunkYSize, chunkZSize));
+					    ProcessComputeData();
+					    CreateVertices();
+				    }
+			    }
+		    }
+	    }
+	    finally
+	    {
+		    CleanupGpu();
+	    }
+
 	    return _vertices;
     }
 
@@ -77,12 +112,8 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
     private void SetupBuffers()
 	{
 		// Create Triangle Buffer
-		int maxTrisPerVoxel = 5;
-		int maxTriangles = maxTrisPerVoxel * (int)Math.Pow(_size, 3);
-		int floatsPerTriangle = sizeof(float) * 3;
-		int bytesPerTriangle = floatsPerTriangle * sizeof(float);
 		const int maxTrisPerVoxel = 5;
-		int maxTriangles = maxTrisPerVoxel * _sizeX * _sizeY * _sizeZ;
+		int maxTriangles = maxTrisPerVoxel * (int)Math.Pow(ChunkSize, 3);
 		const int floatsPerTriangle = sizeof(float) * 3;
 		const int bytesPerTriangle = floatsPerTriangle * sizeof(float);
 		var maxBytes = new byte[bytesPerTriangle * maxTriangles];
@@ -96,11 +127,8 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 		triangleUniform.AddId(_triangleBuffer);
 		
 		// Create Data Points Buffer
-		var dataPoints = _dataPoints;
-		int totalDataPoints = dataPoints.GetLength(0) * dataPoints.GetLength(1) * dataPoints.GetLength(2);
-		var dataPointsBytes = new byte[totalDataPoints * sizeof(float)];
+		var dataPointsBytes = new byte[(ChunkSize * ChunkSize * ChunkSize) * sizeof(float)];
 
-		Buffer.BlockCopy(dataPoints, 0, dataPointsBytes, 0, totalDataPoints * sizeof(float));
 		
 		_dataPointsBuffer = _renderingDevice.StorageBufferCreate((uint)dataPointsBytes.Length, dataPointsBytes);
 		var dataPointsUniform = new RDUniform()
@@ -150,25 +178,90 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 		_pipeline = _renderingDevice.ComputePipelineCreate(_shaderRid);
 	}
     
-	private void RunCompute()
+	private void RunCompute(Vector3 chunkSize)
 	{
+		// Now create the compute list
 		var computeList = _renderingDevice.ComputeListBegin();
 		_renderingDevice.ComputeListBindComputePipeline(computeList, _pipeline);
 		_renderingDevice.ComputeListBindUniformSet(computeList, _uniformSet, 0);
 
+		
 		var groupsNeeded = (uint)Math.Ceiling(_sizeX / 8.0f);
+		uint workGroupSize = 8;
+		/*
 		var groupsNeededX = (uint)Math.Ceiling(_sizeX / 8.0f);
 		var groupsNeededY = (uint)Math.Ceiling(_sizeY / 8.0f);
-		var groupsNeededZ = (uint)Math.Ceiling(_sizeZ / 8.0f);
-		_renderingDevice.ComputeListDispatch(computeList, 
-			xGroups: groupsNeededX, 
-			yGroups: groupsNeededY, 
+		var groupsNeededZ = (uint)Math.Ceiling(chunkZSize / 8.0f);
+		*/
+		var groupsNeededX = (uint)Math.Ceiling(chunkSize.X / workGroupSize);
+		var groupsNeededY = (uint)Math.Ceiling(chunkSize.Y / workGroupSize);
+		var groupsNeededZ = (uint)Math.Ceiling(chunkSize.Z / workGroupSize);
+		_renderingDevice.ComputeListDispatch(computeList,
+			xGroups: groupsNeededX,
+			yGroups: groupsNeededY,
 			zGroups: groupsNeededZ);
+			
 		_renderingDevice.ComputeListEnd();
-
 		_renderingDevice.Submit();
+
 	}
+
+	private void UpdateChunkUniforms(Vector3I offset, Vector3I chunkSize)
+	{
+		// Update the datapoints buffer
+		var batch = ExtractBatch(chunkSize, offset);
+		var dataPointsBytes = new byte[batch.Length * sizeof(float)];
+		Buffer.BlockCopy(batch, 0, dataPointsBytes, 0, dataPointsBytes.Length);
+		_renderingDevice.BufferUpdate(_dataPointsBuffer, 0, (uint)dataPointsBytes.Length, dataPointsBytes);
+		
+		var paramsArray = new float[]
+		{
+			chunkSize.X, 
+			chunkSize.Y, 
+			chunkSize.Z,
+			_isoLevel,
+			_scale,
+			offset.X, 
+			offset.Y,
+			offset.Z 
+		};
     
+		var paramBytes = new byte[paramsArray.Length * sizeof(float)];
+		Buffer.BlockCopy(paramsArray, 0, paramBytes, 0, paramBytes.Length);
+    
+		// Update the uniform buffer
+		_renderingDevice.BufferUpdate(_paramBuffer, 0, (uint)paramBytes.Length, paramBytes);
+		
+		// Reset the counter buffer
+		
+		var counter = new uint[] {0};
+		var counterBytes = new byte[sizeof(uint)];
+		Buffer.BlockCopy(counter, 0, counterBytes, 0, counterBytes.Length);
+		_renderingDevice.BufferUpdate(_counterBuffer, 0, (uint)counterBytes.Length, counterBytes);
+		
+		
+	}
+
+	private float[] ExtractBatch(Vector3I chunkSize, Vector3I offset)
+	{
+		var datapoints = _dataPoints;
+		
+		var batch = new float[chunkSize.X * chunkSize.Y * chunkSize.Z];
+		
+		for (int z = 0; z < chunkSize.Z; z++)
+		{
+			for (int y = 0; y < chunkSize.Y; y++)
+			{
+				for (int x = 0; x < chunkSize.X; x++)
+				{
+					var index = new Vector3I(x, y, z) + offset;
+					batch[x + chunkSize.X * y + chunkSize.X * chunkSize.Y * z] = datapoints[index.X, index.Y, index.Z];
+				}
+			}
+		}
+		return batch;
+	}
+	
 	private void ProcessComputeData()
 	{
 		_renderingDevice.Sync();
@@ -184,8 +277,8 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 	
 	private void CreateVertices()
 	{
-		var numVertices = _triangleCount * 3;
-		_vertices.Capacity = numVertices;
+		//var numVertices = _triangleCount * 3;
+		//_vertices.Capacity = numVertices;
 		
 		for (int i = 0; i < _triangleCount; i++)
 		{

@@ -31,12 +31,20 @@ public class MarchingCube
 	/// Initializes a new instance of the MarchingCube class with the specified scale and threshold.
 	/// </summary>
 	/// <param name="scale">The scale factor for the mesh generation.</param>
+	/// <param name="method">The method used for generating the vertices, either on the cpu or on the gpu</param>
 	/// <param name="threshold">The threshold value for determining the surface of the mesh.</param>
-	public MarchingCube(int scale = 1, float threshold = 0.1f)
+	public MarchingCube(int scale = 1, float threshold = 0.1f, GenerationMethod method = GenerationMethod.Cpu)
 	{
 		_scale = scale;
 		_threshold = threshold;
+		_strategy = method switch
+		{
+			GenerationMethod.Cpu => new CpuVerticesGenerator(),
+			GenerationMethod.Gpu => new GpuVerticesGenerator(),
+			_ => new CpuVerticesGenerator()
+		};
 	}
+
 	~MarchingCube()
 	{
 		_strategy = null;
@@ -47,18 +55,14 @@ public class MarchingCube
 	/// Generates a mesh from a 3D array of float values with the Marching Cubes Algorithm
 	/// </summary>
 	/// <param name="datapoints">3D array of float values representing the scalar field</param>
-	/// <param name="method">The method used for generating the vertices, either on the cpu or on the gpu</param>
 	/// <returns>A MeshInstance3D object representing the generated mesh</returns>
-	public MeshInstance3D GenerateMesh(float[,,] datapoints, GenerationMethod method = GenerationMethod.Cpu)
+	public MeshInstance3D GenerateMesh(float[,,] datapoints)
 	{
-		_strategy = method switch
-		{
-			GenerationMethod.Cpu => new CpuVerticesGenerator(),
-			GenerationMethod.Gpu => new GpuVerticesGenerator(),
-			_ => new CpuVerticesGenerator()
-		};
-
-		var vertices = _strategy.GenerateVertices(datapoints);
+		var sw = new System.Diagnostics.Stopwatch();
+		sw.Start();
+		var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
+		sw.Stop();
+		GD.Print("Time to generate vertices: ", sw.ElapsedMilliseconds, "ms");
 
 		var surfaceTool = new SurfaceTool();
 		surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
