@@ -1,61 +1,117 @@
 using Godot;
+using Godot.Collections;
 using Godot.NativeInterop;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
 /// A class for creating different types of noise to be used when generating planets
 /// </summary>
+[Tool]
 public partial class PlanetNoise : Node, CelestialBodyNoise
 {
-    [Export] private Resource PlanetNoiseResource;
+    private NoiseTexture3D texture3d;
+    private CelestialBodyInput Input;
 
-    public float[,,] GetNoise()
+    public float[,,] CreateDataPoints()
     {
-        if (PlanetNoiseResource is not Planet)
+        Input = GetParent<CelestialBodyInput>();
+        if(Input is not CelestialBodyInput)
         {
-            return null;
+            throw new Exception("Input is not CelestialBodyInput");
         }
 
-        Planet planet = PlanetNoiseResource as Planet;
+        CelestialBodyInput input = Input as CelestialBodyInput;
+        int radius = input.GetRadius();
+        int diameter = 2 * radius;
 
-        int radius = planet.GetRadius();
-        int diameter = radius + radius + 1;
-        float[,,] points = new float[diameter, diameter, diameter];
+        // width, height, depth from editor - + 2 for padding edges with air
+        int width = input.GetWidth() + 2;  int height = input.GetHeight() + 2; int depth = input.GetDepth() + 2;
 
-        Vector3 centerPoint = new Vector3I(diameter, diameter, diameter) / 2;
-
+        float[,,] points = new float[width, height, depth];
+        Vector3 centerPoint = new Vector3I(radius, radius, radius);
+        
         Random random = new Random();
-        Vector3 offset = new Vector3(random.Next(diameter), random.Next(diameter), random.Next(diameter));
 
-        // creates a cube of points
-        for (var x = 0; x < diameter; x++)
+        FastNoiseLite fastNoise = new FastNoiseLite()
         {
-            for (var y = 0; y < diameter; y++)
-            {
-                for (var z = 0; z < diameter; z++)
-                {
+            NoiseType = input.GetNoiseType(),
+            Seed = input.GetSeed()
+        };
+
+         // creates a cube of points
+         for (int x = 0; x < width; x++)
+         {
+             for (int y = 0; y < height; y++)
+             {
+                 for (int z = 0; z < depth; z++)
+                 {
+                    // Pad the boarders of the cube with empty space so marching cubes correctly generates the mesh at the edges
+                    if (x == 0 || x == width - 1 || y == 0 || y == height - 1 || z == 0 || z == depth - 1)
+                    {
+                        points[x, y, z] = -1.0f;
+                        continue;
+                    }
+
                     Vector3 currentPosition = new Vector3I(x, y, z);
                     float distanceToCenter = (centerPoint - currentPosition).Length();
 
-                    // see if the point inside or outside the sphere
-                    if (distanceToCenter < radius)
+                    //fastNoise.Seed = random.Next();
+                    float value = (float)radius - distanceToCenter;
+                    float amplitude = input.GetAmplitude();
+                    float persistence = input.GetPersistence();
+                    float frequency = input.GetFrequency();
+                    float lacunarity = input.GetLacunarity();
+                    Vector3 offset = Vector3.Zero;
+                    for (int i = 0; i < 8; i++)
                     {
-                        // noise-value between 0-1 - will be closer to 1 when the point is close to the surface 
-                        float noiseValue = planet.GetNoise3Dv(currentPosition + offset); //* (distanceToCenter / ((float) radius) + 1);
-                        points[x, y, z] = noiseValue;
+                        value += fastNoise.GetNoise3Dv(frequency * (currentPosition + offset)) * amplitude;
+                        amplitude *= persistence;
+                        frequency *= lacunarity;
+                        offset += Vector3.One;
+
+                        //fastNoise.Seed += 1;
+
                     }
-                    else
-                    {
-                        // if not inside the sphere, just set noise-value to -1 to discard it later
-                        points[x, y, z] = -1.0f;
-                    }
+                    points[x, y, z] = value;
+
 
                 }
             }
-        }
+         }
+        
         return points;
     }
 
+    public ImageTexture3D Get3DTexture(FastNoiseLite fastNoise, int width, int height, int depth, bool useMipmaps)
+    {
+        // Create Slices Of Noise
+        Godot.Collections.Array<Image> noiseSlices = new Godot.Collections.Array<Image>();
+
+        for (int sliceDepth = 0; sliceDepth < depth; sliceDepth++)
+        {
+            // A new 2D image with size diameter x diameter, not inverted, is in3Dspace and is normalized
+            Image image = fastNoise.GetImage(width, height, false, true, true);
+            noiseSlices.Add(image);
+            fastNoise.Offset += Vector3.Back; // (0, 0, 1) - move the noise from GetImage along the z-axis 
+        }
+        ImageTexture3D texture = new ImageTexture3D();
+        texture.Create(noiseSlices[0].GetFormat(), width, height, depth, useMipmaps, noiseSlices);
+        return texture;
+    }
+
+    public float[,,] GetNoise()
+    {
+        return CreateDataPoints();
+    }
+
+    private async Task<bool> UpdateNoise()
+    {
+        texture3d.Noise = new FastNoiseLite();
+        await ToSignal(texture3d, NoiseTexture3D.SignalName.Changed);
+        return true;
+    }
 }
