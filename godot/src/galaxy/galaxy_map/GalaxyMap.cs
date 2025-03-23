@@ -5,10 +5,7 @@ public partial class GalaxyMap : Node3D
 {
 	InfiniteGalaxy galaxy;
 	UISelectableStar uiSelectableStar;
-	
 	StarFinder starFinder;
-	float radius = 10;
-
 	Node3D player;
 
 	// Called when the node enters the scene tree for the first time.
@@ -34,7 +31,7 @@ public partial class GalaxyMap : Node3D
 				Camera3D camera = GetViewport().GetCamera3D();
 				Vector3 dir = camera.ProjectRayNormal(eventButton.Position);
 
-				Star star = starFinder.FindStar(this.player.Position, dir, radius, radius);
+				Star star = starFinder.FindStar(this.player.Position, dir);
 
 				if (star != null)
 				{

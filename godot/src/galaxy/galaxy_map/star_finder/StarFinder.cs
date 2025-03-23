@@ -5,15 +5,16 @@ public partial class StarFinder : Node
 {
 	public InfiniteGalaxy galaxy { private get; set; }
 
+	// Radius should probably at least equal interval to avoid most misses
+	[Export(PropertyHint.Range, "1, 1000, 10")] float radius = 10;
+	[Export(PropertyHint.Range, "1, 1000, 10")] float interval = 10;
+
 	/// <summary>
 	/// Finds along a line from one point to another.
-	/// Checking at set intervals with a given radius.
-	/// 
-	/// radius should probably at least equal interval to avoid most misses
 	/// 
 	/// range is the maximum distance to check, 0 for infinite (until chunks run out)
 	/// </summary>
-	public Star FindStar(Vector3 from, Vector3 dir, float radius, float interval, float range = 0)
+	public Star FindStar(Vector3 from, Vector3 dir, float range = 0)
 	{
 		IStarChunkData currentChunk = GetChunkData(from);
 		Vector3 currentPos = from;
