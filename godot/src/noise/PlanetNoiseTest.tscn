@@ -9,8 +9,17 @@
 [node name="Player" parent="." instance=ExtResource("1_un0fo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 32, 256)
 
-[node name="BasicPlanet2" parent="." instance=ExtResource("1_ycu4v")]
+[node name="BasicPlanet" parent="." instance=ExtResource("1_ycu4v")]
+Width = 64
+Height = 64
+Depth = 64
+Octaves = 4
+Frequency = 2.0
+Lacunarity = 2.0
+Persistence = 0.5
+seed = 725194791
 
 [node name="Skybox" parent="." instance=ExtResource("3_1biuq")]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0)
