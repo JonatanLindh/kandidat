@@ -29,7 +29,7 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
         int diameter = 2 * radius;
 
         // width, height, depth from editor - + 2 for padding edges with air
-        int width = input.GetWidth() + 2;  int height = input.GetHeight() + 2; int depth = input.GetDepth() + 2;
+        int width = input.GetWidth();  int height = input.GetHeight(); int depth = input.GetDepth();
 
         float[,,] points = new float[width, height, depth];
         Vector3 centerPoint = new Vector3I(radius, radius, radius);
