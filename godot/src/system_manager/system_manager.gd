@@ -25,7 +25,7 @@ func getSystemRadius():
 
 func goToGalaxyMap():
 	currentSeed = 0;
-	system.clearPlanets();
+	system.clearBodies();
 	system.hide();
 	galaxyMap.show();
 	ss.show();
