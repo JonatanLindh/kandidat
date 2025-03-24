@@ -10,19 +10,12 @@ extends MeshInstance3D
 		sun_direction = new_dir
 		_update_shader_params()
 
-@export var od_tex_filename : String:
-	set(value):
-		od_tex_filename = value
-		var od_tex := _get_od_tex()
-		if mesh and mesh.material: mesh.material.set_shader_parameter("optical_depth_texture", od_tex)
-		
-#TODO will be changed to depend on rays
-var atmosphere_color := Vector3(
-		randf_range(-10, 10), 
-		randf_range(-10, 10), 
-		randf_range(-10, 10)
-	)
-	
+# CHEATING SINCE WE DON'T HAVE MIE SCATTERING
+const EARTH_LIKE := Vector3(700, 530, 440)
+const PURPLE_ISH := Vector3(540, 700, 380)
+const MARS_LIKE_ORANGE := Vector3(620, 800, 1000)
+
+var wave_lenghts_array := [EARTH_LIKE, PURPLE_ISH, MARS_LIKE_ORANGE]
 	
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -30,15 +23,8 @@ func _ready() -> void:
 	if mesh.material:
 		mesh.material = mesh.material.duplicate()
 	_update_shader_params()
-	
-	# Really slow OD baking
-	#var od_generator = OdGenerator.new()
-	#od_generator.atmosphere_radius = radius * 1.5
-	#od_generator.planet_radius = radius
-	#od_generator.filename = str(get_instance_id())
-	#od_generator.generate_od_img()
-	#od_tex_filename = od_generator.filename
-	
+	var random_wave_length = wave_lenghts_array.pick_random()
+	mesh.material.set_shader_parameter("wavelengths", random_wave_length)
 	mesh.size = Vector3(radius*3,radius*3,radius*3)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -59,21 +45,3 @@ func _update_shader_params():
 		mesh.material.set_shader_parameter("planet_radius", radius)
 		mesh.material.set_shader_parameter("camera_position", cam_pos)
 		mesh.material.set_shader_parameter("camera_direction", cam_dir)
-
-func _get_od_tex() -> ImageTexture:
-	if od_tex_filename.is_empty(): return
-
-	var img_in = FileAccess.open("res://src/bodies/planet/atmosphere/textures/%s.i" % od_tex_filename, FileAccess.READ)
-	var dat_in = FileAccess.open("res://src/bodies/planet/atmosphere/textures/%s.idat" % od_tex_filename, FileAccess.READ)
-
-	var dat = JSON.parse_string(dat_in.get_line())
-	var inbytes = img_in.get_buffer(dat.blen)
-
-	var od_img := Image.create_from_data(dat.width, dat.height, false, dat.format, inbytes)
-	var od_tex := ImageTexture.create_from_image(od_img)
-
-	return od_tex
-
-func _update_shader_od():
-	var od_tex := _get_od_tex() 
-	mesh.material.set_shader_parameter("optical_depth_texture", od_tex)

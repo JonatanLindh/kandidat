@@ -1,7 +1,7 @@
 shader_type spatial;
 render_mode unshaded, depth_test_disabled;
 
-uniform vec3 atmosphere_color : source_color = vec3(0.5, 0.7, 1.0);
+uniform vec3 shadow_color : source_color = vec3(0.0);
 uniform vec3 planet_position;
 uniform vec3 sun_direction;
 uniform float thickness_scale : hint_range(0.0, 0.5, 0.001);
@@ -134,7 +134,7 @@ void fragment() {
 	if(dist_through_atmosphere >= 0.) {
 		const float epsilon = 0.0001;
 		vec3 point_in_atmosphere = cam_pos + cam_dir * rsi.x - epsilon;
-		vec3 light = calculate_light(point_in_atmosphere, cam_dir, dist_through_atmosphere - epsilon * 2., atmosphere_color);
+		vec3 light = calculate_light(point_in_atmosphere, cam_dir, dist_through_atmosphere - epsilon * 2., shadow_color);
 		ALBEDO = light;
 	}
 	ALPHA = clamp((rsi.y-rsi.x)*thickness_scale, 0.0, 1.0);
