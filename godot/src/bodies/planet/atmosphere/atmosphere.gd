@@ -34,7 +34,6 @@ func _process(delta: float) -> void:
 
 func _atmosphere_changed():
 	_update_runtime_shader_params()
-	scale = Vector3(radius, radius, radius)
 
 func _update_runtime_shader_params():
 	if mesh and mesh.material:
