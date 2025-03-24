@@ -32,13 +32,21 @@ fn create_bench_bodies(n: u32) -> Vec<SimulatedBody> {
     bodies
 }
 
-#[criterion]
+fn custom_criterion() -> Criterion {
+    Criterion::default().sample_size(20)
+}
+
+#[criterion(custom_criterion())]
 fn from_elem(c: &mut Criterion) {
     static GRAV_CONST: f32 = 1.0;
     static STEP_DELTA: f32 = 0.01;
 
     let mut group = c.benchmark_group("Gravity: Single time step");
-    for size in [10, 50, 100, 500, 1000, 10000].iter() {
+    for size in [
+        10, 50, 100, 200, 350, 500, 750, 1000, 2000, 4000, 7000, 10000,
+    ]
+    .iter()
+    {
         group.bench_with_input(
             BenchmarkId::new("single-threaded", size),
             size,
