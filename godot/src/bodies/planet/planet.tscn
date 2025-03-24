@@ -1,9 +1,9 @@
 [gd_scene load_steps=23 format=4 uid="uid://cljv6xv7xjelh"]
 
-[ext_resource type="Script" path="res://src/bodies/planet/planet.gd" id="1_w3oq4"]
-[ext_resource type="Script" path="res://src/bodies/planet/planet_data.gd" id="2_14d5b"]
-[ext_resource type="Script" path="res://src/bodies/planet/planet_noise.gd" id="2_77rt1"]
-[ext_resource type="Script" path="res://src/bodies/planet/planet_mesh_face.gd" id="2_mrlx6"]
+[ext_resource type="Script" uid="uid://b66psyvngkw5q" path="res://src/bodies/planet/planet.gd" id="1_w3oq4"]
+[ext_resource type="Script" uid="uid://ut18dhxg7mg5" path="res://src/bodies/planet/planet_data.gd" id="2_14d5b"]
+[ext_resource type="Script" uid="uid://yaegftktkbsk" path="res://src/bodies/planet/planet_noise.gd" id="2_77rt1"]
+[ext_resource type="Script" uid="uid://c0tsb515i237w" path="res://src/bodies/planet/planet_mesh_face.gd" id="2_mrlx6"]
 [ext_resource type="Material" uid="uid://bfly7gucrxb07" path="res://src/bodies/planet/planet_shader_material.tres" id="4_0efhv"]
 [ext_resource type="Shader" path="res://src/bodies/planet/atmosphere/atmosphere.gdshader" id="6_qycik"]
 [ext_resource type="Script" path="res://src/bodies/planet/atmosphere/atmosphere.gd" id="7_jr7qj"]

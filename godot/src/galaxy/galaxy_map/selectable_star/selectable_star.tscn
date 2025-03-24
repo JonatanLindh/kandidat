@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bq3o3cnuyn20f"]
 
-[ext_resource type="Script" path="res://src/galaxy/galaxy_map/selectable_star/SelectableStar.cs" id="1_2bn5i"]
+[ext_resource type="Script" uid="uid://451g1p5au3v0" path="res://src/galaxy/galaxy_map/selectable_star/SelectableStar.cs" id="1_2bn5i"]
 [ext_resource type="Material" uid="uid://5haov76b3va7" path="res://src/galaxy/galaxies/_resources/star/star.tres" id="1_cl8ax"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_21e3v"]
