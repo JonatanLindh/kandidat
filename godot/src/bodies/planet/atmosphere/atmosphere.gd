@@ -13,8 +13,9 @@ extends MeshInstance3D
 const EARTH_LIKE := Vector3(700, 530, 440)
 const PURPLE_ISH := Vector3(540, 700, 380)
 const MARS_LIKE_ORANGE := Vector3(620, 800, 1000)
+const GREEN := Vector3(1000, 530, 800)
 
-var wave_lenghts_array := [EARTH_LIKE, PURPLE_ISH, MARS_LIKE_ORANGE]
+var wave_lenghts_array := [EARTH_LIKE, PURPLE_ISH, MARS_LIKE_ORANGE, GREEN]
 	
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
