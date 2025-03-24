@@ -19,6 +19,10 @@ varying float atmosphere_radius;
 varying vec3 sunDirView;
 varying vec3 scattering_coefficients;
 
+const float CLOSE_THRESHOLD = 100.;
+const float MEDIUM_THRESHOLD = 200.;
+
+
 vec2 raySphere(vec3 sphereCenter, float sphereRadius, vec3 rayOrigin, vec3 rayDir, float maxDepth){
 	vec3 offset = rayOrigin - sphereCenter;
 	float a = 1.;
@@ -88,6 +92,10 @@ vec3 calculate_wavelengths() {
 	return vec3(scatterR, scatterG, scatterB);
 }
 
+float calculate_dist_to_camera(){
+	return length(cam_pos - planet_position);
+}
+
 void vertex() {
 	cam_pos = MODELVIEW_MATRIX[3].xyz;
 }
@@ -115,17 +123,24 @@ void fragment() {
 	
 	// calculate raysphere intersection
 	vec2 rsi = raySphere(planet_position, atmosphere_radius, cam_pos, cam_dir, max_depth);
+	
+	float cam_dist = calculate_dist_to_camera();
+	
+	if (cam_dist < CLOSE_THRESHOLD){
+		float dist_through_atmosphere = min(rsi.y, max_depth - rsi.x);
 
-	float dist_through_atmosphere = min(rsi.y, max_depth - rsi.x);
-
-	// if ray misses atmosphere, dont colour it
-	if(dist_through_atmosphere >= 0.) {
-		const float epsilon = 0.0001;
-		vec3 point_in_atmosphere = cam_pos + cam_dir * rsi.x - epsilon;
-		vec3 light = calculate_light(point_in_atmosphere, cam_dir, dist_through_atmosphere - epsilon * 2., atmosphere_color);
-		ALBEDO = light;
+		// if ray misses atmosphere, dont colour it
+		if(dist_through_atmosphere >= 0.) {
+			const float epsilon = 0.0001;
+			vec3 point_in_atmosphere = cam_pos + cam_dir * rsi.x - epsilon;
+			vec3 light = calculate_light(point_in_atmosphere, cam_dir, dist_through_atmosphere - epsilon * 2., atmosphere_color);
+			ALBEDO = light;
+		}
+		ALPHA = clamp((rsi.y-rsi.x)*thickness_scale, 0.0, 1.0);
+	} else{
+		ALPHA = clamp((rsi.y-rsi.x)*thickness_scale/10., 0.0, 1.0);
+		ALBEDO = calculate_wavelengths();
 	}
-	ALPHA = clamp((rsi.y-rsi.x)*thickness_scale, 0.0, 1.0);
 
 }
 
