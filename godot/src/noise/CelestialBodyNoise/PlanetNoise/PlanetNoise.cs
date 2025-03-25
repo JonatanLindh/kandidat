@@ -4,6 +4,7 @@ using Godot.NativeInterop;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,6 +16,7 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
 {
     private NoiseTexture3D texture3d;
     private CelestialBodyInput Input;
+    private FastNoiseLite fastNoise;
 
     public float[,,] CreateDataPoints()
     {
@@ -36,7 +38,7 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
         
         Random random = new Random();
 
-        FastNoiseLite fastNoise = new FastNoiseLite()
+        fastNoise = new FastNoiseLite()
         {
             NoiseType = input.GetNoiseType(),
             Seed = input.GetSeed()
@@ -56,36 +58,58 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
                         continue;
                     }
 
+                    // Calculate distance from center of planet to the point (x,y,z)
                     Vector3 currentPosition = new Vector3I(x, y, z);
                     float distanceToCenter = (centerPoint - currentPosition).Length();
+                    float distanceAwayFromCenter = (float)radius - distanceToCenter;
 
-                    //fastNoise.Seed = random.Next();
-                    float value = (float)radius - distanceToCenter;
-                    float amplitude = input.GetAmplitude();
-                    float persistence = input.GetPersistence();
-                    float frequency = input.GetFrequency();
-                    float lacunarity = input.GetLacunarity();
-                    int octaves = input.GetOctaves();
-                    Vector3 offset = Vector3.Zero;
-                    for (int i = 0; i < octaves; i++)
-                    {
-                        // TODO Add offset before or after *frequency?
-                        value += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
-                        amplitude *= persistence;
-                        frequency *= lacunarity;
-                        offset += new Vector3(random.Next(octaves), random.Next(octaves), random.Next(octaves));
+                    // Apply fbm to layer noise
+                    float value = Fbm(input, distanceAwayFromCenter, currentPosition);
 
-                        //fastNoise.Seed += 1;
-
-                    }
+                    // Update point (x,y,z) with value from fbm
                     points[x, y, z] = value;
-
-
                 }
             }
          }
         
         return points;
+    }
+
+    /// <summary>
+    /// Fractal Brownian Motion - applies layers of noise to value
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="value"></param>
+    /// <param name="currentPosition"></param>
+    /// <returns>
+    /// The sum of all noise layers added to value
+    /// </returns>
+    private float Fbm(CelestialBodyInput input, float value, Vector3 currentPosition)
+    {
+        float valueAfterFbm = value;
+
+        // Get parameters from editor
+        float amplitude = input.GetAmplitude();
+        float persistence = input.GetPersistence();
+        float frequency = input.GetFrequency();
+        float lacunarity = input.GetLacunarity();
+        int octaves = input.GetOctaves();
+
+        // Used to slightly offset the position when getting noise-value for each octave
+        Vector3 offset = Vector3.Zero;
+        Random random = new Random();
+
+        // FBM - Fractal Brownian Motion 
+        for (int i = 0; i < octaves; i++)
+        {
+            // TODO Add offset before or after *frequency?
+            valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
+            amplitude *= persistence;
+            frequency *= lacunarity;
+            offset += new Vector3(random.Next(octaves), random.Next(octaves), random.Next(octaves));
+        }
+
+        return valueAfterFbm;
     }
 
     public ImageTexture3D Get3DTexture(FastNoiseLite fastNoise, int width, int height, int depth, bool useMipmaps)
