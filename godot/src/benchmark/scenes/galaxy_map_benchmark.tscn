@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://cvt4egt04rlx1"]
+
+[ext_resource type="Script" uid="uid://bw3nqijrl3cru" path="res://src/benchmark/scenes/GalaxyMapBenchmark.cs" id="1_ppp1m"]
+[ext_resource type="PackedScene" uid="uid://qbrs85sp3ds4" path="res://src/galaxy/galaxy_map/galaxy_map.tscn" id="2_0cd5w"]
+
+[node name="GalaxyMapBenchmark" type="Node3D" node_paths=PackedStringArray("galaxyMap", "player")]
+script = ExtResource("1_ppp1m")
+galaxyMap = NodePath("GalaxyMap")
+player = NodePath("Camera3D")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+
+[node name="GalaxyMap" parent="." instance=ExtResource("2_0cd5w")]
