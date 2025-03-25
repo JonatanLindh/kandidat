@@ -6,9 +6,8 @@
 //!
 //! # Usage Example
 //!
-//! ```rust
-//! use crate::worker::{Worker, WorkerLifecycle};
-//! use std::sync::mpsc::Sender;
+//! ```no_run
+//! use crate::worker::Worker;
 //!
 //! // Define command types
 //! enum CalculationCommand {
@@ -16,26 +15,17 @@
 //!     Shutdown,
 //! }
 //!
-//! // Create a worker with a handler function
-//! let worker = Worker::new(|command, result_tx| match command {
-//!     CalculationCommand::Calculate(data) => {
-//!         // Perform calculation
-//!         let result = data.iter().sum::<f32>();
-//!         
-//!         // Send result back to main thread
-//!         if let Err(e) = result_tx.send(result) {
-//!             eprintln!("Failed to send result: {}", e);
+//! // Create a worker with a loop that processes commands
+//! let worker = Worker::new(|cmd_receiver, result_tx| {
+//!     while let Ok(command) = cmd_receiver.recv() {
+//!         match command {
+//!             // Process commands...
 //!         }
-//!         
-//!         // Continue processing commands
-//!         WorkerLifecycle::Continue
-//!     },
-//!     
-//!     CalculationCommand::Shutdown => WorkerLifecycle::Shutdown,
+//!     }
 //! });
 //!
 //! // Send a command to the worker
-//! worker.command_sender.send(CalculationCommand::Calculate(vec![1.0, 2.0, 3.0])).unwrap();
+//! worker.send_command(CalculationCommand::Calculate(vec![1.0, 2.0, 3.0])).unwrap();
 //!
 //! // Check for results
 //! if let Ok(result) = worker.try_recv() {
@@ -43,39 +33,17 @@
 //! }
 //!
 //! // Shut down the worker when done
-//! worker.command_sender.send(CalculationCommand::Shutdown).unwrap();
+//! worker.send_command(CalculationCommand::Shutdown).unwrap();
 //! worker.join().unwrap();
 //! ```
-//!
-//! # Handler Function
-//!
-//! The key component of the `Worker` is the handler function passed to `Worker::new()`.
-//! This function:
-//!
-//! - Receives commands from the main thread
-//! - Performs the actual work
-//! - Sends results back via the provided channel
-//! - Returns a `WorkerLifecycle` (or a type convertible to it) to indicate whether to continue or shut down
-//!
-//! ## Handler Function Requirements
-//!
-//! The handler function must:
-//!
-//! 1. Accept two arguments:
-//!    - `command`: A value of type `Command` - represents a task to be performed
-//!    - `result_tx`: A `Sender<Output>` - used to send results back to the main thread
-//!
-//! 2. Return a value that can be converted into a `WorkerLifecycle`:
-//!    - Return `WorkerLifecycle::Continue` to keep processing commands
-//!    - Return `WorkerLifecycle::Shutdown` to exit the worker thread
-//!    - Return `()` (unit) which automatically converts to `WorkerLifecycle::Continue`
-
 use std::{
     any::Any,
-    panic::AssertUnwindSafe,
-    sync::mpsc::{Receiver, SendError, Sender, TryRecvError, channel},
+    panic::{AssertUnwindSafe, UnwindSafe},
+    sync::mpsc::{self, Receiver, RecvError, SendError, Sender, TryRecvError, channel},
     thread::JoinHandle,
 };
+
+use itertools::{FoldWhile, Itertools};
 
 /// A generic worker that runs tasks in a background thread.
 ///
@@ -87,10 +55,6 @@ use std::{
 ///
 /// * `Res` - The type of results produced by the worker
 /// * `Command` - The type of commands accepted by the worker
-///
-/// # Thread Safety
-///
-/// Both `Res` and `Command` must be `Send + 'static` to ensure safe cross-thread communication.
 pub struct Worker<Res, Command> {
     /// Thread handle for joining the worker thread
     handle: JoinHandle<()>,
@@ -102,22 +66,82 @@ pub struct Worker<Res, Command> {
     result_receiver: Receiver<Res>,
 }
 
-/// Response from a worker handler function that controls worker lifecycle.
+/// Provides methods for receiving commands in a worker thread.
 ///
-/// When returned from a worker handler function, this enum indicates whether
-/// the worker thread should continue processing commands or shut down.
-#[derive(PartialEq, Eq)]
-pub enum WorkerLifecycle {
-    /// Continue processing commands
-    Continue,
-    /// Shut down the worker thread
-    Shutdown,
+/// This struct wraps a command channel receiver and provides methods
+/// for receiving commands either individually or in batches.
+pub struct CommandReceiver<'a, Command> {
+    cmd_rx: &'a Receiver<Command>,
 }
 
-// Make () default to Continue for convenience
-impl From<()> for WorkerLifecycle {
-    fn from(_: ()) -> Self {
-        WorkerLifecycle::Continue
+impl<'a, Command> CommandReceiver<'a, Command> {
+    /// Receives a single command from the worker channel, blocking until one is available.
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(Command)` - The received command
+    /// * `Err(RecvError)` - If the channel is disconnected
+    pub fn recv(&self) -> Result<Command, RecvError> {
+        self.cmd_rx.recv()
+    }
+
+    /// Receives a batch of commands from the worker channel, blocking until at least one is available.
+    ///
+    /// This method receives one command, then drains any additional commands without blocking.
+    /// The first command is stored in the `head` field, and remaining commands are accessible
+    /// through the `tail` iterator.
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(CommandBatch)` - A batch containing at least one command
+    /// * `Err(RecvError)` - If the channel is disconnected
+    pub fn recv_batch(&self) -> Result<CommandBatch<'a, Command>, RecvError> {
+        let head = self.cmd_rx.recv()?;
+        let tail = self.cmd_rx.try_iter();
+        Ok(CommandBatch { head, tail })
+    }
+}
+
+/// Contains a batch of commands received from the worker channel.
+///
+/// This struct provides access to multiple commands received in a single
+/// operation. It guarantees at least one command (`head`), with potentially
+/// more commands available through the `tail` iterator.
+///
+/// Batching commands allows for optimizations like processing only the most
+/// recent command or prioritizing specific command types.
+pub struct CommandBatch<'a, Command> {
+    /// The first command in the batch (guaranteed to exist)
+    pub head: Command,
+
+    /// An iterator over additional commands in the batch (may be empty)
+    pub tail: mpsc::TryIter<'a, Command>,
+}
+
+impl<'a, Command> CommandBatch<'a, Command> {
+    /// Returns the latest command in the batch, consuming the batch.
+    ///
+    /// This method ignores all commands except the most recent one.
+    pub fn latest(self) -> Command {
+        self.tail.fold(self.head, |_, cmd| cmd)
+    }
+
+    /// Finds the first command matching a predicate, or returns the latest if none match.
+    ///
+    /// Useful for prioritizing specific command types (like shutdown commands).
+    pub fn find_or_latest<F>(mut self, predicate: F) -> Command
+    where
+        F: Fn(&Command) -> bool,
+    {
+        self.tail
+            .fold_while(self.head, |_, cmd| {
+                if predicate(&cmd) {
+                    FoldWhile::Done(cmd)
+                } else {
+                    FoldWhile::Continue(cmd)
+                }
+            })
+            .into_inner()
     }
 }
 
@@ -126,66 +150,34 @@ where
     Command: Send + 'static,
     Res: Send + 'static,
 {
-    /// Creates a new worker with the specified handler function.
+    /// Creates a new worker with the specified loop function.
     ///
     /// # Parameters
     ///
-    /// * `worker_handler` - Function that processes commands and produces results
+    /// * `worker_loop` - Function that implements the worker's main loop
+    ///   and handles command processing
     ///
-    /// # Handler Function
+    /// # Loop Function
     ///
-    /// The worker handler receives two parameters:
-    /// * A command of type `Command` to process
+    /// The worker loop receives:
+    /// * A `CommandReceiver<Command>` for receiving commands
     /// * A `Sender<Res>` to send results back to the main thread
     ///
-    /// The handler should return a value convertible to `WorkerLifecycle`:
-    /// * `WorkerLifecycle::Continue` to keep processing commands
-    /// * `WorkerLifecycle::Shutdown` to terminate the worker thread
-    /// * `()` (unit) which automatically converts to `WorkerLifecycle::Continue`
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// let worker = Worker::new(|command, result_tx| match command {
-    ///     CalculationCommand::Calculate(data) => {
-    ///         let result = data.iter().sum::<f32>();
-    ///         result_tx.send(result).unwrap();
-    ///         WorkerLifecycle::Continue
-    ///     },
-    ///     CalculationCommand::Shutdown => WorkerLifecycle::Shutdown,
-    /// });
-    /// ```
-    pub fn new<Handler, S>(worker_handler: Handler) -> Self
+    /// The loop is responsible for implementing its own loop structure
+    /// and determining when to exit.
+    pub fn new<F, S>(worker_loop: F) -> Self
     where
-        S: Into<WorkerLifecycle>,
-        Handler: Fn(Command, Sender<Res>) -> S + Send + 'static,
+        F: Fn(CommandReceiver<Command>, Sender<Res>) -> S,
+        F: UnwindSafe + Send + 'static,
     {
         let (cmd_tx, cmd_rx) = channel::<Command>();
         let (result_tx, result_rx) = channel::<Res>();
 
         // Spawn a thread to handle the worker function
         let handle = std::thread::spawn(move || {
-            // Use `catch_unwind` to handle panics in the worker thread
-            if let Err(e) = std::panic::catch_unwind(AssertUnwindSafe(|| {
-                // Loop to receive commands and process them
-                while let Ok(command) = cmd_rx.recv() {
-                    let response = worker_handler(command, result_tx.clone());
-
-                    // Check if the handler wants to shut down
-                    if response.into() == WorkerLifecycle::Shutdown {
-                        break;
-                    }
-                }
-            })) {
-                // If a panic occurs, handle it here
-                let message = e
-                    .downcast_ref::<String>()
-                    .map(|s| s.as_str())
-                    .or_else(|| e.downcast_ref::<&str>().copied())
-                    .unwrap_or("unknown error");
-
-                eprintln!("Worker thread panicked: {:?}", message);
-            }
+            Self::catch_unwind(move || {
+                worker_loop(CommandReceiver { cmd_rx: &cmd_rx }, result_tx);
+            })
         });
 
         Self {
@@ -195,7 +187,33 @@ where
         }
     }
 
+    /// Catches panics in the worker thread and handles them gracefully.
+    fn catch_unwind<F>(f: F)
+    where
+        F: FnOnce() + UnwindSafe,
+    {
+        if let Err(e) = std::panic::catch_unwind(AssertUnwindSafe(f)) {
+            // If a panic occurs, handle it here
+            let message = e
+                .downcast_ref::<String>()
+                .map(|s| s.as_str())
+                .or_else(|| e.downcast_ref::<&str>().copied())
+                .unwrap_or("unknown error");
+
+            eprintln!("Worker thread panicked: {:?}", message);
+        }
+    }
+
     /// Sends a command to the worker thread.
+    ///
+    /// # Parameters
+    ///
+    /// * `command` - The command to be sent to the worker for processing
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(())` - If the command was sent successfully
+    /// * `Err(SendError<Command>)` - If the command could not be sent (e.g., if the channel is closed)
     #[inline(always)]
     pub fn send_command(&self, command: Command) -> Result<(), SendError<Command>> {
         self.command_sender.send(command)
@@ -214,6 +232,21 @@ where
     #[inline(always)]
     pub fn try_recv(&self) -> Result<Res, TryRecvError> {
         self.result_receiver.try_recv()
+    }
+
+    /// Tries to receive the latest result from the worker without blocking.
+    ///
+    /// This method drains all available results from the channel and returns only
+    /// the most recent one. If multiple results are available, earlier results are
+    /// discarded.
+    ///
+    /// # Returns
+    ///
+    /// * `Some(result)` - The latest result from the worker
+    /// * `None` - No results are currently available
+    #[inline(always)]
+    pub fn try_recv_latest(&self) -> Option<Res> {
+        self.result_receiver.try_iter().last()
     }
 
     /// Joins the worker thread, waiting for it to finish.

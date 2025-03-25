@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Planet" load_steps=3 format=3 uid="uid://4qm1x2tmbuae"]
 
-[ext_resource type="Script" path="res://src/noise/CelestialBodyNoise/PlanetNoise/Planet.cs" id="1_tox4r"]
+[ext_resource type="Script" uid="uid://chf3nni2qmav5" path="res://src/noise/CelestialBodyNoise/PlanetNoise/Planet.cs" id="1_tox4r"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_oil8x"]
 

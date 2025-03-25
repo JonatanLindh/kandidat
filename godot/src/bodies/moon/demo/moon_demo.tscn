@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://bk08dcpc2f8j2"]
 
-[ext_resource type="Texture2D" uid="uid://dnf7n3p4dr322" path="res://src/galaxy/skybox/traditional_skybox/panorama/skybox_6000x3000.png" id="1_j8447"]
+[ext_resource type="Texture2D" uid="uid://dnf7n3p4dr322" path="res://src/galaxy/skybox/_resources/skybox_6000x3000.png" id="1_j8447"]
 [ext_resource type="PackedScene" uid="uid://ckitx7rndvp5l" path="res://src/bodies/moon/moon.tscn" id="2_dq2k1"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_ddj5a"]
