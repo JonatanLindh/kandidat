@@ -74,6 +74,7 @@ public class MarchingCube
 		{
 			surfaceTool.AddVertex(vertex);
 		}
+		vertices.Clear();
 		surfaceTool.GenerateNormals();
 		surfaceTool.Index();
 		Mesh mesh = surfaceTool.Commit();

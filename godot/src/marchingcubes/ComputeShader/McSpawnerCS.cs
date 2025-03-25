@@ -1,16 +1,11 @@
 using Godot;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using Godot.Collections;
-using Array = Godot.Collections.Array;
 
 [Tool]
 public partial class McSpawnerCS : Node
 {
 	FastNoiseLite _noise = new FastNoiseLite();
-	private int _radius = 64;
+	private int _radius = 32;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -18,8 +13,6 @@ public partial class McSpawnerCS : Node
 		var data = GetNoise();
 		MarchingCube marchingCube = new MarchingCube(method:MarchingCube.GenerationMethod.Gpu);
 		MarchingCube marchingCube1 = new MarchingCube(method:MarchingCube.GenerationMethod.Cpu); 
-
-		
 		
 		var meshInstance = marchingCube.GenerateMesh(data);
 		var meshInstance2 = marchingCube1.GenerateMesh(data);
@@ -31,10 +24,8 @@ public partial class McSpawnerCS : Node
 	}
 	private float[,,] GetNoise()
 	{
-
-
 		int radius = _radius;
-		int diameter = radius + radius + 1;
+		int diameter = radius + radius;
 		float[,,] points = new float[diameter, diameter, diameter];
 
 		Vector3 centerPoint = new Vector3I(diameter, diameter, diameter) / 2;
