@@ -23,7 +23,7 @@ public class MarchingCube
     /// </summary>
     /// <param name="scale">The scale factor for the mesh generation.</param>
     /// <param name="threshold">The threshold value for determining the surface of the mesh.</param>
-    public MarchingCube(int scale = 1, float threshold = 0.1f)
+    public MarchingCube(int scale = 1, float threshold = 0.0f)
     {
         _scale = scale;
         _threshold = threshold;
