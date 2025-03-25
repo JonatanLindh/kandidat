@@ -5,6 +5,7 @@ using System;
 /// Resource for a planet. To be used together with some noise type for planets such as PlanetNoise
 /// </summary>
 [GlobalClass]
+[Tool]
 public partial class Planet : Resource
 {
     private FastNoiseLite _noise;
@@ -27,13 +28,11 @@ public partial class Planet : Resource
     /// </summary>
     /// <param name="pos"></param>
     /// <returns>
-    /// a float value in the range [0, 1]
+    /// a float value in the range [-1, 1]
     /// </returns>
     public float GetNoise3Dv(Vector3 pos)
     {
-        // FastNoiseLite.GetNoise returns a value between [-1, 1]. It feels more natural with [0, 1], hence the absolute value.
-        // The distribution of values should still be the same
-        return Mathf.Abs(noise.GetNoise3Dv(pos));
+        return _noise.GetNoise3Dv(pos);
     }
 
     public int GetRadius()
