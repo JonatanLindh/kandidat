@@ -30,7 +30,7 @@ public class MarchingCube
 	/// <param name="scale">The scale factor for the mesh generation.</param>
 	/// <param name="method">The method used for generating the vertices, either on the cpu or on the gpu</param>
 	/// <param name="threshold">The threshold value for determining the surface of the mesh.</param>
-	public MarchingCube(int scale = 1, float threshold = 0.1f, GenerationMethod method = GenerationMethod.Cpu)
+	public MarchingCube(int scale = 1, float threshold = 0.1f, GenerationMethod method = GenerationMethod.Gpu)
 	{
 		_scale = scale;
 		_threshold = threshold;
@@ -38,7 +38,7 @@ public class MarchingCube
 		{
 			GenerationMethod.Cpu => new CpuVerticesGenerator(),
 			GenerationMethod.Gpu => new GpuVerticesGenerator(),
-			_ => new CpuVerticesGenerator()
+			_ => new GpuVerticesGenerator()
 		};
 	}
 
