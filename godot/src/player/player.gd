@@ -26,9 +26,9 @@ func _input(event):
 		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
 		head.rotation.x = clamp(head.rotation.x,deg_to_rad(-89),deg_to_rad(89) )
 	
-	if Input.is_action_just_pressed("speedup"):
+	if Input.is_action_pressed("speedup"):
 		current_speed = current_speed + 1
-	elif Input.is_action_just_pressed("speeddown"):
+	elif Input.is_action_pressed("speeddown"):
 		current_speed = max(1, current_speed - 1)
 	
 	if Input.is_action_just_pressed("ui_cancel"):
