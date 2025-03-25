@@ -65,13 +65,15 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
                     float persistence = input.GetPersistence();
                     float frequency = input.GetFrequency();
                     float lacunarity = input.GetLacunarity();
+                    int octaves = input.GetOctaves();
                     Vector3 offset = Vector3.Zero;
-                    for (int i = 0; i < 8; i++)
+                    for (int i = 0; i < octaves; i++)
                     {
-                        value += fastNoise.GetNoise3Dv(frequency * (currentPosition + offset)) * amplitude;
+                        // TODO Add offset before or after *frequency?
+                        value += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
                         amplitude *= persistence;
                         frequency *= lacunarity;
-                        offset += Vector3.One;
+                        offset += new Vector3(random.Next(octaves), random.Next(octaves), random.Next(octaves));
 
                         //fastNoise.Seed += 1;
 
