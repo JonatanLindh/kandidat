@@ -1,13 +1,11 @@
 ﻿using Godot;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading;
 using Godot.Collections;
-using Array = Godot.Collections.Array;
 
-namespace Kandidat.marchingcubes.ComputeShader;
+/// <summary>
+/// Generates vertices for the marching cubes algorithm on the GPU.
+/// </summary>
 public class GpuVerticesGenerator : IVerticesGenerationStrategy
 {
 	private float _isoLevel = 0f;
@@ -17,7 +15,7 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 	private int _scale = 1;
 	private readonly List<Vector3> _vertices = new();
 	private float[,,] _dataPoints;
-	private bool _customSize = false;
+	private readonly bool _customSize = false;
 	
     // Shader Variables
     private RenderingDevice _renderingDevice;

@@ -1,9 +1,6 @@
 using Godot;
 using System;
-using System.Collections.Generic;
-using Godot.NativeInterop;
-using Kandidat.marchingcubes;
-using Kandidat.marchingcubes.ComputeShader;
+
 
 // TODO 
 // Add multithreading to the mesh generation
@@ -58,11 +55,7 @@ public class MarchingCube
 	/// <returns>A MeshInstance3D object representing the generated mesh</returns>
 	public MeshInstance3D GenerateMesh(float[,,] datapoints)
 	{
-		var sw = new System.Diagnostics.Stopwatch();
-		sw.Start();
 		var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
-		sw.Stop();
-		GD.Print("Time to generate vertices: ", sw.ElapsedMilliseconds, "ms");
 
 		var surfaceTool = new SurfaceTool();
 		surfaceTool.Begin(Mesh.PrimitiveType.Triangles);

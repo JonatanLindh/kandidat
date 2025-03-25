@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using Godot;
 
-namespace Kandidat.marchingcubes.ComputeShader;
 
+/// <summary>
+/// Generates vertices for the marching cubes algorithm on the CPU.
+/// </summary>
 public class CpuVerticesGenerator : IVerticesGenerationStrategy
 {
     private float _isoLevel = 0f;

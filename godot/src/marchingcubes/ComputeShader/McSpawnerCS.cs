@@ -11,11 +11,20 @@ public partial class McSpawnerCS : Node
 	public override void _Ready()
 	{
 		var data = GetNoise();
+		var sw = new System.Diagnostics.Stopwatch();
 		MarchingCube marchingCube = new MarchingCube(method:MarchingCube.GenerationMethod.Gpu);
 		MarchingCube marchingCube1 = new MarchingCube(method:MarchingCube.GenerationMethod.Cpu); 
 		
+		sw.Start();
 		var meshInstance = marchingCube.GenerateMesh(data);
+		sw.Stop();
+		GD.Print("Time to generate vertices (GPU): ", sw.ElapsedMilliseconds, "ms");
+
+		sw.Start();
 		var meshInstance2 = marchingCube1.GenerateMesh(data);
+		sw.Stop();
+		GD.Print("Time to generate vertices (CPU): ", sw.ElapsedMilliseconds, "ms");
+
 		meshInstance2.Translate(new Vector3(0, 0, _radius * 2));
 		AddChild(meshInstance);
 		AddChild(meshInstance2);
