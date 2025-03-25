@@ -6,6 +6,17 @@
 
 [node name="BasicPlanet" type="Node3D"]
 script = ExtResource("1_7ds2o")
+Radius = 58
+Width = 128
+Height = 128
+Depth = 128
+Octaves = 8
+Frequency = 2.0
+Amplitude = 20.0
+Lacunarity = 1.5
+Persistence = 0.2
+seed = 1282444896
+RandomizeSeed = true
 
 [node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("1_au8v0")]
 CelestialBody = NodePath("../PlanetNoise")

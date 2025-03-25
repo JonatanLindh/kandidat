@@ -10,16 +10,6 @@
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 32, 256)
 
 [node name="BasicPlanet" parent="." instance=ExtResource("1_ycu4v")]
-Radius = 60
-Width = 128
-Height = 128
-Depth = 128
-Octaves = 8
-Frequency = 3.0
-Amplitude = 15.0
-Lacunarity = 1.5
-Persistence = 0.25
-seed = 1239749617
 
 [node name="Skybox" parent="." instance=ExtResource("3_1biuq")]
 
