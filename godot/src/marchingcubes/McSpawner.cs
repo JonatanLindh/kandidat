@@ -63,8 +63,10 @@ public partial class McSpawner : Node
 
 			// Disable backface culling
 			StandardMaterial3D material = new StandardMaterial3D();
-			material.AlbedoColor = Colors.Gray;
-			material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
+			Color o = new Color();
+			material.AlbedoColor = Color.Color8((byte)152, (byte)102, (byte)0);
+			material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex;
+			material.DisableReceiveShadows = true;
 			_meshInstance3D.MaterialOverride = material;
 			((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
 
