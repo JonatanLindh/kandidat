@@ -26,11 +26,6 @@ func _input(event):
 		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
 		head.rotation.x = clamp(head.rotation.x,deg_to_rad(-89),deg_to_rad(89) )
 	
-	if Input.is_action_pressed("speedup"):
-		current_speed = current_speed + 1
-	elif Input.is_action_pressed("speeddown"):
-		current_speed = max(1, current_speed - 1)
-	
 	if Input.is_action_just_pressed("ui_cancel"):
 		toggle_mouse_lock()
 		
@@ -39,6 +34,10 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("fly"):
 		flying = not flying
 		velocity.y = 0 if flying else get_gravity().y * delta * current_speed
+	elif Input.is_action_pressed("speedup"):
+		current_speed = current_speed + 1
+	elif Input.is_action_pressed("speeddown"):
+		current_speed = max(1, current_speed - 1)
 	
 	if not flying and not is_on_floor():
 		velocity += get_gravity() * delta
