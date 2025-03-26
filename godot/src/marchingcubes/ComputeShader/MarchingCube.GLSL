@@ -76,7 +76,7 @@ uint index(int x, int y, int z){
     return x + y * uint(uniforms.sizeX) + z * uint(uniforms.sizeY) * uint(uniforms.sizeZ);
 }
 
-vec3 evaluateTriangle(int tri, vec3 pos){
+vec3 evaluateTriangle(int tri, vec3 pos, vec3 offset){
     ivec2 pointsIndices = EDGE_TABLE[tri];
 
     vec3 p0 = POINTS_TABLE[pointsIndices.x];
@@ -84,7 +84,21 @@ vec3 evaluateTriangle(int tri, vec3 pos){
 
     vec3 v0 = pos + p0;
     vec3 v1 = pos + p1;
-    return mix(v0, v1, 0.5);
+    
+    // Get density values at both vertices
+    float value0 = dataPointsBuffer.dataPoints[index(int(v0.x - uniforms.xOffset), int(v0.y - uniforms.yOffset), int(v0.z - uniforms.zOffset))];
+    float value1 = dataPointsBuffer.dataPoints[index(int(v1.x - uniforms.xOffset), int(v1.y - uniforms.yOffset), int(v1.z - uniforms.zOffset))];
+    
+    v0 += offset;
+    v1 += offset;
+
+    // Calculate interpolation factor based on density values
+    float t = (uniforms.isoLevel - value0) / (value1 - value0);
+
+    // Prevent division by zero or negative values
+    t = clamp(t, 0.0, 1.0);
+
+    return mix(v0, v1, t);
 }
 
 float calculateDensityLevel(vec3 pos){
@@ -118,9 +132,9 @@ void main(){
         int tri3 = triangleTable.triangulations[offset + i + 2];
 
         Triangle triangle;
-        triangle.p1 = vec4(evaluateTriangle(tri, pos + posOffset), 0);
-        triangle.p2 = vec4(evaluateTriangle(tri2, pos + posOffset), 0);
-        triangle.p3 = vec4(evaluateTriangle(tri3, pos + posOffset), 0);
+        triangle.p1 = vec4(evaluateTriangle(tri, pos, posOffset), 0);
+        triangle.p2 = vec4(evaluateTriangle(tri2, pos, posOffset), 0);
+        triangle.p3 = vec4(evaluateTriangle(tri3, pos, posOffset), 0);
 
         uint index = atomicAdd(counter, 1u);
         triangleBuffer.triangles[index] = triangle;

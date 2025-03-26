@@ -46,8 +46,13 @@ public class CpuVerticesGenerator : IVerticesGenerationStrategy
             var posA = new Vector3((x + p0.X) * _scale, (y + p0.Y) * _scale, (z + p0.Z) * _scale);
             var posB = new Vector3((x + p1.X) * _scale, (y + p1.Y) * _scale, (z + p1.Z) * _scale);
 			
-            // TODO: use an actual interpolation function between the two points
-            var position = (posA + posB) / 2.0f;
+            // Get density values at each point
+            var valueA = _datapoints[x + (int)p0.X, y + (int)p0.Y, z + (int)p0.Z];
+            var valueB = _datapoints[x + (int)p1.X, y + (int)p1.Y, z + (int)p1.Z];
+            
+            // Interpolate position based on how close each density value is to the iso-level
+            float t = (valueA == valueB) ? 0.5f : (_isoLevel - valueA) / (valueB - valueA);
+            var position = posA + t * (posB - posA);
 			
             _vertices.Add(position);
         }
