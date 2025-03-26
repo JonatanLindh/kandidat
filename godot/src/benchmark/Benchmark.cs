@@ -32,7 +32,7 @@ public partial class Benchmark : Node3D
 	{
 		string absResultPath = ProjectSettings.GlobalizePath(_resultPath);
 		filePath = absResultPath + $"/{time}.txt";
-		GD.Print("Getting ready...");
+		GD.Print("Benchmark getting ready...");
 	}
 
 	public override void _Process(double delta)
@@ -73,18 +73,18 @@ public partial class Benchmark : Node3D
 	public void ExitScene(float downtime)
 	{
 		GD.Print($"\nAverage FPS: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FPS)}");
-		GD.Print($"Average Frame Time: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime)}");
-		GD.Print($"Average Memory Usage: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage)}\n");
-
 		GD.Print($"1% low FPS: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.01f)}");
+		GD.Print($"0.1% low FPS: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.001f)}\n");
+		
+		GD.Print($"Average Frame Time: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime)}");
 		GD.Print($"1% high Frame Time: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f)}");
-		GD.Print($"1% high Memory Usage: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f)}\n");
-
-		GD.Print($"0.1% low FPS: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.001f)}");
-		GD.Print($"0.1% high Frame Time: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f)}");
+		GD.Print($"0.1% high Frame Time: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f)}\n");
+		
+		GD.Print($"Average Memory Usage: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage)}");
+		GD.Print($"1% high Memory Usage: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f)}");
 		GD.Print($"0.1% high Memory Usage: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.001f)}\n");
 
-		GD.Print($"Benchmark done");
+		GD.Print($"Benchmark scene done");
 
 		this.downtime = downtime;
 		benchmarkSetupDone = false;
@@ -95,7 +95,7 @@ public partial class Benchmark : Node3D
 			if (saveResults || saveFullResults)
 			{
 				Write();
-				GD.Print($"Full benchmark complete\nResults saved to: {filePath}\n");
+				GD.Print($"Benchmark complete\nResults saved to: {filePath}\n");
 			}
 
 			else
@@ -147,28 +147,28 @@ public partial class Benchmark : Node3D
 			}
 			resultFile.StoreString("\n");
 
-			// Averages
+			// FPS
 			var averageFPS = processor.GetAverage(i, result, BenchmarkDatapointEnum.FPS);
-			var averageFrameTime = processor.GetAverage(i, result, BenchmarkDatapointEnum.FrameTime);
-			var averageMemoryUsage = processor.GetAverage(i, result, BenchmarkDatapointEnum.MemoryUsage);
-			resultFile.StoreString($"Average FPS: {averageFPS}\n");
-			resultFile.StoreString($"Average Frametime: {averageFrameTime}\n");
-			resultFile.StoreString($"Average Memory Usage: {averageMemoryUsage}\n\n");
-
-			// 1% lows/highs
 			var onePercentLowFPS = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FPS, low: true, 0.01f);
-			var onePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f);
-			var onePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f);
-			resultFile.StoreString($"1% low FPS: {onePercentLowFPS}\n");
-			resultFile.StoreString($"1% high Frametime: {onePercentHighFrameTime}\n");
-			resultFile.StoreString($"1% high Memory Usage: {onePercentHighMemoryUsage}\n\n");
-
-			// 0.1% lows/highs
 			var pointOnePercentLowFPS = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FPS, low: true, 0.001f);
+			resultFile.StoreString($"Average FPS: {averageFPS}\n");
+			resultFile.StoreString($"1% low FPS: {onePercentLowFPS}\n");
+			resultFile.StoreString($"0.1% low FPS: {pointOnePercentLowFPS}\n\n");
+
+			// Framtime
+			var averageFrameTime = processor.GetAverage(i, result, BenchmarkDatapointEnum.FrameTime);
+			var onePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f);
 			var pointOnePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f);
+			resultFile.StoreString($"Average Frametime: {averageFrameTime}\n");
+			resultFile.StoreString($"1% high Frametime: {onePercentHighFrameTime}\n");
+			resultFile.StoreString($"0.1% high Frametime: {pointOnePercentHighFrameTime}\n\n");
+
+			// Memory Usage
+			var averageMemoryUsage = processor.GetAverage(i, result, BenchmarkDatapointEnum.MemoryUsage);
+			var onePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f);
 			var pointOnePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.001f);
-			resultFile.StoreString($"0.1% low FPS: {pointOnePercentLowFPS}\n");
-			resultFile.StoreString($"0.1% high Frametime: {pointOnePercentHighFrameTime}\n");
+			resultFile.StoreString($"Average Memory Usage: {averageMemoryUsage}\n");
+			resultFile.StoreString($"1% high Memory Usage: {onePercentHighMemoryUsage}\n");
 			resultFile.StoreString($"0.1% high Memory Usage: {pointOnePercentHighMemoryUsage}\n\n");
 
 			resultFile.StoreString("Benchmark done\n");
