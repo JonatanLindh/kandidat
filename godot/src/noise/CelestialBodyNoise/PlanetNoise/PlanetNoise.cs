@@ -129,15 +129,8 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
         return texture;
     }
 
-    public float[,,] GetNoise()
-    {
-        return CreateDataPoints();
-    }
-
     public float[,,] GetNoise(bool useRandomGeneration)
     {
-        texture3d.Noise = new FastNoiseLite();
-        await ToSignal(texture3d, NoiseTexture3D.SignalName.Changed);
-        return true;
+        return CreateDataPoints();
     }
 }
