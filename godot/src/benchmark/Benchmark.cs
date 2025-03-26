@@ -20,12 +20,12 @@ public partial class Benchmark : Node3D
 	List<List<BenchmarkDatapoint>> result = new List<List<BenchmarkDatapoint>>();
 	BenchmarkDataProcessor processor = new BenchmarkDataProcessor();
 
-	float measurementInterval = 0.1f; // 100ms
+	float measurementInterval = 0.01f; // 10ms
 	float currentTime = 0.0f;
 
-	// Time to wait before starting the benchmark.
-	// Necessary because the FPS will evaluate to 1, since no average has been calculated yet.
-	float benchmarkSetupTime = 1.0f;
+	// Time to wait before starting the benchmark. Necessary because the FPS will evaluate
+	// to 1 during the first second, since, I believe, no average has been calculated yet.
+	float downtime = 1.0f;
 	bool benchmarkSetupDone = false;
 
 	public override void _Ready()
@@ -37,7 +37,9 @@ public partial class Benchmark : Node3D
 
 	public override void _Process(double delta)
 	{
-		if(currentTime > measurementInterval && benchmarkSetupDone)
+		currentTime += (float)delta;
+
+		if (currentTime > measurementInterval && benchmarkSetupDone)
 		{
 			currentTime = 0;
 
@@ -60,17 +62,15 @@ public partial class Benchmark : Node3D
 			});
 		}
 
-		if(currentTime > benchmarkSetupTime && !benchmarkSetupDone)
+		if(currentTime > downtime && !benchmarkSetupDone)
 		{
 			currentTime = 0;
 			benchmarkSetupDone = true;
 			NextScene();
 		}
-
-		currentTime += (float)delta;
 	}
 
-	public void ExitScene()
+	public void ExitScene(float downtime)
 	{
 		GD.Print($"\nAverage FPS: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FPS)}");
 		GD.Print($"Average Frame Time: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime)}");
@@ -86,12 +86,11 @@ public partial class Benchmark : Node3D
 
 		GD.Print($"Benchmark done");
 
-		NextScene();
-	}
+		this.downtime = downtime;
+		benchmarkSetupDone = false;
+		currentScene.QueueFree();
 
-	private void NextScene()
-	{
-		if (currentSceneIndex == (scenes.Length - 1))
+		if(currentSceneIndex == (scenes.Length - 1))
 		{
 			if (saveResults || saveFullResults)
 			{
@@ -106,15 +105,13 @@ public partial class Benchmark : Node3D
 
 			GetTree().Quit();
 		}
+	}
 
+	private void NextScene()
+	{
 		currentSceneIndex++;
 		if(currentSceneIndex < scenes.Length)
 		{
-			if(currentScene != null)
-			{
-				currentScene.QueueFree();
-			}
-
 			GD.Print($"Starting benchmark of {scenes[currentSceneIndex].ResourcePath}");
 
 			currentScene = (BenchmarkScene) scenes[currentSceneIndex].Instantiate();

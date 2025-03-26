@@ -5,8 +5,14 @@ public abstract partial class BenchmarkScene : Node3D
 {
 	protected Benchmark benchmark;
 
+	// This benchmark duration in seconds
 	[Export] float benchmarkDuration = 30.0f;
+
+	// Benchmark downtime after this benchmark is done
+	[Export] float downtime = 1.0f;
+
 	float currentTime = 0.0f;
+	bool exiting = false;
 
 	public override void _Ready()
 	{
@@ -17,7 +23,7 @@ public abstract partial class BenchmarkScene : Node3D
 	{
 		if(currentTime > benchmarkDuration)
 		{
-			benchmark.ExitScene();
+			benchmark.ExitScene(downtime);
 			return;
 		}
 
