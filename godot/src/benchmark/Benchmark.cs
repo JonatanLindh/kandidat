@@ -37,10 +37,10 @@ public partial class Benchmark : Node3D
 		{
 			currentTime = 0;
 
-			var fps = Engine.GetFramesPerSecond();
-			var measurementTime = DateTime.Now.ToString("HH:mm:ss.fff");
-			var memoryUsage = OS.GetStaticMemoryUsage();
-			var frameTime = delta;
+			double fps = Engine.GetFramesPerSecond();
+			double frameTime = Math.Round(delta, 7);
+			ulong memoryUsage = OS.GetStaticMemoryUsage();
+			string measurementTime = DateTime.Now.ToString("HH:mm:ss.fff");
 
 			if (result.Count <= currentSceneIndex)
 			{
@@ -60,8 +60,6 @@ public partial class Benchmark : Node3D
 		{
 			currentTime = 0;
 			benchmarkSetupDone = true;
-
-			GD.Print("setup done");
 			NextScene();
 		}
 
@@ -70,7 +68,7 @@ public partial class Benchmark : Node3D
 
 	public void ExitScene()
 	{
-		GD.Print($"Benchmark of {currentScene.Name} done");
+		GD.Print($"Benchmark of {scenes[currentSceneIndex].ResourcePath} done");
 		NextScene();
 	}
 
@@ -78,7 +76,10 @@ public partial class Benchmark : Node3D
 	{
 		if (currentSceneIndex == (scenes.Length - 1))
 		{
-			Write();
+			BenchmarkDataProcessor processor = new BenchmarkDataProcessor(result);
+
+			Write(processor);
+
 			GD.Print($"\nBenchmark finished\nResults saved to: {filePath}\n----------");
 			GetTree().Quit();
 		}
@@ -99,7 +100,7 @@ public partial class Benchmark : Node3D
 		}
 	}
 
-	private void Write()
+	private void Write(BenchmarkDataProcessor processor)
 	{
 		resultFile = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
 		resultFile.StoreString($"Benchmark started at {time}\n\n");
@@ -122,52 +123,31 @@ public partial class Benchmark : Node3D
 			}
 			resultFile.StoreString("\n");
 
-			var averageFPS = CalculateAverageFPS(i);
+			// Averages
+			var averageFPS = processor.GetAverage(i, BenchmarkDatapointEnum.FPS);
+			var averageFrameTime = processor.GetAverage(i, BenchmarkDatapointEnum.FrameTime);
+			var averageMemoryUsage = processor.GetAverage(i, BenchmarkDatapointEnum.MemoryUsage);
 			resultFile.StoreString($"Average FPS: {averageFPS}\n");
+			resultFile.StoreString($"Average Frametime: {averageFrameTime}\n");
+			resultFile.StoreString($"Average Memory Usage: {averageMemoryUsage}\n\n");
 
-			var onePercentLowFPS = CalculatePercentLowFPS(0.01f, i);
-			resultFile.StoreString($"1% Low FPS: {onePercentLowFPS}\n");
+			// 1% lows/highs
+			var onePercentLowFPS = processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.FPS, low: true, 0.01f);
+			var onePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f);
+			var onePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f);
+			resultFile.StoreString($"1% low FPS: {onePercentLowFPS}\n");
+			resultFile.StoreString($"1% high Frametime: {onePercentHighFrameTime}\n");
+			resultFile.StoreString($"1% high Memory Usage: {onePercentHighMemoryUsage}\n\n");
 
-			var pointOnePercentLowFPS = CalculatePercentLowFPS(0.001f, i);
-			resultFile.StoreString($"0.1% Low FPS: {pointOnePercentLowFPS}\n");
-
-			GD.Print($"Benchmark complete");
-			GD.Print($"Average FPS of {scenes[i].ResourcePath}: {averageFPS}");
-			GD.Print($"1% Low FPS of {scenes[i].ResourcePath}: {onePercentLowFPS}");
-			GD.Print($"0.1% Low FPS of {scenes[i].ResourcePath}: {pointOnePercentLowFPS}");
+			// 0.1% lows/highs
+			var pointOnePercentLowFPS = processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.FPS, low: true, 0.001f);
+			var pointOnePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f);
+			var pointOnePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.001f);
+			resultFile.StoreString($"0.1% low FPS: {pointOnePercentLowFPS}\n");
+			resultFile.StoreString($"0.1% high Frametime: {pointOnePercentHighFrameTime}\n");
+			resultFile.StoreString($"0.1% high Memory Usage: {pointOnePercentHighMemoryUsage}\n\n");
 		}
 
 		resultFile.Close();
-	}
-
-	private float CalculateAverageFPS(int scene)
-	{
-		float sum = 0;
-		foreach (var dataPoint in result[scene])
-		{
-			sum += dataPoint.fps;
-		}
-
-		return sum / result[scene].Count;
-	}
-
-	private float CalculatePercentLowFPS(float percentage, int scene)
-	{
-		var fpsValues = new List<float>();
-		foreach (var dataPoint in result[scene])
-		{
-			fpsValues.Add(dataPoint.fps);
-		}
-
-		fpsValues.Sort();
-
-		int percentCount = (int)Math.Ceiling(fpsValues.Count * percentage);
-		float sum = 0;
-		for (int i = 0; i < percentCount; i++)
-		{
-			sum += fpsValues[i];
-		}
-
-		return sum / percentCount;
 	}
 }
