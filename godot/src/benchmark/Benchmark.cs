@@ -14,7 +14,7 @@ public partial class Benchmark : Node3D
 	string time = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
 	FileAccess resultFile;
 
-	Node currentScene;
+	BenchmarkScene currentScene;
 	int currentSceneIndex = -1;
 
 	List<List<BenchmarkDatapoint>> result = new List<List<BenchmarkDatapoint>>();
@@ -103,7 +103,7 @@ public partial class Benchmark : Node3D
 			{
 				GD.Print($"Benchmark complete");
 			}
-				
+
 			GetTree().Quit();
 		}
 
@@ -117,8 +117,8 @@ public partial class Benchmark : Node3D
 
 			GD.Print($"Starting benchmark of {scenes[currentSceneIndex].ResourcePath}");
 
-			currentScene = scenes[currentSceneIndex].Instantiate();
-			currentScene.Call("setBenchmark", this);
+			currentScene = (BenchmarkScene) scenes[currentSceneIndex].Instantiate();
+			currentScene.setBenchmark(this);
 			AddChild(currentScene);
 		}
 	}
