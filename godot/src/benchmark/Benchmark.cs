@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public partial class Benchmark : Node3D
 {
 	[Export] PackedScene[] scenes;
+	[Export] bool saveResults = false;
 
 	string _resultPath = "res://../resources/benchmark";
 	string filePath;
@@ -78,9 +79,33 @@ public partial class Benchmark : Node3D
 		{
 			BenchmarkDataProcessor processor = new BenchmarkDataProcessor(result);
 
-			Write(processor);
+			for (int i = 0; i < scenes.Length; i++)
+			{
+				GD.Print($"\nProcessing data for {scenes[i].ResourcePath}");
+				GD.Print($"Average FPS: {processor.GetAverage(i, BenchmarkDatapointEnum.FPS)}");
+				GD.Print($"Average Frame Time: {processor.GetAverage(i, BenchmarkDatapointEnum.FrameTime)}");
+				GD.Print($"Average Memory Usage: {processor.GetAverage(i, BenchmarkDatapointEnum.MemoryUsage)}\n");
 
-			GD.Print($"\nBenchmark finished\nResults saved to: {filePath}\n----------");
+				GD.Print($"1% low FPS: {processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.FPS, low: true, 0.01f)}");
+				GD.Print($"1% high Frame Time: {processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f)}");
+				GD.Print($"1% high Memory Usage: {processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f)}\n");
+
+				GD.Print($"0.1% low FPS: {processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.FPS, low: true, 0.001f)}");
+				GD.Print($"0.1% high Frame Time: {processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f)}");
+				GD.Print($"0.1% high Memory Usage: {processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.001f)}\n");
+			}
+
+			if (saveResults)
+			{
+				Write(processor);
+				GD.Print($"Benchmark finished\nResults saved to: {filePath}\n");
+			}
+
+			else
+			{
+				GD.Print($"Benchmark finished");
+			}
+				
 			GetTree().Quit();
 		}
 
