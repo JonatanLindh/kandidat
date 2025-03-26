@@ -58,7 +58,7 @@ public partial class McSpawner : Node
         celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody != null)
 		{
-            float[,,] dataPoints = celestialBody.GetNoise();
+            float[,,] dataPoints = celestialBody.GetNoise(false);
 			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
 
 			// Disable backface culling
