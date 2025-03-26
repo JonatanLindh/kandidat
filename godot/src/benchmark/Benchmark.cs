@@ -1,8 +1,6 @@
 using Godot;
-using Godot.Collections;
 using System;
-using static System.Formats.Asn1.AsnWriter;
-using System.Diagnostics;
+using System.Collections.Generic;
 
 public partial class Benchmark : Node3D
 {
@@ -16,24 +14,58 @@ public partial class Benchmark : Node3D
 	Node currentScene;
 	int currentSceneIndex = -1;
 
-	string result = "";
+	List<List<BenchmarkDataPoint>> result = new List<List<BenchmarkDataPoint>>();
+
+	float measurementInterval = 0.1f; // 100ms
+	float currentTime = 0.0f;
+
+	// Time to wait before starting the benchmark.
+	// Necessary because the FPS will evaluate to 1, since no average has been calculated yet.
+	float benchmarkSetupTime = 1.0f;
+	bool benchmarkSetupDone = false;
 
 	public override void _Ready()
 	{
 		string absResultPath = ProjectSettings.GlobalizePath(_resultPath);
 		filePath = absResultPath + $"/{time}.txt";
-		Write($"Benchmark started at {time}\n");
-
-		NextScene();
+		GD.Print("Getting ready...");
 	}
 
 	public override void _Process(double delta)
 	{
-		var fps = Engine.GetFramesPerSecond();
-		var currentTime = DateTime.Now.ToString("HH:mm:ss.fff");
-		var memoryUsage = OS.GetStaticMemoryUsage();
+		if(currentTime > measurementInterval && benchmarkSetupDone)
+		{
+			currentTime = 0;
 
-		result += $"Time: {currentTime}, FPS: {fps}, Delta: {delta}, Memory: {memoryUsage} bytes\n";
+			var fps = Engine.GetFramesPerSecond();
+			var measurementTime = DateTime.Now.ToString("HH:mm:ss.fff");
+			var memoryUsage = OS.GetStaticMemoryUsage();
+			var frameTime = delta;
+
+			if (result.Count <= currentSceneIndex)
+			{
+				result.Add(new List<BenchmarkDataPoint>());
+			}
+
+			result[currentSceneIndex].Add(new BenchmarkDataPoint
+			{
+				fps = (float)fps,
+				frameTime = (float)frameTime,
+				memoryUsage = memoryUsage,
+				time = measurementTime
+			});
+		}
+
+		if(currentTime > benchmarkSetupTime && !benchmarkSetupDone)
+		{
+			currentTime = 0;
+			benchmarkSetupDone = true;
+
+			GD.Print("setup done");
+			NextScene();
+		}
+
+		currentTime += (float)delta;
 	}
 
 	public void ExitScene()
@@ -46,10 +78,8 @@ public partial class Benchmark : Node3D
 	{
 		if (currentSceneIndex == (scenes.Length - 1))
 		{
-			GD.Print("Benchmark finished");
-			GD.Print("Results saved to: " + filePath);
-
-			Write(result);
+			Write();
+			GD.Print($"\nBenchmark finished\nResults saved to: {filePath}\n----------");
 			GetTree().Quit();
 		}
 
@@ -61,10 +91,7 @@ public partial class Benchmark : Node3D
 				currentScene.QueueFree();
 			}
 
-			GD.Print($"Starting benchmark of {scenes[currentSceneIndex].ToString()}");
-			result += $"\n------------------------------------\n" +
-				$"Starting benchmark of {scenes[currentSceneIndex].ToString()}" +
-				$"\n------------------------------------\n";
+			GD.Print($"Starting benchmark of {scenes[currentSceneIndex].ResourcePath}");
 
 			currentScene = scenes[currentSceneIndex].Instantiate();
 			currentScene.Call("setBenchmark", this);
@@ -72,10 +99,83 @@ public partial class Benchmark : Node3D
 		}
 	}
 
-	private void Write(string text)
+	private void Write()
 	{
 		resultFile = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
-		resultFile.StoreString(text);
+		resultFile.StoreString($"Benchmark started at {time}\n\n");
+
+		resultFile.StoreString($"Computer specifications:\n");
+		resultFile.StoreString($"OS: {OS.GetName()}\n");
+		resultFile.StoreString($"CPU: {OS.GetProcessorName()}\n");
+		resultFile.StoreString($"GPU: {RenderingServer.GetRenderingDevice().GetDeviceName()}\n");
+
+		var memoryInfo = OS.GetMemoryInfo();
+		var physicalMemory = memoryInfo["physical"];
+		resultFile.StoreString($"RAM: {(ulong)physicalMemory / (1024 * 1024)} MB\n\n");
+
+		for (int i = 0; i < scenes.Length; i++)
+		{
+			resultFile.StoreString($"Benchmark of {scenes[i].ResourcePath}:\n");
+			foreach (var dataPoint in result[i])
+			{
+				resultFile.StoreString($"Time: {dataPoint.time}, FPS: {dataPoint.fps}, Frametime: {dataPoint.frameTime}, Memory Usage: {dataPoint.memoryUsage}\n");
+			}
+			resultFile.StoreString("\n");
+
+			var averageFPS = CalculateAverageFPS(i);
+			resultFile.StoreString($"Average FPS: {averageFPS}\n");
+
+			var onePercentLowFPS = CalculatePercentLowFPS(0.01f, i);
+			resultFile.StoreString($"1% Low FPS: {onePercentLowFPS}\n");
+
+			var pointOnePercentLowFPS = CalculatePercentLowFPS(0.001f, i);
+			resultFile.StoreString($"0.1% Low FPS: {pointOnePercentLowFPS}\n");
+
+			GD.Print($"Benchmark complete");
+			GD.Print($"Average FPS of {scenes[i].ResourcePath}: {averageFPS}");
+			GD.Print($"1% Low FPS of {scenes[i].ResourcePath}: {onePercentLowFPS}");
+			GD.Print($"0.1% Low FPS of {scenes[i].ResourcePath}: {pointOnePercentLowFPS}");
+		}
+
 		resultFile.Close();
 	}
+
+	private float CalculateAverageFPS(int scene)
+	{
+		float sum = 0;
+		foreach (var dataPoint in result[scene])
+		{
+			sum += dataPoint.fps;
+		}
+
+		return sum / result[scene].Count;
+	}
+
+	private float CalculatePercentLowFPS(float percentage, int scene)
+	{
+		var fpsValues = new List<float>();
+		foreach (var dataPoint in result[scene])
+		{
+			fpsValues.Add(dataPoint.fps);
+		}
+
+		fpsValues.Sort();
+
+		int percentCount = (int)Math.Ceiling(fpsValues.Count * percentage);
+		float sum = 0;
+		for (int i = 0; i < percentCount; i++)
+		{
+			sum += fpsValues[i];
+		}
+
+		return sum / percentCount;
+	}
+}
+
+public class BenchmarkDataPoint
+{
+	public float fps;
+	public float frameTime;
+	public float memoryUsage;
+	public string time;
 }

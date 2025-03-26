@@ -5,4 +5,4 @@
 
 [node name="Benchmark" type="Node3D"]
 script = ExtResource("1_xicp2")
-scenes = Array[PackedScene]([ExtResource("2_b22y5"), ExtResource("2_b22y5")])
+scenes = Array[PackedScene]([ExtResource("2_b22y5")])
