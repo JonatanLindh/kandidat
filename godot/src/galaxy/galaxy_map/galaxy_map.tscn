@@ -11,6 +11,12 @@ script = ExtResource("1_8ccs1")
 [node name="InfiniteGalaxy" parent="." instance=ExtResource("2_3xdco")]
 unique_name_in_owner = true
 starScene = ExtResource("3_jn6v0")
+seed = 0
+viewDistance = 1
+IsoLevel = 0.3
+chunkSize = 1000
+starCount = 1000
 
 [node name="UiSelectableStar" parent="." instance=ExtResource("3_51kxb")]
 unique_name_in_owner = true
+travelSpeed = 500.0

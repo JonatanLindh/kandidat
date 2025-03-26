@@ -10,6 +10,11 @@
 
 [node name="InfiniteGalaxy" parent="." node_paths=PackedStringArray("player") instance=ExtResource("1_r7vsn")]
 player = NodePath("../Player")
+seed = 0
+viewDistance = 1
+IsoLevel = 0.3
+chunkSize = 1000
+starCount = 1000
 
 [node name="DummyPlayer" type="Node3D" parent="."]
 
