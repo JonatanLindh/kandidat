@@ -5,7 +5,8 @@ using System.Collections.Generic;
 public partial class Benchmark : Node3D
 {
 	[Export] PackedScene[] scenes;
-	[Export] bool saveResults = false;
+	[Export] bool saveResults = true;
+	[Export] bool saveFullResults = false;
 
 	string _resultPath = "res://../resources/benchmark";
 	string filePath;
@@ -69,7 +70,7 @@ public partial class Benchmark : Node3D
 
 	public void ExitScene()
 	{
-		GD.Print($"Benchmark of {scenes[currentSceneIndex].ResourcePath} done");
+		GD.Print($"Benchmark done");
 		NextScene();
 	}
 
@@ -95,15 +96,15 @@ public partial class Benchmark : Node3D
 				GD.Print($"0.1% high Memory Usage: {processor.GetPercentageLowOrHigh(i, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.001f)}\n");
 			}
 
-			if (saveResults)
+			if (saveResults || saveFullResults)
 			{
 				Write(processor);
-				GD.Print($"Benchmark finished\nResults saved to: {filePath}\n");
+				GD.Print($"Full benchmark complete\nResults saved to: {filePath}\n");
 			}
 
 			else
 			{
-				GD.Print($"Benchmark finished");
+				GD.Print($"Benchmark complete");
 			}
 				
 			GetTree().Quit();
@@ -130,21 +131,25 @@ public partial class Benchmark : Node3D
 		resultFile = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
 		resultFile.StoreString($"Benchmark started at {time}\n\n");
 
-		resultFile.StoreString($"Computer specifications:\n");
+		resultFile.StoreString($"Specifications:\n");
 		resultFile.StoreString($"OS: {OS.GetName()}\n");
 		resultFile.StoreString($"CPU: {OS.GetProcessorName()}\n");
 		resultFile.StoreString($"GPU: {RenderingServer.GetRenderingDevice().GetDeviceName()}\n");
 
 		var memoryInfo = OS.GetMemoryInfo();
 		var physicalMemory = memoryInfo["physical"];
-		resultFile.StoreString($"RAM: {(ulong)physicalMemory / (1024 * 1024)} MB\n\n");
+		resultFile.StoreString($"RAM: {(ulong)physicalMemory / (1024 * 1024)} MB\n");
 
 		for (int i = 0; i < scenes.Length; i++)
 		{
-			resultFile.StoreString($"Benchmark of {scenes[i].ResourcePath}:\n");
-			foreach (var dataPoint in result[i])
+			resultFile.StoreString("\n------------------------------------------------");
+			resultFile.StoreString($"\nStarting benchmark of {scenes[i].ResourcePath}:\n");
+			if (saveFullResults)
 			{
-				resultFile.StoreString($"Time: {dataPoint.time}, FPS: {dataPoint.fps}, Frametime: {dataPoint.frameTime}, Memory Usage: {dataPoint.memoryUsage}\n");
+				foreach (var dataPoint in result[i])
+				{
+					resultFile.StoreString($"Time: {dataPoint.time}, FPS: {dataPoint.fps}, Frametime: {dataPoint.frameTime}, Memory Usage: {dataPoint.memoryUsage}\n");
+				}
 			}
 			resultFile.StoreString("\n");
 
@@ -171,6 +176,8 @@ public partial class Benchmark : Node3D
 			resultFile.StoreString($"0.1% low FPS: {pointOnePercentLowFPS}\n");
 			resultFile.StoreString($"0.1% high Frametime: {pointOnePercentHighFrameTime}\n");
 			resultFile.StoreString($"0.1% high Memory Usage: {pointOnePercentHighMemoryUsage}\n\n");
+
+			resultFile.StoreString("Benchmark done\n");
 		}
 
 		resultFile.Close();
