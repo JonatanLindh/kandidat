@@ -14,7 +14,7 @@ public partial class Benchmark : Node3D
 	Node currentScene;
 	int currentSceneIndex = -1;
 
-	List<List<BenchmarkDataPoint>> result = new List<List<BenchmarkDataPoint>>();
+	List<List<BenchmarkDatapoint>> result = new List<List<BenchmarkDatapoint>>();
 
 	float measurementInterval = 0.1f; // 100ms
 	float currentTime = 0.0f;
@@ -44,10 +44,10 @@ public partial class Benchmark : Node3D
 
 			if (result.Count <= currentSceneIndex)
 			{
-				result.Add(new List<BenchmarkDataPoint>());
+				result.Add(new List<BenchmarkDatapoint>());
 			}
 
-			result[currentSceneIndex].Add(new BenchmarkDataPoint
+			result[currentSceneIndex].Add(new BenchmarkDatapoint
 			{
 				fps = (float)fps,
 				frameTime = (float)frameTime,
@@ -170,12 +170,4 @@ public partial class Benchmark : Node3D
 
 		return sum / percentCount;
 	}
-}
-
-public class BenchmarkDataPoint
-{
-	public float fps;
-	public float frameTime;
-	public float memoryUsage;
-	public string time;
 }
