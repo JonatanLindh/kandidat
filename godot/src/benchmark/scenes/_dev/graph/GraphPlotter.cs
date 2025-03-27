@@ -34,39 +34,82 @@ public partial class GraphPlotter : Control
 		currentTime += (float)delta;
 	}
 
-	private float maxFps = 60.0f; // Initial estimate, updated dynamically
-	private List<Vector2> fpsPoints = new List<Vector2>(); // Store points to rescale
-	private float maxfpspadding = 30.0f; // Padding for max FPS
+	float maxFps;
+	float maxFrameTime;
+	float maxMemoryUsage;
+
+	// Store points to allow for rescaling
+	List<Vector2> fpsPoints = new List<Vector2>();
+	List<Vector2> frameTimePoints = new List<Vector2>();
+	List<Vector2> memoryUsagePoints = new List<Vector2>();
+
+	// Padding of max for when rescaling graphs
+	float maxFpsPadding = 30.0f;
+	float maxFrametimePadding = 0.01f;
+	float maxMemoryUsagePadding = 50.0f;
 
 	public void AddDataPoint(BenchmarkDatapoint data)
 	{
-		// Update max dynamically if a new value is higher
-		if (data.fps > maxFps)
-		{
-			maxFps = data.fps + maxfpspadding;
-			RescaleGraph();
-		}
-
-		float normalizedFps = data.fps / maxFps;
-		float yPosition = panelHeight * (1.0f - normalizedFps);
-		Vector2 point = new Vector2(currentTime * 10, yPosition);
-		fpsPoints.Add(point);
-		fpsLine.AddPoint(point);
+		ProcessDataPoint(BenchmarkDatapointEnum.FPS, data.fps, ref maxFps, maxFpsPadding, fpsPoints, fpsLine);
+		ProcessDataPoint(BenchmarkDatapointEnum.FrameTime, data.frameTime * 100, ref maxFrameTime, maxFrametimePadding, frameTimePoints, frameTimeLine);
+		ProcessDataPoint(BenchmarkDatapointEnum.MemoryUsage, data.memoryUsage / (1024 * 1024), ref maxMemoryUsage, maxMemoryUsagePadding, memoryUsagePoints, memoryUsageLine);
 	}
 
-	private void RescaleGraph()
+	private void ProcessDataPoint(BenchmarkDatapointEnum type, float value, ref float maxValue, float padding, List<Vector2> pointsList, Line2D line)
 	{
-		for (int i = 0; i < fpsPoints.Count; i++)
+		// Update max dynamically if a new value is higher
+		if (value > maxValue)
 		{
-			float normalizedFps = (fpsPoints[i].Y / panelHeight) * maxFps; // Convert back to FPS
-			float newY = panelHeight * (1.0f - (normalizedFps / maxFps));  // Rescale
-			fpsPoints[i] = new Vector2(fpsPoints[i].X, newY);
+			maxValue = value + padding;
+			RescaleGraph(type);
 		}
 
-		fpsLine.ClearPoints();
-		foreach (var point in fpsPoints)
+		// Get y position of value
+		float yPosition = GetPanelPositionOfValue(value, maxValue);
+		Vector2 newPoint = new Vector2(currentTime * 10, yPosition);
+
+		// Add point to list and line
+		pointsList.Add(newPoint);
+		line.AddPoint(newPoint);
+	}
+
+	private void RescaleGraph(BenchmarkDatapointEnum datapointType)
+	{
+		switch (datapointType)
 		{
-			fpsLine.AddPoint(point);
+			case BenchmarkDatapointEnum.FPS:
+				RescaleGraph(fpsPoints, fpsLine, maxFps);
+				break;
+			case BenchmarkDatapointEnum.FrameTime:
+				RescaleGraph(frameTimePoints, frameTimeLine, maxFrameTime);
+				break;
+			case BenchmarkDatapointEnum.MemoryUsage:
+				RescaleGraph(memoryUsagePoints, memoryUsageLine, maxMemoryUsage);
+				break;
 		}
+	}
+
+	private void RescaleGraph(List<Vector2> points, Line2D line, float maxValue)
+	{
+		// Rescale points
+		for (int i = 0; i < points.Count; i++)
+		{
+			float nonNormalizedValue = (points[i].Y / panelHeight) * maxValue;
+			float newY = GetPanelPositionOfValue(nonNormalizedValue, maxValue);
+			points[i] = new Vector2(points[i].X, newY);
+		}
+
+		// Clear and redraw line
+		line.ClearPoints();
+		foreach (var point in points)
+		{
+			line.AddPoint(point);
+		}
+	}
+
+	private float GetPanelPositionOfValue(float value, float maxValue)
+	{
+		float nValue = value / maxValue;
+		return panelHeight * (1.0f - nValue);
 	}
 }
