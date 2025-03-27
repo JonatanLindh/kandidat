@@ -33,6 +33,12 @@ public partial class Benchmark : Node3D
 		string absResultPath = ProjectSettings.GlobalizePath(_resultPath);
 		filePath = absResultPath + $"/{time}.txt";
 		GD.Print("Benchmark getting ready...");
+
+		if (scenes.Length == 0)
+		{
+			GD.Print("No scenes to benchmark");
+			GetTree().Quit();
+		}
 	}
 
 	public override void _Process(double delta)
