@@ -18,20 +18,21 @@ func _process(delta: float) -> void:
 	set_atmosphere_sun_dir()
 	
 func generate_atmosphere() -> void:
-	atmosphere = $Atmosphere
+	atmosphere = get_node_or_null("Atmosphere")
 	if atmosphere == null:
 		return
-
+		
 	var radius = planet_data.radius
 	atmosphere.radius = radius
 	
-	set_atmosphere_sun_dir()
+	# call method when node is ready
+	call_deferred("set_atmosphere_sun_dir")
 
 func set_atmosphere_sun_dir() -> void:
 	var sun_dir = (planet_data.sun_position - global_position).normalized()
 	atmosphere.sun_direction = sun_dir
 
-	
+
 func generate() -> void:
 	planet_data.min_height = 99999.0
 	planet_data.max_height = 0.0
