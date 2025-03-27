@@ -12,8 +12,12 @@ public partial class GraphPlotter : Control
 	Panel fpsPanel;
 	Panel frameTimePanel;
 	Panel memoryUsagePanel;
-	float panelHeight;
 
+	Label fpsLabel;
+	Label frameTimeLabel;
+	Label memoryUsageLabel;
+
+	float panelHeight;
 	float currentTime = 0.0f;
 
 	public override void _Ready()
@@ -25,18 +29,25 @@ public partial class GraphPlotter : Control
 		fpsPanel = GetNode<Panel>("%FPSPanel");
 		frameTimePanel = GetNode<Panel>("%FrametimePanel");
 		memoryUsagePanel = GetNode<Panel>("%MemoryPanel");
+
+		fpsLabel = GetNode<Label>("%FPSLabel");
+		frameTimeLabel = GetNode<Label>("%FrametimeLabel");
+		memoryUsageLabel = GetNode<Label>("%MemoryLabel");
 	}
 
 	public override void _Process(double delta)
 	{
 		panelHeight = fpsPanel.GetRect().Size.Y;
-		
 		currentTime += (float)delta;
 	}
 
 	float maxFps;
 	float maxFrameTime;
 	float maxMemoryUsage;
+
+	float currentFps;
+	float currentFrameTime;
+	float currentMemoryUsage;
 
 	// Store points to allow for rescaling
 	List<Vector2> fpsPoints = new List<Vector2>();
@@ -50,9 +61,20 @@ public partial class GraphPlotter : Control
 
 	public void AddDataPoint(BenchmarkDatapoint data)
 	{
-		ProcessDataPoint(BenchmarkDatapointEnum.FPS, data.fps, ref maxFps, maxFpsPadding, fpsPoints, fpsLine);
-		ProcessDataPoint(BenchmarkDatapointEnum.FrameTime, data.frameTime * 100, ref maxFrameTime, maxFrametimePadding, frameTimePoints, frameTimeLine);
-		ProcessDataPoint(BenchmarkDatapointEnum.MemoryUsage, data.memoryUsage / (1024 * 1024), ref maxMemoryUsage, maxMemoryUsagePadding, memoryUsagePoints, memoryUsageLine);
+		currentFps = data.fps;
+		currentFrameTime = data.frameTime;
+		currentMemoryUsage = data.memoryUsage;
+
+		float filteredFrameTime = currentFrameTime * 100; // seconds to ms
+		float filteredMemoryUsage = currentMemoryUsage / (1024 * 1024); // bytes to MB
+
+		fpsLabel.Text = currentFps.ToString();
+		frameTimeLabel.Text = Math.Round(filteredFrameTime, 4).ToString();
+		memoryUsageLabel.Text = Math.Round(filteredMemoryUsage, 2).ToString();
+
+		ProcessDataPoint(BenchmarkDatapointEnum.FPS, currentFps, ref maxFps, maxFpsPadding, fpsPoints, fpsLine);
+		ProcessDataPoint(BenchmarkDatapointEnum.FrameTime, filteredFrameTime, ref maxFrameTime, maxFrametimePadding, frameTimePoints, frameTimeLine);
+		ProcessDataPoint(BenchmarkDatapointEnum.MemoryUsage, filteredMemoryUsage, ref maxMemoryUsage, maxMemoryUsagePadding, memoryUsagePoints, memoryUsageLine);
 	}
 
 	private void ProcessDataPoint(BenchmarkDatapointEnum type, float value, ref float maxValue, float padding, List<Vector2> pointsList, Line2D line)
