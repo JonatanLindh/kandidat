@@ -219,6 +219,9 @@ public partial class GraphPlotter : Control
 			pointsList[i] = new Vector2(pointsList[i].X - shiftAmount, pointsList[i].Y);
 		}
 
+		// Remove points that are out of bounds (left)
+		pointsList.RemoveAll(point => point.X < 0);
+
 		RedrawGraph(pointsList, line);
 	}
 }
