@@ -12,14 +12,14 @@ public partial class GalaxyMapBenchmark : BenchmarkScene
 
 	float currentTime = 0.0f;
 
-	public override void Ready()
+	public override void BenchmarkReady()
 	{
 		InfiniteGalaxy galaxy = galaxyMap.GetNode<InfiniteGalaxy>("InfiniteGalaxy");
 		galaxy.Set("player", player);
 		galaxy.Set("seed", seed);
 	}
 
-	public override void Process(double delta)
+	public override void BenchmarkProcess(double delta)
 	{
 		player.Position += Vector3.Forward * speed * (float)delta;
 		currentTime += (float)delta;
