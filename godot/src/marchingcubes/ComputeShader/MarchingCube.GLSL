@@ -73,7 +73,7 @@ layout(set = 0, binding = 4) buffer TriangleTableBuffer{
 
 
 uint index(int x, int y, int z){
-    return x + y * uint(uniforms.sizeX) + z * uint(uniforms.sizeY) * uint(uniforms.sizeZ);
+    return x + y * uint(uniforms.sizeX) + z * uint(uniforms.sizeX) * uint(uniforms.sizeY);
 }
 
 vec3 evaluateTriangle(int tri, vec3 pos, vec3 offset){
@@ -99,11 +99,6 @@ vec3 evaluateTriangle(int tri, vec3 pos, vec3 offset){
     t = clamp(t, 0.0, 1.0);
 
     return mix(v0, v1, t);
-}
-
-float calculateDensityLevel(vec3 pos){
-    if(distance(vec3(32), pos) < 32) return 1;
-    return 0;
 }
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
