@@ -9,6 +9,8 @@ public partial class Benchmark : Node3D
 	[Export] bool saveResults = true;
 	[Export] bool saveFullResults = false;
 
+	GraphPlotter plot;
+
 	string _resultPath = "res://../resources/benchmark";
 	string filePath;
 	string time = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
@@ -30,6 +32,8 @@ public partial class Benchmark : Node3D
 
 	public override void _Ready()
 	{
+		this.plot = GetNode<GraphPlotter>("GraphPlotter");
+
 		string absResultPath = ProjectSettings.GlobalizePath(_resultPath);
 		filePath = absResultPath + $"/{time}.txt";
 		GD.Print("Benchmark getting ready...");
@@ -59,13 +63,16 @@ public partial class Benchmark : Node3D
 				result.Add(new List<BenchmarkDatapoint>());
 			}
 
-			result[currentSceneIndex].Add(new BenchmarkDatapoint
+			BenchmarkDatapoint benchmarkDatapoint = new BenchmarkDatapoint
 			{
 				fps = (float)fps,
 				frameTime = (float)frameTime,
 				memoryUsage = memoryUsage,
 				time = measurementTime
-			});
+			};
+
+			result[currentSceneIndex].Add(benchmarkDatapoint);
+			plot.AddDataPoint(benchmarkDatapoint);
 		}
 
 		if(currentTime > downtime && !benchmarkSetupDone)

@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=3 uid="uid://bn03e1m8twjh0"]
+
+[ext_resource type="Script" uid="uid://bopwc70j3myag" path="res://src/benchmark/scenes/_dev/graph/GraphPlotter.cs" id="1_vtf27"]
+
+[node name="GraphPlotter" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_vtf27")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 500.0
+offset_bottom = 300.0
+
+[node name="FPSPanel" type="Panel" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Control" type="Control" parent="VBoxContainer/FPSPanel"]
+layout_mode = 1
+anchors_preset = 0
+
+[node name="FPSLine2D" type="Line2D" parent="VBoxContainer/FPSPanel/Control"]
+unique_name_in_owner = true
+width = 2.0
+
+[node name="FrametimePanel" type="Panel" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Control" type="Control" parent="VBoxContainer/FrametimePanel"]
+layout_mode = 1
+anchors_preset = 0
+
+[node name="FrametimeLine2D" type="Line2D" parent="VBoxContainer/FrametimePanel/Control"]
+unique_name_in_owner = true
+width = 2.0
+
+[node name="MemoryPanel" type="Panel" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Control" type="Control" parent="VBoxContainer/MemoryPanel"]
+layout_mode = 1
+anchors_preset = 0
+
+[node name="MemoryLine2D" type="Line2D" parent="VBoxContainer/MemoryPanel/Control"]
+unique_name_in_owner = true
+width = 2.0
