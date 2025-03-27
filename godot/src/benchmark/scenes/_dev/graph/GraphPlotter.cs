@@ -17,6 +17,7 @@ public partial class GraphPlotter : Control
 	Label frameTimeLabel;
 	Label memoryUsageLabel;
 
+	float panelWidth;
 	float panelHeight;
 	float currentTime = 0.0f;
 
@@ -37,6 +38,7 @@ public partial class GraphPlotter : Control
 
 	public override void _Process(double delta)
 	{
+		panelWidth = fpsPanel.GetRect().Size.X;
 		panelHeight = fpsPanel.GetRect().Size.Y;
 		currentTime += (float)delta;
 	}
@@ -48,6 +50,8 @@ public partial class GraphPlotter : Control
 	float currentFps;
 	float currentFrameTime;
 	float currentMemoryUsage;
+
+	int graphShiftFactor = 3;
 
 	// Store points to allow for rescaling
 	List<Vector2> fpsPoints = new List<Vector2>();
@@ -86,13 +90,19 @@ public partial class GraphPlotter : Control
 			RescaleGraph(type);
 		}
 
-		// Get y position of value
-		float yPosition = GetPanelPositionOfValue(value, maxValue);
-		Vector2 newPoint = new Vector2(currentTime * 10, yPosition);
+		float x = currentTime * 10;
+		float y = GetPanelPositionOfValue(value, maxValue);
+		Vector2 newPoint = new Vector2(x, y);
 
 		// Add point to list and line
 		pointsList.Add(newPoint);
 		line.AddPoint(newPoint);
+
+		// Check if the graph exceeds the panel width
+		if (pointsList.Count > 0 && newPoint.X >= panelWidth)
+		{
+			ShiftAllGraphsLeft();
+		}
 	}
 
 	private void RescaleGraph(BenchmarkDatapointEnum datapointType)
@@ -122,6 +132,11 @@ public partial class GraphPlotter : Control
 		}
 
 		// Clear and redraw line
+		RedrawGraph(points, line);
+	}
+
+	private void RedrawGraph(List<Vector2> points, Line2D line)
+	{
 		line.ClearPoints();
 		foreach (var point in points)
 		{
@@ -133,5 +148,33 @@ public partial class GraphPlotter : Control
 	{
 		float nValue = value / maxValue;
 		return panelHeight * (1.0f - nValue);
+	}
+
+	private void ShiftAllGraphsLeft()
+	{
+		int removeCount = fpsPoints.Count / graphShiftFactor;
+		if (removeCount == 0) return;
+
+		float shiftAmount = fpsPoints[removeCount].X;
+
+		// Adjust `currentTime` to prevent drifting
+		currentTime -= shiftAmount / 10.0f;
+
+		// Apply shift to all datasets
+		ShiftGraphLeft(fpsPoints, fpsLine, shiftAmount);
+		ShiftGraphLeft(frameTimePoints, frameTimeLine, shiftAmount);
+		ShiftGraphLeft(memoryUsagePoints, memoryUsageLine, shiftAmount);
+	}
+
+	private void ShiftGraphLeft(List<Vector2> pointsList, Line2D line, float shiftAmount)
+	{
+		pointsList.RemoveRange(0, pointsList.Count / 4);
+
+		for (int i = 0; i < pointsList.Count; i++)
+		{
+			pointsList[i] = new Vector2(pointsList[i].X - shiftAmount, pointsList[i].Y);
+		}
+
+		RedrawGraph(pointsList, line);
 	}
 }
