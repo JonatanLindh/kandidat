@@ -1,26 +1,19 @@
 using Godot;
 using System;
+using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.ConstrainedExecution;
 
 [Tool]
 public partial class CelestialBodyInput : Node3D
 {
-    /*
-    [Export] private Resource PlanetNoiseResource;
-    Planet planet;
+/*    [ExportToolButton("Click me!")]
+    public Callable ClickMeButton => Callable.From(PrintMessage);*/
 
-    public override void _Ready()
+    public void PrintMessage()
     {
-        if (PlanetNoiseResource is not Planet)
-        {
-            planet = null;
-        }
-        else
-        {
-            planet = PlanetNoiseResource as Planet;
-        }
-    
-    }*/
+        GD.Print("Button clicked!");
+    }
 
     [ExportCategory("Celestial body parameters")]
     private int radius = 32;
@@ -81,14 +74,14 @@ public partial class CelestialBodyInput : Node3D
         set { octaves = value; }
     }
     private float frequency = 1.0f;
-    [Export(PropertyHint.Range, "0,32,00.1")]
+    [Export(PropertyHint.Range, "0,32,0.01")]
     private float Frequency
     {
         get { return frequency; }
         set { frequency = value; }
     }
     private float amplitude = 10.0f;
-    [Export(PropertyHint.Range, "0,32,00.1")]
+    [Export(PropertyHint.Range, "0,32,0.01")]
     private float Amplitude
     {
         get { return amplitude; }
@@ -126,6 +119,8 @@ public partial class CelestialBodyInput : Node3D
             seed = new Random().Next();
         }
     }
+
+    // Getters
 
     public int GetRadius()
     {
@@ -180,5 +175,69 @@ public partial class CelestialBodyInput : Node3D
     public int GetSeed()
     {
         return seed;
+    }
+
+    // Setters
+
+    public void SetRadius(int newRadius)
+    {
+        radius = newRadius;
+    }
+
+    public void SetWidth(int newWidth)
+    {
+        width = newWidth;
+    }
+
+    public void SetHeight(int newHeight)
+    {
+        height = newHeight;
+    }
+
+    public void SetDepth(int newDepth)
+    {
+        depth = newDepth;
+    }
+
+    public void SetSize(int size)
+    {
+        SetWidth(size);
+        SetHeight(size);
+        SetDepth(size);
+    }
+
+    public void SetOctaves(int newOctaves)
+    {
+        octaves = newOctaves;
+    }
+
+    public void SetFrequency(float newFrequency)
+    {
+        frequency = newFrequency;
+    }
+
+    public void SetAmplitude(float newAmplitude)
+    {
+        amplitude = newAmplitude;
+    }
+
+    public void SetLacunarity(float newLacunarity)
+    {
+        lacunarity = newLacunarity;
+    }
+
+    public void SetPersistence(float newPersistence)
+    {
+        persistence = newPersistence;
+    }
+
+    public void SetNoiseType(FastNoiseLite.NoiseTypeEnum newNoiseType)
+    {
+        noiseType = newNoiseType;
+    }
+
+    public void SetSeed(int newSeed)
+    {
+        seed = newSeed;
     }
 }

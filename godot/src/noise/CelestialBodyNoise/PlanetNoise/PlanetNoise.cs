@@ -16,28 +16,21 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
 {
     private NoiseTexture3D texture3d;
     private CelestialBodyInput Input;
+    private CelestialBodyInput input;
     private FastNoiseLite fastNoise;
 
     public float[,,] CreateDataPoints()
     {
-        Input = GetParent<CelestialBodyInput>();
-        if(Input is not CelestialBodyInput)
-        {
-            throw new Exception("Input is not CelestialBodyInput");
-        }
-
-        CelestialBodyInput input = Input as CelestialBodyInput;
         int radius = input.GetRadius();
         int diameter = 2 * radius;
 
-        // width, height, depth from editor - + 2 for padding edges with air
-        int width = input.GetWidth();  int height = input.GetHeight(); int depth = input.GetDepth();
+        int width = input.GetWidth();  
+        int height = input.GetHeight(); 
+        int depth = input.GetDepth();
 
         float[,,] points = new float[width, height, depth];
         Vector3 centerPoint = new Vector3I(radius, radius, radius);
         
-        Random random = new Random();
-
         fastNoise = new FastNoiseLite()
         {
             NoiseType = input.GetNoiseType(),
@@ -64,7 +57,7 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
                     float distanceAwayFromCenter = (float)radius - distanceToCenter;
 
                     // Apply fbm to layer noise
-                    float value = Fbm(input, distanceAwayFromCenter, currentPosition);
+                    float value = Fbm(distanceAwayFromCenter, currentPosition);
 
                     // Update point (x,y,z) with value from fbm
                     points[x, y, z] = value;
@@ -84,7 +77,7 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
     /// <returns>
     /// The sum of all noise layers added to value
     /// </returns>
-    private float Fbm(CelestialBodyInput input, float value, Vector3 currentPosition)
+    private float Fbm(float value, Vector3 currentPosition)
     {
         float valueAfterFbm = value;
 
@@ -112,7 +105,7 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
         return valueAfterFbm;
     }
 
-    public ImageTexture3D Get3DTexture(FastNoiseLite fastNoise, int width, int height, int depth, bool useMipmaps)
+    public ImageTexture3D Get3DNoiseTexture(FastNoiseLite fastNoise, int width, int height, int depth, bool useMipmaps)
     {
         // Create Slices Of Noise
         Godot.Collections.Array<Image> noiseSlices = new Godot.Collections.Array<Image>();
@@ -129,8 +122,38 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
         return texture;
     }
 
+    private void RandomizeParameters()
+    {
+        RandomPlanet random = new RandomPlanet();
+
+        input.SetRadius(random.GetRadius());
+        input.SetSize(random.GetSize());
+
+        input.SetOctaves(random.GetOctaves());
+        input.SetSeed(random.GetSeed());
+
+        input.SetAmplitude(random.GetAmplitude());
+        input.SetPersistence(random.GetPersistence());
+        input.SetFrequency(random.GetFrequency());
+        input.SetLacunarity(random.GetLacunarity());
+
+        input.SetNoiseType(FastNoiseLite.NoiseTypeEnum.Perlin);
+    }
+
     public float[,,] GetNoise(bool useRandomGeneration)
     {
+        Input = GetParent<CelestialBodyInput>();
+        if (Input is not CelestialBodyInput)
+        {
+            throw new Exception("Input is not CelestialBodyInput");
+        }
+        input = Input as CelestialBodyInput;
+
+        if (useRandomGeneration)
+        {
+            RandomizeParameters();
+        }
+
         return CreateDataPoints();
     }
 }

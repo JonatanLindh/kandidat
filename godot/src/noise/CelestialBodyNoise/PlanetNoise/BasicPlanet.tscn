@@ -15,8 +15,7 @@ Frequency = 2.0
 Amplitude = 20.0
 Lacunarity = 1.5
 Persistence = 0.2
-seed = 1282444896
-RandomizeSeed = true
+seed = 1557559149
 
 [node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("1_au8v0")]
 CelestialBody = NodePath("../PlanetNoise")
