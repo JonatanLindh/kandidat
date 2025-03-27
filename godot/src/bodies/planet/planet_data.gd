@@ -3,6 +3,11 @@ extends Resource
 
 class_name PlanetData
 
+@export var sun_position := Vector3(0.,0.,0.):
+	set(new_pos):
+		sun_position = new_pos
+		emit_changed()
+
 @export var radius := 1.0:
 	set(val):
 		radius = val
