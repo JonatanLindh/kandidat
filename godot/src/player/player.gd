@@ -35,7 +35,6 @@ func _input(event):
 				current_speed = current_speed + 1
 			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 				current_speed = current_speed - 1
-
 	
 	if Input.is_action_just_pressed("ui_cancel"):
 		toggle_mouse_lock()
