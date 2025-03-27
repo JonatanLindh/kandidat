@@ -17,6 +17,18 @@ public partial class GraphPlotter : Control
 	Label frameTimeLabel;
 	Label memoryUsageLabel;
 
+	Label fps1Label;
+	Label fps0_5Label;
+	Label fps0Label;
+
+	Label frametime1Label;
+	Label frametime0_5Label;
+	Label frametime0Label;
+
+	Label memory1Label;
+	Label memory0_5Label;
+	Label memory0Label;
+
 	float panelWidth;
 	float panelHeight;
 	float currentTime = 0.0f;
@@ -34,6 +46,18 @@ public partial class GraphPlotter : Control
 		fpsLabel = GetNode<Label>("%FPSLabel");
 		frameTimeLabel = GetNode<Label>("%FrametimeLabel");
 		memoryUsageLabel = GetNode<Label>("%MemoryLabel");
+
+		fps1Label = GetNode<Label>("%1FPS");
+		fps0_5Label = GetNode<Label>("%0_5FPS");
+		fps0Label = GetNode<Label>("%0FPS");
+
+		frametime1Label = GetNode<Label>("%1Frametime");
+		frametime0_5Label = GetNode<Label>("%0_5Frametime");
+		frametime0Label = GetNode<Label>("%0Frametime");
+
+		memory1Label = GetNode<Label>("%1Memory");
+		memory0_5Label = GetNode<Label>("%0_5Memory");
+		memory0Label = GetNode<Label>("%0Memory");
 	}
 
 	public override void _Process(double delta)
@@ -88,6 +112,26 @@ public partial class GraphPlotter : Control
 		{
 			maxValue = value + padding;
 			RescaleGraph(type);
+
+			// Update labels
+			switch (type)
+			{
+				case BenchmarkDatapointEnum.FPS:
+					fps1Label.Text = Math.Round(maxValue, 0).ToString();
+					fps0_5Label.Text = Math.Round(maxValue / 2, 0).ToString();
+					fps0Label.Text = "0";
+					break;
+				case BenchmarkDatapointEnum.FrameTime:
+					frametime1Label.Text = Math.Round(maxValue, 2).ToString();
+					frametime0_5Label.Text = Math.Round(maxValue / 2, 2).ToString();
+					frametime0Label.Text = "0";
+					break;
+				case BenchmarkDatapointEnum.MemoryUsage:
+					memory1Label.Text = Math.Round(maxValue, 2).ToString();
+					memory0_5Label.Text = Math.Round(maxValue / 2, 2).ToString();
+					memory0Label.Text = "0";
+					break;
+			}
 		}
 
 		float x = currentTime * 10;

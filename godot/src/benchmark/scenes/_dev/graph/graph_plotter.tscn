@@ -10,27 +10,82 @@ script = ExtResource("1_vtf27")
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 offset_right = 600.0
-offset_bottom = 400.0
+offset_bottom = 300.0
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 text = "Frames per second (FPS)"
 
-[node name="FPSPanel" type="Panel" parent="VBoxContainer"]
-unique_name_in_owner = true
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="VBoxContainer/FPSPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+
+[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="1FPS" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/Panel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "1"
+horizontal_alignment = 1
+
+[node name="Panel2" type="Panel" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="0_5FPS" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/Panel2"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0.5"
+horizontal_alignment = 1
+
+[node name="Panel3" type="Panel" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="0FPS" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/Panel3"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+horizontal_alignment = 1
+
+[node name="FPSPanel" type="Panel" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer/FPSPanel"]
 layout_mode = 1
 anchors_preset = 0
 
-[node name="FPSLine2D" type="Line2D" parent="VBoxContainer/FPSPanel/Control"]
+[node name="FPSLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer/FPSPanel/Control"]
 unique_name_in_owner = true
 width = 2.0
 
-[node name="FPSLabel" type="Label" parent="VBoxContainer/FPSPanel"]
+[node name="FPSLabel" type="Label" parent="VBoxContainer/HBoxContainer/FPSPanel"]
 unique_name_in_owner = true
 z_index = 1
 layout_mode = 1
@@ -46,7 +101,7 @@ grow_vertical = 0
 text = "Current"
 horizontal_alignment = 2
 
-[node name="ColorRect" type="ColorRect" parent="VBoxContainer/FPSPanel/FPSLabel"]
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/HBoxContainer/FPSPanel/FPSLabel"]
 z_index = -1
 layout_mode = 1
 anchors_preset = 15
@@ -60,20 +115,75 @@ color = Color(0.470588, 0.470588, 0.470588, 0.705882)
 layout_mode = 2
 text = "Frametime (ms)"
 
-[node name="FrametimePanel" type="Panel" parent="VBoxContainer"]
-unique_name_in_owner = true
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="VBoxContainer/FrametimePanel"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+
+[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer2/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="1Frametime" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer2/Panel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "1"
+horizontal_alignment = 1
+
+[node name="Panel2" type="Panel" parent="VBoxContainer/HBoxContainer2/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="0_5Frametime" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer2/Panel2"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0.5"
+horizontal_alignment = 1
+
+[node name="Panel3" type="Panel" parent="VBoxContainer/HBoxContainer2/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="0Frametime" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer2/Panel3"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+horizontal_alignment = 1
+
+[node name="FrametimePanel" type="Panel" parent="VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
 layout_mode = 1
 anchors_preset = 0
 
-[node name="FrametimeLine2D" type="Line2D" parent="VBoxContainer/FrametimePanel/Control"]
+[node name="FrametimeLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer2/FrametimePanel/Control"]
 unique_name_in_owner = true
 width = 2.0
 
-[node name="FrametimeLabel" type="Label" parent="VBoxContainer/FrametimePanel"]
+[node name="FrametimeLabel" type="Label" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
 unique_name_in_owner = true
 z_index = 1
 layout_mode = 1
@@ -89,7 +199,7 @@ grow_vertical = 0
 text = "Current"
 horizontal_alignment = 2
 
-[node name="ColorRect" type="ColorRect" parent="VBoxContainer/FrametimePanel/FrametimeLabel"]
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/HBoxContainer2/FrametimePanel/FrametimeLabel"]
 z_index = -1
 layout_mode = 1
 anchors_preset = 15
@@ -103,20 +213,75 @@ color = Color(0.470588, 0.470588, 0.470588, 0.705882)
 layout_mode = 2
 text = "Memory usage (MB)"
 
-[node name="MemoryPanel" type="Panel" parent="VBoxContainer"]
-unique_name_in_owner = true
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="VBoxContainer/MemoryPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+
+[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer3/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="1Memory" type="Label" parent="VBoxContainer/HBoxContainer3/VBoxContainer/Panel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "1"
+horizontal_alignment = 1
+
+[node name="Panel2" type="Panel" parent="VBoxContainer/HBoxContainer3/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="0_5Memory" type="Label" parent="VBoxContainer/HBoxContainer3/VBoxContainer/Panel2"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0.5"
+horizontal_alignment = 1
+
+[node name="Panel3" type="Panel" parent="VBoxContainer/HBoxContainer3/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="0Memory" type="Label" parent="VBoxContainer/HBoxContainer3/VBoxContainer/Panel3"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+horizontal_alignment = 1
+
+[node name="MemoryPanel" type="Panel" parent="VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
 layout_mode = 1
 anchors_preset = 0
 
-[node name="MemoryLine2D" type="Line2D" parent="VBoxContainer/MemoryPanel/Control"]
+[node name="MemoryLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer3/MemoryPanel/Control"]
 unique_name_in_owner = true
 width = 2.0
 
-[node name="MemoryLabel" type="Label" parent="VBoxContainer/MemoryPanel"]
+[node name="MemoryLabel" type="Label" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
 unique_name_in_owner = true
 z_index = 1
 layout_mode = 1
@@ -133,7 +298,7 @@ text = "Current"
 horizontal_alignment = 2
 autowrap_mode = 1
 
-[node name="ColorRect" type="ColorRect" parent="VBoxContainer/MemoryPanel/MemoryLabel"]
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/HBoxContainer3/MemoryPanel/MemoryLabel"]
 z_index = -1
 layout_mode = 1
 anchors_preset = 15
