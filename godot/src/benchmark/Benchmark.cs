@@ -110,14 +110,10 @@ public partial class Benchmark : Node3D
 	private void NextScene()
 	{
 		currentSceneIndex++;
-		if(currentSceneIndex < scenes.Length)
-		{
-			GD.Print($"Starting benchmark of {scenes[currentSceneIndex].ResourcePath}");
-
-			currentScene = (BenchmarkScene) scenes[currentSceneIndex].Instantiate();
-			currentScene.setBenchmark(this);
-			AddChild(currentScene);
-		}
+		GD.Print($"Starting benchmark of {scenes[currentSceneIndex].ResourcePath}");
+		currentScene = (BenchmarkScene) scenes[currentSceneIndex].Instantiate();
+		currentScene.setBenchmark(this);
+		AddChild(currentScene);
 	}
 
 	private void Write()
@@ -155,7 +151,7 @@ public partial class Benchmark : Node3D
 			resultFile.StoreString($"1% low FPS: {onePercentLowFPS}\n");
 			resultFile.StoreString($"0.1% low FPS: {pointOnePercentLowFPS}\n\n");
 
-			// Framtime
+			// Frametime
 			var averageFrameTime = processor.GetAverage(i, result, BenchmarkDatapointEnum.FrameTime);
 			var onePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f);
 			var pointOnePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f);
