@@ -78,7 +78,13 @@ public partial class Benchmark : Node3D
 
 	public void ExitScene(float downtime)
 	{
-		GD.Print($"\nAverage FPS: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FPS)}");
+		var firstTime = result[result.Count - 1][0].time;
+		var lastTime = result[result.Count - 1][result[result.Count - 1].Count - 1].time;
+		GD.Print($"Ran test from {firstTime} to {lastTime}");
+		var timeSpan = DateTime.Parse(lastTime) - DateTime.Parse(firstTime);
+		GD.Print($"Test took: {timeSpan.Minutes} min and {timeSpan.Seconds} seconds\n");
+
+		GD.Print($"Average FPS: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FPS)}");
 		GD.Print($"1% low FPS: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.01f)}");
 		GD.Print($"0.1% low FPS: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.001f)}\n");
 		
@@ -116,7 +122,7 @@ public partial class Benchmark : Node3D
 	private void NextScene()
 	{
 		currentSceneIndex++;
-		GD.Print($"Starting benchmark of {scenes[currentSceneIndex].ResourcePath}");
+		GD.Print($"Starting benchmark of {scenes[currentSceneIndex].ResourcePath}\n");
 		currentScene = (BenchmarkScene) scenes[currentSceneIndex].Instantiate();
 		currentScene.setBenchmark(this);
 		AddChild(currentScene);
@@ -140,6 +146,16 @@ public partial class Benchmark : Node3D
 		{
 			resultFile.StoreString("\n------------------------------------------------");
 			resultFile.StoreString($"\nStarting benchmark of {scenes[i].ResourcePath}:\n");
+
+			// Time spent
+			var firstTime = result[i][0].time;
+			var lastTime = result[i][result[i].Count - 1].time;
+			resultFile.StoreString($"Ran test from {firstTime} to {lastTime}\n");
+			
+			var timeSpan = DateTime.Parse(lastTime) - DateTime.Parse(firstTime);
+			resultFile.StoreString($"Test took: {timeSpan.Minutes} min and {timeSpan.Seconds} seconds\n");
+
+			// Full results (all measured datapoints)
 			if (saveFullResults)
 			{
 				foreach (var dataPoint in result[i])
