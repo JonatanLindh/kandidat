@@ -28,9 +28,9 @@ public partial class McSpawner : Node
 		set
 		{
 			cb = value;
-			OnResourceSet();
-		}
-	}
+            // OnResourceSet(); TODO THIS MAKES THE SpawnMesh() FUNCTION RUN TWICE!
+        }
+    }
 
     private int _maxHeight = 16;
 	private int _size = 32;
