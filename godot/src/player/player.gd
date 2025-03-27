@@ -59,8 +59,6 @@ func handle_rotation(direction : Vector3, delta : float):
 		new_basis, delta * 1
 	))
 
-
-
 func handle_flying() -> void:
 	if Input.is_action_just_pressed("up"):
 		floating_flag = true
@@ -163,7 +161,6 @@ func in_gravity_field_movement(delta : float):
 			current_speed = max(1, current_speed - 1)
 
 	if is_falling():
-		handle_rotation(-gravity_vector.normalized(), 0.1)
 		velocity += gravity_vector * delta
 	
 		
