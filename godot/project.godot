@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Kandidat"
-run/main_scene="res://src/noise/PlanetNoiseTest.tscn"
-config/features=PackedStringArray("4.3", "C#", "Forward Plus")
+run/main_scene="res://src/main.tscn"
+config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+PlayerVariables="*res://src/player/player_variables.gd"
 
 [dotnet]
 
@@ -23,7 +27,9 @@ project/assembly_name="Kandidat"
 
 folder_colors={
 "res://src/galaxy/": "orange",
-"res://src/galaxy/galaxies/other_galaxies/": "gray"
+"res://src/galaxy/galaxies/other_galaxies/": "gray",
+"res://src/system/": "purple",
+"res://src/system_manager/": "purple"
 }
 
 [input]

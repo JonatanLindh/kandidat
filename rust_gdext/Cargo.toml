@@ -4,11 +4,21 @@ version = "0.1.0"
 edition = "2024"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-godot = { version = "0.2.4", features = ["register-docs"] }
+godot = { version = "0.2.4", features = [
+    "register-docs",
+    "experimental-threads",
+] }
 itertools = "0.14.0"
 ndarray = { version = "0.16.1", features = ["rayon"] }
 rayon = "1.10.0"
 proc = { path = "proc" }
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+criterion-macro = "0.4.0"
+
+[[bench]]
+name = "gravity_bench"

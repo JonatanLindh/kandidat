@@ -1,4 +1,4 @@
-use super::body::GravityBody;
+use super::{body::GravityBody, trajectories::TrajectoryWorker};
 use godot::{
     classes::{MeshInstance3D, notify::Node3DNotification},
     prelude::*,
@@ -44,7 +44,7 @@ pub struct GravityController {
 
     /// Number of steps to compute when simulating trajectories
     #[export]
-    #[init(val = 1000)]
+    #[init(val = 4000)]
     pub simulation_steps: u32,
 
     /// Time increment (in seconds) between each simulation step
@@ -56,6 +56,8 @@ pub struct GravityController {
     #[export]
     #[init(val = true)]
     pub auto_update_trajectories: bool,
+
+    pub trajectory_worker: Option<TrajectoryWorker>,
 
     /// Optional body to use as the reference point for trajectory calculations
     #[export]
@@ -98,11 +100,12 @@ pub struct SimulatedBody {
 impl From<&Gd<GravityBody>> for SimulatedBody {
     fn from(body: &Gd<GravityBody>) -> Self {
         let b = body.bind();
+
         Self {
             body_instance_id: body.instance_id(),
             mass: b.mass,
             vel: b.velocity,
-            pos: b.base().get_position(),
+            pos: body.get_position(),
         }
     }
 }
@@ -116,6 +119,9 @@ impl GravityController {
     /// Only runs in the editor context due to the `#[editor(only)]` attribute.
     #[editor(only)]
     fn setup_editor(&mut self) {
+        // Simulate less steps in the editor for "snappyness"
+        self.simulation_steps = 1000;
+
         // Disable physics in editor
         self.base_mut().set_physics_process(false);
     }
@@ -165,7 +171,7 @@ impl GravityController {
     ///
     /// # Returns
     /// The net acceleration vector resulting from all gravitational interactions
-    fn calc_acc(grav_const: f32, body: &SimulatedBody, bodies: &[SimulatedBody]) -> Vector3 {
+    pub fn calc_acc(grav_const: f32, body: &SimulatedBody, bodies: &[SimulatedBody]) -> Vector3 {
         bodies
             .iter()
             .map(|other| (other.pos - body.pos, other.mass))
@@ -204,6 +210,31 @@ impl GravityController {
             .par_iter()
             .map(|body| Self::calc_acc(grav_const, body, bodies_sim))
             .collect_into_vec(accelerations);
+
+        // 2: Update velocities and positions
+        bodies_sim
+            .iter_mut()
+            .zip(accelerations)
+            .for_each(|(body, acc)| {
+                body.vel += *acc * delta;
+                body.pos += body.vel * delta;
+            });
+    }
+
+    /// Advances the physical simulation by one time step using a single core.
+    /// This function is kept for benchmarking purposes.
+    #[doc(hidden)]
+    pub fn step_time_single_core(
+        grav_const: f32,
+        delta: f32,
+        bodies_sim: &mut [SimulatedBody],
+        accelerations: &mut Vec<Vector3>,
+    ) {
+        // 1: Calculate accelerations
+        bodies_sim
+            .iter()
+            .map(|body| GravityController::calc_acc(grav_const, body, bodies_sim))
+            .collect_into(accelerations);
 
         // 2: Update velocities and positions
         bodies_sim
