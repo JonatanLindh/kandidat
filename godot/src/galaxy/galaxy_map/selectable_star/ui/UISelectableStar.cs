@@ -67,13 +67,12 @@ public partial class UISelectableStar : CanvasLayer
             if (isBehind)
             {
                 // Adjust the position to the side of the screen
-                newPos.X = viewportSize.X - starSelect.Size.X - 10; // 10 pixels from the right edge
-                newPos.Y = viewportSize.Y / 2 - starSelect.Size.Y / 2; // Center vertically
-            }
+                newPos.X = viewportSize.X - starSelect.Size.X - 10;
+                newPos.Y = Mathf.Clamp(newPos.Y, 0, viewportSize.Y - starSelect.Size.Y);
+			}
 
             else
             {
-                // Clamp the position to keep the panel within the screen bounds
                 newPos.X = Mathf.Clamp(newPos.X, 0, viewportSize.X - starSelect.Size.X);
                 newPos.Y = Mathf.Clamp(newPos.Y, 0, viewportSize.Y - starSelect.Size.Y);
             }
