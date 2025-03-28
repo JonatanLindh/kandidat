@@ -7,12 +7,12 @@ using System.Runtime.ConstrainedExecution;
 [Tool]
 public partial class CelestialBodyInput : Node3D
 {
-/*    [ExportToolButton("Click me!")]
-    public Callable ClickMeButton => Callable.From(PrintMessage);*/
+    [ExportToolButton("Regenerate Mesh")]
+    public Callable ClickMeButton => Callable.From(RegenMesh);
 
-    public void PrintMessage()
+    public void RegenMesh()
     {
-        GD.Print("Button clicked!");
+        GetNode<McSpawner>("MarchingCube").RegenerateMesh();
     }
 
     [ExportCategory("Celestial body parameters")]

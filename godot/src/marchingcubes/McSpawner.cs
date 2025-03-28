@@ -16,7 +16,7 @@ public partial class McSpawner : Node
         set
         {
             _reload = !value;
-            OnResourceSet();
+            //OnResourceSet();
         }
     }
 
@@ -46,6 +46,11 @@ public partial class McSpawner : Node
 	}
 	
 	private void OnResourceSet()
+	{
+		SpawnMesh();
+	}
+
+	public void RegenerateMesh()
 	{
 		SpawnMesh();
 	}
