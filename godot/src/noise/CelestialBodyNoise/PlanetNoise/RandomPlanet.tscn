@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://bcjad2rujjihf"]
+
+[ext_resource type="Script" uid="uid://cnikwq6bgmy1k" path="res://src/noise/CelestialBodyNoise/PlanetNoise/CelestialBodyInput.cs" id="1_8t10l"]
+[ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="2_455go"]
+[ext_resource type="Script" uid="uid://nqgu7rpdrhhf" path="res://src/noise/CelestialBodyNoise/PlanetNoise/PlanetNoise.cs" id="3_455go"]
+[ext_resource type="Script" uid="uid://bbu2bvnkwq6r3" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomCelestialBodyNoise.cs" id="4_0h02l"]
+
+[node name="RandomPlanet" type="Node3D"]
+script = ExtResource("1_8t10l")
+seed = 1525889010
+
+[node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("2_455go")]
+reload = true
+CelestialBody = NodePath("../Random")
+
+[node name="Random" type="Node" parent="." node_paths=PackedStringArray("CelestialBody")]
+script = ExtResource("4_0h02l")
+CelestialBody = NodePath("../Planet")
+
+[node name="Planet" type="Node" parent="."]
+script = ExtResource("3_455go")

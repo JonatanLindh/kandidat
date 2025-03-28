@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://dr0tbidpxor8i"]
+[gd_scene load_steps=5 format=3 uid="uid://dr0tbidpxor8i"]
 
 [ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="1_un0fo"]
 [ext_resource type="PackedScene" uid="uid://cc3fpt0u5jmex" path="res://src/noise/CelestialBodyNoise/PlanetNoise/BasicPlanet.tscn" id="1_ycu4v"]
 [ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="3_1biuq"]
+[ext_resource type="PackedScene" uid="uid://bcjad2rujjihf" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomPlanet.tscn" id="4_hnbm4"]
 
 [node name="PlanetNoiseTest" type="Node3D"]
 
@@ -10,6 +11,20 @@
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 32, 256)
 
 [node name="BasicPlanet" parent="." instance=ExtResource("1_ycu4v")]
+seed = 1362973670
+
+[node name="RandomPlanet" parent="." instance=ExtResource("4_hnbm4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.305, 0, 0)
+Radius = 63
+Width = 126
+Height = 126
+Depth = 126
+Octaves = 5
+Frequency = 2.56
+Amplitude = 12.4
+Lacunarity = 3.48
+Persistence = 0.25
+seed = 977494976
 
 [node name="Skybox" parent="." instance=ExtResource("3_1biuq")]
 

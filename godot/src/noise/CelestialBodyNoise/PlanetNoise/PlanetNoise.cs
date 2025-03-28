@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using static Godot.XmlParser;
 
 /// <summary>
 /// A class for creating different types of noise to be used when generating planets
@@ -18,6 +19,16 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
     private CelestialBodyInput Input;
     private CelestialBodyInput input;
     private FastNoiseLite fastNoise;
+
+    public override void _Ready()
+    {
+        Input = GetParent<CelestialBodyInput>();
+        if (Input == null)
+        {
+            GD.PrintErr("Input is null");
+        }
+        input = Input as CelestialBodyInput;
+    }
 
     public float[,,] CreateDataPoints()
     {
@@ -81,25 +92,22 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
     {
         float valueAfterFbm = value;
 
-        // Get parameters from editor
+        // Get parameters from editor which will change locally in the loop
         float amplitude = input.GetAmplitude();
-        float persistence = input.GetPersistence();
         float frequency = input.GetFrequency();
-        float lacunarity = input.GetLacunarity();
-        int octaves = input.GetOctaves();
 
         // Used to slightly offset the position when getting noise-value for each octave
         Vector3 offset = Vector3.Zero;
         Random random = new Random();
 
         // FBM - Fractal Brownian Motion 
-        for (int i = 0; i < octaves; i++)
+        for (int i = 0; i < input.GetOctaves(); i++)
         {
             // TODO Add offset before or after *frequency?
             valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
-            amplitude *= persistence;
-            frequency *= lacunarity;
-            offset += new Vector3(random.Next(octaves), random.Next(octaves), random.Next(octaves));
+            amplitude *= input.GetPersistence();
+            frequency *= input.GetLacunarity();
+            offset += new Vector3(random.Next(input.GetOctaves()), random.Next(input.GetOctaves()), random.Next(input.GetOctaves()));
         }
 
         return valueAfterFbm;
@@ -122,38 +130,70 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
         return texture;
     }
 
-    private void RandomizeParameters()
+    public float[,,] GetNoise()
     {
-        RandomPlanet random = new RandomPlanet();
-
-        input.SetRadius(random.GetRadius());
-        input.SetSize(random.GetSize());
-
-        input.SetOctaves(random.GetOctaves());
-        input.SetSeed(random.GetSeed());
-
-        input.SetAmplitude(random.GetAmplitude());
-        input.SetPersistence(random.GetPersistence());
-        input.SetFrequency(random.GetFrequency());
-        input.SetLacunarity(random.GetLacunarity());
-
-        input.SetNoiseType(FastNoiseLite.NoiseTypeEnum.Perlin);
+        return CreateDataPoints();
     }
 
-    public float[,,] GetNoise(bool useRandomGeneration)
+    public void SetRadius(int newRadius)
     {
-        Input = GetParent<CelestialBodyInput>();
-        if (Input is not CelestialBodyInput)
-        {
-            throw new Exception("Input is not CelestialBodyInput");
-        }
-        input = Input as CelestialBodyInput;
+        input.SetRadius(newRadius);
+    }
 
-        if (useRandomGeneration)
-        {
-            RandomizeParameters();
-        }
+    public void SetWidth(int newWidth)
+    {
+        input.SetWidth(newWidth);
+    }
 
-        return CreateDataPoints();
+    public void SetHeight(int newHeight)
+    {
+        input.SetHeight(newHeight);
+    }
+
+    public void SetDepth(int newDepth)
+    {
+        input.SetDepth(newDepth);
+    }
+
+    public void SetSize(int size)
+    {
+        SetWidth(size);
+        SetHeight(size);
+        SetDepth(size);
+    }
+
+    public void SetOctaves(int newOctaves)
+    {
+        input.SetOctaves(newOctaves);
+    }
+
+    public void SetFrequency(float newFrequency)
+    {
+        input.SetFrequency(newFrequency);
+    }
+
+    public void SetAmplitude(float newAmplitude)
+    {
+        input.SetAmplitude(newAmplitude);
+    }
+
+    public void SetLacunarity(float newLacunarity)
+    {
+        input.SetLacunarity(newLacunarity);
+    }
+
+    public void SetPersistence(float newPersistence)
+    {
+        input.SetPersistence(newPersistence);
+    }
+
+    public void SetNoiseType(FastNoiseLite.NoiseTypeEnum newNoiseType)
+    {
+        input.SetNoiseType(newNoiseType);
+    }
+
+    public void SetSeed(int newSeed)
+    {
+        input.SetSeed(newSeed);
     }
 }

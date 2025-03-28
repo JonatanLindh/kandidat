@@ -42,7 +42,7 @@ public partial class McSpawner : Node
 	public override void _Ready()
 	{
 		_marchingCube = new MarchingCube();
-		SpawnMesh();
+		CallDeferred(nameof(SpawnMesh));
 	}
 	
 	private void OnResourceSet()
@@ -58,7 +58,7 @@ public partial class McSpawner : Node
         celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody != null)
 		{
-            float[,,] dataPoints = celestialBody.GetNoise(true);
+            float[,,] dataPoints = celestialBody.GetNoise();
 			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
 
 			// Disable backface culling
