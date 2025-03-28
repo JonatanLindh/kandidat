@@ -1,17 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://c78s68trv7dj3"]
+[gd_scene load_steps=5 format=3 uid="uid://c78s68trv7dj3"]
 
 [ext_resource type="Script" uid="uid://bhsc7s0vmsm5m" path="res://src/player/player.gd" id="1_x5q4h"]
 [ext_resource type="PackedScene" uid="uid://dkx5f3mgc3mdq" path="res://src/player/hud.tscn" id="2_u6rmv"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_rxibo"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ymbmu"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_rxibo"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_rxibo"]
-top_radius = 0.01
-bottom_radius = 0.01
+[sub_resource type="SphereShape3D" id="SphereShape3D_rxibo"]
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_x5q4h")
@@ -20,7 +14,8 @@ script = ExtResource("1_x5q4h")
 mesh = SubResource("CapsuleMesh_rxibo")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("CapsuleShape3D_ymbmu")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("SphereShape3D_rxibo")
 
 [node name="Head" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
@@ -28,14 +23,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 [node name="Camera3D" type="Camera3D" parent="Head"]
 
 [node name="HUD" parent="." instance=ExtResource("2_u6rmv")]
-
-[node name="DEBUG" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0114, 0)
-mesh = SubResource("BoxMesh_rxibo")
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="DEBUG"]
-transform = Transform3D(1, 0, 0, 0, 0.00998312, 0.99995, 0, -0.99995, 0.00998312, 0, -0.34736, -0.831516)
-mesh = SubResource("CylinderMesh_rxibo")
-skeleton = NodePath("../MeshInstance3D")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="DEBUG"]

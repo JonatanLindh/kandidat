@@ -23,17 +23,18 @@ var in_gravity_field = false
 var planet_velocity: Vector3 = Vector3.ZERO
 var gravity_strength := 0
 
+
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	PlayerVariables.player_position = camera_3d.global_transform.origin
 	PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 
 func _input(event):
-	#if event is InputEventMouseMotion and Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
-		#rotate_y(deg_to_rad(-event.relative.x * mouse_sensitivity))
-		#head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
-		#head.rotation.x = clamp(head.rotation.x,deg_to_rad(-89),deg_to_rad(89) )
-		#PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
+	if event is InputEventMouseMotion and Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
+		rotate_y(deg_to_rad(-event.relative.x * mouse_sensitivity))
+		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
+		head.rotation.x = clamp(head.rotation.x,deg_to_rad(-89),deg_to_rad(89) )
+		PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 
 		
 	if event is InputEventMouseButton:
@@ -203,17 +204,32 @@ func on_planet_movement(delta : float):
 		velocity += gravity_vector * delta
 		
 	# Get the input direction and handle the movement/deceleration.
-	var input_dir := Input.get_vector("left", "right", "forward", "backward")	
-	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var input_dir := Input.get_vector("left", "right", "forward", "backward")
+	#var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var forward = transform.basis.z.normalized()
+	var right = transform.basis.x.normalized()
+	var direction = (forward * input_dir.y + right * input_dir.x).normalized()
+
+	up_direction = -gravity_vector.normalized()
+
+	#Input
+	#var movement_dir = (global_transform.basis * Vector3(input_dir.x,0,input_dir.y)).normalized()
 	
-	if direction and is_on_floor():
-		print("BEFOREE", up_direction)
-		orient_player_to_planet(direction, delta)
-		print("AFTER", up_direction)
+	#if input_dir:
+		#velocity = movement_dir * BASE_SPEED
+	#else:
+		#velocity = Vector3(0,0,0)
+
+	
+	#Rotation
+	#var rotation_quat = Quaternion(Vector3.DOWN, gravity_vector.normalized())
+	#quaternion = rotation_quat
+
+	if direction and (is_on_floor()):
+		pass
 	elif not is_on_floor():
-		print("Is On Floor:", is_on_floor())
-		orient_player_to_gravity(gravity_vector.normalized(), delta)  # Orient only to gravity when falling
-	
+		pass
+
 	if direction and is_on_floor():
 		if Input.is_action_pressed("sprint"):
 			velocity.x = direction.x * current_speed * 2
@@ -228,11 +244,13 @@ func on_planet_movement(delta : float):
 			velocity.y = move_toward(velocity.y, planet_velocity.y, current_speed)
 			velocity.x = move_toward(velocity.x, planet_velocity.x, current_speed)
 			velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
-
 	
-
+	var rotation_quat = Quaternion(Vector3.DOWN, gravity_vector.normalized())
+	quaternion = rotation_quat
 	emit_player_status_changed()
 	move_and_slide()
+	
+
 
 # Aligns the player to the gravity vector by rotating the player
 func orient_player_to_gravity(direction : Vector3, delta : float):
@@ -241,7 +259,7 @@ func orient_player_to_gravity(direction : Vector3, delta : float):
 	if direction.length() < 0.001:
 		return
 
-	var left_axis = gravity_up.cross(direction.normalized()).normalized()
+	var left_axis = -gravity_up.cross(direction.normalized()).normalized()
 
 	if left_axis.length() < 0.001:
 		left_axis = gravity_up.cross(Vector3.FORWARD).normalized()
@@ -256,21 +274,12 @@ func orient_player_to_gravity(direction : Vector3, delta : float):
 	var current_quat = transform.basis.orthonormalized().get_rotation_quaternion()
 	var target_quat = new_basis.get_rotation_quaternion()
 
-	transform.basis = Basis(current_quat.slerp(target_quat, 11 * delta))
+	transform.basis = Basis(current_quat.slerp(target_quat, 10 * delta))
 
 func orient_player_to_planet(direction : Vector3, delta : float):
-	var gravity_up = -get_gravity().normalized()
+	var gravity_up = get_gravity().normalized()
 
-	if direction.length() < 0.001:
-		return
-
-	var left_axis = gravity_up.cross(direction.normalized()).normalized()
-
-	if left_axis.length() < 0.001:
-		left_axis = gravity_up.cross(Vector3.FORWARD).normalized()
-
-	if left_axis.length() < 0.001:
-		left_axis = gravity_up.cross(Vector3.RIGHT).normalized()
+	var left_axis = -gravity_up.cross(direction.normalized()).normalized()
 
 	var forward_axis = direction.normalized()
 
@@ -279,4 +288,4 @@ func orient_player_to_planet(direction : Vector3, delta : float):
 	var current_quat = transform.basis.orthonormalized().get_rotation_quaternion()
 	var target_quat = new_basis.get_rotation_quaternion()
 
-	transform.basis = Basis(current_quat.slerp(target_quat, 11 * delta))
+	transform.basis = Basis(current_quat.slerp(target_quat, 1 * delta))

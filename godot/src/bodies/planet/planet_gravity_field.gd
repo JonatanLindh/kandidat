@@ -33,7 +33,7 @@ func _ready() -> void:
 	#Debug and test
 	gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 	gravity_point = true
-	gravity = 9.82
+	gravity = 40
 	connect("body_entered", _on_body_entered)
 	connect("body_exited", _on_body_exited)
 
@@ -49,12 +49,12 @@ func get_player_velocity() -> Vector3:
 		return Vector3.ZERO
 		
 func _on_body_entered(body):
-	if body is Player:
+	if body is Player or RigidBodyPlayer:
 		body.on_gravity_field_entered(gravity, gravity_direction, planet.velocity)
 		_player_inside_field = true
 
 func _on_body_exited(body):
-	if body is Player:
+	if body is Player or RigidBodyPlayer:
 		body.on_gravity_field_exited()
 		_player_inside_field = false
 

@@ -4,21 +4,23 @@
 [ext_resource type="Script" uid="uid://ba2chkln3f48f" path="res://src/bodies/planet/planet_gravity_field.gd" id="2_2yc86"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_wrfox"]
-radius = 100.0
+radius = 94.249
 
 [node name="GravityBody" type="GravityBody"]
 
+[node name="Player" parent="." instance=ExtResource("1_3wd6y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 73, 0)
+
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(0.139617, -0.279444, 0.949957, 0.0406338, 0.960162, 0.276474, -0.989372, 0, 0.14541, 97.0712, 83.9212, 0)
+transform = Transform3D(1, 0, 0, 0, 0.803057, 0.595903, 0, -0.595903, 0.803057, -0.548458, 76.3712, 25.8177)
+current = true
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.266767, -0.789766, 0.552363, -1.35701e-08, 0.573133, 0.819462, -0.963761, 0.218606, -0.152893, 620.152, 369.086, 488.764)
 
-[node name="Player" parent="." instance=ExtResource("1_3wd6y")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 76.2114, -0.108076)
-
 [node name="PlanetGravityField" type="Area3D" parent="."]
 script = ExtResource("2_2yc86")
+base_gravity = 40.0
 metadata/_custom_type_script = "uid://ba2chkln3f48f"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlanetGravityField"]
