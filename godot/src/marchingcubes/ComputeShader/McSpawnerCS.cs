@@ -5,25 +5,26 @@ using System;
 public partial class McSpawnerCS : Node
 {
 	FastNoiseLite _noise = new FastNoiseLite();
-	private int _radius = 32;
+	private int _radius = 128;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		var data = GenerateDataPoints();
 		var sw = new System.Diagnostics.Stopwatch();
-		MarchingCube marchingCube = new MarchingCube(method:MarchingCube.GenerationMethod.Gpu);
-		MarchingCube marchingCube1 = new MarchingCube(method:MarchingCube.GenerationMethod.Cpu); 
+		MarchingCube marchingCube = new MarchingCube(method:MarchingCube.GenerationMethod.Cpu);
+		MarchingCube marchingCube1 = new MarchingCube(method:MarchingCube.GenerationMethod.Gpu); 
 		
 		sw.Start();
 		var meshInstance = marchingCube.GenerateMesh(data);
 		sw.Stop();
-		GD.Print("Time to generate vertices (GPU): ", sw.ElapsedMilliseconds, "ms");
+		GD.Print("Time to generate vertices (CPU): ", sw.ElapsedMilliseconds, "ms");
 
+		sw.Reset();
 		sw.Start();
 		var meshInstance2 = marchingCube1.GenerateMesh(data);
 		sw.Stop();
-		GD.Print("Time to generate vertices (CPU): ", sw.ElapsedMilliseconds, "ms");
+		GD.Print("Time to generate vertices (GPU): ", sw.ElapsedMilliseconds, "ms");
 
 		meshInstance2.Translate(new Vector3(0, 0, _radius * 2));
 		AddChild(meshInstance);

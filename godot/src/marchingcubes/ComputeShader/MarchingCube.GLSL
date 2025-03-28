@@ -84,13 +84,13 @@ vec3 evaluateTriangle(int tri, vec3 pos, vec3 offset){
 
     vec3 v0 = pos + p0;
     vec3 v1 = pos + p1;
-    
+
     // Get density values at both vertices
-    float value0 = dataPointsBuffer.dataPoints[index(int(v0.x - uniforms.xOffset), int(v0.y - uniforms.yOffset), int(v0.z - uniforms.zOffset))];
-    float value1 = dataPointsBuffer.dataPoints[index(int(v1.x - uniforms.xOffset), int(v1.y - uniforms.yOffset), int(v1.z - uniforms.zOffset))];
-    
-    v0 += offset;
-    v1 += offset;
+    float value0 = dataPointsBuffer.dataPoints[index(int(v0.x), int(v0.y), int(v0.z))];
+    float value1 = dataPointsBuffer.dataPoints[index(int(v1.x), int(v1.y), int(v1.z))];
+
+    vec3 worldV0 = v0 + offset; //- vec3(uniforms.sizeX / 2, uniforms.sizeY / 2, uniforms.sizeZ / 2);
+    vec3 worldV1 = v1 + offset; //- vec3(uniforms.sizeX / 2, uniforms.sizeY / 2, uniforms.sizeZ / 2);
 
     // Calculate interpolation factor based on density values
     float t = (uniforms.isoLevel - value0) / (value1 - value0);
@@ -98,7 +98,7 @@ vec3 evaluateTriangle(int tri, vec3 pos, vec3 offset){
     // Prevent division by zero or negative values
     t = clamp(t, 0.0, 1.0);
 
-    return mix(v0, v1, t);
+    return mix(worldV0, worldV1, t);
 }
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
@@ -106,19 +106,19 @@ void main(){
     vec3 pos = gl_GlobalInvocationID.xyz;
     vec3 posOffset = vec3(uniforms.xOffset, uniforms.yOffset, uniforms.zOffset);
     if (pos.x >= uniforms.sizeX - 1 || pos.y >= uniforms.sizeY - 1 || pos.z >= uniforms.sizeZ - 1) return;
-    
+
     int cubeIndex = 0;
     float isoLevel = uniforms.isoLevel;
     if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y), int(pos.z))] >= isoLevel) cubeIndex |= 1;
     if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y), int(pos.z + 1))] >= isoLevel) cubeIndex |= 2;
     if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y), int(pos.z + 1))] >= isoLevel) cubeIndex |= 4;
     if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y), int(pos.z))] >= isoLevel) cubeIndex |= 8;
-  
+
     if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z))] >= isoLevel) cubeIndex |= 16;
     if (dataPointsBuffer.dataPoints[index(int(pos.x), int(pos.y + 1), int(pos.z + 1))] >= isoLevel) cubeIndex |= 32;
     if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y + 1), int(pos.z + 1))] >= isoLevel) cubeIndex |= 64;
     if (dataPointsBuffer.dataPoints[index(int(pos.x + 1), int(pos.y + 1), int(pos.z))] >= isoLevel) cubeIndex |= 128;
-    
+
     int numIndicies = lengths[cubeIndex];
     int offset = offsets[cubeIndex];
     for(int i = 0; i < numIndicies; i += 3){

@@ -32,16 +32,17 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
     private float[] _triangles;
     private int _triangleCount;
     
-	public GpuVerticesGenerator(Vector3I size)
+	public GpuVerticesGenerator(Vector3I batchSize)
 	{
-		_customSize = true;
-		_sizeX = size.X;
-		_sizeY = size.Y;
-		_sizeZ = size.Z;
+		_sizeX = batchSize.X;
+		_sizeY = batchSize.Y;
+		_sizeZ = batchSize.Z;
+		InitGpu();
 	}
 	public GpuVerticesGenerator()
 	{
-		_sizeX = _sizeY = _sizeZ = 32;
+		_sizeX = _sizeY = _sizeZ = 64;
+		InitGpu();
 	}
 
     ~GpuVerticesGenerator()
@@ -54,29 +55,29 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 	    _dataPoints = datapoints;
 	    _isoLevel = isoLevel;
 	    _scale = scale;
-	    if (_customSize)
+	    var dataSizeX = datapoints.GetLength(0);
+	    var dataSizeY = datapoints.GetLength(1);
+	    var dataSizeZ = datapoints.GetLength(2);
+	    var batchSize = new Vector3I(_sizeX, _sizeY, _sizeZ);
+	    for (int xOffset = 0; xOffset < dataSizeX; xOffset += batchSize.X - 1)
 	    {
-		    if (_sizeX != datapoints.GetLength(0) || _sizeY != datapoints.GetLength(1) || _sizeZ != datapoints.GetLength(2))
+		    for (int yOffset = 0; yOffset < dataSizeY; yOffset += batchSize.Y - 1)
 		    {
-			    _sizeX = datapoints.GetLength(0);
-			    _sizeY = datapoints.GetLength(1);
-			    _sizeZ = datapoints.GetLength(2);
-			    CleanupGpu();
-			    InitGpu();
+			    for (int zOffset = 0; zOffset < dataSizeZ; zOffset += batchSize.Z - 1)
+			    {
+				    // Set the size for the current chunk
+				    _sizeX = Math.Min(batchSize.X, dataSizeX - xOffset);
+				    _sizeY = Math.Min(batchSize.Y, dataSizeY - yOffset);
+				    _sizeZ = Math.Min(batchSize.Z, dataSizeZ - zOffset);
+
+				    UpdateBuffers(new Vector3I(xOffset, yOffset, zOffset));
+				    RunCompute(new Vector3(_sizeX, _sizeY, _sizeZ));
+				    ProcessComputeData();
+				    CreateVertices();
+			    }
 		    }
 	    }
-	    else
-	    {
-		    _sizeX = datapoints.GetLength(0);
-		    _sizeY = datapoints.GetLength(1);
-		    _sizeZ = datapoints.GetLength(2);
-		    InitGpu();
-	    }
-	    
-	    RunCompute(new Vector3(_sizeX, _sizeY, _sizeZ));
-	    ProcessComputeData();
-	    CreateVertices();
-	    
+
 	    return _vertices;
     }
 
@@ -119,20 +120,6 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 		
 		// Create Data Points Buffer
 		var dataPointsBytes = new byte[(_sizeX * _sizeY * _sizeZ) * sizeof(float)];
-		// Flatten data points
-		var dataPoints = new float[_sizeX * _sizeY * _sizeZ];
-		for (int z = 0; z < _sizeZ; z++)
-		{
-			for (int y = 0; y < _sizeY; y++)
-			{
-				for (int x = 0; x < _sizeX; x++)
-				{
-					dataPoints[x + _sizeX * y + _sizeX * _sizeY * z] = _dataPoints[x, y, z];
-				}
-			}
-		}
-		Buffer.BlockCopy(dataPoints, 0, dataPointsBytes, 0, dataPointsBytes.Length);
-		
 		_dataPointsBuffer = _renderingDevice.StorageBufferCreate((uint)dataPointsBytes.Length, dataPointsBytes);
 		var dataPointsUniform = new RDUniform()
 		{
@@ -149,9 +136,9 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 				_sizeZ, 
 				_isoLevel,
 				_scale,
-				0.0f, // Padding
- 				0.0f, // Padding
-				0.0f // Padding
+				0,
+ 				0,
+				0
 			};
 		var paramBytes = new byte[paramsArray.Length * sizeof(float)];
 		Buffer.BlockCopy(paramsArray, 0, paramBytes, 0, paramBytes.Length);
@@ -227,15 +214,41 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 		_triangles = new float[triangleData.Length / sizeof(float)];
 		Buffer.BlockCopy(triangleData, 0, _triangles, 0, triangleData.Length);
 		
-		//thread = new Thread(CreateVertices);
-		//thread.Start();
+	}
+
+	private void UpdateBuffers(Vector3I offsets)
+	{
+		// Update data points buffer
+		var dataPoints = ExtractDataPoints(offsets);
+		var dataPointsBytes = new byte[dataPoints.Length * sizeof(float)];
+		Buffer.BlockCopy(dataPoints, 0, dataPointsBytes, 0, dataPointsBytes.Length);
+		_renderingDevice.BufferUpdate(_dataPointsBuffer, 0, (uint)dataPointsBytes.Length, dataPointsBytes);
+		
+		// Update params buffer
+		var paramsArray = new float[]
+		{
+			_sizeX, 
+			_sizeY, 
+			_sizeZ, 
+			_isoLevel,
+			_scale,
+			offsets.X,
+			offsets.Y,
+			offsets.Z
+		};
+		var paramBytes = new byte[paramsArray.Length * sizeof(float)];
+		Buffer.BlockCopy(paramsArray, 0, paramBytes, 0, paramBytes.Length);
+		_renderingDevice.BufferUpdate(_paramBuffer,0 ,(uint)paramBytes.Length, paramBytes);
+		
+		// Reset counter
+		var counter = new uint[] {0};
+		var counterBytes = new byte[sizeof(uint)];
+		Buffer.BlockCopy(counter, 0, counterBytes, 0, counterBytes.Length);
+		_renderingDevice.BufferUpdate(_counterBuffer, 0, (uint)counterBytes.Length, counterBytes);
 	}
 	
 	private void CreateVertices()
 	{
-		var numVertices = _triangleCount * 3;
-		_vertices.Capacity = numVertices;
-		
 		for (int i = 0; i < _triangleCount; i++)
 		{
 			var triIndex = i * 12;
@@ -267,6 +280,24 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 			triangulations.Add(int.Parse(index));
 		}
 		return triangulations.ToArray();
+	}
+	
+	private float[] ExtractDataPoints(Vector3I offsets)
+	{
+		var dataPoints = new float[_sizeX * _sizeY * _sizeZ];
+		
+		for (int z = 0; z < _sizeZ; z++)
+		{
+			for (int y = 0; y < _sizeY; y++)
+			{
+				for (int x = 0; x < _sizeX; x++)
+				{
+					var index = new Vector3I(x, y, z) + offsets;
+					dataPoints[x + _sizeX * y + _sizeX * _sizeY * z] =  _dataPoints[index.X, index.Y, index.Z];
+				}
+			}
+		}
+		return dataPoints;
 	}
 	
 	private void CleanupGpu()

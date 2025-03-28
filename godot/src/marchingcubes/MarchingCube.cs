@@ -2,8 +2,6 @@ using Godot;
 using System;
 
 
-// TODO 
-// Add multithreading to the mesh generation
 
 /// <summary>
 /// The MarchingCube class generates a 3D mesh from a scalar field represented by a 3D array of float values.
@@ -30,7 +28,7 @@ public class MarchingCube
 	/// <param name="scale">The scale factor for the mesh generation.</param>
 	/// <param name="method">The method used for generating the vertices, either on the cpu or on the gpu</param>
 	/// <param name="threshold">The threshold value for determining the surface of the mesh.</param>
-	public MarchingCube(int scale = 1, float threshold = 0.1f, GenerationMethod method = GenerationMethod.Gpu)
+	public MarchingCube(int scale = 1, float threshold = 0.1f, GenerationMethod method = GenerationMethod.Cpu)
 	{
 		_scale = scale;
 		_threshold = threshold;
