@@ -31,9 +31,20 @@ func _ready() -> void:
 
 func _input(event):
 	if event is InputEventMouseMotion and Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
-		rotate_y(deg_to_rad(-event.relative.x * mouse_sensitivity))
-		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
-		head.rotation.x = clamp(head.rotation.x,deg_to_rad(-89),deg_to_rad(89) )
+		#rotate_y(deg_to_rad(-event.relative.x * mouse_sensitivity))
+		#head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
+		#head.rotation.x = clamp(head.rotation.x,deg_to_rad(-89),deg_to_rad(89) )
+		var yaw = deg_to_rad(-event.relative.x * mouse_sensitivity)
+		var pitch = deg_to_rad(-event.relative.y * mouse_sensitivity)
+
+		var up_direction = -gravity_vector.normalized() if in_gravity_field else Vector3.UP
+
+		# Apply Yaw rotation around gravity-aligned up direction
+		rotate(up_direction, yaw)
+
+		# Apply Pitch rotation for looking up/down (clamped)
+		head.rotate_object_local(Vector3.RIGHT, pitch)
+		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89), deg_to_rad(89))
 		PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 
 		
@@ -245,47 +256,61 @@ func on_planet_movement(delta : float):
 			velocity.x = move_toward(velocity.x, planet_velocity.x, current_speed)
 			velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
 	
-	var rotation_quat = Quaternion(Vector3.DOWN, gravity_vector.normalized())
-	quaternion = rotation_quat
+	#var rotation_quat = Quaternion(Vector3.DOWN, gravity_vector.normalized())
+	#quaternion = rotation_quat
+	align_with_gravity()
+	#camera_3d.transform.basis = Basis(quaternion)
+	print(camera_3d.transform.basis)
 	emit_player_status_changed()
 	move_and_slide()
 	
+func align_with_gravity():
+		if not in_gravity_field:
+			return
+		var up_direction = -gravity_vector.normalized()
+		var current_basis = global_transform.basis
 
+		# Preserve forward direction correctly (project it onto the new plane)
+		var forward_direction = (current_basis.z - up_direction * current_basis.z.dot(up_direction)).normalized()
+		var right_direction = up_direction.cross(forward_direction).normalized()
 
-# Aligns the player to the gravity vector by rotating the player
-func orient_player_to_gravity(direction : Vector3, delta : float):
-	var gravity_up = -get_gravity().normalized()
-
-	if direction.length() < 0.001:
-		return
-
-	var left_axis = -gravity_up.cross(direction.normalized()).normalized()
-
-	if left_axis.length() < 0.001:
-		left_axis = gravity_up.cross(Vector3.FORWARD).normalized()
-
-	if left_axis.length() < 0.001:
-		left_axis = gravity_up.cross(Vector3.RIGHT).normalized()
-
-	var forward_axis = left_axis.cross(gravity_up).normalized()
-
-	var new_basis = Basis(left_axis, gravity_up, forward_axis).orthonormalized()
-
-	var current_quat = transform.basis.orthonormalized().get_rotation_quaternion()
-	var target_quat = new_basis.get_rotation_quaternion()
-
-	transform.basis = Basis(current_quat.slerp(target_quat, 10 * delta))
-
-func orient_player_to_planet(direction : Vector3, delta : float):
-	var gravity_up = get_gravity().normalized()
-
-	var left_axis = -gravity_up.cross(direction.normalized()).normalized()
-
-	var forward_axis = direction.normalized()
-
-	var new_basis = Basis(left_axis, gravity_up, forward_axis).orthonormalized()
-
-	var current_quat = transform.basis.orthonormalized().get_rotation_quaternion()
-	var target_quat = new_basis.get_rotation_quaternion()
-
-	transform.basis = Basis(current_quat.slerp(target_quat, 1 * delta))
+		# Reconstruct the new basis
+		global_transform.basis = Basis(right_direction, up_direction, forward_direction).orthonormalized()
+#
+## Aligns the player to the gravity vector by rotating the player
+#func orient_player_to_gravity(direction : Vector3, delta : float):
+	#var gravity_up = -get_gravity().normalized()
+#
+	#if direction.length() < 0.001:
+		#return
+#
+	#var left_axis = -gravity_up.cross(direction.normalized()).normalized()
+#
+	#if left_axis.length() < 0.001:
+		#left_axis = gravity_up.cross(Vector3.FORWARD).normalized()
+#
+	#if left_axis.length() < 0.001:
+		#left_axis = gravity_up.cross(Vector3.RIGHT).normalized()
+#
+	#var forward_axis = left_axis.cross(gravity_up).normalized()
+#
+	#var new_basis = Basis(left_axis, gravity_up, forward_axis).orthonormalized()
+#
+	#var current_quat = transform.basis.orthonormalized().get_rotation_quaternion()
+	#var target_quat = new_basis.get_rotation_quaternion()
+#
+	#transform.basis = Basis(current_quat.slerp(target_quat, 10 * delta))
+#
+#func orient_player_to_planet(direction : Vector3, delta : float):
+	#var gravity_up = get_gravity().normalized()
+#
+	#var left_axis = -gravity_up.cross(direction.normalized()).normalized()
+#
+	#var forward_axis = direction.normalized()
+#
+	#var new_basis = Basis(left_axis, gravity_up, forward_axis).orthonormalized()
+#
+	#var current_quat = transform.basis.orthonormalized().get_rotation_quaternion()
+	#var target_quat = new_basis.get_rotation_quaternion()
+#
+	#transform.basis = Basis(current_quat.slerp(target_quat, 1 * delta))
