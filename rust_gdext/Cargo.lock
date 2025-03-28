@@ -218,6 +218,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "779ae4bf7e8421cf91c0b3b64e7e8b40b862fba4d393f59150042de7c4965a94"
 
 [[package]]
+name = "glam"
+version = "0.30.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf3aa70d918d2b234126ff4f850f628f172542bf0603ded26b8ee36e5e22d5f9"
+
+[[package]]
 name = "godot"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -262,7 +268,7 @@ version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2ff8345372e4c990ca592d7b61490ef88ff249fc77226f5b79beca173b4a0458"
 dependencies = [
- "glam",
+ "glam 0.28.0",
  "godot-bindings",
  "godot-cell",
  "godot-codegen",
@@ -616,6 +622,7 @@ version = "0.1.0"
 dependencies = [
  "criterion",
  "criterion-macro",
+ "glam 0.30.1",
  "godot",
  "itertools 0.14.0",
  "ndarray",

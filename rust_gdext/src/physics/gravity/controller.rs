@@ -1,4 +1,7 @@
+use crate::to_glam_vec3;
+
 use super::{body::GravityBody, trajectories::TrajectoryWorker};
+use glam::Vec3A;
 use godot::{
     classes::{MeshInstance3D, notify::Node3DNotification},
     prelude::*,
@@ -87,10 +90,10 @@ pub struct SimulatedBody {
     pub mass: f32,
 
     /// Current position in 3D space
-    pub pos: Vector3,
+    pub pos: Vec3A,
 
     /// Current velocity vector
-    pub vel: Vector3,
+    pub vel: Vec3A,
 }
 
 /// Converts a gravity body node reference into its simulation representation.
@@ -104,8 +107,8 @@ impl From<&Gd<GravityBody>> for SimulatedBody {
         Self {
             body_instance_id: body.instance_id(),
             mass: b.mass,
-            vel: b.velocity,
-            pos: body.get_position(),
+            vel: to_glam_vec3(b.velocity),
+            pos: to_glam_vec3(body.get_position()),
         }
     }
 }
@@ -171,14 +174,14 @@ impl GravityController {
     ///
     /// # Returns
     /// The net acceleration vector resulting from all gravitational interactions
-    pub fn calc_acc(grav_const: f32, body: &SimulatedBody, bodies: &[SimulatedBody]) -> Vector3 {
+    pub fn calc_acc(grav_const: f32, body: &SimulatedBody, bodies: &[SimulatedBody]) -> Vec3A {
         bodies
             .iter()
             .map(|other| (other.pos - body.pos, other.mass))
-            .filter(|(diff, _)| !diff.is_zero_approx())
+            .filter(|(diff, _)| !diff.length_squared().is_zero_approx())
             .map(|(diff, other_mass)| {
                 let r2 = diff.length_squared();
-                let dir = diff.normalized();
+                let dir = diff.normalize();
 
                 grav_const * dir * (other_mass) / r2
             })
@@ -203,7 +206,7 @@ impl GravityController {
         grav_const: f32,
         delta: f32,
         bodies_sim: &mut [SimulatedBody],
-        accelerations: &mut Vec<Vector3>,
+        accelerations: &mut Vec<Vec3A>,
     ) {
         // 1: Calculate accelerations
         bodies_sim
@@ -228,7 +231,7 @@ impl GravityController {
         grav_const: f32,
         delta: f32,
         bodies_sim: &mut [SimulatedBody],
-        accelerations: &mut Vec<Vector3>,
+        accelerations: &mut Vec<Vec3A>,
     ) {
         // 1: Calculate accelerations
         bodies_sim

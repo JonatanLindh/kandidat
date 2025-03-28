@@ -4,6 +4,7 @@
 
 use criterion::{BenchmarkId, Criterion};
 use criterion_macro::criterion;
+use glam::Vec3A;
 use godot::prelude::*;
 use rust_gdext::physics::gravity::controller::{GravityController, SimulatedBody};
 
@@ -20,12 +21,12 @@ fn create_bench_bodies(n: u32) -> Vec<SimulatedBody> {
         bodies.push(SimulatedBody {
             body_instance_id: InstanceId::from_i64(i.into()),
             mass: 1000.0 + (i as f32),
-            pos: Vector3::new(
+            pos: Vec3A::new(
                 radius * phi.sin() * theta.cos(),
                 radius * phi.sin() * theta.sin(),
                 radius * phi.cos(),
             ),
-            vel: Vector3::ZERO,
+            vel: Vec3A::ZERO,
         });
     }
 
@@ -52,7 +53,7 @@ fn from_elem(c: &mut Criterion) {
             size,
             |b, &size| {
                 let mut bodies = create_bench_bodies(size);
-                let mut accelerations = vec![Vector3::ZERO; size as usize];
+                let mut accelerations = vec![Vec3A::ZERO; size as usize];
 
                 b.iter(|| {
                     GravityController::step_time_single_core(
@@ -70,7 +71,7 @@ fn from_elem(c: &mut Criterion) {
             size,
             |b, &size| {
                 let mut bodies = create_bench_bodies(size);
-                let mut accelerations = vec![Vector3::ZERO; size as usize];
+                let mut accelerations = vec![Vec3A::ZERO; size as usize];
 
                 b.iter(|| {
                     GravityController::step_time(

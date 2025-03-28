@@ -17,7 +17,10 @@
 //! colors for each trajectory.
 
 use super::controller::{GravityController, SimulatedBody};
-use crate::{physics::gravity::controller::__gdext_GravityController_Funcs, worker::Worker};
+use crate::{
+    from_glam_vec3, physics::gravity::controller::__gdext_GravityController_Funcs, worker::Worker,
+};
+use glam::Vec3A;
 use godot::{
     classes::{
         ArrayMesh, MeshInstance3D, StandardMaterial3D, SurfaceTool, base_material_3d::ShadingMode,
@@ -36,7 +39,7 @@ pub struct Trajectory {
     /// Color used to render this trajectory
     color: Color,
     /// Sequential 3D positions forming the predicted path
-    points: Vec<Vector3>,
+    points: Vec<Vec3A>,
 }
 
 /// Contains all necessary information for simulating body trajectories.
@@ -53,7 +56,7 @@ pub struct SimulationInfo {
 
     /// Optional reference body index and initial position for relative trajectories
     /// When present, (index, initial_position) is used to make trajectories relative to the body
-    offset_info: Option<(usize, Vector3)>,
+    offset_info: Option<(usize, Vec3A)>,
 
     /// Time increment per simulation step in seconds
     delta: f32,
@@ -281,7 +284,7 @@ impl GravityController {
 
             let offset = offset_info
                 .map(|(idx, init)| bodies_sim[idx].pos - init)
-                .unwrap_or(Vector3::ZERO);
+                .unwrap_or(Vec3A::ZERO);
 
             // Store positions
             for (i, body) in bodies_sim.iter().enumerate() {
@@ -347,7 +350,7 @@ impl GravityController {
         surface_tool.begin(mesh::PrimitiveType::LINE_STRIP);
 
         for &point in &trajectory.points {
-            surface_tool.add_vertex(point);
+            surface_tool.add_vertex(from_glam_vec3(point));
         }
 
         // Create material with color
