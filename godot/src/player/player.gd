@@ -19,17 +19,15 @@ var vertical_multiplier = 0.1
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	
+	PlayerVariables.player_position = camera_3d.global_transform.origin
+	PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
+
 func _input(event):
 	if event is InputEventMouseMotion and Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
 		rotate_y(deg_to_rad(-event.relative.x * mouse_sensitivity))
 		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
 		head.rotation.x = clamp(head.rotation.x,deg_to_rad(-89),deg_to_rad(89) )
-	
-	if Input.is_action_just_pressed("speedup"):
-		current_speed = current_speed + 1
-	elif Input.is_action_just_pressed("speeddown"):
-		current_speed = max(1, current_speed - 1)
+		PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 	
 	if Input.is_action_just_pressed("ui_cancel"):
 		toggle_mouse_lock()
@@ -39,6 +37,10 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("fly"):
 		flying = not flying
 		velocity.y = 0 if flying else get_gravity().y * delta * current_speed
+	elif Input.is_action_pressed("speedup"):
+		current_speed = current_speed + 1
+	elif Input.is_action_pressed("speeddown"):
+		current_speed = max(1, current_speed - 1)
 	
 	if not flying and not is_on_floor():
 		velocity += get_gravity() * delta
@@ -64,7 +66,7 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0, current_speed)
 		if not floating_flag and flying:
 			velocity.y = move_toward(velocity.y, 0, current_speed)
-
+	
 	emit_player_status_changed()
 	move_and_slide()
 
@@ -96,9 +98,12 @@ func emit_player_status_changed() -> void:
 		updated_status.emit(position, speed)
 		last_position = position
 		last_speed = speed
+	PlayerVariables.player_position = camera_3d.global_transform.origin
+	PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 
 func toggle_mouse_lock():
 	if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	else:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	

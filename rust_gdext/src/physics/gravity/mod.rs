@@ -3,6 +3,6 @@
 //! This module provides components for simulating gravitational interactions between bodies
 //! in 3D space, including force calculations, trajectory predictions, and visualization.
 
-mod body;
-mod controller;
-mod trajectories;
+pub mod body;
+pub mod controller;
+pub mod trajectories;

@@ -171,7 +171,7 @@ impl GravityController {
     ///
     /// # Returns
     /// The net acceleration vector resulting from all gravitational interactions
-    fn calc_acc(grav_const: f32, body: &SimulatedBody, bodies: &[SimulatedBody]) -> Vector3 {
+    pub fn calc_acc(grav_const: f32, body: &SimulatedBody, bodies: &[SimulatedBody]) -> Vector3 {
         bodies
             .iter()
             .map(|other| (other.pos - body.pos, other.mass))
@@ -210,6 +210,31 @@ impl GravityController {
             .par_iter()
             .map(|body| Self::calc_acc(grav_const, body, bodies_sim))
             .collect_into_vec(accelerations);
+
+        // 2: Update velocities and positions
+        bodies_sim
+            .iter_mut()
+            .zip(accelerations)
+            .for_each(|(body, acc)| {
+                body.vel += *acc * delta;
+                body.pos += body.vel * delta;
+            });
+    }
+
+    /// Advances the physical simulation by one time step using a single core.
+    /// This function is kept for benchmarking purposes.
+    #[doc(hidden)]
+    pub fn step_time_single_core(
+        grav_const: f32,
+        delta: f32,
+        bodies_sim: &mut [SimulatedBody],
+        accelerations: &mut Vec<Vector3>,
+    ) {
+        // 1: Calculate accelerations
+        bodies_sim
+            .iter()
+            .map(|body| GravityController::calc_acc(grav_const, body, bodies_sim))
+            .collect_into(accelerations);
 
         // 2: Update velocities and positions
         bodies_sim
