@@ -1,5 +1,6 @@
 #![feature(iter_collect_into)]
 
+pub mod octree;
 pub mod physics;
 pub mod worker;
 

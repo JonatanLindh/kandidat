@@ -8,9 +8,10 @@
 [node name="System" type="Node3D"]
 script = ExtResource("1_7my1l")
 
-[node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
+[node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body", "octree_visualizer")]
 simulation_steps = 1000
 sim_center_body = NodePath("Star")
+octree_visualizer = NodePath("../OctreeVisualizer")
 script = ExtResource("6_wayc2")
 
 [node name="Star" parent="GravityController" groups=["gravity_body"] instance=ExtResource("5_5coes")]
@@ -30,5 +31,7 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "Toggle Trajectories"
 script = ExtResource("4_btp4s")
+
+[node name="OctreeVisualizer" type="OctreeVisualizer" parent="."]
 
 [connection signal="toggled" from="CheckButton" to="CheckButton" method="_on_toggled"]

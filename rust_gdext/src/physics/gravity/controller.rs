@@ -1,4 +1,4 @@
-use crate::to_glam_vec3;
+use crate::{octree::visualize::OctreeVisualizer, to_glam_vec3};
 
 use super::{body::GravityBody, trajectories::TrajectoryWorker};
 use glam::Vec3A;
@@ -66,6 +66,9 @@ pub struct GravityController {
     #[export]
     pub sim_center_body: Option<Gd<GravityBody>>,
 
+    #[export]
+    pub octree_visualizer: Option<Gd<OctreeVisualizer>>,
+
     /// Mesh instances representing the currently displayed trajectories
     pub trajectories: Vec<Gd<MeshInstance3D>>,
 }
@@ -81,7 +84,7 @@ pub struct GravityController {
 /// `SimulatedBody` instances are created from [`GravityBody`] nodes during physics
 /// calculations and trajectory predictions, then their updated states can be
 /// transferred back to the original nodes.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SimulatedBody {
     /// Unique identifier of the original `GravityBody` node
     pub body_instance_id: InstanceId,
@@ -291,6 +294,11 @@ impl INode3D for GravityController {
             &mut bodies_sim,
             &mut Vec::new(),
         );
+
+        if let Some(ov) = self.octree_visualizer.as_mut() {
+            // Update the octree visualizer with the simulated bodies
+            ov.bind_mut().update_visualization(&bodies_sim);
+        }
 
         // Apply simulated step to real bodies
         self.bodies

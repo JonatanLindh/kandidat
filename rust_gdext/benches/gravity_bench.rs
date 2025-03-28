@@ -2,14 +2,17 @@
 #![feature(iter_collect_into)]
 #![test_runner(criterion::runner)]
 
-use criterion::{BenchmarkId, Criterion};
+use criterion::{BenchmarkId, Criterion, black_box};
 use criterion_macro::criterion;
 use glam::Vec3A;
 use godot::prelude::*;
-use rust_gdext::physics::gravity::controller::{GravityController, SimulatedBody};
+use rust_gdext::{
+    octree::Octree,
+    physics::gravity::controller::{GravityController, SimulatedBody},
+};
 
 // Helper function to create a collection of simulated bodies
-fn create_bench_bodies(n: u32) -> Vec<SimulatedBody> {
+pub fn create_bench_bodies(n: u32) -> Vec<SimulatedBody> {
     let mut bodies = Vec::with_capacity(n as usize);
 
     for i in 1..=n {
@@ -80,6 +83,27 @@ fn from_elem(c: &mut Criterion) {
                         &mut bodies,
                         &mut accelerations,
                     )
+                });
+            },
+        );
+    }
+    group.finish();
+}
+
+#[criterion]
+fn octree_build(c: &mut Criterion) {
+    let mut group = c.benchmark_group("octree_build");
+    for size in [10, 100, 1000, 10000, 1000000].iter() {
+        group.bench_with_input(
+            BenchmarkId::new("single-threaded", size),
+            size,
+            |b, &size| {
+                let bodies = create_bench_bodies(size);
+
+                b.iter(|| {
+                    let mut octree = Octree::new(&bodies);
+                    octree.build();
+                    black_box(octree);
                 });
             },
         );
