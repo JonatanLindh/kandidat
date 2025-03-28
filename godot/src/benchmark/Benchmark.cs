@@ -188,7 +188,7 @@ public partial class Benchmark : Node3D
 			var averageFrameTime = processor.GetAverage(i, result, BenchmarkDatapointEnum.FrameTime);
 			var onePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f);
 			var pointOnePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f);
-			resultFile.StoreString($"Averamark runtime to outputge Frametime: {averageFrameTime}\n");
+			resultFile.StoreString($"Average Frametime: {averageFrameTime}\n");
 			resultFile.StoreString($"1% high Frametime: {onePercentHighFrameTime}\n");
 			resultFile.StoreString($"0.1% high Frametime: {pointOnePercentHighFrameTime}\n\n");
 

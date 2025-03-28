@@ -48,7 +48,7 @@ public abstract partial class BenchmarkScene : Node3D
 
 		else
 		{
-			GD.PrintErr("Benchmark duration is enabled, don't use ExitScene()");
+			GD.PrintErr("Benchmark duration is enabled; do not call ExitScene() manually");
 		}
 	}
 
