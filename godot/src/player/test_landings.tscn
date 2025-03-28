@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3 uid="uid://bxm7mmp2csxrr"]
+
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="1_3wd6y"]
+[ext_resource type="Script" uid="uid://ba2chkln3f48f" path="res://src/bodies/planet/planet_gravity_field.gd" id="2_2yc86"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_wrfox"]
+radius = 100.0
+
+[node name="GravityBody" type="GravityBody"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.139617, -0.279444, 0.949957, 0.0406338, 0.960162, 0.276474, -0.989372, 0, 0.14541, 97.0712, 83.9212, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.266767, -0.789766, 0.552363, -1.35701e-08, 0.573133, 0.819462, -0.963761, 0.218606, -0.152893, 620.152, 369.086, 488.764)
+
+[node name="Player" parent="." instance=ExtResource("1_3wd6y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 76.2114, -0.108076)
+
+[node name="PlanetGravityField" type="Area3D" parent="."]
+script = ExtResource("2_2yc86")
+metadata/_custom_type_script = "uid://ba2chkln3f48f"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlanetGravityField"]
+shape = SubResource("SphereShape3D_wrfox")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="."]
+use_collision = true
+radius = 70.256
+radial_segments = 100
+rings = 100

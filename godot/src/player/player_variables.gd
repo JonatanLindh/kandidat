@@ -24,3 +24,9 @@ extends Node
 		planet_velocity = new_v
 	get():
 		return planet_velocity
+
+@export var planet_position: Vector3:
+	set(new):
+		planet_position = new
+	get():
+		return planet_position
