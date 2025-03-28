@@ -34,6 +34,13 @@ func _input(event):
 		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sensitivity))
 		head.rotation.x = clamp(head.rotation.x,deg_to_rad(-89),deg_to_rad(89) )
 		PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
+		
+	if event is InputEventMouseButton:
+		if event.is_pressed():
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				current_speed = current_speed + 1
+			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				current_speed = current_speed - 1
 	
 	if Input.is_action_just_pressed("ui_cancel"):
 		toggle_mouse_lock()
