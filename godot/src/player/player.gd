@@ -120,6 +120,7 @@ func on_gravity_field_exited():
 	velocity = Vector3.ZERO
 	gravity_strength = 0
 	flying = true
+	align_with_vector(Vector3.DOWN)
 	print("Im exit")
 
 func in_space_state_movement(delta : float):
@@ -153,9 +154,6 @@ func in_space_state_movement(delta : float):
 	move_and_slide()
 
 func in_gravity_field_movement(delta : float):
-	#print("Gravity Vector:", gravity_vector)
-	#print("Planet Velocity:", planet_velocity)
-	#print("Is On Floor:", is_on_floor())
 	current_speed = max(planet_velocity.length() + BASE_SPEED, current_speed)	
 	
 	planet_velocity = PlayerVariables.planet_velocity
@@ -191,6 +189,7 @@ func in_gravity_field_movement(delta : float):
 		velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
 		if not floating_flag:
 			velocity.y = move_toward(velocity.y, planet_velocity.y, current_speed)
+
 	
 	emit_player_status_changed()
 	move_and_slide()
@@ -258,16 +257,12 @@ func on_planet_movement(delta : float):
 	
 	#var rotation_quat = Quaternion(Vector3.DOWN, gravity_vector.normalized())
 	#quaternion = rotation_quat
-	align_with_gravity()
-	#camera_3d.transform.basis = Basis(quaternion)
-	print(camera_3d.transform.basis)
+	align_with_vector(gravity_vector)
 	emit_player_status_changed()
 	move_and_slide()
 	
-func align_with_gravity():
-		if not in_gravity_field:
-			return
-		var up_direction = -gravity_vector.normalized()
+func align_with_vector(alignment_vector : Vector3):
+		var up_direction = -alignment_vector.normalized()
 		var current_basis = global_transform.basis
 
 		# Preserve forward direction correctly (project it onto the new plane)

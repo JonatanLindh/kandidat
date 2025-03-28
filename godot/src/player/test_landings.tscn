@@ -6,9 +6,8 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_wrfox"]
 radius = 94.249
 
-[sub_resource type="PrismMesh" id="PrismMesh_3wd6y"]
-left_to_right = 2.0
-size = Vector3(5, 5, 5)
+[sub_resource type="CylinderMesh" id="CylinderMesh_3wd6y"]
+height = 27.89
 
 [node name="GravityBody" type="GravityBody"]
 
@@ -35,6 +34,6 @@ radius = 70.256
 radial_segments = 100
 rings = 100
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.957737, -0.287645, 0, 0.287645, 0.957737, 0, 71.6386, 20.2151)
-mesh = SubResource("PrismMesh_3wd6y")
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 81.1946, 0)
+mesh = SubResource("CylinderMesh_3wd6y")
