@@ -49,10 +49,12 @@ public partial class UISelectableStar : CanvasLayer
 
 		if (star != null)
 		{
-            Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
+			// Calculate the offset for the star select panel based on the star's position
+			Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
             Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
 
-            float distance = player.Position.DistanceTo(targetPosition);
+			// Calculate the offset based on the distance to the star
+			float distance = player.Position.DistanceTo(targetPosition);
             float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * starSelectOffsetStrength;
             Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
 
