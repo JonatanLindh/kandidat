@@ -66,14 +66,16 @@ public partial class UISelectableStar : CanvasLayer
             Vector3 forward = player.GlobalTransform.Basis.Z;
             bool isBehind = forward.Dot(toStar) > 0;
 
-            if (isBehind)
-            {
-                // Adjust the position to the side of the screen
-                newPos.X = viewportSize.X - starSelect.Size.X - 10;
-                newPos.Y = Mathf.Clamp(newPos.Y, 0, viewportSize.Y - starSelect.Size.Y);
+			if (isBehind)
+			{
+				// Adjust the position to the side of the screen
+				if (screenPosition.X > viewportSize.X / 2) newPos.X = 10; // Closer to the left side
+				else newPos.X = viewportSize.X - starSelect.Size.X - 10; // Closer to the right side
+
+				newPos.Y = Mathf.Clamp(newPos.Y, 0, viewportSize.Y - starSelect.Size.Y);
 			}
 
-            else
+			else
             {
                 newPos.X = Mathf.Clamp(newPos.X, 0, viewportSize.X - starSelect.Size.X);
                 newPos.Y = Mathf.Clamp(newPos.Y, 0, viewportSize.Y - starSelect.Size.Y);
