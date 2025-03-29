@@ -51,8 +51,9 @@ public partial class UISelectableStar : CanvasLayer
 
 		if (star != null)
 		{
+			Vector2 screenPosition = GetStarScreenPosition();
+
 			// Calculate the offset for the star select panel based on the star's position
-			Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
             Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
 
 			// Calculate the offset based on the distance to the star
@@ -68,13 +69,11 @@ public partial class UISelectableStar : CanvasLayer
 			Rect2 starSelectBounds = starSelect.GetGlobalRect();
 
 			bool isOnScreen = IsFullyVisible(screenSpace, starSelectBounds);
-			GD.Print(isOnScreen);
 
 			// Clamp the position to the screen bounds
 			if (!isOnScreen)
 			{
 				Vector2 dir = GetClosestDirection(screenSpace, starSelectBounds);
-				GD.Print(dir);
 
 				if (dir.X != 0)
 				{
@@ -94,13 +93,26 @@ public partial class UISelectableStar : CanvasLayer
 				//newPos = newPos.Clamped(Vector2.Zero, GetViewportRect().Size - starSelect.Size);
 			}
 
-
-
-
-
 			starSelect.Position = newPos;
             starDistance.Text = "Distance: " + ((int)distance).ToString() + " LY";
         }
+	}
+
+	private Vector2 GetStarScreenPosition()
+	{
+		// Check if the star is behind the camera
+		Camera3D camera = GetViewport().GetCamera3D();
+		Vector3 cameraForward = -camera.GlobalTransform.Basis.Z.Normalized();
+		Vector3 directionToStar = (targetPosition - camera.GlobalPosition).Normalized();
+		bool isBehindCamera = cameraForward.Dot(directionToStar) < 0;
+
+		Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
+		if (isBehindCamera)
+		{
+			screenPosition = -screenPosition;
+		}
+
+		return screenPosition;
 	}
 
 	private bool IsFullyVisible(Rect2 checker, Rect2 target)
