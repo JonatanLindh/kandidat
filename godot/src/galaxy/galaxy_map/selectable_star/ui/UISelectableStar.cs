@@ -27,7 +27,9 @@ public partial class UISelectableStar : CanvasLayer
 
 	[Signal]
 	public delegate void ExploreStarEventHandler(int seed);
-	
+
+	float sidePadding = 10.0f;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -59,32 +61,80 @@ public partial class UISelectableStar : CanvasLayer
             Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
 
             Vector2 newPos = screenPosition + (distanceOffset + posOffset);
-            Vector2 viewportSize = GetViewport().GetVisibleRect().Size;
+			starSelect.Position = newPos;
 
-            // Check if the star is behind the player
-            Vector3 toStar = targetPosition - player.Position;
-            Vector3 forward = player.GlobalTransform.Basis.Z;
-            bool isBehind = forward.Dot(toStar) > 0;
+			// Check if the star select panel is fully visible on the screen
+			Rect2 screenSpace = GetViewport().GetVisibleRect();
+			Rect2 starSelectBounds = starSelect.GetGlobalRect();
 
-			if (isBehind)
+			bool isOnScreen = IsFullyVisible(screenSpace, starSelectBounds);
+			GD.Print(isOnScreen);
+
+			// Clamp the position to the screen bounds
+			if (!isOnScreen)
 			{
-				// Adjust the position to the side of the screen
-				if (screenPosition.X > viewportSize.X / 2) newPos.X = 10; // Closer to the left side
-				else newPos.X = viewportSize.X - starSelect.Size.X - 10; // Closer to the right side
+				Vector2 dir = GetClosestDirection(screenSpace, starSelectBounds);
+				GD.Print(dir);
 
-				newPos.Y = Mathf.Clamp(newPos.Y, 0, viewportSize.Y - starSelect.Size.Y);
+				if (dir.X != 0)
+				{
+					newPos.X = dir.X > 0 ? 
+						screenSpace.Position.X + sidePadding : 
+						screenSpace.End.X - starSelect.Size.X - sidePadding;
+				}
+
+				if (dir.Y != 0)
+				{
+					newPos.Y = dir.Y > 0 ? 
+						screenSpace.Position.Y + sidePadding : 
+						screenSpace.End.Y - starSelect.Size.Y - sidePadding;
+				}
+
+
+				//newPos = newPos.Clamped(Vector2.Zero, GetViewportRect().Size - starSelect.Size);
 			}
 
-			else
-            {
-                newPos.X = Mathf.Clamp(newPos.X, 0, viewportSize.X - starSelect.Size.X);
-                newPos.Y = Mathf.Clamp(newPos.Y, 0, viewportSize.Y - starSelect.Size.Y);
-            }
 
-            starSelect.Position = newPos;
 
+
+
+			starSelect.Position = newPos;
             starDistance.Text = "Distance: " + ((int)distance).ToString() + " LY";
         }
+	}
+
+	private bool IsFullyVisible(Rect2 checker, Rect2 target)
+	{
+		return checker.Encloses(target);
+		//	checker.HasPoint(target.Position) &&
+		//	checker.HasPoint(target.End);
+	}
+
+	private Vector2 GetClosestDirection(Rect2 from, Rect2 to)
+	{
+		Vector2 direction = Vector2.Zero;
+
+		// Calculate horizontal direction
+		if (to.Position.X < from.Position.X)
+		{
+			direction.X = from.Position.X - to.Position.X;
+		}
+		else if (to.End.X > from.End.X)
+		{
+			direction.X = from.End.X - to.End.X;
+		}
+
+		// Calculate vertical direction
+		if (to.Position.Y < from.Position.Y)
+		{
+			direction.Y = from.Position.Y - to.Position.Y;
+		}
+		else if (to.End.Y > from.End.Y)
+		{
+			direction.Y = from.End.Y - to.End.Y;
+		}
+
+		return direction;
 	}
 
 	public void SetStar(SelectableStar star)
