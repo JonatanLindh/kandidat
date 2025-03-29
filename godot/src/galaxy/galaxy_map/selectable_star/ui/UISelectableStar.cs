@@ -74,14 +74,11 @@ public partial class UISelectableStar : CanvasLayer
 
 	private Vector2 GetStarScreenPosition()
 	{
-		// Check if the star is behind the camera
 		Camera3D camera = GetViewport().GetCamera3D();
-		Vector3 cameraForward = -camera.GlobalTransform.Basis.Z.Normalized();
 		Vector3 directionToStar = (targetPosition - camera.GlobalPosition).Normalized();
-		bool isBehindCamera = cameraForward.Dot(directionToStar) < 0;
+		Vector2 screenPosition = camera.UnprojectPosition(targetPosition);
 
-		Vector2 screenPosition = GetViewport().GetCamera3D().UnprojectPosition(targetPosition);
-		if (isBehindCamera)
+		if (camera.GlobalTransform.Basis.Z.Dot(directionToStar) > 0)
 		{
 			screenPosition = -screenPosition;
 		}
@@ -136,6 +133,7 @@ public partial class UISelectableStar : CanvasLayer
 		{
 			direction.X = from.Position.X - to.Position.X;
 		}
+
 		else if (to.End.X > from.End.X)
 		{
 			direction.X = from.End.X - to.End.X;
@@ -146,6 +144,7 @@ public partial class UISelectableStar : CanvasLayer
 		{
 			direction.Y = from.Position.Y - to.Position.Y;
 		}
+
 		else if (to.End.Y > from.End.Y)
 		{
 			direction.Y = from.End.Y - to.End.Y;
