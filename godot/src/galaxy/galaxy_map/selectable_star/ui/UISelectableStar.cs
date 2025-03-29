@@ -49,14 +49,15 @@ public partial class UISelectableStar : CanvasLayer
 			}
 		}
 
+		// Update the star UI
 		if (star != null)
 		{
 			Vector2 screenPosition = GetStarScreenPosition();
 
-			// Calculate the offset for the star select panel based on the star's position
-            Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
+			// Offset to center the star ui on the star
+			Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
 
-			// Calculate the offset based on the distance to the star
+			// Offset based on the distance to the star
 			float distance = player.Position.DistanceTo(targetPosition);
             float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * starSelectOffsetStrength;
             Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
@@ -64,34 +65,7 @@ public partial class UISelectableStar : CanvasLayer
             Vector2 newPos = screenPosition + (distanceOffset + posOffset);
 			starSelect.Position = newPos;
 
-			// Check if the star select panel is fully visible on the screen
-			Rect2 screenSpace = GetViewport().GetVisibleRect();
-			Rect2 starSelectBounds = starSelect.GetGlobalRect();
-
-			bool isOnScreen = IsFullyVisible(screenSpace, starSelectBounds);
-
-			// Clamp the position to the screen bounds
-			if (!isOnScreen)
-			{
-				Vector2 dir = GetClosestDirection(screenSpace, starSelectBounds);
-
-				if (dir.X != 0)
-				{
-					newPos.X = dir.X > 0 ? 
-						screenSpace.Position.X + sidePadding : 
-						screenSpace.End.X - starSelect.Size.X - sidePadding;
-				}
-
-				if (dir.Y != 0)
-				{
-					newPos.Y = dir.Y > 0 ? 
-						screenSpace.Position.Y + sidePadding : 
-						screenSpace.End.Y - starSelect.Size.Y - sidePadding;
-				}
-
-
-				//newPos = newPos.Clamped(Vector2.Zero, GetViewportRect().Size - starSelect.Size);
-			}
+			newPos = GetClampedPositionIfOutside(newPos);
 
 			starSelect.Position = newPos;
             starDistance.Text = "Distance: " + ((int)distance).ToString() + " LY";
@@ -115,11 +89,42 @@ public partial class UISelectableStar : CanvasLayer
 		return screenPosition;
 	}
 
+	private Vector2 GetClampedPositionIfOutside(Vector2 basePos)
+	{
+		Vector2 clampedPos = basePos;
+
+		// Check if the star select panel is fully visible on the screen
+		Rect2 screenSpace = GetViewport().GetVisibleRect();
+		Rect2 starSelectBounds = starSelect.GetGlobalRect();
+
+		bool isOnScreen = IsFullyVisible(screenSpace, starSelectBounds);
+
+		// Clamp the position to the screen bounds
+		if (!isOnScreen)
+		{
+			Vector2 dir = GetClosestDirection(screenSpace, starSelectBounds);
+
+			if (dir.X != 0)
+			{
+				clampedPos.X = dir.X > 0 ?
+					screenSpace.Position.X + sidePadding :
+					screenSpace.End.X - starSelect.Size.X - sidePadding;
+			}
+
+			if (dir.Y != 0)
+			{
+				clampedPos.Y = dir.Y > 0 ?
+					screenSpace.Position.Y + sidePadding :
+					screenSpace.End.Y - starSelect.Size.Y - sidePadding;
+			}
+		}
+
+		return clampedPos;
+	}
+
 	private bool IsFullyVisible(Rect2 checker, Rect2 target)
 	{
 		return checker.Encloses(target);
-		//	checker.HasPoint(target.Position) &&
-		//	checker.HasPoint(target.End);
 	}
 
 	private Vector2 GetClosestDirection(Rect2 from, Rect2 to)
@@ -178,10 +183,9 @@ public partial class UISelectableStar : CanvasLayer
 	{
 		if (star != null) {
 			EmitSignal(nameof(ExploreStar), this.star.GetSeed());
-			// star.LoadSolarSystem();z
 		}
-		
 	}
+
 	public void OnTravelButtonPressed()
 	{
 		if (player != null)
