@@ -61,6 +61,7 @@ public partial class PlanetMarchingCube : Node3D
         meshInstance3D.Scale = Vector3.One * (1 / (float)Resolution);
         AddChild(meshInstance3D);
         */
+        GD.Print(_radius);
         SpawnMesh();
     }
 
