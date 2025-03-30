@@ -22,6 +22,8 @@ func _ready() -> void:
 	# Duplicate shader to allow uniuqe parameters
 	if mesh.material:
 		mesh.material = mesh.material.duplicate()
+	
+	print(radius)
 	_update_runtime_shader_params()
 	var random_wave_length = wave_lenghts_array.pick_random()
 	mesh.material.set_shader_parameter("wavelengths", random_wave_length)
@@ -39,3 +41,5 @@ func _update_runtime_shader_params():
 	if mesh and mesh.material:
 		mesh.material.set_shader_parameter("sun_direction", sun_direction.normalized())
 		mesh.material.set_shader_parameter("planet_position", position)
+		mesh.material.set_shader_parameter("planet_radius", radius)
+		
