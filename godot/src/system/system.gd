@@ -60,7 +60,7 @@ func randomPlanetMass(r):
 	return r.randf_range(1,2);
 
 func randomPlanetRadius(r):
-	return r.randf_range(5,20);
+	return r.randf_range(15,15);
 
 
 func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpeed= 0):
