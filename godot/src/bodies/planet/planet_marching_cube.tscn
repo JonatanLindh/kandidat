@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3 uid="uid://du6jp713wv2h5"]
+
+[ext_resource type="Script" uid="uid://be8xbyj5m5urc" path="res://src/bodies/planet/PlanetMarchingCube.cs" id="1_ha83e"]
+[ext_resource type="Shader" uid="uid://b2yi8ib46fc6k" path="res://src/bodies/planet/atmosphere/atmosphere.gdshader" id="2_umdtg"]
+[ext_resource type="Script" uid="uid://1e7tm60t4h55" path="res://src/bodies/planet/atmosphere/atmosphere.gd" id="3_f3734"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_umdtg"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("2_umdtg")
+shader_parameter/shadow_color = Color(0, 0, 0, 1)
+shader_parameter/planet_position = Vector3(0, 0, 0)
+shader_parameter/sun_direction = Vector3(0, 0, -1)
+shader_parameter/thickness_scale = 0.042
+shader_parameter/planet_radius = 1.0
+shader_parameter/density_falloff = 4.0
+shader_parameter/num_in_scattering_points = 30
+shader_parameter/num_optical_depth_points = 30
+shader_parameter/wavelengths = Vector3(1000, 530, 800)
+shader_parameter/scattering_strenght = 8.55
+shader_parameter/atmosphere_scale = 1.3
+
+[sub_resource type="BoxMesh" id="BoxMesh_736bg"]
+resource_local_to_scene = true
+material = SubResource("ShaderMaterial_umdtg")
+flip_faces = true
+size = Vector3(3, 3, 3)
+
+[node name="PlanetMarchingCube" type="GravityBody"]
+script = ExtResource("1_ha83e")
+
+[node name="Atmosphere" type="MeshInstance3D" parent="."]
+transform = Transform3D(16.785, 0, 0, 0, 16.785, 0, 0, 0, 16.785, 0, 0, 0)
+mesh = SubResource("BoxMesh_736bg")
+script = ExtResource("3_f3734")
+radius = 1.0
