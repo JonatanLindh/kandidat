@@ -36,9 +36,11 @@ func _input(event):
 
 		# Clamp the pitch before applying rotation
 		head.rotation.x = clamp(head.rotation.x + pitch, deg_to_rad(-89), deg_to_rad(89))
+		
+		head.rotate_y(yaw)
 
 		# Rotate player around gravity-aligned UP direction
-		global_transform.basis = global_transform.basis.rotated(up_direction, yaw).orthonormalized()
+		#global_transform.basis = global_transform.basis.rotated(up_direction, yaw).orthonormalized()
 		PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 
 
@@ -89,21 +91,7 @@ func in_space_state_movement(delta : float):
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")	
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	
-	#if direction:
-		#if flying:
-			#direction = (head.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-		#if Input.is_action_pressed("sprint"):
-			#apply_velocity(direction, sprint_factor)
-			#camera_3d.fov = base_fov * 1.1
-		#else:
-			#apply_velocity(direction, 1)
-			#camera_3d.fov = base_fov
-	#else:
-		#velocity.x = move_toward(velocity.x, 0, current_speed)
-		#velocity.z = move_toward(velocity.z, 0, current_speed)
-		#if not floating_flag and flying:
-			#velocity.y = move_toward(velocity.y, 0, current_speed)
+
 	apply_flying_movement(Vector3.ZERO)
 	emit_player_status_changed()
 	move_and_slide()
@@ -125,31 +113,14 @@ func in_gravity_field_movement(delta : float):
 			current_speed = current_speed + 1
 		elif Input.is_action_pressed("speeddown"):
 			current_speed = max(1, current_speed - 1)
-			
-	## Get the input direction and handle the movement/deceleration.
-	#var input_dir := Input.get_vector("left", "right", "forward", "backward")	
-	#var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	#
-	#if direction:
-		#if flying:
-			#direction = (head.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-		#if Input.is_action_pressed("sprint"):
-			#apply_velocity(direction, sprint_factor)
-			#camera_3d.fov = base_fov * 1.1
-		#else:
-			#apply_velocity(direction, 1)
-			#camera_3d.fov = base_fov
-	#else:
-		#velocity.x = move_toward(velocity.x, planet_velocity.x, current_speed)
-		#velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
-		#if not floating_flag:
-			#velocity.y = move_toward(velocity.y, planet_velocity.y, current_speed)
+
 	apply_flying_movement(planet_velocity)
 #
-	#if distance_to_planet < 20:
-		#align_with_vector(gravity_vector,1)
-	#else:
-		#align_with_vector(Vector3.DOWN,0.1)
+	if distance_to_planet < (PlayerVariables.planet_radius * 1.2):
+		print("GRAVITY")
+		align_with_vector(gravity_vector,0.5)
+	else:
+		align_with_vector(Vector3.DOWN,0.5)
 	
 	emit_player_status_changed()
 	move_and_slide()
@@ -194,7 +165,8 @@ func on_planet_movement(delta : float):
 	var forward = global_transform.basis.z
 	var right = global_transform.basis.x
 
-	var direction = (right * input_dir.x + forward * input_dir.y).normalized()
+	#var direction = (right * input_dir.x + forward * input_dir.y).normalized()
+	var direction = (head.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	up_direction = -gravity_vector.normalized()
 	# ensures movement is parallel to the ground
 	direction = (direction - up_direction * direction.dot(up_direction)).normalized()
@@ -271,7 +243,7 @@ func handle_flying() -> void:
 		velocity.y = move_toward(velocity.y, 0, float_speed)
 
 func align_with_vector(alignment_vector: Vector3, rotation_speed : float):
-	var up_direction = -alignment_vector.normalized()
+	up_direction = -alignment_vector.normalized()
 	var current_basis = global_transform.basis
 
 	# Preserve forward direction correctly (project onto new up direction)

@@ -30,3 +30,9 @@ extends Node
 		planet_position = new
 	get():
 		return planet_position
+
+@export var planet_radius: float:
+	set(new):
+		planet_radius = new
+	get():
+		return planet_radius
