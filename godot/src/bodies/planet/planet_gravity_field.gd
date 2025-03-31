@@ -11,9 +11,14 @@ class_name PlanetGravityField
 @export var radius : float:
 	set(new_rad):
 		radius = new_rad
+		if collision_shape_3d and collision_shape_3d.shape:
+			collision_shape_3d.shape.radius = new_rad * radius_scale
+
 @export var base_gravity: float = 9.82
 
 var _player_inside_field := false
+
+var radius_scale := 2
 
 func _physics_process(delta: float) -> void:
 	if not planet:
@@ -32,12 +37,14 @@ func _physics_process(delta: float) -> void:
 
 	
 func _ready() -> void:
-	#Debug and test
 	gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 	gravity_point = true
 	gravity = 9.82 + planet.velocity.length()
 	connect("body_entered", _on_body_entered)
 	connect("body_exited", _on_body_exited)
+
+
+	
 
 func update_gravity(relative_velocity: Vector3) -> void:
 		if planet:
@@ -65,12 +72,3 @@ func _on_body_exited(body):
 	elif body is Player or RigidBodyPlayer:
 		body.on_gravity_field_exited()
 		_player_inside_field = false
-
-## Factory Method for creating new PlanetGravityFields 
-#func create_new_gravity_field(radius : float) -> PlanetGravityField:
-	#var gravity_field_shape := CollisionShape3D.new()
-	#gravity_field_shape.shape = SphereShape3D.new()
-	#gravity_field_shape.shape.radius = radius * 2
-	#self.add_child(gravity_field_shape)
-	#print(get_children())
-	#return self

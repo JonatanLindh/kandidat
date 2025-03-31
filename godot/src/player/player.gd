@@ -117,11 +117,12 @@ func in_gravity_field_movement(delta : float):
 	emit_player_status_changed()
 	move_and_slide()
 
+## 
 func apply_flying_movement(base_velocity : Vector3, delta : float):
-	if Input.is_action_pressed("rotate_left"):
-		rotate_object_local(Vector3(0, 0, 1), 2 * delta)  # Roll left
-	elif Input.is_action_pressed("rotate_right"):
-		rotate_object_local(Vector3(0, 0, -1), 2 * delta)  # Roll right
+	if Input.is_action_pressed("roll_left"):
+		rotate_object_local(Vector3(0, 0, 1), 2 * delta)
+	elif Input.is_action_pressed("roll_right"):
+		rotate_object_local(Vector3(0, 0, -1), 2 * delta)
 	
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")	
@@ -157,12 +158,12 @@ func on_planet_movement(delta : float):
 	if is_falling():
 		velocity += gravity_vector * delta
 		
+		
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")
 	var forward = global_transform.basis.z
 	var right = global_transform.basis.x
 
-	#var direction = (right * input_dir.x + forward * input_dir.y).normalized()
 	var direction = (head.global_transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	up_direction = -gravity_vector.normalized()
 	# ensures movement is parallel to the ground
@@ -186,7 +187,7 @@ func on_planet_movement(delta : float):
 			velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
 	
 	if is_falling():
-		align_with_vector(gravity_vector, 0.5)
+		align_with_vector(gravity_vector, 1)
 	else:	
 		align_with_vector(gravity_vector, 1)
 	emit_player_status_changed()
@@ -237,11 +238,9 @@ func align_with_vector(alignment_vector: Vector3, rotation_speed : float):
 	up_direction = -alignment_vector.normalized()
 	var current_basis = global_transform.basis
 
-	# Preserve forward direction correctly (project onto new up direction)
 	var forward_direction = (current_basis.z - up_direction * current_basis.z.dot(up_direction)).normalized()
 	var right_direction = up_direction.cross(forward_direction).normalized()
 
-	# Smooth transition instead of snapping
 	var target_basis = Basis(right_direction, up_direction, forward_direction).orthonormalized()
 	global_transform.basis = global_transform.basis.slerp(target_basis, rotation_speed)
 	
