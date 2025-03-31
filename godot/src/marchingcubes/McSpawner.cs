@@ -55,7 +55,7 @@ public partial class McSpawner : Node
 		SpawnMesh();
 	}
 
-	private void SpawnMesh()
+    private void SpawnMesh()
 	{
 		if(_meshInstance3D != null) RemoveChild(_meshInstance3D);
 		_marchingCube ??= new MarchingCube();

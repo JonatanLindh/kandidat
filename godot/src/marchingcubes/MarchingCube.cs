@@ -72,15 +72,20 @@ public class MarchingCube
             if (edgeIndex == -1) break;
             var pointsIndices = MarchingTable.EDGES[edgeIndex];
 
-            var p0 = MarchingTable.POINTS[pointsIndices.X];
-            var p1 = MarchingTable.POINTS[pointsIndices.Y];
-			
-            var posA = new Vector3((x + p0.X) * _scale, (y + p0.Y) * _scale, (z + p0.Z) * _scale);
-            var posB = new Vector3((x + p1.X) * _scale, (y + p1.Y) * _scale, (z + p1.Z) * _scale);
-			
+            Vector3I p0 = MarchingTable.POINTS[pointsIndices.X];
+            Vector3I p1 = MarchingTable.POINTS[pointsIndices.Y];
+
+            Vector3I posA = new Vector3I((x + p0.X) * _scale, (y + p0.Y) * _scale, (z + p0.Z) * _scale);
+            Vector3I posB = new Vector3I((x + p1.X) * _scale, (y + p1.Y) * _scale, (z + p1.Z) * _scale);
+            Vector3 A = posA;
+            Vector3 B = posB;
+            float valueA = _datapoints[posA.X, posA.Y, posA.Z];
+            float valueB = _datapoints[posB.X, posB.Y, posB.Z];
+
             // TODO: use an actual interpolation function between the two points
-            var position = (posA + posB) / 2.0f;
-			
+            float t = (0 - valueA) / (valueB - valueA);
+            var position = A + t * (B - A);
+
             _vertices.Add(position);
         }
         

@@ -1,19 +1,11 @@
 using Godot;
-using Godot.Collections;
-using Godot.NativeInterop;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using static Godot.XmlParser;
 
 /// <summary>
 /// A class for creating different types of noise to be used when generating planets
 /// </summary>
 [Tool]
-public partial class PlanetNoise : Node, CelestialBodyNoise
+public partial class PlanetNoise : Node, CelestialBodyNoise, ModifiableCelestialBody
 {
     private NoiseTexture3D texture3d;
     private CelestialBodyInput Input;
@@ -135,6 +127,10 @@ public partial class PlanetNoise : Node, CelestialBodyNoise
         return CreateDataPoints();
     }
 
+    public int GetRadius()
+    {
+        return input.GetRadius();
+    }
     public void SetRadius(int newRadius)
     {
         input.SetRadius(newRadius);
