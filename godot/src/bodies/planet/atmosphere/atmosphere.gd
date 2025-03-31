@@ -23,12 +23,11 @@ func _ready() -> void:
 	if mesh.material:
 		mesh.material = mesh.material.duplicate()
 	
-	print(radius)
 	_update_runtime_shader_params()
 	var random_wave_length = wave_lenghts_array.pick_random()
 	mesh.material.set_shader_parameter("wavelengths", random_wave_length)
 	mesh.material.set_shader_parameter("planet_radius", radius)
-	mesh.size = Vector3(radius*3,radius*3,radius*3)
+	mesh.size = Vector3(radius*6,radius*6,radius*6)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
