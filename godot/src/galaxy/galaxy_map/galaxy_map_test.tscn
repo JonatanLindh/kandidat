@@ -11,3 +11,4 @@
 [node name="GalaxyMap" parent="." instance=ExtResource("1_xbp6i")]
 
 [node name="Player" parent="." instance=ExtResource("2_f3twl")]
+unique_name_in_owner = true
