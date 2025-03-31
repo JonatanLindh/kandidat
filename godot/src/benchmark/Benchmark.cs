@@ -50,7 +50,7 @@ public partial class Benchmark : Node3D
 			currentTime = 0;
 
 			double fps = Engine.GetFramesPerSecond();
-			double frameTime = Math.Round(delta, 7);
+			double frameTime = Math.Round(delta, 6);
 			ulong memoryUsage = OS.GetStaticMemoryUsage();
 			string measurementTime = DateTime.Now.ToString("HH:mm:ss.fff");
 
@@ -123,9 +123,12 @@ public partial class Benchmark : Node3D
 		GD.Print($"1% low FPS: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.01f)}");
 		GD.Print($"0.1% low FPS: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.001f)}\n");
 
-		GD.Print($"Average Frame Time: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime)}");
-		GD.Print($"1% high Frame Time: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f)}");
-		GD.Print($"0.1% high Frame Time: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f)}\n");
+		float averageFrameTime = processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime);
+		float onePercentHighFrameTime = processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f);
+		float pointOnePercentHighFrameTime = processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f);
+		GD.Print($"Average Frame Time: {averageFrameTime} s | {Math.Round(averageFrameTime * 100, 2)} ms");
+		GD.Print($"1% high Frame Time: {onePercentHighFrameTime} s | {Math.Round(onePercentHighFrameTime * 100, 2)} ms");
+		GD.Print($"0.1% high Frame Time: {pointOnePercentHighFrameTime} s | {Math.Round(pointOnePercentHighFrameTime * 100, 2)} ms\n");
 
 		float averageMemoryUsage = processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage);
 		float onePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f);
@@ -184,17 +187,17 @@ public partial class Benchmark : Node3D
 			var averageFrameTime = processor.GetAverage(i, result, BenchmarkDatapointEnum.FrameTime);
 			var onePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f);
 			var pointOnePercentHighFrameTime = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f);
-			resultFile.StoreString($"Average Frametime: {averageFrameTime}\n");
-			resultFile.StoreString($"1% high Frametime: {onePercentHighFrameTime}\n");
-			resultFile.StoreString($"0.1% high Frametime: {pointOnePercentHighFrameTime}\n\n");
+			resultFile.StoreString($"Average Frametime: {averageFrameTime} s | {Math.Round(averageFrameTime * 100, 2)} ms\n");
+			resultFile.StoreString($"1% high Frametime: {onePercentHighFrameTime} s | {Math.Round(onePercentHighFrameTime * 100, 2)} ms\n");
+			resultFile.StoreString($"0.1% high Frametime: {pointOnePercentHighFrameTime} s | {Math.Round(pointOnePercentHighFrameTime * 100, 2)} ms\n\n");
 
 			// Memory Usage
 			var averageMemoryUsage = processor.GetAverage(i, result, BenchmarkDatapointEnum.MemoryUsage);
 			var onePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f);
 			var pointOnePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.001f);
-			resultFile.StoreString($"Average Memory Usage: {averageMemoryUsage} bytes / {Math.Round(averageMemoryUsage / (1024 * 1024), 1)} MB\n");
-			resultFile.StoreString($"1% high Memory Usage: {onePercentHighMemoryUsage} bytes / {Math.Round(onePercentHighMemoryUsage / (1024 * 1024), 1)} MB\n");
-			resultFile.StoreString($"0.1% high Memory Usage: {pointOnePercentHighMemoryUsage} bytes / {Math.Round(pointOnePercentHighMemoryUsage / (1024 * 1024), 1)} MB\n\n");
+			resultFile.StoreString($"Average Memory Usage: {averageMemoryUsage} bytes | {Math.Round(averageMemoryUsage / (1024 * 1024), 1)} MB\n");
+			resultFile.StoreString($"1% high Memory Usage: {onePercentHighMemoryUsage} bytes | {Math.Round(onePercentHighMemoryUsage / (1024 * 1024), 1)} MB\n");
+			resultFile.StoreString($"0.1% high Memory Usage: {pointOnePercentHighMemoryUsage} bytes | {Math.Round(pointOnePercentHighMemoryUsage / (1024 * 1024), 1)} MB\n\n");
 
 			resultFile.StoreString("Benchmark done\n");
 		}
