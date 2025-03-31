@@ -88,7 +88,7 @@ public partial class PlanetMarchingCube : Node3D
             
             if (_planet != null)
             {
-                _planet.Set("radius", _resolution + 1);
+                _planet.Set("radius", _radius);
                 _planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
 
                 // Add the planet as a child of the current node
