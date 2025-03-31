@@ -6,7 +6,7 @@ using Godot.Collections;
 [Tool]
 public partial class PlanetMarchingCube : Node3D
 {
-    [ExportToolButton("Click me!")]
+    [ExportToolButton("Generate Mesh")]
     public Callable ClickMeButton => Callable.From(SpawnMesh);
     
     [Export]
@@ -41,32 +41,22 @@ public partial class PlanetMarchingCube : Node3D
             OnResourceSet();
         }
     }
+
+    [Export] public PackedScene Planet { get; set; }
+    
     
     
     private MarchingCube _marchingCube;
-    private MeshInstance3D _meshInstance3D;
     private int _resolution = 16;
     private float _radius = 1;
     private Vector3 _sunPosition;
+    private Node3D _planet;
     private Node _atmosphere;
+    
 
     public override void _Ready()
     {
-        // Called every time the node is added to the scene.
-        /*
-        _marchingCube = new MarchingCube();
-        var dataPoints = GenerateDataPoints();
-        var meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
-        meshInstance3D.Translate(Vector3.Zero);
-        meshInstance3D.Scale = Vector3.One * (1 / (float)Resolution);
-        AddChild(meshInstance3D);
-        */
         SpawnMesh();
-    }
-
-    public override void _EnterTree()
-    {
-        //SpawnMesh();
     }
 
     public override void _Process(double delta)
@@ -77,66 +67,54 @@ public partial class PlanetMarchingCube : Node3D
     {
         SpawnMesh();
     }
+
     private void SpawnMesh()
     {
-        if(_meshInstance3D != null) RemoveChild(_meshInstance3D);
-        _marchingCube ??= new MarchingCube();
-
-        _atmosphere = GetNodeOrNull("Atmosphere");
-        //GD.Print(atmosphere.Get("radius"));
-        _atmosphere?.Set("radius", _radius);
-        CallDeferred("SetAtmosphereSunDir");
-
-
-        float[,,] dataPoints = GenerateDataPoints();
-        _meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
+        // Check if there's already a planet instance and remove it
+        if (_planet != null && IsInstanceValid(_planet))
+        {
+            _planet.QueueFree();
+            _planet = null;
+        }
         
-        var material = new OrmMaterial3D();
-        _meshInstance3D.MaterialOverride = material;
-        material.CullMode = BaseMaterial3D.CullModeEnum.Back;
-        material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
-        material.AlbedoColor = Colors.YellowGreen;
-        _meshInstance3D.Translate(-1 * _radius * Vector3.One);
-        _meshInstance3D.Scale = Vector3.One * (1 / (float)_resolution);
-        _meshInstance3D.Scale *= _radius;
-        AddChild(_meshInstance3D);
+        // Instantiate the new planet
+        if (Planet != null)
+        {
+            // Instantiate without immediately casting
+            var instance = Planet.Instantiate();
+            
+            // Try to cast to Node3D    
+            _planet = instance as Node3D;
+            
+            if (_planet != null)
+            {
+                _planet.Set("radius", _resolution + 1);
+                _planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
 
+                // Add the planet as a child of the current node
+                AddChild(_planet);
+            }
+        }
+        
+        _atmosphere = GetNodeOrNull("Atmosphere");
+        _atmosphere?.Set("radius", _radius);
+        CallDeferred(nameof(SetAtmosphereSunDir));
     }
-    
+
     private void SetAtmosphereSunDir()
     {
-        var sunDir = (_sunPosition - GlobalPosition).Normalized();
-        _atmosphere?.Set("sun_direction", sunDir);
+        if (!IsInsideTree() || _atmosphere == null)
+            return;
+        
+        try 
+        {
+            var sunDir = (_sunPosition - GlobalPosition).Normalized();
+            _atmosphere.Set("sun_direction", sunDir);
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr($"Error updating atmosphere: {e.Message}");
+        }
     }
     
-    private float[,,] GenerateDataPoints()
-    {
-        var radius = _resolution;
-        var diameter = radius * 2 + 1;
-        var dataPoints = new float[diameter, diameter, diameter];
-		
-        Vector3 center = new Vector3(radius, radius, radius);
-		
-        Parallel.For(0, diameter, x =>
-        {
-            for (var y = 0; y < diameter; y++)
-            {
-                for (var z = 0; z < diameter; z++)
-                {
-                    Vector3 point = new Vector3(x, y, z);
-                    float distance = center.DistanceTo(point);
-				
-                    // Adjust threshold to match radius more precisely
-                    // Using radius - 0.5 creates a more visually accurate sphere
-                    float value = (radius - 0.5f) - distance;
-				
-                    // Clamp to ensure values stay in [-1, 1] range
-                    value = Mathf.Clamp(value, -1.0f, 1.0f);
-				
-                    dataPoints[x, y, z] = value;
-                }
-            }
-        });
-        return dataPoints;
-    }
 }
