@@ -25,7 +25,7 @@ public partial class RandomCelestialBodyNoise : Node, CelestialBodyNoise, Modifi
 
     private void RandomizeParameters()
     {
-        SetRadius(RADIUS);
+        int radius = celestialBodyNoise.GetRadius();
         SetWidth(WIDTH);
         SetHeight(HEIGHT);
         SetDepth(DEPTH);
