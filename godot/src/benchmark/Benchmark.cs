@@ -127,9 +127,12 @@ public partial class Benchmark : Node3D
 		GD.Print($"1% high Frame Time: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f)}");
 		GD.Print($"0.1% high Frame Time: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.001f)}\n");
 
-		GD.Print($"Average Memory Usage: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage)}");
-		GD.Print($"1% high Memory Usage: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f)}");
-		GD.Print($"0.1% high Memory Usage: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.001f)}\n");
+		float averageMemoryUsage = processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage);
+		float onePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f);
+		float pointOnePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.001f);
+		GD.Print($"Average Memory Usage: {averageMemoryUsage} bytes | {Math.Round(averageMemoryUsage / (1024 * 1024), 1)} MB");
+		GD.Print($"1% high Memory Usage: {onePercentHighMemoryUsage} bytes | {Math.Round(onePercentHighMemoryUsage / (1024 * 1024), 1)} MB");
+		GD.Print($"0.1% high Memory Usage: {Math.Round(pointOnePercentHighMemoryUsage, 1)} bytes | {Math.Round(pointOnePercentHighMemoryUsage / (1024 * 1024), 1)} MB\n");
 	}
 
 	private void Write()
@@ -189,9 +192,9 @@ public partial class Benchmark : Node3D
 			var averageMemoryUsage = processor.GetAverage(i, result, BenchmarkDatapointEnum.MemoryUsage);
 			var onePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.01f);
 			var pointOnePercentHighMemoryUsage = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.MemoryUsage, low: false, 0.001f);
-			resultFile.StoreString($"Average Memory Usage: {averageMemoryUsage}\n");
-			resultFile.StoreString($"1% high Memory Usage: {onePercentHighMemoryUsage}\n");
-			resultFile.StoreString($"0.1% high Memory Usage: {pointOnePercentHighMemoryUsage}\n\n");
+			resultFile.StoreString($"Average Memory Usage: {averageMemoryUsage} bytes / {Math.Round(averageMemoryUsage / (1024 * 1024), 1)} MB\n");
+			resultFile.StoreString($"1% high Memory Usage: {onePercentHighMemoryUsage} bytes / {Math.Round(onePercentHighMemoryUsage / (1024 * 1024), 1)} MB\n");
+			resultFile.StoreString($"0.1% high Memory Usage: {pointOnePercentHighMemoryUsage} bytes / {Math.Round(pointOnePercentHighMemoryUsage / (1024 * 1024), 1)} MB\n\n");
 
 			resultFile.StoreString("Benchmark done\n");
 		}
