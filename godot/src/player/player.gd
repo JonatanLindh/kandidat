@@ -116,11 +116,10 @@ func in_gravity_field_movement(delta : float):
 
 	apply_flying_movement(planet_velocity)
 #
-	if distance_to_planet < (PlayerVariables.planet_radius * 1.2):
-		print("GRAVITY")
-		align_with_vector(gravity_vector,0.5)
-	else:
-		align_with_vector(Vector3.DOWN,0.5)
+	#if distance_to_planet < (PlayerVariables.planet_radius * 1.2):
+		#align_with_vector(gravity_vector,0.5)
+	#else:
+		#align_with_vector(Vector3.DOWN,0.5)
 	
 	emit_player_status_changed()
 	move_and_slide()
@@ -193,8 +192,6 @@ func on_planet_movement(delta : float):
 			velocity.x = move_toward(velocity.x, planet_velocity.x, current_speed)
 			velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
 	
-	#var rotation_quat = Quaternion(Vector3.DOWN, gravity_vector.normalized())
-	#quaternion = rotation_quat
 	if is_falling():
 		align_with_vector(gravity_vector, 0.5)
 	else:	
@@ -219,7 +216,7 @@ func on_gravity_field_exited():
 	velocity = Vector3.ZERO
 	gravity_strength = 0
 	flying = true
-	align_with_vector(Vector3.DOWN,1)
+	align_with_vector(Vector3.DOWN,0.5)
 	print("Im exit")
 
 func apply_velocity(dir : Vector3, speed_multiplier):
@@ -228,6 +225,7 @@ func apply_velocity(dir : Vector3, speed_multiplier):
 	if flying and not floating_flag:
 		velocity.y = dir.y * current_speed * speed_multiplier
 
+# TODO fix when on planets
 func handle_flying() -> void:
 	if Input.is_action_just_pressed("up"):
 		floating_flag = true
