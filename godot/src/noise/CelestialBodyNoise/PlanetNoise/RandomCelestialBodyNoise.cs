@@ -9,11 +9,11 @@ public partial class RandomCelestialBodyNoise : Node, CelestialBodyNoise, Modifi
     private CelestialBodyNoise celestialBodyNoise;
     private ModifiableCelestialBody modifiableBody;
 
-    private const int MAX_RADIUS = 96;
-    private const int MAX_WIDTH = 2 * MAX_RADIUS;
-    private const int MAX_HEIGHT = 2 * MAX_RADIUS;
-    private const int MAX_DEPTH = 2 * MAX_RADIUS;
-    private const int MAX_SIZE = 2 * MAX_RADIUS;
+    private const int RADIUS = 64;
+    private const int WIDTH = 2 * RADIUS + 2;
+    private const int HEIGHT = 2 * RADIUS + 2;
+    private const int DEPTH = 2 * RADIUS + 2;
+    private const int SIZE = 2 * RADIUS + 2;
 
     private const int MAX_OCTAVES = 8;
     private const float MAX_AMPLITUDE = 20.0f;
@@ -25,12 +25,11 @@ public partial class RandomCelestialBodyNoise : Node, CelestialBodyNoise, Modifi
 
     private void RandomizeParameters()
     {
-        int radius = random.Next(MAX_RADIUS / 4, MAX_RADIUS);
-        SetWidth(2 * radius + 2);
-        SetHeight(2 * radius + 2);
-        SetDepth(2 * radius + 2);
-        SetSize(2 * radius + 2);
-        SetRadius(radius);
+        SetRadius(RADIUS);
+        SetWidth(WIDTH);
+        SetHeight(HEIGHT);
+        SetDepth(DEPTH);
+        SetSize(SIZE);
 
         SetOctaves(random.Next(4, MAX_OCTAVES));
         SetSeed(random.Next());
