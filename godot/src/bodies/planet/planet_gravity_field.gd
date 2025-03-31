@@ -8,7 +8,9 @@ class_name PlanetGravityField
 ## The collision shape
 @onready var collision_shape_3d: CollisionShape3D = $CollisionShape3D
 
-@export var radius : float
+@export var radius : float:
+	set(new_rad):
+		radius = new_rad
 @export var base_gravity: float = 9.82
 
 var _player_inside_field := false
@@ -21,7 +23,7 @@ func _physics_process(delta: float) -> void:
 	var player_position = PlayerVariables.player_position
 	gravity_direction = (gravity_point_center - player_position).normalized()
 	
-	# 🛰️ Adjust for planet's velocity
+	# adjust for planet's velocity
 	var relative_velocity = planet.velocity - get_player_velocity()
 	if _player_inside_field:
 		PlayerVariables.planet_velocity = planet.velocity
@@ -54,6 +56,8 @@ func _on_body_entered(body):
 	elif body is Player or RigidBodyPlayer:
 		body.on_gravity_field_entered(gravity, gravity_direction, planet.velocity)
 		_player_inside_field = true
+		PlayerVariables.planet_radius = collision_shape_3d.shape.radius
+
 
 func _on_body_exited(body):
 	if body is not Player:
@@ -63,10 +67,10 @@ func _on_body_exited(body):
 		_player_inside_field = false
 
 ## Factory Method for creating new PlanetGravityFields 
-func create_new_gravity_field(radius : float , gravity_strength : float ) -> PlanetGravityField:
-	var gravity_field := PlanetGravityField.new()
-	var gravity_field_shape := CollisionShape3D.new()
-	gravity_field_shape.shape = SphereShape3D.new()
-	gravity_field_shape.shape.radius = radius
-	gravity_field.add_child(gravity_field_shape)
-	return gravity_field
+#func create_new_gravity_field(radius : float) -> PlanetGravityField:
+	#var gravity_field_shape := CollisionShape3D.new()
+	#gravity_field_shape.shape = SphereShape3D.new()
+	#gravity_field_shape.shape.radius = radius * 2
+	#self.add_child(gravity_field_shape)
+	#print(get_children())
+	#return self

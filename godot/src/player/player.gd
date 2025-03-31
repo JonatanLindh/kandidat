@@ -37,7 +37,7 @@ func _input(event):
 		# Clamp the pitch before applying rotation
 		head.rotation.x = clamp(head.rotation.x + pitch, deg_to_rad(-89), deg_to_rad(89))
 		
-		head.rotate_y(yaw)
+		head.rotation.y = (head.rotation.y + yaw)
 
 		# Rotate player around gravity-aligned UP direction
 		#global_transform.basis = global_transform.basis.rotated(up_direction, yaw).orthonormalized()
