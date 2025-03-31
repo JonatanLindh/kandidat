@@ -34,13 +34,12 @@ func _input(event):
 		var yaw = deg_to_rad(-event.relative.x * mouse_sensitivity)
 		var pitch = deg_to_rad(-event.relative.y * mouse_sensitivity)
 
-		# Clamp the pitch before applying rotation
-		head.rotation.x = clamp(head.rotation.x + pitch, deg_to_rad(-89), deg_to_rad(89))
+		rotate(global_basis.y, yaw)
 		
-		head.rotation.y = (head.rotation.y + yaw)
+		head.rotate_x(pitch)
+		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89), deg_to_rad(89))
 
-		# Rotate player around gravity-aligned UP direction
-		#global_transform.basis = global_transform.basis.rotated(up_direction, yaw).orthonormalized()
+
 		PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 
 
@@ -92,7 +91,7 @@ func in_space_state_movement(delta : float):
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")	
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
-	apply_flying_movement(Vector3.ZERO)
+	apply_flying_movement(Vector3.ZERO, delta)
 	emit_player_status_changed()
 	move_and_slide()
 
@@ -101,7 +100,6 @@ func in_gravity_field_movement(delta : float):
 	
 	planet_velocity = PlayerVariables.planet_velocity
 	gravity_vector = get_gravity()
-	var distance_to_planet := (global_position - PlayerVariables.planet_position).length()
 	
 	if Input.is_action_just_pressed("fly"):
 		flying = not flying
@@ -114,17 +112,17 @@ func in_gravity_field_movement(delta : float):
 		elif Input.is_action_pressed("speeddown"):
 			current_speed = max(1, current_speed - 1)
 
-	apply_flying_movement(planet_velocity)
-#
-	#if distance_to_planet < (PlayerVariables.planet_radius * 1.2):
-		#align_with_vector(gravity_vector,0.5)
-	#else:
-		#align_with_vector(Vector3.DOWN,0.5)
+	apply_flying_movement(planet_velocity, delta)
 	
 	emit_player_status_changed()
 	move_and_slide()
 
-func apply_flying_movement(base_velocity : Vector3):
+func apply_flying_movement(base_velocity : Vector3, delta : float):
+	if Input.is_action_pressed("rotate_left"):
+		rotate_object_local(Vector3(0, 0, 1), 2 * delta)  # Roll left
+	elif Input.is_action_pressed("rotate_right"):
+		rotate_object_local(Vector3(0, 0, -1), 2 * delta)  # Roll right
+	
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")	
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
@@ -170,11 +168,6 @@ func on_planet_movement(delta : float):
 	# ensures movement is parallel to the ground
 	direction = (direction - up_direction * direction.dot(up_direction)).normalized()
 
-	if not is_falling():
-		print("IM ON FLOOOOR")
-	else:
-		print("IM IN AIR")
-
 	if direction and (not is_falling()):
 		if Input.is_action_pressed("sprint"):
 			velocity.x = direction.x * current_speed * 2 + planet_velocity.x
@@ -198,7 +191,7 @@ func on_planet_movement(delta : float):
 		align_with_vector(gravity_vector, 1)
 	emit_player_status_changed()
 	move_and_slide()
-	
+
 func is_falling() -> bool:
 	return not flying and not floating_flag and in_gravity_field and not is_on_floor() and not ray_cast_3d.is_colliding()
 
@@ -251,3 +244,4 @@ func align_with_vector(alignment_vector: Vector3, rotation_speed : float):
 	# Smooth transition instead of snapping
 	var target_basis = Basis(right_direction, up_direction, forward_direction).orthonormalized()
 	global_transform.basis = global_transform.basis.slerp(target_basis, rotation_speed)
+	
