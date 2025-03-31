@@ -18,15 +18,12 @@ public partial class GraphPlotter : Control
 	Label memoryUsageLabel;
 
 	Label fps1Label;
-	Label fps0_5Label;
 	Label fps0Label;
 
 	Label frametime1Label;
-	Label frametime0_5Label;
 	Label frametime0Label;
 
 	Label memory1Label;
-	Label memory0_5Label;
 	Label memory0Label;
 
 	float panelWidth;
@@ -48,15 +45,12 @@ public partial class GraphPlotter : Control
 		memoryUsageLabel = GetNode<Label>("%MemoryLabel");
 
 		fps1Label = GetNode<Label>("%1FPS");
-		fps0_5Label = GetNode<Label>("%0_5FPS");
 		fps0Label = GetNode<Label>("%0FPS");
 
 		frametime1Label = GetNode<Label>("%1Frametime");
-		frametime0_5Label = GetNode<Label>("%0_5Frametime");
 		frametime0Label = GetNode<Label>("%0Frametime");
 
 		memory1Label = GetNode<Label>("%1Memory");
-		memory0_5Label = GetNode<Label>("%0_5Memory");
 		memory0Label = GetNode<Label>("%0Memory");
 	}
 
@@ -70,6 +64,11 @@ public partial class GraphPlotter : Control
 	float maxFps;
 	float maxFrameTime;
 	float maxMemoryUsage;
+
+	bool minValuesSet = false;
+	float minFps;
+	float minFrameTime;
+	float minMemoryUsage;
 
 	float currentFps;
 	float currentFrameTime;
@@ -93,6 +92,15 @@ public partial class GraphPlotter : Control
 		currentFrameTime = data.frameTime;
 		currentMemoryUsage = data.memoryUsage;
 
+		// Set initial min values
+		if (!minValuesSet)
+		{
+			minValuesSet = true;
+			minFps = currentFps;
+			minFrameTime = currentFrameTime;
+			minMemoryUsage = currentMemoryUsage;
+		}
+
 		float filteredFrameTime = currentFrameTime * 100; // seconds to ms
 		float filteredMemoryUsage = currentMemoryUsage / (1024 * 1024); // bytes to MB
 
@@ -100,12 +108,12 @@ public partial class GraphPlotter : Control
 		frameTimeLabel.Text = Math.Round(filteredFrameTime, 4).ToString();
 		memoryUsageLabel.Text = Math.Round(filteredMemoryUsage, 2).ToString();
 
-		ProcessDataPoint(BenchmarkDatapointEnum.FPS, currentFps, ref maxFps, maxFpsPadding, fpsPoints, fpsLine);
-		ProcessDataPoint(BenchmarkDatapointEnum.FrameTime, filteredFrameTime, ref maxFrameTime, maxFrametimePadding, frameTimePoints, frameTimeLine);
-		ProcessDataPoint(BenchmarkDatapointEnum.MemoryUsage, filteredMemoryUsage, ref maxMemoryUsage, maxMemoryUsagePadding, memoryUsagePoints, memoryUsageLine);
+		ProcessDataPoint(BenchmarkDatapointEnum.FPS, currentFps, ref maxFps, ref minFps, maxFpsPadding, fpsPoints, fpsLine);
+		ProcessDataPoint(BenchmarkDatapointEnum.FrameTime, filteredFrameTime, ref maxFrameTime, ref minFrameTime, maxFrametimePadding, frameTimePoints, frameTimeLine);
+		ProcessDataPoint(BenchmarkDatapointEnum.MemoryUsage, filteredMemoryUsage, ref maxMemoryUsage, ref minMemoryUsage, maxMemoryUsagePadding, memoryUsagePoints, memoryUsageLine);
 	}
 
-	private void ProcessDataPoint(BenchmarkDatapointEnum type, float value, ref float maxValue, float padding, List<Vector2> pointsList, Line2D line)
+	private void ProcessDataPoint(BenchmarkDatapointEnum type, float value, ref float maxValue, ref float minValue, float padding, List<Vector2> pointsList, Line2D line)
 	{
 		// Update max dynamically if a new value is higher
 		if (value > maxValue)
@@ -113,25 +121,13 @@ public partial class GraphPlotter : Control
 			maxValue = value + padding;
 			RescaleGraph(type);
 
-			// Update labels
-			switch (type)
-			{
-				case BenchmarkDatapointEnum.FPS:
-					fps1Label.Text = Math.Round(maxValue, 0).ToString();
-					fps0_5Label.Text = Math.Round(maxValue / 2, 0).ToString();
-					fps0Label.Text = "0";
-					break;
-				case BenchmarkDatapointEnum.FrameTime:
-					frametime1Label.Text = Math.Round(maxValue, 2).ToString();
-					frametime0_5Label.Text = Math.Round(maxValue / 2, 2).ToString();
-					frametime0Label.Text = "0";
-					break;
-				case BenchmarkDatapointEnum.MemoryUsage:
-					memory1Label.Text = Math.Round(maxValue, 2).ToString();
-					memory0_5Label.Text = Math.Round(maxValue / 2, 2).ToString();
-					memory0Label.Text = "0";
-					break;
-			}
+			UpdateMaxMinLabels();
+		}
+
+		if(value < minValue)
+		{
+			minValue = value;
+			UpdateMaxMinLabels();
 		}
 
 		float x = currentTime * 10;
@@ -223,5 +219,17 @@ public partial class GraphPlotter : Control
 		pointsList.RemoveAll(point => point.X < 0);
 
 		RedrawGraph(pointsList, line);
+	}
+
+	private void UpdateMaxMinLabels()
+	{
+		fps1Label.Text = Math.Round(maxFps, 0).ToString();
+		fps0Label.Text = Math.Round(minFps, 0).ToString();
+
+		frametime1Label.Text = Math.Round(maxFrameTime, 2).ToString();
+		frametime0Label.Text = Math.Round(minFrameTime, 2).ToString();
+
+		memory1Label.Text = Math.Round(maxMemoryUsage, 2).ToString();
+		memory0Label.Text = Math.Round(minMemoryUsage, 2).ToString();
 	}
 }
