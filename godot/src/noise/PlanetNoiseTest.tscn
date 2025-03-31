@@ -1,15 +1,28 @@
-[gd_scene load_steps=3 format=3 uid="uid://dr0tbidpxor8i"]
+[gd_scene load_steps=5 format=3 uid="uid://dr0tbidpxor8i"]
 
 [ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="1_un0fo"]
 [ext_resource type="PackedScene" uid="uid://cc3fpt0u5jmex" path="res://src/noise/CelestialBodyNoise/PlanetNoise/BasicPlanet.tscn" id="1_ycu4v"]
+[ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="3_1biuq"]
+[ext_resource type="PackedScene" uid="uid://5e7ris75mkdi" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomPlanet.tscn" id="4_hnbm4"]
 
 [node name="PlanetNoiseTest" type="Node3D"]
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 300, 15.748)
 
 [node name="Player" parent="." instance=ExtResource("1_un0fo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 32, 256)
 
-[node name="BasicPlanet2" parent="." instance=ExtResource("1_ycu4v")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 57.9961, 0)
+[node name="BasicPlanet" parent="." instance=ExtResource("1_ycu4v")]
+seed = 1761808417
+
+[node name="RandomPlanet" parent="." instance=ExtResource("4_hnbm4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.305, 0, 0)
+Octaves = 7
+Frequency = 0.28
+Amplitude = 6.8
+Lacunarity = 2.8
+Persistence = 0.25
+seed = 164119959
+
+[node name="Skybox" parent="." instance=ExtResource("3_1biuq")]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0)
