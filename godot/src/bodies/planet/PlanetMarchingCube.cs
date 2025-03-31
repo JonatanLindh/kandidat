@@ -61,8 +61,12 @@ public partial class PlanetMarchingCube : Node3D
         meshInstance3D.Scale = Vector3.One * (1 / (float)Resolution);
         AddChild(meshInstance3D);
         */
-        GD.Print(_radius);
         SpawnMesh();
+    }
+
+    public override void _EnterTree()
+    {
+        //SpawnMesh();
     }
 
     public override void _Process(double delta)
@@ -95,8 +99,8 @@ public partial class PlanetMarchingCube : Node3D
         _meshInstance3D.Translate(-1 * _radius * Vector3.One);
         _meshInstance3D.Scale = Vector3.One * (1 / (float)_resolution);
         _meshInstance3D.Scale *= _radius;
-
         AddChild(_meshInstance3D);
+
     }
     
     private void SetAtmosphereSunDir()
