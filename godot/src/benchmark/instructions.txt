@@ -1,0 +1,5 @@
+Run the benchmark.tscn scene to run benchmarks. It will run all benchmark scenes within its Scenes list.
+Add/remove scenes from that list however you like.
+
+New benchmark scenes can easily be created, refer to the galaxy map benchmark scene and its .cs
+for how to create your own.
