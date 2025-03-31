@@ -65,12 +65,20 @@ public class MarchingCube
 		{
 			surfaceTool.AddVertex(vertex);
 		}
+		var polygonShape = new ConcavePolygonShape3D();
+		polygonShape.SetFaces(vertices.ToArray());
+		
 		vertices.Clear();
 		surfaceTool.GenerateNormals();
 		surfaceTool.Index();
 		Mesh mesh = surfaceTool.Commit();
 		var meshInstance = new MeshInstance3D();
 		meshInstance.Mesh = mesh;
+
+		var collisionShape = new CollisionShape3D();
+		collisionShape.Shape = polygonShape;
+		meshInstance.AddChild(collisionShape);
+		collisionShape.Owner = meshInstance;
 		return meshInstance;
 	}
 }
