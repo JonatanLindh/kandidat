@@ -1,6 +1,9 @@
 using Godot;
 using System;
 
+/// <summary>
+/// Interface should be implemented by noise which is to be modified outside of the editor
+/// </summary>
 public interface ModifiableCelestialBody
 {
     /// <summary>
