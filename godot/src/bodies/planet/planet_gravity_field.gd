@@ -39,12 +39,9 @@ func _physics_process(delta: float) -> void:
 func _ready() -> void:
 	gravity_space_override = Area3D.SPACE_OVERRIDE_REPLACE
 	gravity_point = true
-	gravity = 9.82 + planet.velocity.length()
+	gravity = 9.82
 	connect("body_entered", _on_body_entered)
 	connect("body_exited", _on_body_exited)
-
-
-	
 
 func update_gravity(relative_velocity: Vector3) -> void:
 		if planet:
