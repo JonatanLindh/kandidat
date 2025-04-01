@@ -29,6 +29,7 @@ size = Vector3(3, 3, 3)
 
 [node name="PlanetMarchingCube" type="GravityBody"]
 script = ExtResource("1_ha83e")
+Resolution = 32
 Planet = ExtResource("2_736bg")
 
 [node name="Atmosphere" type="MeshInstance3D" parent="."]
