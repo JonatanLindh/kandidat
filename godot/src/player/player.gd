@@ -162,7 +162,7 @@ func on_planet_movement(delta : float):
 		velocity += -gravity_vector.normalized() * 5
 
 	if is_falling():
-		velocity.y += (gravity_vector.y) * delta
+		velocity += (gravity_vector) * delta
 
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")
