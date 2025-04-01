@@ -33,7 +33,6 @@ func _physics_process(delta: float) -> void:
 	if _player_inside_field:
 		PlayerVariables.planet_velocity = planet.velocity
 		PlayerVariables.planet_position = planet.global_transform.origin
-	update_gravity(relative_velocity)
 
 	
 func _ready() -> void:
@@ -42,12 +41,6 @@ func _ready() -> void:
 	gravity = 9.82
 	connect("body_entered", _on_body_entered)
 	connect("body_exited", _on_body_exited)
-
-func update_gravity(relative_velocity: Vector3) -> void:
-		if planet:
-			var velocity_magnitude = planet.velocity.length()
-			var relative_velocity_magnitude = relative_velocity.length()
-			gravity = base_gravity + velocity_magnitude * 0.1 + relative_velocity_magnitude * 0.05
 
 func get_player_velocity() -> Vector3:
 		if Engine.has_singleton("PlayerVariables") and PlayerVariables.has("player_velocity"):

@@ -4,7 +4,6 @@ class_name Player
 @onready var head: Node3D = $Head
 @onready var camera_3d: Camera3D = $Head/Camera3D
 @onready var ray_cast_3d: RayCast3D = $RayCast3D
-@onready var jump_tween: Tween = Tween.new()
 
 signal updated_status(position, speed)
 
@@ -113,6 +112,7 @@ func in_gravity_field_movement(delta : float):
 			velocity += gravity_vector * delta
 			align_with_vector(gravity_vector, 0.1)
 		else:
+			velocity = planet_velocity
 			on_sufarce_movement = true
 	
 	
@@ -146,7 +146,7 @@ func apply_flying_movement(base_velocity : Vector3, delta : float):
 			velocity.y = move_toward(velocity.y, base_velocity.y, current_speed)
 
 func on_planet_movement(delta : float):
-	current_speed = BASE_SPEED
+	current_speed = 3
 	
 	planet_velocity = PlayerVariables.planet_velocity
 	gravity_vector = get_gravity()
@@ -155,9 +155,6 @@ func on_planet_movement(delta : float):
 	if Input.is_action_just_pressed("fly"):
 		on_sufarce_movement = false
 		flying = not flying
-	
-	if Input.is_action_just_pressed("ui_accept") and not is_falling():
-		velocity += -gravity_vector.normalized() * 5
 
 	if is_falling():
 		velocity += (gravity_vector) * delta
@@ -171,28 +168,31 @@ func on_planet_movement(delta : float):
 	# ensures movement is parallel to the ground
 	direction = (direction - up_direction * direction.dot(up_direction)).normalized()
 
-	if direction:
+	if direction and not is_falling():
 		if Input.is_action_pressed("sprint"):
 			velocity.x = direction.x * current_speed * 2 + planet_velocity.x
 			velocity.z = direction.z * current_speed * 2 + planet_velocity.z
-			if not is_falling() and velocity.y <= planet_velocity.y:
-				velocity.y = direction.y * current_speed * 2 + planet_velocity.y
+			velocity.y = direction.y * current_speed * 2 + planet_velocity.y
 			camera_3d.fov = base_fov * 1.1
 		else:
 			velocity.x = direction.x * current_speed + planet_velocity.x
 			velocity.z = direction.z * current_speed + planet_velocity.z
-			if not is_falling() and velocity.y <= planet_velocity.y:
-				velocity.y = direction.y * current_speed + planet_velocity.y
+			velocity.y = direction.y * current_speed + planet_velocity.y
 			camera_3d.fov = base_fov
 	else:
-		if not is_falling() and velocity.y <= planet_velocity.y:
+		if not is_falling():
 			velocity.y = move_toward(velocity.y, planet_velocity.y, current_speed)
 			velocity.x = move_toward(velocity.x, planet_velocity.x, current_speed)
 			velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
 	
+	print(is_on_floor())
+	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+		velocity += -gravity_vector.normalized() * JUMP_VELOCITY
+		
 	align_with_vector(gravity_vector, 1)
 	emit_player_status_changed()
 	move_and_slide()
+
 
 func is_falling() -> bool:
 	return not flying and not floating_flag and in_gravity_field and not is_on_floor() and not ray_cast_3d.is_colliding()
