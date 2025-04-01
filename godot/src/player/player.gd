@@ -42,9 +42,9 @@ func _input(event):
 	if event is InputEventMouseButton:
 		if event.is_pressed():
 			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-				current_speed = current_speed + 1
+				current_speed = max(1, current_speed + 1)
 			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-				current_speed = current_speed - 1
+				current_speed = max(1, current_speed - 1)
 	
 	if Input.is_action_just_pressed("ui_cancel"):
 		toggle_mouse_lock()
@@ -113,7 +113,6 @@ func in_gravity_field_movement(delta : float):
 			velocity += gravity_vector * delta
 			align_with_vector(gravity_vector, 0.1)
 		else:
-			print("On surface bby")
 			on_sufarce_movement = true
 	
 	
@@ -158,7 +157,6 @@ func on_planet_movement(delta : float):
 		flying = not flying
 	
 	if Input.is_action_just_pressed("ui_accept") and not is_falling():
-		print("jumped")
 		velocity += -gravity_vector.normalized() * 5
 
 	if is_falling():
