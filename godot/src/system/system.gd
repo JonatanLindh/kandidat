@@ -7,7 +7,7 @@ extends Node3D
 @export var generate: bool:
 	set(val):
 		print("dawg");
-		generatePlanets(self.rand,self.numberOfPlanets);
+		generatePlanets(self.numberOfPlanets, self.rand);
 		
 @export var clear: bool:
 	set(val):
@@ -16,7 +16,7 @@ extends Node3D
 @onready var SUN = ($"./GravityController/Star")
 
 const G = 1.0;
-var PLANET_SCENE:PackedScene = load("res://src/bodies/planet/planet.tscn");
+var PLANET_SCENE:PackedScene = load("res://src/bodies/planet/planet_marching_cube.tscn");
 var rand = RandomNumberGenerator.new();
 var planets = [];
 
@@ -81,9 +81,9 @@ func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSp
 	planetInstance.mass = planetMass;
 	planetInstance.velocity = Vector3(cos(orbitAngle)*orbitSpeed,0,-sin(orbitAngle)*orbitSpeed)
 	planetInstance.position = Vector3(sin(orbitAngle)*orbitRadius,0,cos(orbitAngle)*orbitRadius)
-	planetInstance.planet_data.radius = planetRadius
+	planetInstance._radius = planetRadius
 	# NEEDED FOR ATMOSPHERE, IF MULTIPLE SUN SOLAR SYSTEM, MAYBE USE ONE OF THE SUNS AS THE MAIN LIGHT SOURCE?
-	planetInstance.planet_data.sun_position = SUN.global_position
+	planetInstance._sunPosition = SUN.global_position
 	planetInstance.name = "Planet" + str(randomID);
 	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0,1),0.80,0.80)*3;
 	$GravityController.add_child(planetInstance);
