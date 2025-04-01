@@ -156,15 +156,14 @@ func on_planet_movement(delta : float):
 	if Input.is_action_just_pressed("fly"):
 		on_sufarce_movement = false
 		flying = not flying
-
+	
 	if Input.is_action_just_pressed("ui_accept") and not is_falling():
-		#velocity = up_direction * 20
-		velocity.y = 10
+		print("jumped")
+		velocity += -gravity_vector.normalized() * 5
 
 	if is_falling():
-		velocity += (gravity_vector) * delta
-		#velocity.y += gravity_vector.y * delta
-	
+		velocity.y += (gravity_vector.y) * delta
+
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")
 	var forward = global_transform.basis.z
@@ -178,17 +177,17 @@ func on_planet_movement(delta : float):
 		if Input.is_action_pressed("sprint"):
 			velocity.x = direction.x * current_speed * 2 + planet_velocity.x
 			velocity.z = direction.z * current_speed * 2 + planet_velocity.z
-			if not is_falling():
+			if not is_falling() and velocity.y <= planet_velocity.y:
 				velocity.y = direction.y * current_speed * 2 + planet_velocity.y
 			camera_3d.fov = base_fov * 1.1
 		else:
 			velocity.x = direction.x * current_speed + planet_velocity.x
 			velocity.z = direction.z * current_speed + planet_velocity.z
-			if not is_falling():
+			if not is_falling() and velocity.y <= planet_velocity.y:
 				velocity.y = direction.y * current_speed + planet_velocity.y
 			camera_3d.fov = base_fov
 	else:
-		if not is_falling():
+		if not is_falling() and velocity.y <= planet_velocity.y:
 			velocity.y = move_toward(velocity.y, planet_velocity.y, current_speed)
 			velocity.x = move_toward(velocity.x, planet_velocity.x, current_speed)
 			velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
