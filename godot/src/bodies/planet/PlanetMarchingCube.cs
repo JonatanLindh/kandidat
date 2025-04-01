@@ -53,11 +53,14 @@ public partial class PlanetMarchingCube : Node3D
     private Node3D _planet;
     private Node _atmosphere;
     
+	private Node3D _planet_gravity_field;
 
     public override void _Ready()
     {
         SpawnMesh();
     }
+		_planet_gravity_field = GetNode<Area3D>("PlanetGravityField");
+		_planet_gravity_field.Set("radius"radius = _radius
 
     public override void _Process(double delta)
     {
