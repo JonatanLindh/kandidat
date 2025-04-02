@@ -31,8 +31,8 @@ extends Node
 	get():
 		return planet_position
 
-@export var planet_radius: float:
+@export var gravity_field_radius: float:
 	set(new):
-		planet_radius = new
+		gravity_field_radius = new
 	get():
-		return planet_radius
+		return gravity_field_radius

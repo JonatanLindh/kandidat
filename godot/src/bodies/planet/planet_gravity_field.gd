@@ -50,10 +50,10 @@ func get_player_velocity() -> Vector3:
 func _on_body_entered(body):
 	if body is not Player:
 		return
-	elif body is Player or RigidBodyPlayer:
+	elif body is Player:
 		body.on_gravity_field_entered(gravity, gravity_direction, planet.velocity)
 		_player_inside_field = true
-		PlayerVariables.planet_radius = collision_shape_3d.shape.radius
+		PlayerVariables.gravity_field_radius = collision_shape_3d.shape.radius
 
 
 func _on_body_exited(body):
