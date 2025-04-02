@@ -16,8 +16,8 @@ buffer = PackedFloat32Array(0.459236, -0.225454, 0.45269, 1.53967, 0.241331, 0.6
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_m54a1"]
 render_priority = 0
 shader = ExtResource("3_tlhil")
-shader_parameter/base_color = Color(0.05, 0.2, 0.01, 1)
-shader_parameter/tip_color = Color(0.443628, 0.498453, 0.427705, 1)
+shader_parameter/base_color = Color(0.237558, 0.670798, 0.0811559, 1)
+shader_parameter/tip_color = Color(0.252649, 0.416771, 0.196259, 1)
 
 [node name="GrassTest" type="Node3D"]
 
@@ -32,6 +32,6 @@ multimesh = SubResource("MultiMesh_aixja")
 script = ExtResource("2_4ow6b")
 GrassMesh = ExtResource("1_aixja")
 Density = 0.8
-TileSize = 2.0
-MapRadius = 4
+TileSize = 4.0
+MapRadius = 8
 GrassMaterial = SubResource("ShaderMaterial_m54a1")
