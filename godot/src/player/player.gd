@@ -218,7 +218,6 @@ func apply_velocity(dir : Vector3, speed_multiplier):
 	if flying and not floating_flag:
 		velocity.y = dir.y * current_speed * speed_multiplier
 
-# TODO fix when on planets
 func handle_flying() -> void:
 	if Input.is_action_just_pressed("up"):
 		floating_flag = true
