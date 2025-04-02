@@ -44,13 +44,20 @@ void vertex() {
 	float hash1 = hash12(-NODE_POSITION_WORLD.zx);
 	
 	VERTEX.x *= mix(0.6, 1.0, hash1);
-
-
-	float curve_amount = hash0 * height_percent;
-	mat3 grass_mat = rotate_x(curve_amount);
-	vec3 grass_vertex_position = grass_mat * VERTEX;
 	
-	VERTEX = grass_vertex_position;
+	// Rotate the grass blade
+	float based_angle = 0.4;
+	float turn_angle_base = mix(-based_angle, based_angle, hash0) * TAU;
+	mat3 grass_rotate = rotate_y(turn_angle_base);
+
+	// Bend the grass blade
+	float curve_amount = hash0 * height_percent;
+	mat3 grass_bend = rotate_x(curve_amount);
+	
+	mat3 grass_mat = grass_rotate * grass_bend;
+	
+	VERTEX = grass_mat * VERTEX;
+	NORMAL = grass_mat * NORMAL;
 	
 }
 
@@ -59,6 +66,7 @@ void fragment() {
 	
 	float height_factor = 1.0 - UV.y;
 	ALBEDO = mix(base_color, tip_color, ease_in_quartic(height_factor));
+	ALBEDO *= mix(0.1, 1.0, height_factor*height_factor);
 	ROUGHNESS = mix(1.0, 0.4, ease_out_quartic(height_factor));
 	ANISOTROPY = 0.85;
 }
