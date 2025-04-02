@@ -119,7 +119,6 @@ func in_gravity_field_movement(delta : float):
 	emit_player_status_changed()
 	move_and_slide()
 
-## 
 func apply_flying_movement(base_velocity : Vector3, delta : float):
 	if Input.is_action_pressed("roll_left"):
 		rotate_object_local(Vector3(0, 0, 1), 2 * delta)
@@ -157,7 +156,7 @@ func on_planet_movement(delta : float):
 		flying = not flying
 
 	if is_falling():
-		velocity += (gravity_vector) * delta
+		velocity += (gravity_vector + planet_velocity.normalized()) * delta
 
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")
@@ -185,14 +184,13 @@ func on_planet_movement(delta : float):
 			velocity.x = move_toward(velocity.x, planet_velocity.x, current_speed)
 			velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
 	
-	print(is_on_floor())
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+	print(not is_falling())
+	if Input.is_action_just_pressed("ui_accept") and not is_falling():
 		velocity += -gravity_vector.normalized() * JUMP_VELOCITY
 		
 	align_with_vector(gravity_vector, 1)
 	emit_player_status_changed()
 	move_and_slide()
-
 
 func is_falling() -> bool:
 	return not flying and not floating_flag and in_gravity_field and not is_on_floor() and not ray_cast_3d.is_colliding()
