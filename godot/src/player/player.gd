@@ -184,7 +184,6 @@ func on_planet_movement(delta : float):
 			velocity.x = move_toward(velocity.x, planet_velocity.x, current_speed)
 			velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
 	
-	print(not is_falling())
 	if Input.is_action_just_pressed("ui_accept") and not is_falling():
 		velocity += -gravity_vector.normalized() * JUMP_VELOCITY
 		
@@ -200,7 +199,6 @@ func on_gravity_field_entered(gravity : float, gravity_direction : Vector3, plan
 	gravity_strength = gravity
 	gravity_vector = gravity_direction * gravity_strength
 	self.planet_velocity = planet_velocity
-	print("Im enter")
 
 func on_gravity_field_exited():
 	in_gravity_field = false
@@ -210,7 +208,6 @@ func on_gravity_field_exited():
 	gravity_strength = 0
 	flying = true
 	align_with_vector(Vector3.DOWN,0.1)
-	print("Im exit")
 
 func apply_velocity(dir : Vector3, speed_multiplier):
 	velocity.x = dir.x * current_speed * speed_multiplier

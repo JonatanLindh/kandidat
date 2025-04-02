@@ -18,7 +18,7 @@ class_name PlanetGravityField
 
 var _player_inside_field := false
 
-var radius_scale := 2
+var radius_scale := 2.5
 
 func _physics_process(delta: float) -> void:
 	if not planet:

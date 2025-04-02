@@ -29,6 +29,7 @@ flip_faces = true
 size = Vector3(3, 3, 3)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_b5ifj"]
+resource_local_to_scene = true
 
 [node name="PlanetMarchingCube" type="GravityBody"]
 script = ExtResource("1_ha83e")
