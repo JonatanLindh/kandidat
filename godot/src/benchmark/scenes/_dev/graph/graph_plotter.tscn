@@ -13,8 +13,8 @@ yAxisHSeparator = ExtResource("3_fem5t")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
-offset_right = 600.0
-offset_bottom = 300.0
+offset_right = 400.0
+offset_bottom = 400.0
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="VBoxContainer"]
@@ -24,57 +24,6 @@ text = "Frames per second (FPS)"
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.1
-
-[node name="Max" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "max"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="1FPS" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/Panel"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "1"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Min" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "min"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Panel3" type="Panel" parent="VBoxContainer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="0FPS" type="Label" parent="VBoxContainer/HBoxContainer/VBoxContainer/Panel3"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="FPSYAxis" type="VBoxContainer" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
@@ -127,57 +76,6 @@ text = "Frametime (ms)"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer/HBoxContainer2"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.1
-
-[node name="Max" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "max"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer2/VBoxContainer2"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="1Frametime" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer2/Panel"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "1"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Min" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "min"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Panel3" type="Panel" parent="VBoxContainer/HBoxContainer2/VBoxContainer2"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="0Frametime" type="Label" parent="VBoxContainer/HBoxContainer2/VBoxContainer2/Panel3"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="FrametimeYAxis" type="VBoxContainer" parent="VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -228,57 +126,6 @@ text = "Memory usage (MB)"
 [node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer3"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.1
-
-[node name="Max" type="Label" parent="VBoxContainer/HBoxContainer3/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "max"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer3/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="1Memory" type="Label" parent="VBoxContainer/HBoxContainer3/VBoxContainer/Panel"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "1"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Min" type="Label" parent="VBoxContainer/HBoxContainer3/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 10
-text = "min"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Panel3" type="Panel" parent="VBoxContainer/HBoxContainer3/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="0Memory" type="Label" parent="VBoxContainer/HBoxContainer3/VBoxContainer/Panel3"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-text = "0"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="MemoryYAxis" type="VBoxContainer" parent="VBoxContainer/HBoxContainer3"]
 unique_name_in_owner = true
