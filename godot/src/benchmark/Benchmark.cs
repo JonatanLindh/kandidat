@@ -22,7 +22,7 @@ public partial class Benchmark : Node3D
 	List<List<BenchmarkDatapoint>> result = new List<List<BenchmarkDatapoint>>();
 	BenchmarkDataProcessor processor = new BenchmarkDataProcessor();
 
-	float measurementInterval = 0.01f; // 10ms
+	float measurementInterval = 0.0f;
 	float currentTime = 0.0f;
 
 	// Time to wait before starting the benchmark. Necessary because the FPS will evaluate

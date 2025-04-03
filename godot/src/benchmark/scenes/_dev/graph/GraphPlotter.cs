@@ -16,7 +16,7 @@ public partial class GraphPlotter : Control
 	Label frameTimeLabel;
 	Label memoryUsageLabel;
 
-	[Export] float timeScale = 10;
+	[Export] float timeScale = 30;
 
 	[ExportGroup("Y-axis")]
 	[Export] int yAxisCount = 4;

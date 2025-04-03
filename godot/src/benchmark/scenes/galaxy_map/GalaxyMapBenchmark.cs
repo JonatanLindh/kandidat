@@ -6,8 +6,7 @@ public partial class GalaxyMapBenchmark : BenchmarkScene
 	[Export] GalaxyMap galaxyMap;
 	[Export] Camera3D player;
 
-	[ExportCategory("CHANGES INVALIDATE OLD BENCHMARKS")]
-	[Export] float speed = 10000.0f;
+	[Export] float speed = 1500.0f;
 	[Export] uint seed = 1234;
 
 	float currentTime = 0.0f;

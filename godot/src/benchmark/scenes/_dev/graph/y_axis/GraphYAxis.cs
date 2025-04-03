@@ -48,7 +48,7 @@ public partial class GraphYAxis
 			float normalizedPos = y / panelHeight;
         	float actualValue = maxValue * (1.0f - normalizedPos);
 
-			cL.Text = Math.Round(actualValue, 0).ToString();
+			cL.Text = Math.Round(actualValue).ToString();
 		}
 	}
 }
