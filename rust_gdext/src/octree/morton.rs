@@ -279,7 +279,8 @@ impl<'a> MortonOctree<'a> {
             body_range: body_range.clone(),
             children: [None; 8],  // Placeholder
             bounds: *node_bounds, // Placeholder
-            ..Default::default()  // Placeholder
+            depth: current_depth,
+            ..Default::default() // Placeholder
         });
 
         // --- Partition bodies into 8 children based on Morton codes ---
