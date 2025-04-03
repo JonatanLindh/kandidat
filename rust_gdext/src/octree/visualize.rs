@@ -1,3 +1,4 @@
+use crate::octree::BoundingBox;
 use glam::Vec3A;
 use godot::{
     classes::{
@@ -8,10 +9,9 @@ use godot::{
     prelude::*,
 };
 
-use crate::{
-    octree::{BoundingBox, NodeData, Octree},
-    physics::gravity::controller::SimulatedBody,
-}; // Import necessary items from your octree.rs
+pub trait VisualizeOctree {
+    fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)>;
+}
 
 #[derive(GodotClass)]
 #[class(tool, base = Node3D)]
@@ -24,7 +24,7 @@ pub struct OctreeVisualizer {
 #[godot_api]
 impl INode3D for OctreeVisualizer {
     fn init(base: Base<Node3D>) -> Self {
-        godot_print!("init");
+        godot_print!("init octree visualizer");
         Self {
             base,
             mesh_instance: None,
@@ -46,6 +46,8 @@ impl INode3D for OctreeVisualizer {
         // Assign material to mesh instance
         mesh_inst.set_material_override(&mat);
 
+        self.base_mut().add_child(&mesh_inst);
+
         self.mesh_instance = Some(mesh_inst);
         self.material = Some(mat);
     }
@@ -55,17 +57,12 @@ impl INode3D for OctreeVisualizer {
 impl OctreeVisualizer {
     /// Call this method to update the visualization based on the current octree state.
     /// It rebuilds the ImmediateMesh with the bounds of all nodes.
-    pub fn update_visualization(&mut self, sim_bodies: &[SimulatedBody]) {
-        let mut octree = Octree::new(sim_bodies);
-        octree.build();
-
-        let nodes = octree.nodes;
-
+    pub fn update_visualization<Octree: VisualizeOctree>(&mut self, octree: &Octree) {
         let Some(mesh_inst) = self.mesh_instance.as_mut() else {
             godot_error!("MeshInstance not ready.");
             return;
         };
-        let Some(material) = self.material.as_ref() else {
+        let Some(_material) = self.material.as_ref() else {
             godot_error!("Material not ready.");
             return;
         };
@@ -74,41 +71,13 @@ impl OctreeVisualizer {
         let mut imm_mesh = ImmediateMesh::new_gd();
         imm_mesh.surface_begin(PrimitiveType::LINES);
 
-        // Track the maximum depth to create a color gradient
-        let mut level = 0;
-
-        let mut next_level = vec![nodes[0].clone()];
-        let mut nodes0 = Vec::new();
-
-        while !next_level.is_empty() {
-            let current_level = std::mem::take(&mut next_level);
-            for node in current_level.iter() {
-                match node {
-                    NodeData::Internal(d) => {
-                        d.children.iter().flatten().for_each(|child| {
-                            next_level.push(nodes[child.get()].clone());
-                        });
-                    }
-                    NodeData::Leaf(_) => {}
-                    NodeData::Unused => continue,
-                };
-                nodes0.push((level, node.clone()));
-            }
-            level += 1;
-        }
+        let nodes = octree.get_bounds_and_depths();
+        let max_depth = nodes.iter().map(|(_, depth)| *depth).max().unwrap_or(0);
 
         // Draw each node with its appropriate color
-        for (depth, node_data) in nodes0.iter() {
-            let bounds = match node_data {
-                NodeData::Internal(d) => &d.bounds,
-                NodeData::Leaf(d) => &d.bounds,
-                NodeData::Unused => continue, // Skip unused nodes
-            };
-
-            // Get the depth of this node (implement this based on your Octree structure)
-
+        for (bounds, depth) in nodes.iter() {
             // Create a color based on depth
-            let color = get_color_for_depth(*depth, level);
+            let color = get_color_for_depth(*depth, max_depth);
 
             Self::draw_bounding_box(&mut imm_mesh, bounds, color);
         }
@@ -117,8 +86,9 @@ impl OctreeVisualizer {
 
         // Assign the completed mesh to the instance
         mesh_inst.set_mesh(&imm_mesh);
-        let mesh_inst = mesh_inst.clone();
-        self.base_mut().add_child(&mesh_inst);
+
+        // let mesh_inst = mesh_inst.clone();
+        // self.base_mut().add_child(&mesh_inst);
     }
 }
 

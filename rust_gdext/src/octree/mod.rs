@@ -1,8 +1,15 @@
+pub mod morton;
+pub mod parallel;
 pub mod visualize;
 
+use core::array;
+use either::Either;
 use glam::Vec3A;
 use godot::prelude::{godot_error, godot_warn};
 use std::num::NonZeroUsize;
+use visualize::VisualizeOctree;
+
+use crate::physics::gravity::controller::SimulatedBody;
 
 // --- Constants ---
 const MAX_BODIES_PER_LEAF: usize = 1; // Standard for Barnes-Hut is 1 body per leaf
@@ -22,6 +29,50 @@ pub trait Massive {
     fn get_mass(&self) -> f32;
 }
 
+#[derive(Clone, Debug, Default)]
+pub struct GravityData {
+    pub mass: f32,
+    pub center_of_mass: Vec3A,
+}
+
+impl Spacial for GravityData {
+    fn get_pos(&self) -> Vec3A {
+        self.center_of_mass
+    }
+}
+
+impl From<&SimulatedBody> for GravityData {
+    fn from(body: &SimulatedBody) -> Self {
+        GravityData {
+            mass: body.get_mass(),
+            center_of_mass: body.get_pos(),
+        }
+    }
+}
+
+impl GravityData {
+    fn merge(ds: &[Self]) -> Self {
+        let total_mass = ds.iter().map(|d| d.mass).sum();
+
+        let total_mass_inv = if total_mass > 0.0 {
+            1.0 / total_mass
+        } else {
+            0.0
+        };
+
+        let center_of_mass = ds
+            .iter()
+            .map(|d| d.center_of_mass * d.mass * total_mass_inv)
+            .reduce(|a, b| a + b)
+            .unwrap_or_default();
+
+        GravityData {
+            mass: total_mass,
+            center_of_mass,
+        }
+    }
+}
+
 /// Represents the different types of nodes in the octree arena.
 #[derive(Clone, Debug)]
 pub enum NodeData {
@@ -35,6 +86,7 @@ pub enum NodeData {
 #[derive(Clone, Debug)]
 pub struct InternalData {
     pub bounds: BoundingBox,
+    /// Index 0 is the root node, which cannot be a child.
     pub children: [Option<NonZeroUsize>; 8],
 }
 
@@ -60,37 +112,66 @@ pub struct BoundingBox {
     pub half_width: f32, // Represents max half-width along any axis
 }
 
+impl Default for BoundingBox {
+    fn default() -> Self {
+        Self {
+            center: Vec3A::ZERO,
+            half_width: 1.0,
+        }
+    }
+}
+
+type Partition<T> = Either<T, T>;
+
 impl BoundingBox {
-    // Method to compute the bounding box of multiple bodies
-    pub fn compute<T: Spacial>(bodies: &[T]) -> Self {
-        if bodies.is_empty() {
-            return BoundingBox {
-                center: Vec3A::ZERO,
-                half_width: 1.0,
-            }; // Default
-        }
+    pub fn containing_gravity_data(bodies: &[GravityData]) -> Self {
+        let mut ps = bodies.iter().map(|b| b.center_of_mass);
 
-        // Convert Godot Vec3 to glam Vec3A for calculations
-        let mut min_p = bodies[0].get_pos();
-        let mut max_p = bodies[0].get_pos();
+        let p0 = match ps.next() {
+            Some(pos) => pos,
+            None => return Self::default(),
+        };
 
-        for body in bodies.iter().skip(1) {
-            min_p = min_p.min(body.get_pos());
-            max_p = max_p.max(body.get_pos());
-        }
+        let (min_p, max_p) = bodies
+            .iter()
+            .skip(1)
+            .map(|b| b.center_of_mass)
+            .fold((p0, p0), |(min, max), pos| (min.min(pos), max.max(pos)));
 
         let center = (min_p + max_p) * 0.5;
         // Calculate the max extent from the center along any axis
         let extent = (max_p - min_p) * 0.5;
-        let half_width = extent.x.max(extent.y).max(extent.z).max(MIN_HALF_WIDTH); // Ensure non-zero size
+        let half_width = extent.max_element().max(MIN_HALF_WIDTH);
 
         BoundingBox { center, half_width }
     }
 
-    // Method to determine which octant a point belongs to within this box
+    // Method to compute the bounding box of multiple bodies
+    pub fn containing<T: Spacial>(bodies: &[T]) -> Self {
+        let mut ps = bodies.iter().map(|b| b.get_pos());
+
+        let p0 = match ps.next() {
+            Some(pos) => pos,
+            None => return Self::default(),
+        };
+
+        let (min_p, max_p) = bodies
+            .iter()
+            .skip(1)
+            .map(|b| b.get_pos())
+            .fold((p0, p0), |(min, max), pos| (min.min(pos), max.max(pos)));
+
+        let center = (min_p + max_p) * 0.5;
+        // Calculate the max extent from the center along any axis
+        let extent = (max_p - min_p) * 0.5;
+        let half_width = extent.max_element().max(MIN_HALF_WIDTH);
+
+        BoundingBox { center, half_width }
+    }
+
+    /// Method to determine which octant a point belongs to within this box
     #[inline]
     pub fn get_octant_index(&self, point: Vec3A) -> usize {
-        // Use sign bit check for efficiency if possible, otherwise comparison
         let offset = point - self.center;
 
         ((offset.x > 0.0) as usize) << 2
@@ -98,10 +179,35 @@ impl BoundingBox {
             | ((offset.z > 0.0) as usize)
     }
 
+    /// Method to determine which octant a point belongs to within this box.
+    ///
+    /// Uses nested Eithers to work with [`rayon::iter::ParallelIterator::partition_map`]
+    #[inline]
+    pub fn octant_either_partition(
+        &self,
+        point: GravityData,
+    ) -> Partition<Partition<Partition<GravityData>>> {
+        use Either::{Left as L, Right as R};
+        // Use sign bit check for efficiency if possible, otherwise comparison
+        let offset = point.center_of_mass - self.center;
+
+        match ((offset.x > 0.0), (offset.y > 0.0), (offset.z > 0.0)) {
+            (false, false, false) => L(L(L(point))),
+            (false, false, true) => L(L(R(point))),
+            (false, true, false) => L(R(L(point))),
+            (false, true, true) => L(R(R(point))),
+            (true, false, false) => R(L(L(point))),
+            (true, false, true) => R(L(R(point))),
+            (true, true, false) => R(R(L(point))),
+            (true, true, true) => R(R(R(point))),
+        }
+    }
+
     // Method to calculate the center and half-width of a specific octant
     #[inline]
-    pub fn get_octant_bounds(&self, octant_index: usize) -> BoundingBox {
+    pub fn get_octant_bounds(&self, octant_index: usize) -> Self {
         let child_half_width = self.half_width * 0.5;
+
         let offset_x = if (octant_index & 4) != 0 {
             child_half_width
         } else {
@@ -123,6 +229,70 @@ impl BoundingBox {
             center: child_center,
             half_width: child_half_width,
         }
+    }
+
+    #[inline]
+    pub fn get_octant_bounds_morton(&self, octant_index: usize) -> Self {
+        let child_half_width = self.half_width * 0.5;
+
+        // Correct bit checks for ZYX mapping:
+        // Bit 0 (value 1) -> X axis
+        let offset_x = if (octant_index & 1) != 0 {
+            child_half_width
+        } else {
+            -child_half_width
+        };
+        // Bit 1 (value 2) -> Y axis
+        let offset_y = if (octant_index & 2) != 0 {
+            child_half_width
+        } else {
+            -child_half_width
+        };
+        // Bit 2 (value 4) -> Z axis
+        let offset_z = if (octant_index & 4) != 0 {
+            child_half_width
+        } else {
+            -child_half_width
+        };
+
+        let child_center = self.center + Vec3A::new(offset_x, offset_y, offset_z);
+        BoundingBox {
+            center: child_center,
+            half_width: child_half_width,
+        }
+    }
+
+    pub fn subdivide(&self) -> [Self; 8] {
+        array::from_fn(|i| self.get_octant_bounds(i))
+    }
+}
+
+impl VisualizeOctree for Octree<'_, GravityData> {
+    fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
+        let mut result = Vec::new();
+        let mut stack: Vec<(usize, u32)> = Vec::new();
+        stack.push((self.root_index, 0));
+
+        while let Some((node_index, depth)) = stack.pop() {
+            if let Some(node) = self.get_node(node_index) {
+                let bounds = match node {
+                    NodeData::Internal(internal_data) => internal_data.bounds,
+                    NodeData::Leaf(leaf_data) => leaf_data.bounds,
+                    NodeData::Unused => continue,
+                };
+                result.push((bounds, depth));
+
+                if let NodeData::Internal(internal_data) = node {
+                    for &child_index in internal_data.children.iter() {
+                        if let Some(child_index) = child_index {
+                            stack.push((child_index.into(), depth + 1));
+                        }
+                    }
+                }
+            }
+        }
+
+        result
     }
 }
 
@@ -171,7 +341,7 @@ impl<'a, T: Spacial> Octree<'a, T> {
         }
 
         // 1. Compute bounds
-        self.bounds = BoundingBox::compute(self.external_data);
+        self.bounds = BoundingBox::containing(self.external_data);
 
         // 2. Initialize root node (as empty leaf initially, easier to insert into)
         let root_node_data = LeafData {
