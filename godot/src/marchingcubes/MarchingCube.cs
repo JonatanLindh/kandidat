@@ -57,11 +57,17 @@ public class MarchingCube
         
         // Calculate the actual geometric center of the vertices
         var center = Vector3.Zero;
+        float maxHeight = float.MinValue;
+        float minHeight = float.MaxValue;
         if (vertices.Count > 0)
         {
             foreach (var vertex in vertices)
             {
                 center += vertex;
+
+                float height = vertex.Length();
+                if (height > maxHeight) maxHeight = height;
+                if (height < minHeight) minHeight = height;
             }
             center /= vertices.Count;
         }
