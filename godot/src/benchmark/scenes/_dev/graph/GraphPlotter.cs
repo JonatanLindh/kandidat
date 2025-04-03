@@ -18,6 +18,10 @@ public partial class GraphPlotter : Control
 
 	[Export] float timeScale = 30;
 
+	// Amount to shift graphs to the left when they exceed the panel width
+	// E.g 2.0f removes 50% of the points, points.Count / graphShiftFactor
+	[Export] float graphShiftFactor = 2.0f;
+
 	[ExportGroup("Y-axis")]
 	[Export] int yAxisCount = 4;
 	[Export] PackedScene yAxisLabel;
@@ -39,8 +43,6 @@ public partial class GraphPlotter : Control
 	float minFps;
 	float minFrameTime;
 	float minMemoryUsage;
-
-	int graphShiftFactor = 3;
 
 	// Store points to allow for rescaling
 	List<Vector2> fpsPoints = new List<Vector2>();
@@ -240,7 +242,7 @@ public partial class GraphPlotter : Control
 	/// </summary>
 	private void ShiftAllGraphsLeft()
 	{
-		int removeCount = fpsPoints.Count / graphShiftFactor;
+		int removeCount = (int)Mathf.Round(fpsPoints.Count / graphShiftFactor);
 		if (removeCount == 0) return;
 
 		float shiftAmount = fpsPoints[removeCount].X;
@@ -249,9 +251,9 @@ public partial class GraphPlotter : Control
 		currentTime -= shiftAmount / timeScale;
 
 		// Apply shift to all datasets
-		ShiftGraphLeft(fpsPoints, fpsLine, shiftAmount);
-		ShiftGraphLeft(frameTimePoints, frameTimeLine, shiftAmount);
-		ShiftGraphLeft(memoryUsagePoints, memoryUsageLine, shiftAmount);
+		ShiftGraphLeft(fpsPoints, fpsLine, shiftAmount, removeCount);
+		ShiftGraphLeft(frameTimePoints, frameTimeLine, shiftAmount, removeCount);
+		ShiftGraphLeft(memoryUsagePoints, memoryUsageLine, shiftAmount, removeCount);
 	}
 
 	/// <summary>
@@ -260,9 +262,9 @@ public partial class GraphPlotter : Control
 	/// <param name="pointsList"></param>
 	/// <param name="line"></param>
 	/// <param name="shiftAmount"></param>
-	private void ShiftGraphLeft(List<Vector2> pointsList, Line2D line, float shiftAmount)
+	private void ShiftGraphLeft(List<Vector2> pointsList, Line2D line, float shiftAmount, int removeCount)
 	{
-		pointsList.RemoveRange(0, pointsList.Count / 4);
+		pointsList.RemoveRange(0, removeCount);
 
 		for (int i = 0; i < pointsList.Count; i++)
 		{
