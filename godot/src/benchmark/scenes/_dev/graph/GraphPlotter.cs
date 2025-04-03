@@ -25,24 +25,16 @@ public partial class GraphPlotter : Control
 	Label memory1Label;
 	Label memory0Label;
 
-	VBoxContainer fpsYaxis;
-	VBoxContainer frametimeYaxis;
-	VBoxContainer memoryYaxis;
+	[Export] float timeScale = 10;
 
-	int yAxisCount = 4;
-	Label[] fpsYAxisLabels;
-	Label[] frametimeYAxisLabels;
-	Label[] memoryYAxisLabels;
-	HSeparator[] fpsYAxisSeparators;
-	HSeparator[] frametimeYAxisSeparators;
-	HSeparator[] memoryYAxisSeparators;
+	[ExportGroup("Y-axis")]
+	[Export] int yAxisCount = 4;
+	[Export] PackedScene yAxisLabel;
+	[Export] PackedScene yAxisHSeparator;
 
 	GraphYAxis fpsYAxis;
 	GraphYAxis frametimeYAxis;
 	GraphYAxis memoryYAxis;
-
-	[Export] PackedScene yAxisLabel;
-	[Export] PackedScene yAxisHSeparator;
 
 	float panelWidth;
 	float panelHeight;
@@ -153,7 +145,7 @@ public partial class GraphPlotter : Control
 			UpdateMaxMinLabels();
 		}
 
-		float x = currentTime * 10;
+		float x = currentTime * timeScale;
 		float y = GetPanelPositionOfValue(value, maxValue);
 		Vector2 newPoint = new Vector2(x, y);
 
@@ -237,7 +229,7 @@ public partial class GraphPlotter : Control
 		float shiftAmount = fpsPoints[removeCount].X;
 
 		// Adjust `currentTime` to prevent drifting
-		currentTime -= shiftAmount / 10.0f;
+		currentTime -= shiftAmount / timeScale;
 
 		// Apply shift to all datasets
 		ShiftGraphLeft(fpsPoints, fpsLine, shiftAmount);
