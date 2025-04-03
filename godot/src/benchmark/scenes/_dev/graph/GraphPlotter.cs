@@ -40,10 +40,6 @@ public partial class GraphPlotter : Control
 	float minFrameTime;
 	float minMemoryUsage;
 
-	float currentFps;
-	float currentFrameTime;
-	float currentMemoryUsage;
-
 	int graphShiftFactor = 3;
 
 	// Store points to allow for rescaling
@@ -53,7 +49,7 @@ public partial class GraphPlotter : Control
 
 	// Padding of max for when rescaling graphs
 	float maxFpsPadding = 30.0f;
-	float maxFrametimePadding = 0.01f;
+	float maxFrametimePadding = 5.0f;
 	float maxMemoryUsagePadding = 50.0f;
 
 	public override void _Ready()
@@ -90,21 +86,18 @@ public partial class GraphPlotter : Control
 	/// <param name="data"></param>
 	public void AddDataPoint(BenchmarkDatapoint data)
 	{
-		currentFps = data.fps;
-		currentFrameTime = data.frameTime;
-		currentMemoryUsage = data.memoryUsage;
+		float currentFps = data.fps;
+		float filteredFrameTime = data.frameTime * 1000; // seconds to ms
+		float filteredMemoryUsage = data.memoryUsage / (1024 * 1024); // bytes to MB
 
 		// Set initial min values
 		if (!minValuesSet)
 		{
 			minValuesSet = true;
 			minFps = currentFps;
-			minFrameTime = currentFrameTime;
-			minMemoryUsage = currentMemoryUsage;
+			minFrameTime = filteredFrameTime;
+			minMemoryUsage = filteredMemoryUsage;
 		}
-
-		float filteredFrameTime = currentFrameTime * 100; // seconds to ms
-		float filteredMemoryUsage = currentMemoryUsage / (1024 * 1024); // bytes to MB
 
 		fpsLabel.Text = currentFps.ToString();
 		frameTimeLabel.Text = Math.Round(filteredFrameTime, 4).ToString();
@@ -132,7 +125,7 @@ public partial class GraphPlotter : Control
 		{
 			maxValue = value + padding;
 			RescaleGraph(type);
-			RedrawYAxis(type, maxValue);
+			RedrawYAxis(type, maxValue );
 		}
 
 		if(value < minValue)
