@@ -16,6 +16,7 @@ public partial class GraphPlotter : Control
 	Label frameTimeLabel;
 	Label memoryUsageLabel;
 
+	// Time scale for the graph, to exaggerate the time axis
 	[Export] float timeScale = 30;
 
 	// Amount to shift graphs to the left when they exceed the panel width
@@ -50,9 +51,10 @@ public partial class GraphPlotter : Control
 	List<Vector2> memoryUsagePoints = new List<Vector2>();
 
 	// Padding of max for when rescaling graphs
-	float maxFpsPadding = 30.0f;
-	float maxFrametimePadding = 5.0f;
-	float maxMemoryUsagePadding = 50.0f;
+	[ExportGroup("Max padding")]
+	[Export] float maxFpsPadding = 30.0f;
+	[Export] float maxFrametimePadding = 5.0f;
+	[Export] float maxMemoryUsagePadding = 50.0f;
 
 	public override void _Ready()
 	{
