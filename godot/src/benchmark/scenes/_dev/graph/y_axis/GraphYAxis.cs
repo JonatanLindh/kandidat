@@ -25,6 +25,10 @@ public partial class GraphYAxis
 		}
 	}
 
+	/// <summary>
+	/// Redraws the Y-axis labels and separators based on the maximum value.
+	/// </summary>
+	/// <param name="maxValue"></param>
 	public void RedrawYAxis(float maxValue)
 	{
 		for (int i = 0; i < yAxisCount; i++)

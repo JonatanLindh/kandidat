@@ -40,6 +40,31 @@ public partial class GraphPlotter : Control
 	float panelHeight;
 	float currentTime = 0.0f;
 
+	float maxFps;
+	float maxFrameTime;
+	float maxMemoryUsage;
+
+	bool minValuesSet = false;
+	float minFps;
+	float minFrameTime;
+	float minMemoryUsage;
+
+	float currentFps;
+	float currentFrameTime;
+	float currentMemoryUsage;
+
+	int graphShiftFactor = 3;
+
+	// Store points to allow for rescaling
+	List<Vector2> fpsPoints = new List<Vector2>();
+	List<Vector2> frameTimePoints = new List<Vector2>();
+	List<Vector2> memoryUsagePoints = new List<Vector2>();
+
+	// Padding of max for when rescaling graphs
+	float maxFpsPadding = 30.0f;
+	float maxFrametimePadding = 0.01f;
+	float maxMemoryUsagePadding = 50.0f;
+
 	public override void _Ready()
 	{
 		fpsLine = GetNode<Line2D>("%FPSLine2D");
@@ -77,31 +102,10 @@ public partial class GraphPlotter : Control
 		currentTime += (float)delta;
 	}
 
-	float maxFps;
-	float maxFrameTime;
-	float maxMemoryUsage;
-
-	bool minValuesSet = false;
-	float minFps;
-	float minFrameTime;
-	float minMemoryUsage;
-
-	float currentFps;
-	float currentFrameTime;
-	float currentMemoryUsage;
-
-	int graphShiftFactor = 3;
-
-	// Store points to allow for rescaling
-	List<Vector2> fpsPoints = new List<Vector2>();
-	List<Vector2> frameTimePoints = new List<Vector2>();
-	List<Vector2> memoryUsagePoints = new List<Vector2>();
-
-	// Padding of max for when rescaling graphs
-	float maxFpsPadding = 30.0f;
-	float maxFrametimePadding = 0.01f;
-	float maxMemoryUsagePadding = 50.0f;
-
+	/// <summary>
+	/// Adds a data point to the graph for FPS, frame time, and memory usage.
+	/// </summary>
+	/// <param name="data"></param>
 	public void AddDataPoint(BenchmarkDatapoint data)
 	{
 		currentFps = data.fps;
@@ -129,6 +133,16 @@ public partial class GraphPlotter : Control
 		ProcessDataPoint(BenchmarkDatapointEnum.MemoryUsage, filteredMemoryUsage, ref maxMemoryUsage, ref minMemoryUsage, maxMemoryUsagePadding, memoryUsagePoints, memoryUsageLine);
 	}
 
+	/// <summary>
+	/// Processes a data point for the specified type and updates its graph accordingly.
+	/// </summary>
+	/// <param name="type"></param>
+	/// <param name="value"></param>
+	/// <param name="maxValue"></param>
+	/// <param name="minValue"></param>
+	/// <param name="padding"></param>
+	/// <param name="pointsList"></param>
+	/// <param name="line"></param>
 	private void ProcessDataPoint(BenchmarkDatapointEnum type, float value, ref float maxValue, ref float minValue, float padding, List<Vector2> pointsList, Line2D line)
 	{
 		// Update max dynamically if a new value is higher
@@ -162,6 +176,11 @@ public partial class GraphPlotter : Control
 		}
 	}
 
+	/// <summary>
+	/// Redraws the Y-axis labels and separators based on the maximum value of the specified type.
+	/// </summary>
+	/// <param name="type"></param>
+	/// <param name="maxValue"></param>
 	private void RedrawYAxis(BenchmarkDatapointEnum type, float maxValue)
 	{
 		switch (type)
@@ -178,6 +197,10 @@ public partial class GraphPlotter : Control
 		}
 	}
 
+	/// <summary>
+	/// Rescales the graph based on the maximum value of the specified type.
+	/// </summary>
+	/// <param name="datapointType"></param>
 	private void RescaleGraph(BenchmarkDatapointEnum datapointType)
 	{
 		switch (datapointType)
@@ -194,6 +217,12 @@ public partial class GraphPlotter : Control
 		}
 	}
 
+	/// <summary>
+	/// Rescales the graph points based on the maximum value.
+	/// </summary>
+	/// <param name="points"></param>
+	/// <param name="line"></param>
+	/// <param name="maxValue"></param>
 	private void RescaleGraph(List<Vector2> points, Line2D line, float maxValue)
 	{
 		// Rescale points
@@ -208,6 +237,11 @@ public partial class GraphPlotter : Control
 		RedrawGraph(points, line);
 	}
 
+	/// <summary>
+	/// Redraws the graph with the given points.
+	/// </summary>
+	/// <param name="points"></param>
+	/// <param name="line"></param>
 	private void RedrawGraph(List<Vector2> points, Line2D line)
 	{
 		line.ClearPoints();
@@ -217,12 +251,21 @@ public partial class GraphPlotter : Control
 		}
 	}
 
+	/// <summary>
+	/// Calculates the panel position of a value based on the maximum value.
+	/// </summary>
+	/// <param name="value"></param>
+	/// <param name="maxValue"></param>
+	/// <returns></returns>
 	private float GetPanelPositionOfValue(float value, float maxValue)
 	{
 		float nValue = value / maxValue;
 		return panelHeight * (1.0f - nValue);
 	}
 
+	/// <summary>
+	/// Shifts all graphs to the left by removing points that are out of bounds.
+	/// </summary>
 	private void ShiftAllGraphsLeft()
 	{
 		int removeCount = fpsPoints.Count / graphShiftFactor;
@@ -239,6 +282,12 @@ public partial class GraphPlotter : Control
 		ShiftGraphLeft(memoryUsagePoints, memoryUsageLine, shiftAmount);
 	}
 
+	/// <summary>
+	/// Shifts the specified graph to the left by removing points that are out of bounds.
+	/// </summary>
+	/// <param name="pointsList"></param>
+	/// <param name="line"></param>
+	/// <param name="shiftAmount"></param>
 	private void ShiftGraphLeft(List<Vector2> pointsList, Line2D line, float shiftAmount)
 	{
 		pointsList.RemoveRange(0, pointsList.Count / 4);
@@ -254,6 +303,9 @@ public partial class GraphPlotter : Control
 		RedrawGraph(pointsList, line);
 	}
 
+	/// <summary>
+	/// Updates the max and min labels for FPS, frame time, and memory usage.
+	/// </summary>
 	private void UpdateMaxMinLabels()
 	{
 		fps1Label.Text = Math.Round(maxFps, 0).ToString();
