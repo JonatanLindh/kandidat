@@ -169,3 +169,5 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.470588, 0.470588, 0.470588, 0.705882)
+
+[connection signal="resized" from="VBoxContainer/HBoxContainer/FPSPanel" to="." method="OnFpsPanelResized"]

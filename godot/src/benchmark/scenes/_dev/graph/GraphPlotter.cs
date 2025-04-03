@@ -66,12 +66,14 @@ public partial class GraphPlotter : Control
 		fpsYAxis = new GraphYAxis(GetNode<VBoxContainer>("%FPSYAxis"), fpsPanel, yAxisLabel, yAxisHSeparator, yAxisCount);
 		frametimeYAxis = new GraphYAxis(GetNode<VBoxContainer>("%FrametimeYAxis"), frameTimePanel, yAxisLabel, yAxisHSeparator, yAxisCount);
 		memoryYAxis = new GraphYAxis(GetNode<VBoxContainer>("%MemoryYAxis"), memoryUsagePanel, yAxisLabel, yAxisHSeparator, yAxisCount);
+
+		// Set initial panel width and height
+		panelWidth = fpsPanel.GetRect().Size.X;
+		panelHeight = fpsPanel.GetRect().Size.Y;
 	}
 
 	public override void _Process(double delta)
 	{
-		panelWidth = fpsPanel.GetRect().Size.X;
-		panelHeight = fpsPanel.GetRect().Size.Y;
 		currentTime += (float)delta;
 	}
 
@@ -262,5 +264,15 @@ public partial class GraphPlotter : Control
 
 		memory1Label.Text = Math.Round(maxMemoryUsage, 2).ToString();
 		memory0Label.Text = Math.Round(minMemoryUsage, 2).ToString();
+	}
+
+	/// <summary>
+	/// Signal handler for when the FPS panel is resized.
+	/// Updates the panel width and height variables.
+	/// </summary>
+	public void OnFpsPanelResized()
+	{
+		panelWidth = fpsPanel.GetRect().Size.X;
+		panelHeight = fpsPanel.GetRect().Size.Y;
 	}
 }
