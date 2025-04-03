@@ -30,13 +30,11 @@ public partial class UISelectableStar : CanvasLayer
 
 	float sidePadding = 10.0f;
 
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		Hide();
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
 		if (isTraveling)
@@ -74,6 +72,12 @@ public partial class UISelectableStar : CanvasLayer
         }
 	}
 
+	/// <summary>
+	/// Calculates the screen position of a 3D point in world space.
+	/// If the point is behind the camera or outside the screen, it will be clamped to the edges.
+	/// </summary>
+	/// <param name="pos"></param>
+	/// <returns>A <c>Vector2</c> of the screen position</returns>
 	private Vector2 GetVector3ScreenPosition(Vector3 pos)
 	{
 		Camera3D camera = GetViewport().GetCamera3D();
@@ -122,6 +126,12 @@ public partial class UISelectableStar : CanvasLayer
 		return screenPosition;
 	}
 
+	/// <summary>
+	/// Checks if the star select panel is fully visible on the screen.
+	/// If not, it clamps the position to the screen bounds.
+	/// </summary>
+	/// <param name="basePos"></param>
+	/// <returns>A <c>Vector2</c> of the (potentially) clamped screen position</returns>
 	private Vector2 GetClampedPositionIfOutside(Vector2 basePos)
 	{
 		Vector2 clampedPos = basePos;
@@ -136,6 +146,8 @@ public partial class UISelectableStar : CanvasLayer
 		if (!isOnScreen)
 		{
 			Vector2 dir = GetClosestDirection(screenSpace, starSelectBounds);
+
+			GD.Print(dir);
 
 			if (dir.X != 0)
 			{
@@ -160,6 +172,12 @@ public partial class UISelectableStar : CanvasLayer
 		return checker.Encloses(target);
 	}
 
+	/// <summary>
+	/// Calculates the closest direction from the <c>from</c> rectangle to the <c>to</c> rectangle.
+	/// </summary>
+	/// <param name="from"></param>
+	/// <param name="to"></param>
+	/// <returns>A non-normalized <c>Vector2</c> of the closest direction</returns>
 	private Vector2 GetClosestDirection(Rect2 from, Rect2 to)
 	{
 		Vector2 direction = Vector2.Zero;
@@ -189,6 +207,10 @@ public partial class UISelectableStar : CanvasLayer
 		return direction;
 	}
 
+	/// <summary>
+	/// Sets the star to be displayed by the UI.
+	/// </summary>
+	/// <param name="star"></param>
 	public void SetStar(SelectableStar star)
 	{
 		this.star = star;
