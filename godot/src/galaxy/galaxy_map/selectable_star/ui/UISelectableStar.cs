@@ -229,11 +229,20 @@ public partial class UISelectableStar : CanvasLayer
 		this.player = player;
 	}
 
+	/// <summary>
+	/// Signal handler for the close button.
+	/// Hides the star select UI.
+	/// </summary>
 	public void OnCloseButtonPressed()
 	{
 		Hide();
 	}
 
+	/// <summary>
+	/// Signal handler for the visit button.
+	/// Emits the ExploreStar signal with the star's seed.
+	/// This signal is connected to the galaxy map.
+	/// </summary>
 	public void OnVisitButtonPressed()
 	{
 		if (star != null) {
@@ -241,6 +250,11 @@ public partial class UISelectableStar : CanvasLayer
 		}
 	}
 
+	/// <summary>
+	/// Signal handler for the travel button.
+	/// Sets the isTraveling flag to true.
+	/// This will cause the player to move towards the star.
+	/// </summary>
 	public void OnTravelButtonPressed()
 	{
 		if (player != null)
