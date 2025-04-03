@@ -52,7 +52,7 @@ public partial class UISelectableStar : CanvasLayer
 		// Update the star UI
 		if (star != null)
 		{
-			Vector2 screenPosition = GetStarScreenPosition();
+			Vector2 screenPosition = GetVector3ScreenPosition(targetPosition);
 
 			// Offset to center the star ui on the star
 			Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
@@ -62,9 +62,11 @@ public partial class UISelectableStar : CanvasLayer
             float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * starSelectOffsetStrength;
             Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
 
+			// Proposed new UI position
             Vector2 newPos = screenPosition + (distanceOffset + posOffset);
 			starSelect.Position = newPos;
 
+			// Make sure that the new position ensures that the entire panel is within screen bounds
 			newPos = GetClampedPositionIfOutside(newPos);
 
 			starSelect.Position = newPos;
@@ -72,17 +74,51 @@ public partial class UISelectableStar : CanvasLayer
         }
 	}
 
-	private Vector2 GetStarScreenPosition()
+	private Vector2 GetVector3ScreenPosition(Vector3 pos)
 	{
 		Camera3D camera = GetViewport().GetCamera3D();
-		Vector3 directionToStar = (targetPosition - camera.GlobalPosition).Normalized();
-		Vector2 screenPosition = camera.UnprojectPosition(targetPosition);
+		Vector2 screenSize = GetViewport().GetVisibleRect().Size;
+		Vector2 screenPosition = camera.UnprojectPosition(pos);
+		
+		Vector3 directionToStar = (pos - camera.GlobalPosition).Normalized();
+		float dotProduct = directionToStar.Dot(-camera.GlobalTransform.Basis.Z);
 
-		if (camera.GlobalTransform.Basis.Z.Dot(directionToStar) > 0)
+		bool isBehindCamera = dotProduct <= 0;
+		bool isOutsideScreen = screenPosition.X < 0 || screenPosition.X > screenSize.X || screenPosition.Y < 0 || screenPosition.Y > screenSize.Y;
+		
+		// If star is behind camera or position is outside screen, clamp to edges
+		if (isBehindCamera || isOutsideScreen)
 		{
-			screenPosition = -screenPosition;
+			Vector2 screenCenter = screenSize / 2;
+			Vector2 direction;
+			
+			if (isBehindCamera) {
+				// Invert the direction
+				direction = (screenCenter - screenPosition).Normalized();
+			} else { // If outside screen
+				direction = (screenPosition - screenCenter).Normalized();
+			}
+			
+			float maxX = screenSize.X - sidePadding;
+			float maxY = screenSize.Y - sidePadding;
+			
+			// Calculate scale for each edge
+			float scaleLeft 	= direction.X != 0 ? (sidePadding - screenCenter.X) / direction.X 	: float.MaxValue;
+			float scaleRight 	= direction.X != 0 ? (maxX - screenCenter.X) / direction.X 			: float.MaxValue;
+			float scaleTop 		= direction.Y != 0 ? (sidePadding - screenCenter.Y) / direction.Y 	: float.MaxValue;
+			float scaleBottom 	= direction.Y != 0 ? (maxY - screenCenter.Y) / direction.Y 			: float.MaxValue;
+			
+			// Find closest edge
+			float scale = float.MaxValue;
+			if (scaleLeft > 0 && scaleLeft < scale) 	scale = scaleLeft;
+			if (scaleRight > 0 && scaleRight < scale) 	scale = scaleRight;
+			if (scaleTop > 0 && scaleTop < scale) 		scale = scaleTop;
+			if (scaleBottom > 0 && scaleBottom < scale)	scale = scaleBottom;
+			
+			// Position at screen edge in direction of star
+			screenPosition = screenCenter + direction * scale;
 		}
-
+		
 		return screenPosition;
 	}
 
