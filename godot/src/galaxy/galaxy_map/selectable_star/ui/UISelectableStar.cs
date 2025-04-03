@@ -4,46 +4,49 @@ using System;
 public partial class UISelectableStar : CanvasLayer
 {
 	SelectableStar star;
-
 	Node3D player;
+	[Signal] public delegate void ExploreStarEventHandler(int seed);
+	
+	[ExportCategory("Fast Travel")]
+	[Export] float fastTravelSpeed = 500.0f;
+	[Export] float fastTravelDistanceOffset = 10.0f;
+	bool isFastTraveling = false;
 
-	bool isTraveling = false;
+	[ExportCategory("Star Select UI")]
+	[Export] float sidePadding = 10.0f;
+	[Export] float distanceOffsetStrength = 800;
 	Vector3 targetPosition;
-	[Export] float travelSpeed = 500.0f;
-	float travelDistance = 10.0f;
 
-	[Export] Control control;
+	// Star Select UI
+	Panel starSelect;
+	Label starNameLabel;
+	Label starDistanceLabel;
 
-	[Export] Panel starSelect;
-	float starSelectOffsetStrength = 800;
-
-	[Export] Label starNameLabel;
-	[Export] Label starPosLabel;
-	[Export] Label starSeed;
-	[Export] Label starDistance;
-
-	[Export] Button closeButton;
-	[Export] Button visitButton;
-
-	[Signal]
-	public delegate void ExploreStarEventHandler(int seed);
-
-	float sidePadding = 10.0f;
+	// Star Info UI
+	Label starPosLabel;
+	Label starSeed;
 
 	public override void _Ready()
 	{
+		starSelect = GetNode<Panel>("%StarSelectPanel");
+		starNameLabel = GetNode<Label>("%StarName");
+		starDistanceLabel = GetNode<Label>("%StarDistance");
+
+		starPosLabel = GetNode<Label>("%StarPos");
+		starSeed = GetNode<Label>("%StarSeed");
+
 		Hide();
 	}
 
 	public override void _Process(double delta)
 	{
-		if (isTraveling)
+		if (isFastTraveling)
 		{
-			player.Position = player.Position.Lerp(targetPosition, (float)delta * 0.01f * travelSpeed);
+			player.Position = player.Position.Lerp(targetPosition, (float)delta * 0.01f * fastTravelSpeed);
 
-			if (player.Position.DistanceTo(targetPosition) < travelDistance)
+			if (player.Position.DistanceTo(targetPosition) < fastTravelDistanceOffset)
 			{
-				isTraveling = false;
+				isFastTraveling = false;
 			}
 		}
 
@@ -57,7 +60,7 @@ public partial class UISelectableStar : CanvasLayer
 
 			// Offset based on the distance to the star
 			float distance = player.Position.DistanceTo(targetPosition);
-            float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * starSelectOffsetStrength;
+            float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * distanceOffsetStrength;
             Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
 
 			// Proposed new UI position
@@ -68,7 +71,7 @@ public partial class UISelectableStar : CanvasLayer
 			newPos = GetClampedPositionIfOutside(newPos);
 
 			starSelect.Position = newPos;
-            starDistance.Text = "Distance: " + ((int)distance).ToString() + " LY";
+            starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " LY";
         }
 	}
 
@@ -146,8 +149,6 @@ public partial class UISelectableStar : CanvasLayer
 		if (!isOnScreen)
 		{
 			Vector2 dir = GetClosestDirection(screenSpace, starSelectBounds);
-
-			GD.Print(dir);
 
 			if (dir.X != 0)
 			{
@@ -244,7 +245,7 @@ public partial class UISelectableStar : CanvasLayer
 	{
 		if (player != null)
 		{
-			isTraveling = true;
+			isFastTraveling = true;
 		}
 	}
 }

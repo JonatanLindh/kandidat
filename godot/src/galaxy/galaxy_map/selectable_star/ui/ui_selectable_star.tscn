@@ -5,28 +5,10 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_odo66"]
 bg_color = Color(0.192157, 0.192157, 0.192157, 0)
 
-[node name="UiSelectableStar" type="CanvasLayer" node_paths=PackedStringArray("control", "starSelect", "starNameLabel", "starPosLabel", "starSeed", "starDistance", "closeButton", "visitButton")]
+[node name="UiSelectableStar" type="CanvasLayer"]
 script = ExtResource("1_6q8y8")
-control = NodePath("Control")
-starSelect = NodePath("Control/StarSelectPanel")
-starNameLabel = NodePath("Control/StarSelectPanel/StarName")
-starPosLabel = NodePath("Control/StarInfoPanel/StarPos")
-starSeed = NodePath("Control/StarInfoPanel/StarSeed")
-starDistance = NodePath("Control/StarSelectPanel/StarDistance")
-closeButton = NodePath("Control/StarInfoPanel/CloseButton")
-visitButton = NodePath("Control/StarInfoPanel/VisitButton")
 
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="StarInfoPanel" type="Panel" parent="Control"]
-layout_mode = 1
+[node name="StarInfoPanel" type="Panel" parent="."]
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -37,7 +19,8 @@ offset_top = -158.0
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="StarPos" type="Label" parent="Control/StarInfoPanel"]
+[node name="StarPos" type="Label" parent="StarInfoPanel"]
+unique_name_in_owner = true
 layout_mode = 1
 offset_left = 3.0
 offset_top = 30.0
@@ -46,7 +29,7 @@ offset_bottom = 55.0
 text = "Position"
 clip_text = true
 
-[node name="StarPosTitle" type="Label" parent="Control/StarInfoPanel"]
+[node name="StarPosTitle" type="Label" parent="StarInfoPanel"]
 layout_mode = 1
 offset_left = 3.0
 offset_top = 5.0
@@ -55,7 +38,8 @@ offset_bottom = 30.0
 text = "Coordinates:"
 clip_text = true
 
-[node name="StarSeed" type="Label" parent="Control/StarInfoPanel"]
+[node name="StarSeed" type="Label" parent="StarInfoPanel"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -68,7 +52,7 @@ grow_vertical = 2
 text = "Seed"
 clip_text = true
 
-[node name="StarSeedTitle" type="Label" parent="Control/StarInfoPanel"]
+[node name="StarSeedTitle" type="Label" parent="StarInfoPanel"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -81,7 +65,7 @@ grow_vertical = 2
 text = "Star Seed:"
 clip_text = true
 
-[node name="CloseButton" type="Button" parent="Control/StarInfoPanel"]
+[node name="CloseButton" type="Button" parent="StarInfoPanel"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -93,7 +77,7 @@ offset_bottom = 40.17
 grow_horizontal = 0
 text = "X"
 
-[node name="VisitButton" type="Button" parent="Control/StarInfoPanel"]
+[node name="VisitButton" type="Button" parent="StarInfoPanel"]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -108,7 +92,7 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "Explore"
 
-[node name="TravelButton" type="Button" parent="Control/StarInfoPanel"]
+[node name="TravelButton" type="Button" parent="StarInfoPanel"]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -123,14 +107,15 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "->"
 
-[node name="StarSelectPanel" type="Panel" parent="Control"]
-layout_mode = 2
+[node name="StarSelectPanel" type="Panel" parent="."]
+unique_name_in_owner = true
 offset_right = 160.0
 offset_bottom = 60.0
 mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_odo66")
 
-[node name="StarName" type="Label" parent="Control/StarSelectPanel"]
+[node name="StarName" type="Label" parent="StarSelectPanel"]
+unique_name_in_owner = true
 layout_mode = 1
 offset_left = 3.0
 offset_top = 3.0
@@ -138,7 +123,8 @@ offset_right = 157.0
 offset_bottom = 26.0
 text = "Name"
 
-[node name="StarDistance" type="Label" parent="Control/StarSelectPanel"]
+[node name="StarDistance" type="Label" parent="StarSelectPanel"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -149,7 +135,7 @@ offset_right = 157.0
 grow_vertical = 0
 text = "Distance"
 
-[node name="ColorRect" type="ColorRect" parent="Control/StarSelectPanel"]
+[node name="ColorRect" type="ColorRect" parent="StarSelectPanel"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -159,6 +145,6 @@ offset_bottom = 2.0
 grow_vertical = 2
 color = Color(0.662745, 0.662745, 0.662745, 0.392157)
 
-[connection signal="pressed" from="Control/StarInfoPanel/CloseButton" to="." method="OnCloseButtonPressed"]
-[connection signal="pressed" from="Control/StarInfoPanel/VisitButton" to="." method="OnVisitButtonPressed"]
-[connection signal="pressed" from="Control/StarInfoPanel/TravelButton" to="." method="OnTravelButtonPressed"]
+[connection signal="pressed" from="StarInfoPanel/CloseButton" to="." method="OnCloseButtonPressed"]
+[connection signal="pressed" from="StarInfoPanel/VisitButton" to="." method="OnVisitButtonPressed"]
+[connection signal="pressed" from="StarInfoPanel/TravelButton" to="." method="OnTravelButtonPressed"]
