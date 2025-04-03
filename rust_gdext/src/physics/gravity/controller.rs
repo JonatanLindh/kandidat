@@ -300,9 +300,9 @@ impl INode3D for GravityController {
         if let Some(ov) = self.octree_visualizer.as_mut() {
             // Update the octree visualizer with the simulated bodies
             let bs = bodies_sim.iter().map(|b| b.into()).collect::<Vec<_>>();
-            let mut octree = MortonOctree::new(bs);
+            let octree = MortonOctree::new(&bs);
 
-            ov.bind_mut().update_visualization(&mut octree);
+            ov.bind_mut().update_visualization(&octree);
         }
 
         // Apply simulated step to real bodies

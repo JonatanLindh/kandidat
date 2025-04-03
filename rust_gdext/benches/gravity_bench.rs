@@ -122,6 +122,13 @@ fn octree_build(c: &mut Criterion) {
     let mut group = c.benchmark_group("octree_build");
     for size in [10, 100, 1000, 10000, 100000, 1000000].iter() {
         let bodies = create_bench_bodies(*size);
+        let bodies_gd = bodies
+            .iter()
+            .map(|body| GravityData {
+                mass: body.mass,
+                center_of_mass: body.pos,
+            })
+            .collect::<Vec<_>>();
 
         group.bench_with_input(
             BenchmarkId::new("single-threaded", size),
@@ -135,17 +142,11 @@ fn octree_build(c: &mut Criterion) {
             },
         );
 
-        group.bench_with_input(BenchmarkId::new("morton", size), size, |b, &size| {
-            let bodies = create_bench_bodies(size);
-
-            b.iter_batched(
-                || bodies.iter().map(GravityData::from).collect(),
-                |bodies| {
-                    let octree = MortonOctree::new(bodies);
-                    black_box(octree);
-                },
-                BatchSize::LargeInput,
-            );
+        group.bench_with_input(BenchmarkId::new("morton", size), size, |b, &_size| {
+            b.iter(|| {
+                let octree = MortonOctree::new(&bodies_gd);
+                black_box(octree);
+            });
         });
     }
     group.finish();

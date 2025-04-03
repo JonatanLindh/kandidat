@@ -135,7 +135,7 @@ pub const fn split_depth_from_lcp(lcp_length: u32) -> u32 {
     lcp_length / 3 // Integer division gives the depth of the common parent
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Node {
     /// The bounding box of the node.
     ///
@@ -156,7 +156,7 @@ pub struct Node {
 /// The resulting octree structure.
 /// Might evolve, but starts with nodes and bounds.
 #[derive(Debug, Default)]
-pub struct MortonOctree {
+pub struct MortonOctree<'a> {
     /// Arena storing the explicit node hierarchy built from the sorted list.
     /// Note: The 'Node' struct might need modification from the top-down
     /// version (e.g., explicit child pointers instead of n_subtree_nodes).
@@ -165,9 +165,12 @@ pub struct MortonOctree {
 
     /// The overall bounds of the octree root.
     pub bounds: BoundingBox,
+
+    /// Reference to the original data used to build the octree.
+    pub data_ref: &'a [GravityData],
 }
 
-impl VisualizeOctree for MortonOctree {
+impl VisualizeOctree for MortonOctree<'_> {
     fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
         self.nodes
             .iter()
@@ -176,31 +179,35 @@ impl VisualizeOctree for MortonOctree {
     }
 }
 
-impl MortonOctree {
+impl<'a> MortonOctree<'a> {
     /// Main function to build the octree from body data using Morton codes.
-    pub fn new(bodies: Vec<GravityData>) -> Self {
+    pub fn new(bodies: &'a [GravityData]) -> Self {
         if bodies.is_empty() {
             return Default::default();
         }
 
         // --- Stage 1: Calculate Morton Codes ---
-        let bounds = BoundingBox::containing_gravity_data(&bodies);
+        let bounds = BoundingBox::containing_gravity_data(bodies);
 
-        let encode_item = |data: GravityData| {
+        let encode_item = |(index, data): (usize, &GravityData)| {
             // Pass the calculated cubic bounds to the encode function
             let code = encode(data.center_of_mass, &bounds);
             MortonEncodedItem {
                 morton_code: code,
-                item: data,
+                item: index,
             }
         };
 
         // Use parallel iteration for large datasets, otherwise sequential
         // The value was chosen based on benchmarks
         let mut encoded_bodies: Vec<MortonEncodedItem<_>> = if bodies.len() >= 3000 {
-            bodies.into_par_iter().map(encode_item).collect()
+            bodies
+                .into_par_iter()
+                .enumerate()
+                .map(encode_item)
+                .collect()
         } else {
-            bodies.into_iter().map(encode_item).collect()
+            bodies.iter().enumerate().map(encode_item).collect()
         };
 
         // --- Stage 2: Sort by Morton Code ---
@@ -211,18 +218,24 @@ impl MortonOctree {
         let mut nodes = Vec::new();
         let _root_index = Self::build_recursive(
             &mut nodes,
-            &encoded_bodies,         // Pass immutable slice
+            &encoded_bodies, // Pass immutable slice
+            bodies,
             0..encoded_bodies.len(), // Range of bodies in the current node
             &bounds,                 // current node bounds
             0,                       // current depth
         );
 
-        MortonOctree { nodes, bounds }
+        MortonOctree {
+            nodes,
+            bounds,
+            data_ref: bodies,
+        }
     }
 
     fn build_recursive(
         node_arena: &mut Vec<Node>,
-        sorted_bodies: &[MortonEncodedItem<GravityData>],
+        sorted_bodies: &[MortonEncodedItem<usize>],
+        data_ref: &[GravityData],
         body_range: Range<usize>,
         node_bounds: &BoundingBox,
         current_depth: u32,
@@ -246,7 +259,8 @@ impl MortonOctree {
 
         // --- Leaf Node ---
         if count == 1 || current_depth == MAX_DEPTH {
-            let data = GravityData::merge(body_range.clone().map(|i| &sorted_bodies[i].item));
+            let data =
+                GravityData::merge(body_range.clone().map(|i| &data_ref[sorted_bodies[i].item]));
 
             node_arena.push(Node {
                 body_range,
@@ -307,6 +321,7 @@ impl MortonOctree {
                 let child_node_index = Self::build_recursive(
                     node_arena,
                     sorted_bodies,
+                    data_ref,
                     child_range,
                     &child_bounds,
                     current_depth + 1,
@@ -350,12 +365,12 @@ impl MortonOctree {
     // that does *not* belong to `target_octant` or lower octants at the given depth.
     // Uses binary search since the input slice `sorted_bodies` is sorted by Morton code.
     fn find_octant_split(
-        sorted_bodies: &[MortonEncodedItem<GravityData>],
+        sorted_bodies: &[MortonEncodedItem<usize>],
         range: Range<usize>,
         target_octant: u8, // Find first particle with octant > target_octant
         depth: u32,
     ) -> usize {
-        let pred = |item: &MortonEncodedItem<GravityData>| {
+        let pred = |item: &MortonEncodedItem<usize>| {
             item.get_octant_index_at_depth(depth) <= target_octant
         };
 
