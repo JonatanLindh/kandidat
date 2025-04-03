@@ -1,6 +1,6 @@
 use super::{body::GravityBody, trajectories::TrajectoryWorker};
 use crate::{
-    octree::{morton::MortonOctree, parallel::ParallelOctree, visualize::OctreeVisualizer},
+    octree::{morton::MortonOctree, visualize::OctreeVisualizer},
     to_glam_vec3,
 };
 use glam::Vec3A;
@@ -300,9 +300,9 @@ impl INode3D for GravityController {
         if let Some(ov) = self.octree_visualizer.as_mut() {
             // Update the octree visualizer with the simulated bodies
             let bs = bodies_sim.iter().map(|b| b.into()).collect::<Vec<_>>();
-            let octree = MortonOctree::build(&bs);
+            let mut octree = MortonOctree::new(bs);
 
-            ov.bind_mut().update_visualization(&octree);
+            ov.bind_mut().update_visualization(&mut octree);
         }
 
         // Apply simulated step to real bodies

@@ -10,7 +10,7 @@ use godot::{
 };
 
 pub trait VisualizeOctree {
-    fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)>;
+    fn get_bounds_and_depths(&mut self) -> Vec<(BoundingBox, u32)>;
 }
 
 #[derive(GodotClass)]
@@ -57,7 +57,7 @@ impl INode3D for OctreeVisualizer {
 impl OctreeVisualizer {
     /// Call this method to update the visualization based on the current octree state.
     /// It rebuilds the ImmediateMesh with the bounds of all nodes.
-    pub fn update_visualization<Octree: VisualizeOctree>(&mut self, octree: &Octree) {
+    pub fn update_visualization<Octree: VisualizeOctree>(&mut self, octree: &mut Octree) {
         let Some(mesh_inst) = self.mesh_instance.as_mut() else {
             godot_error!("MeshInstance not ready.");
             return;

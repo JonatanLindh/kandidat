@@ -1,20 +1,12 @@
-use std::{
-    array,
-    num::NonZeroUsize,
-    ops::{Range, RangeBounds},
-};
-
+use super::BoundingBox;
+use super::visualize::VisualizeOctree;
+use crate::octree::GravityData;
 use derivative::Derivative;
 use glam::{U64Vec3, Vec3A};
-use godot::obj::bounds;
-use itertools::Itertools;
 use rayon::prelude::*;
-
-use super::{BoundingBox, GravityData};
-
+use sharded_slab::Slab;
 use std::fmt::Debug;
-
-use super::*;
+use std::{num::NonZeroUsize, ops::Range};
 
 /// A Morton code is a 64-bit integer that encodes the position of a point in 3D space.
 /// It is used to efficiently index and retrieve points in a spatial data structure.
@@ -70,31 +62,48 @@ pub fn encode(point: Vec3A, bounds: &BoundingBox) -> MortonCode {
 /// A temporary struct to hold Morton code and index during sorting.
 #[derive(Derivative, Clone, Copy)]
 #[derivative(PartialEq, PartialOrd, Eq, Ord)]
-pub struct MortonEncodedItem {
-    #[derivative(Debug(format_with = "format_morton_code"))]
-    pub code: MortonCode,
+pub struct MortonEncodedItem<T> {
+    pub morton_code: MortonCode,
 
     #[derivative(PartialEq = "ignore", PartialOrd = "ignore", Ord = "ignore")]
-    pub body_index: usize,
+    pub item: T,
 }
 
-impl MortonEncodedItem {
-    /// Determines the child octant index (0-7) for a Morton code relative to its parent at 'level'.
+impl<T> MortonEncodedItem<T> {
+    /// Determines the child octant index (0-7) for a Morton code relative to its parent at 'depth'.
     #[inline]
-    const fn get_octant_index_at_level(&self, level: u32) -> usize {
-        // Level 0 -> uses bits 60-62. Level 1 -> bits 57-59, etc.
-        // Max prefix bits used = MAX_DEPTH * 3 = 63.
-        // Shift needed to bring the relevant 3 bits to the LSB position.
-        let shift = (MAX_DEPTH * 3) - 3 * (level + 1);
-        ((self.code >> shift) & 0b111) as usize
+    const fn get_octant_index_at_depth(&self, depth: u32) -> u8 {
+        // Shift the code so the bits for the desired depth are the least significant
+        // Each depth uses 3 bits (z, y, x)
+        // The bits for depth 'depth' start at bit position 3 * (max_tree_depth - 1 - depth)
+        // depth = 0 => shift = 3 * 20 = 60
+        // depth = 1 => shift = 3 * 19 = 57
+        // ...
+        // depth = 20 => shift = 3 * 0 = 0
+
+        let shift_amount = 3 * (MAX_DEPTH - 1 - depth);
+        // Extract the 3 relevant bits (z, y, x for that depth)
+        ((self.morton_code >> shift_amount) & 0b111) as u8
+    }
+
+    #[inline]
+    pub const fn common_prefix_length(&self, other: &Self) -> u32 {
+        // Calculate the length of the longest common prefix (LCP) between two Morton codes.
+        // This is done by XORing the codes and counting leading zeros.
+        let xored = self.morton_code ^ other.morton_code;
+        if xored == 0 {
+            const { MAX_DEPTH * 3 }
+        } else {
+            xored.leading_zeros()
+        }
     }
 }
 
-impl Debug for MortonEncodedItem {
+impl<T: Debug> Debug for MortonEncodedItem<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("MortonEncodedItem")
-            .field("code", &format!("{:b}", self.code))
-            .field("body_index", &self.body_index)
+            .field("code", &format!("{:b}", self.morton_code))
+            .field("body_index", &self.item)
             .finish()
     }
 }
@@ -116,36 +125,15 @@ pub fn spread_bits(v: u32) -> u64 {
     x
 }
 
-/// Calculates the octree level corresponding to a shared Morton prefix length.
-/// Assumes 64-bit code, 3 bits per level. Max useful prefix = 63 (level 21).
+/// Calculates the octree depth corresponding to a shared Morton prefix length.
+/// Assumes 64-bit code, 3 bits per depth. Max useful prefix = 63 (depth 21).
 #[inline]
-const fn split_level_from_lcp(lcp_length: u32) -> u32 {
-    // The level where the split occurs is determined by the first differing bit triplet.
-    // If LCP is 63 (max), they share the deepest prefix, level is effectively MAX_DEPTH.
-    // If LCP is 60, 61, 62, they differ in the last triplet, split is at level 20.
-    // If LCP is 0, 1, 2, they differ in the first triplet, split is at level 0.
-    lcp_length / 3 // Integer division gives the level of the common parent
-}
-
-#[test]
-fn hej() {
-    let points: Vec<_> = (0..=3)
-        .cartesian_product(0..=3)
-        .cartesian_product(0..=3)
-        .map(|((x, y), z)| Vec3A::new(x as f32, y as f32, z as f32))
-        .collect_vec();
-
-    let gds: Vec<_> = points
-        .iter()
-        .map(|p| GravityData {
-            center_of_mass: *p,
-            ..Default::default()
-        })
-        .collect();
-
-    let octree = MortonOctree::build(&gds);
-    dbg!(&octree);
-    dbg!(octree.get_bounds_and_depths());
+pub const fn split_depth_from_lcp(lcp_length: u32) -> u32 {
+    // The depth where the split occurs is determined by the first differing bit triplet.
+    // If LCP is 63 (max), they share the deepest prefix, depth is effectively MAX_DEPTH.
+    // If LCP is 60, 61, 62, they differ in the last triplet, split is at depth 20.
+    // If LCP is 0, 1, 2, they differ in the first triplet, split is at depth 0.
+    lcp_length / 3 // Integer division gives the depth of the common parent
 }
 
 #[derive(Debug, Default, Clone)]
@@ -158,35 +146,12 @@ pub struct Node {
 
     pub children: [Option<NonZeroUsize>; 8],
     pub body_range: Range<usize>,
-    pub level: u32,
+    pub depth: u32,
 
     /// The data associated with this node.
     ///
     /// This can be either internal or leaf data.
     pub data: GravityData,
-}
-
-impl Node {
-    // Helper to create a root node
-    fn root(n: usize, global_bounds: BoundingBox) -> Self {
-        Self {
-            bounds: global_bounds,
-            children: [None; 8],
-            body_range: 0..n,
-            level: 0,
-            data: Default::default(),
-        }
-    }
-    // Helper to create an internal node during construction
-    fn internal(level: u32, bounds: BoundingBox, range_start: usize) -> Self {
-        Self {
-            bounds,
-            children: [None; 8],                 // Initialize empty children
-            body_range: range_start..usize::MAX, // End will be determined later
-            level,
-            data: Default::default(),
-        }
-    }
 }
 
 /// The resulting octree structure.
@@ -196,6 +161,7 @@ pub struct MortonOctree {
     /// Arena storing the explicit node hierarchy built from the sorted list.
     /// Note: The 'Node' struct might need modification from the top-down
     /// version (e.g., explicit child pointers instead of n_subtree_nodes).
+    // pub nodes: Vec<Node>,
     pub nodes: Vec<Node>,
 
     /// The overall bounds of the octree root.
@@ -203,39 +169,39 @@ pub struct MortonOctree {
 }
 
 impl VisualizeOctree for MortonOctree {
-    fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
+    fn get_bounds_and_depths(&mut self) -> Vec<(BoundingBox, u32)> {
         self.nodes
             .iter()
-            .map(|node| (node.bounds, node.level))
+            .map(|node| (node.bounds, node.depth))
             .collect()
     }
 }
 
 impl MortonOctree {
     /// Main function to build the octree from body data using Morton codes.
-    pub fn build(bodies: &[GravityData]) -> Self {
+    pub fn new(bodies: Vec<GravityData>) -> Self {
         if bodies.is_empty() {
             return Default::default();
         }
 
         // --- Stage 1: Calculate Morton Codes ---
-        let bounds = BoundingBox::containing_gravity_data(bodies);
+        let bounds = BoundingBox::containing_gravity_data(&bodies);
 
-        let encode_item = |(index, body): (usize, &GravityData)| {
+        let encode_item = |data: GravityData| {
             // Pass the calculated cubic bounds to the encode function
-            let code = morton::encode(body.center_of_mass, &bounds);
+            let code = encode(data.center_of_mass, &bounds);
             MortonEncodedItem {
-                code,
-                body_index: index,
+                morton_code: code,
+                item: data,
             }
         };
 
         // Use parallel iteration for large datasets, otherwise sequential
         // The value was chosen based on benchmarks
-        let mut encoded_bodies: Vec<MortonEncodedItem> = if bodies.len() >= 3000 {
-            bodies.par_iter().enumerate().map(encode_item).collect()
+        let mut encoded_bodies: Vec<MortonEncodedItem<_>> = if bodies.len() >= 3000 {
+            bodies.into_par_iter().map(encode_item).collect()
         } else {
-            bodies.iter().enumerate().map(encode_item).collect()
+            bodies.into_iter().map(encode_item).collect()
         };
 
         // --- Stage 2: Sort by Morton Code ---
@@ -243,163 +209,157 @@ impl MortonOctree {
         encoded_bodies.par_sort_unstable();
 
         // --- Stage 3: Build Explicit Tree Hierarchy ---
-        let mut nodes = Self::construct_tree_hierarchy(&encoded_bodies, bounds);
-
-        // --- Stage 4: Calculate Aggregate Node Properties ---
-        Self::calculate_node_aggregates(&mut nodes, &encoded_bodies, bodies);
+        let mut nodes = Vec::new();
+        let _root_index = Self::build_recursive(
+            &mut nodes,
+            &encoded_bodies,         // Pass immutable slice
+            0..encoded_bodies.len(), // Range of bodies in the current node
+            &bounds,                 // current node bounds
+            0,                       // current depth
+        );
 
         MortonOctree { nodes, bounds }
     }
 
-    /// Constructs the tree hierarchy from the sorted Morton codes.
-    ///
-    /// ## Input Invariant:
-    ///
-    /// The Morton codes are sorted in ascending order.
-    fn construct_tree_hierarchy(
-        sorted_encoded_bodies: &[MortonEncodedItem],
-        global_bounds: BoundingBox,
-    ) -> Vec<Node> {
-        let n = sorted_encoded_bodies.len();
-        if n == 0 {
-            return Vec::new();
+    fn build_recursive(
+        node_arena: &mut Vec<Node>,
+        sorted_bodies: &[MortonEncodedItem<GravityData>],
+        body_range: Range<usize>,
+        node_bounds: &BoundingBox,
+        current_depth: u32,
+    ) -> usize {
+        let count = body_range.end - body_range.start;
+        if count == 0 {
+            // This shouldn't happen for valid child calls, but handle defensively
+            // Or perhaps return an Option<usize> instead. For simplicity, create dummy.
+            let node_index = node_arena.len();
+            node_arena.push(Node {
+                body_range,
+                children: [None; 8],
+                bounds: *node_bounds,
+                data: Default::default(),
+                depth: current_depth,
+            });
+            return node_index; // Might need better empty node handling
         }
 
-        // --- Node Arena ---
-        let mut nodes = Vec::<Node>::with_capacity(n * 2);
+        let current_node_index = node_arena.len();
 
-        // --- Calculate LCP Array ---
-        // LCP[i] = common prefix length between code[i] and code[i+1]
-        let lcps: Vec<u32> = sorted_encoded_bodies
-            .windows(2) // ! BENCHMARK PAR_WINDOWS
-            .map(|codes| {
-                let code1 = codes[0].code;
-                let code2 = codes[1].code;
-                let xored = code1 ^ code2;
-                // Handle identical codes explicitly for max LCP length
-                if xored == 0 {
-                    const { MAX_DEPTH * 3 }
-                } else {
-                    xored.leading_zeros()
-                }
-            })
-            .collect();
+        // --- Leaf Node ---
+        if count == 1 || current_depth == MAX_DEPTH {
+            let data = GravityData::merge(body_range.clone().map(|i| &sorted_bodies[i].item));
 
-        // --- Initialize Root & Stack ---
-        nodes.push(Node::root(n, global_bounds));
+            node_arena.push(Node {
+                body_range,
+                children: [None; 8],
+                bounds: *node_bounds,
+                data,
+                depth: current_depth,
+            });
 
-        // Stack holds indices of nodes whose children are currently being processed
-        let mut parent_stack = vec![0usize]; // Start with root index
+            return current_node_index;
+        }
 
-        // --- Iterate through split points ---
-        for (i, lcp_length) in lcps.into_iter().enumerate() {
-            let split_level = split_level_from_lcp(lcp_length);
+        // --- Internal Node ---
+        // Add a placeholder node first, we'll fill it later after children are processed
+        node_arena.push(Node {
+            body_range: body_range.clone(),
+            children: [None; 8],  // Placeholder
+            bounds: *node_bounds, // Placeholder
+            ..Default::default()  // Placeholder
+        });
 
-            // --- Pop completed nodes from stack ---
-            // Pop nodes deeper than the split level, finalizing their range
-            while let Some(finished_node_idx) =
-                parent_stack.pop_if(|parent| nodes[*parent].level > split_level)
-            {
-                nodes[finished_node_idx].body_range.end = i + 1;
-            }
+        // --- Partition bodies into 8 children based on Morton codes ---
+        // Since bodies are sorted by Morton code, all bodies belonging to a specific
+        // child octant at this depth will form a contiguous sub-slice.
+        // We need to find the split points.
 
-            // --- Ensure parent at split_level exists (create intermediates if needed) ---
-            // This handles cases where the LCP jump is large (e.g., LCP drops significantly)
-            let mut curr_parent_idx = *parent_stack.last().unwrap();
-            while nodes[curr_parent_idx].level < split_level {
-                let parent_level = nodes[curr_parent_idx].level;
-                // Determine which octant body 'i+1' falls into relative to this ancestor
-                let octant = sorted_encoded_bodies[i + 1].get_octant_index_at_level(parent_level);
+        // Stores start index for each child + end of last
+        let mut split_indices = [body_range.start; 9];
+        split_indices[8] = body_range.end; // End of the range for child 7
 
-                // Create the intermediate node
-                let intermediate_level = parent_level + 1;
-                let intermediate_bounds = nodes[curr_parent_idx]
-                    .bounds
-                    .get_octant_bounds_morton(octant);
-
-                let new_idx = nodes.len();
-
-                nodes.push(Node::internal(
-                    intermediate_level,
-                    intermediate_bounds,
-                    i + 1,
-                ));
-
-                // Link intermediate node as child of current parent
-                nodes[curr_parent_idx].children[octant] = NonZeroUsize::new(new_idx);
-                parent_stack.push(new_idx);
-
-                // ADD THIS: Check the link immediately after making it
-                if curr_parent_idx == 1 && octant == 4 {
-                    // Check the specific case from i=3 trace
-                    dbg!(
-                        "Link Check (i=3):",
-                        curr_parent_idx,
-                        octant,
-                        new_idx,
-                        &nodes[curr_parent_idx].children
-                    );
-                }
-
-                curr_parent_idx = new_idx;
-            }
-
-            // --- Create/link node for body i+1 branch ---
-            let parent_idx = *parent_stack.last().unwrap(); // Parent is now at split_level
-            let new_node_level = split_level + 1;
-            let octant = sorted_encoded_bodies[i + 1].get_octant_index_at_level(split_level);
-            let new_bounds = nodes[parent_idx].bounds.get_octant_bounds_morton(octant);
-            let new_idx = nodes.len();
-
-            // --- Debugging Point ---
-            let next_body_code = sorted_encoded_bodies[i + 1].code;
-            let calculated_octant =
-                sorted_encoded_bodies[i + 1].get_octant_index_at_level(split_level);
-            let calculated_bounds = nodes[parent_idx]
-                .bounds
-                .get_octant_bounds_morton(calculated_octant);
-            let new_node_idx = nodes.len(); // Index where the new node *will be* placed
-
-            dbg!(
-                i, // Index of the split point being processed
-                lcp_length,
-                split_level,
-                parent_idx,              // Index of the parent node determined
-                nodes[parent_idx].level, // Level of the parent
-                next_body_code,          // Code of the body starting the new branch
-                calculated_octant,       // The octant this branch belongs to relative to parent
-                new_node_level,          // Expected level of the new node
-                calculated_bounds,       // Bounds calculated for the new node
-                new_node_idx             // Index the new node will have in the arena
+        // Find the start index for children 1 through 7
+        let mut current_search_start = body_range.start;
+        for octant in 0..7 {
+            // Find divisions between octant N and N+1
+            let split_point = Self::find_octant_split(
+                sorted_bodies,
+                current_search_start..(body_range.end),
+                octant, // We are looking for the first particle NOT in this octant or lower
+                current_depth,
             );
-
-            // Add the new node to the arena
-            nodes.push(Node::internal(new_node_level, new_bounds, i + 1));
-
-            // Link it to the parent
-            nodes[parent_idx].children[octant] = NonZeroUsize::new(new_idx);
-
-            // Push the new node onto the stack as it's now the active branch
-            parent_stack.push(new_idx);
+            split_indices[octant as usize + 1] = split_point;
+            current_search_start = split_point; // Start next search from here
         }
 
-        // --- Finalize ranges for nodes remaining on stack ---
-        // After the loop, the stack contains the path from the root
-        // to the node containing the last body
-        while let Some(idx) = parent_stack.pop() {
-            nodes[idx].body_range.end = n;
+        // --- Recursively build children and gather properties ---
+        let mut child_node_indices = [None; 8];
+        let mut total_mass_acc = 0.0;
+        let mut weighted_pos_sum_acc = Vec3A::ZERO;
+
+        // Potential parallelization point using rayon::scope or join
+        for (octant, child_range) in split_indices
+            .array_windows::<2>()
+            .map(|[a, b]| *a..*b)
+            .enumerate()
+        {
+            if !child_range.is_empty() {
+                let child_bounds = node_bounds.get_octant_bounds_morton(octant as u8);
+                let child_node_index = Self::build_recursive(
+                    node_arena,
+                    sorted_bodies,
+                    child_range,
+                    &child_bounds,
+                    current_depth + 1,
+                );
+                child_node_indices[octant] = NonZeroUsize::new(child_node_index);
+
+                // Accumulate mass and weighted position from the child
+                // Read the properties from the newly created child node
+                let child_node = &node_arena[child_node_index]; // Read back the child node
+                total_mass_acc += child_node.data.mass;
+                weighted_pos_sum_acc += child_node.data.weighted_center();
+            } else {
+                child_node_indices[octant] = None;
+            }
         }
 
-        nodes
+        // --- Finalize the current internal node ---
+        let center_of_mass = if total_mass_acc > 0.0 {
+            weighted_pos_sum_acc / total_mass_acc
+        } else {
+            node_bounds.center // Geometric center if mass is zero
+        };
+
+        // Update the placeholder node that was added earlier
+        let current_node = &mut node_arena[current_node_index];
+        *current_node = Node {
+            body_range,
+            bounds: *node_bounds,
+            children: child_node_indices,
+            data: GravityData {
+                center_of_mass,
+                mass: total_mass_acc,
+            },
+            ..*current_node
+        };
+
+        current_node_index
     }
 
-    // --- Placeholder for aggregate calculation ---
-    fn calculate_node_aggregates(
-        nodes: &mut Vec<Node>,
-        sorted_encoded_bodies: &[MortonEncodedItem],
-        original_bodies: &[GravityData],
-    ) {
-        eprintln!("WARNING: calculate_node_aggregates not implemented!");
-        // TODO: Implement aggregate calculation
+    // Helper function to find the first particle index in [range_start, range_end)
+    // that does *not* belong to `target_octant` or lower octants at the given depth.
+    // Uses binary search since the input slice `sorted_bodies` is sorted by Morton code.
+    fn find_octant_split(
+        sorted_bodies: &[MortonEncodedItem<GravityData>],
+        range: Range<usize>,
+        target_octant: u8, // Find first particle with octant > target_octant
+        depth: u32,
+    ) -> usize {
+        let pred = |item: &MortonEncodedItem<GravityData>| {
+            item.get_octant_index_at_depth(depth) <= target_octant
+        };
+
+        range.start + sorted_bodies[range].partition_point(pred)
     }
 }

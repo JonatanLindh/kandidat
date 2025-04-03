@@ -8,13 +8,13 @@ use glam::Vec3A;
 use godot::prelude::*;
 use rand::{Rng, SeedableRng, rngs::StdRng};
 use rayon::{
-    iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator},
+    iter::{IntoParallelIterator, ParallelIterator},
     slice::ParallelSliceMut,
 };
 use rust_gdext::{
     octree::{
         BoundingBox, GravityData, Octree,
-        morton::{self, MortonEncodedItem},
+        morton::{self, MortonEncodedItem, MortonOctree},
         parallel::ParallelOctree,
     },
     physics::gravity::controller::{GravityController, SimulatedBody},
@@ -135,13 +135,13 @@ fn octree_build(c: &mut Criterion) {
             },
         );
 
-        group.bench_with_input(BenchmarkId::new("parallel", size), size, |b, &size| {
+        group.bench_with_input(BenchmarkId::new("morton", size), size, |b, &size| {
             let bodies = create_bench_bodies(size);
 
             b.iter_batched(
                 || bodies.iter().map(GravityData::from).collect(),
                 |bodies| {
-                    let octree = ParallelOctree::build(bodies);
+                    let octree = MortonOctree::new(bodies);
                     black_box(octree);
                 },
                 BatchSize::LargeInput,
@@ -237,15 +237,14 @@ fn morton_encode(c: &mut Criterion) {
             &data,
             |b, data_ref| {
                 b.iter(|| {
-                    let encoded_bodies: Vec<MortonEncodedItem> = data_ref
+                    let encoded_bodies: Vec<_> = data_ref
                         .iter()
-                        .enumerate()
-                        .map(|(index, body)| {
+                        .map(|body| {
                             // Pass the calculated cubic bounds to the encode function
                             let code = morton::encode(body.center_of_mass, &bounds);
                             MortonEncodedItem {
-                                code,
-                                body_index: index,
+                                morton_code: code,
+                                item: body,
                             }
                         })
                         .collect();
@@ -260,15 +259,14 @@ fn morton_encode(c: &mut Criterion) {
             &data,
             |b, data_ref| {
                 b.iter(|| {
-                    let encoded_bodies: Vec<MortonEncodedItem> = data_ref
-                        .par_iter()
-                        .enumerate()
-                        .map(|(index, body)| {
+                    let encoded_bodies: Vec<_> = data_ref
+                        .into_par_iter()
+                        .map(|body| {
                             // Pass the calculated cubic bounds to the encode function
                             let code = morton::encode(body.center_of_mass, &bounds);
                             MortonEncodedItem {
-                                code,
-                                body_index: index,
+                                morton_code: code,
+                                item: body,
                             }
                         })
                         .collect();
@@ -291,15 +289,14 @@ fn morton_sort(c: &mut Criterion) {
         let data = random_gravity_data(&mut rng, *size, 1000.0);
         let bounds = BoundingBox::containing_gravity_data(&data);
 
-        let encoded_bodies: Vec<MortonEncodedItem> = data
-            .par_iter()
-            .enumerate()
-            .map(|(index, body)| {
+        let encoded_bodies: Vec<_> = data
+            .into_par_iter()
+            .map(|body| {
                 // Pass the calculated cubic bounds to the encode function
-                let code = morton::encode(body.center_of_mass, &bounds);
+                let morton_code = morton::encode(body.center_of_mass, &bounds);
                 MortonEncodedItem {
-                    code,
-                    body_index: index,
+                    morton_code,
+                    item: body,
                 }
             })
             .collect();
@@ -341,7 +338,7 @@ fn morton_sort(c: &mut Criterion) {
                 b.iter_batched(
                     || data_ref.clone(),
                     |mut data| {
-                        data.par_sort_unstable_by_key(|item| item.code);
+                        data.par_sort_unstable_by_key(|item| item.morton_code);
                         black_box(data);
                     },
                     BatchSize::SmallInput,
