@@ -16,15 +16,6 @@ public partial class GraphPlotter : Control
 	Label frameTimeLabel;
 	Label memoryUsageLabel;
 
-	Label fps1Label;
-	Label fps0Label;
-
-	Label frametime1Label;
-	Label frametime0Label;
-
-	Label memory1Label;
-	Label memory0Label;
-
 	[Export] float timeScale = 10;
 
 	[ExportGroup("Y-axis")]
@@ -78,15 +69,6 @@ public partial class GraphPlotter : Control
 		fpsLabel = GetNode<Label>("%FPSLabel");
 		frameTimeLabel = GetNode<Label>("%FrametimeLabel");
 		memoryUsageLabel = GetNode<Label>("%MemoryLabel");
-
-		fps1Label = GetNode<Label>("%1FPS");
-		fps0Label = GetNode<Label>("%0FPS");
-
-		frametime1Label = GetNode<Label>("%1Frametime");
-		frametime0Label = GetNode<Label>("%0Frametime");
-
-		memory1Label = GetNode<Label>("%1Memory");
-		memory0Label = GetNode<Label>("%0Memory");
 
 		fpsYAxis = new GraphYAxis(GetNode<VBoxContainer>("%FPSYAxis"), fpsPanel, yAxisLabel, yAxisHSeparator, yAxisCount);
 		frametimeYAxis = new GraphYAxis(GetNode<VBoxContainer>("%FrametimeYAxis"), frameTimePanel, yAxisLabel, yAxisHSeparator, yAxisCount);
@@ -151,14 +133,11 @@ public partial class GraphPlotter : Control
 			maxValue = value + padding;
 			RescaleGraph(type);
 			RedrawYAxis(type, maxValue);
-
-			UpdateMaxMinLabels();
 		}
 
 		if(value < minValue)
 		{
 			minValue = value;
-			UpdateMaxMinLabels();
 		}
 
 		float x = currentTime * timeScale;
@@ -301,21 +280,6 @@ public partial class GraphPlotter : Control
 		pointsList.RemoveAll(point => point.X < 0);
 
 		RedrawGraph(pointsList, line);
-	}
-
-	/// <summary>
-	/// Updates the max and min labels for FPS, frame time, and memory usage.
-	/// </summary>
-	private void UpdateMaxMinLabels()
-	{
-		fps1Label.Text = Math.Round(maxFps, 0).ToString();
-		fps0Label.Text = Math.Round(minFps, 0).ToString();
-
-		frametime1Label.Text = Math.Round(maxFrameTime, 2).ToString();
-		frametime0Label.Text = Math.Round(minFrameTime, 2).ToString();
-
-		memory1Label.Text = Math.Round(maxMemoryUsage, 2).ToString();
-		memory0Label.Text = Math.Round(minMemoryUsage, 2).ToString();
 	}
 
 	/// <summary>
