@@ -3,12 +3,14 @@ using System;
 
 public partial class GraphYAxis
 {
+	private Panel panel;
 	private int yAxisCount;
 	private Label[] labels;
 	private HSeparator[] separators;
 
 	public GraphYAxis(VBoxContainer yAxisContainer, Panel panel, PackedScene yAxisLabel, PackedScene yAxisHSeparator, int yAxisCount)
 	{
+		this.panel = panel;
 		this.yAxisCount = yAxisCount;
 		labels = new Label[yAxisCount];
 		separators = new HSeparator[yAxisCount];
@@ -31,14 +33,22 @@ public partial class GraphYAxis
 	/// <param name="maxValue"></param>
 	public void RedrawYAxis(float maxValue)
 	{
+		float panelHeight = panel.GetRect().Size.Y;
+
 		for (int i = 0; i < yAxisCount; i++)
 		{
 			Label cL = labels[i];
 			HSeparator cS = separators[i];
-			cL.Text = Math.Round(maxValue - (maxValue / yAxisCount * i), 0).ToString();
 
 			float y = cL.Position.Y + cL.Size.Y / yAxisCount;
 			cS.Position = new Vector2(0, y);
+
+			// Since the separator & labels are offset,
+			// calculate the actual value that those would represent
+			float normalizedPos = y / panelHeight;
+        	float actualValue = maxValue * (1.0f - normalizedPos);
+
+			cL.Text = Math.Round(actualValue, 0).ToString();
 		}
 	}
 }
