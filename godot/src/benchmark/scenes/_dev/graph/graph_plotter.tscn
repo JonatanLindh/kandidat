@@ -72,17 +72,88 @@ text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="FPSYAxis" type="VBoxContainer" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/FPSYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer/FPSYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer/FPSYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer/FPSYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
 [node name="FPSPanel" type="Panel" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
+clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer/FPSPanel"]
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/HBoxContainer/FPSPanel"]
 layout_mode = 1
-anchors_preset = 0
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
 
-[node name="FPSLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer/FPSPanel/Control"]
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer/HBoxContainer/FPSPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
+
+[node name="HSeparator3" type="HSeparator" parent="VBoxContainer/HBoxContainer/FPSPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
+
+[node name="HSeparator4" type="HSeparator" parent="VBoxContainer/HBoxContainer/FPSPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
+
+[node name="FPSLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer/FPSPanel"]
 unique_name_in_owner = true
 width = 2.0
 
@@ -171,17 +242,87 @@ text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="FrametimeYAxis" type="VBoxContainer" parent="VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2/FrametimeYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer2/FrametimeYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer2/FrametimeYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer2/FrametimeYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
 [node name="FrametimePanel" type="Panel" parent="VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
 layout_mode = 1
-anchors_preset = 0
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
 
-[node name="FrametimeLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer2/FrametimePanel/Control"]
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
+
+[node name="HSeparator3" type="HSeparator" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
+
+[node name="HSeparator4" type="HSeparator" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
+
+[node name="FrametimeLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
 unique_name_in_owner = true
 width = 2.0
 
@@ -270,17 +411,87 @@ text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="MemoryYAxis" type="VBoxContainer" parent="VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.1
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer3/MemoryYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer3/MemoryYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer3/MemoryYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer3/MemoryYAxis"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_font_sizes/font_size = 10
+text = "11111111111111111111"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
 [node name="MemoryPanel" type="Panel" parent="VBoxContainer/HBoxContainer3"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
 layout_mode = 1
-anchors_preset = 0
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
 
-[node name="MemoryLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer3/MemoryPanel/Control"]
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
+
+[node name="HSeparator3" type="HSeparator" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
+
+[node name="HSeparator4" type="HSeparator" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = 3.0
+offset_bottom = 4.0
+grow_horizontal = 2
+
+[node name="MemoryLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
 unique_name_in_owner = true
 width = 2.0
 

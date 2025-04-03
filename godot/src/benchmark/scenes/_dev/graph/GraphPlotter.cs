@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 public partial class GraphPlotter : Control
 {
@@ -25,6 +24,10 @@ public partial class GraphPlotter : Control
 
 	Label memory1Label;
 	Label memory0Label;
+
+	VBoxContainer fpsYaxis;
+	VBoxContainer frametimeYaxis;
+	VBoxContainer memoryYaxis;
 
 	float panelWidth;
 	float panelHeight;
@@ -52,6 +55,10 @@ public partial class GraphPlotter : Control
 
 		memory1Label = GetNode<Label>("%1Memory");
 		memory0Label = GetNode<Label>("%0Memory");
+
+		fpsYaxis = GetNode<VBoxContainer>("%FPSYAxis");
+		frametimeYaxis = GetNode<VBoxContainer>("%FrametimeYAxis");
+		memoryYaxis = GetNode<VBoxContainer>("%MemoryYAxis");
 	}
 
 	public override void _Process(double delta)
@@ -120,6 +127,7 @@ public partial class GraphPlotter : Control
 		{
 			maxValue = value + padding;
 			RescaleGraph(type);
+			RedrawYAxis(type);
 
 			UpdateMaxMinLabels();
 		}
@@ -173,6 +181,59 @@ public partial class GraphPlotter : Control
 
 		// Clear and redraw line
 		RedrawGraph(points, line);
+	}
+
+	private void RedrawYAxis(BenchmarkDatapointEnum datapointType)
+	{
+		Panel panel = fpsPanel;
+		VBoxContainer yAxis = fpsYaxis;
+		float maxVal = 0.0f;
+
+		float[] labelYPositions = new float[4];
+		int i = 0;
+
+		switch (datapointType)
+		{
+			case BenchmarkDatapointEnum.FPS:
+				panel = fpsPanel;
+				yAxis = fpsYaxis;
+				maxVal = maxFps;
+				break;
+			case BenchmarkDatapointEnum.FrameTime:
+				panel = frameTimePanel;
+				yAxis = frametimeYaxis;
+				maxVal = maxFrameTime;
+				break;
+			case BenchmarkDatapointEnum.MemoryUsage:
+				panel = memoryUsagePanel;
+				yAxis = memoryYaxis;
+				maxVal = maxMemoryUsage;
+				break;
+		}
+
+		foreach (var c in yAxis.GetChildren())
+		{
+			if (c is Label)
+			{
+				Label cL = (Label)c;
+				cL.Text = Math.Round(maxVal - (maxVal / 4 * i), 0).ToString();
+
+				float y = cL.Position.Y + cL.Size.Y / 4;
+				labelYPositions[i] = y;
+				i++;
+			}
+		}
+
+		i = 0;
+		foreach (var c in panel.GetChildren())
+		{
+			if (c is HSeparator)
+			{
+				HSeparator cS = (HSeparator)c;
+				cS.Position = new Vector2(0, labelYPositions[i]);
+				i++;
+			}
+		}
 	}
 
 	private void RedrawGraph(List<Vector2> points, Line2D line)
