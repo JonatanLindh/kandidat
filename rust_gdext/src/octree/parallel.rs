@@ -29,7 +29,7 @@ pub struct ParallelOctree {
 }
 
 impl VisualizeOctree for ParallelOctree {
-    fn get_bounds_and_depths(&mut self) -> Vec<(BoundingBox, u32)> {
+    fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
         let root_half_width = self.bounds.half_width;
         self.nodes
             .iter()

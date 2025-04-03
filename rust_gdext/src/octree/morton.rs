@@ -4,7 +4,6 @@ use crate::octree::GravityData;
 use derivative::Derivative;
 use glam::{U64Vec3, Vec3A};
 use rayon::prelude::*;
-use sharded_slab::Slab;
 use std::fmt::Debug;
 use std::{num::NonZeroUsize, ops::Range};
 
@@ -169,7 +168,7 @@ pub struct MortonOctree {
 }
 
 impl VisualizeOctree for MortonOctree {
-    fn get_bounds_and_depths(&mut self) -> Vec<(BoundingBox, u32)> {
+    fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
         self.nodes
             .iter()
             .map(|node| (node.bounds, node.depth))

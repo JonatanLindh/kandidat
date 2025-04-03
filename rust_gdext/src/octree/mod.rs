@@ -52,6 +52,15 @@ impl From<&SimulatedBody> for GravityData {
 
 impl GravityData {
     #[inline]
+    pub fn merge_reduce_fn(self, other: &Self) -> Self {
+        let total_mass = self.mass + other.mass;
+        Self {
+            center_of_mass: (self.weighted_center() + other.weighted_center()) / total_mass,
+            mass: total_mass,
+        }
+    }
+
+    #[inline]
     pub fn weighted_center(&self) -> Vec3A {
         if self.mass > 0.0 {
             self.center_of_mass * self.mass
@@ -61,31 +70,8 @@ impl GravityData {
     }
 
     fn merge(ds: impl IntoIterator<Item = &Self>) -> Self {
-        ds.into_iter().fold(Self::default(), |acc, v| {
-            let total_mass = acc.mass + v.mass;
-            Self {
-                center_of_mass: (acc.weighted_center() + v.weighted_center()) / total_mass,
-                mass: total_mass,
-            }
-        })
-        // let total_mass = ds.into_iter().map(|d| d.mass).sum();
-
-        // let total_mass_inv = if total_mass > 0.0 {
-        //     1.0 / total_mass
-        // } else {
-        //     0.0
-        // };
-
-        // let center_of_mass = ds
-        //     .into_iter()
-        //     .map(|d| d.center_of_mass * d.mass * total_mass_inv)
-        //     .reduce(|a, b| a + b)
-        //     .unwrap_or_default();
-
-        // GravityData {
-        //     mass: total_mass,
-        //     center_of_mass,
-        // }
+        ds.into_iter()
+            .fold(Self::default(), |acc, v| acc.merge_reduce_fn(v))
     }
 }
 
@@ -284,7 +270,7 @@ impl BoundingBox {
 }
 
 impl VisualizeOctree for Octree<'_, GravityData> {
-    fn get_bounds_and_depths(&mut self) -> Vec<(BoundingBox, u32)> {
+    fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
         let mut result = Vec::new();
         let mut stack: Vec<(usize, u32)> = Vec::new();
         stack.push((self.root_index, 0));
