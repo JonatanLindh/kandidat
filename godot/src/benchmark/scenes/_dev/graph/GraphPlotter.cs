@@ -29,6 +29,17 @@ public partial class GraphPlotter : Control
 	VBoxContainer frametimeYaxis;
 	VBoxContainer memoryYaxis;
 
+	int yAxisCount = 4;
+	Label[] fpsYAxisLabels;
+	Label[] frametimeYAxisLabels;
+	Label[] memoryYAxisLabels;
+	HSeparator[] fpsYAxisSeparators;
+	HSeparator[] frametimeYAxisSeparators;
+	HSeparator[] memoryYAxisSeparators;
+
+	[Export] PackedScene yAxisLabel;
+	[Export] PackedScene yAxisHSeparator;
+
 	float panelWidth;
 	float panelHeight;
 	float currentTime = 0.0f;
@@ -59,6 +70,14 @@ public partial class GraphPlotter : Control
 		fpsYaxis = GetNode<VBoxContainer>("%FPSYAxis");
 		frametimeYaxis = GetNode<VBoxContainer>("%FrametimeYAxis");
 		memoryYaxis = GetNode<VBoxContainer>("%MemoryYAxis");
+
+		fpsYAxisLabels = new Label[yAxisCount];
+		frametimeYAxisLabels = new Label[yAxisCount];
+		memoryYAxisLabels = new Label[yAxisCount];
+		fpsYAxisSeparators = new HSeparator[yAxisCount];
+		frametimeYAxisSeparators = new HSeparator[yAxisCount];
+		memoryYAxisSeparators = new HSeparator[yAxisCount];
+		InitYAxis();
 	}
 
 	public override void _Process(double delta)
@@ -189,8 +208,10 @@ public partial class GraphPlotter : Control
 		VBoxContainer yAxis = fpsYaxis;
 		float maxVal = 0.0f;
 
-		float[] labelYPositions = new float[4];
-		int i = 0;
+		Label[] labels = fpsYAxisLabels;
+		HSeparator[] separators = fpsYAxisSeparators;
+
+		float[] labelYPositions = new float[yAxisCount];
 
 		switch (datapointType)
 		{
@@ -198,41 +219,63 @@ public partial class GraphPlotter : Control
 				panel = fpsPanel;
 				yAxis = fpsYaxis;
 				maxVal = maxFps;
+				labels = fpsYAxisLabels;
+				separators = fpsYAxisSeparators;
 				break;
 			case BenchmarkDatapointEnum.FrameTime:
 				panel = frameTimePanel;
 				yAxis = frametimeYaxis;
 				maxVal = maxFrameTime;
+				labels = frametimeYAxisLabels;
+				separators = frametimeYAxisSeparators;
 				break;
 			case BenchmarkDatapointEnum.MemoryUsage:
 				panel = memoryUsagePanel;
 				yAxis = memoryYaxis;
 				maxVal = maxMemoryUsage;
+				labels = memoryYAxisLabels;
+				separators = memoryYAxisSeparators;
 				break;
 		}
 
-		foreach (var c in yAxis.GetChildren())
+		for(int i = 0; i < yAxisCount; i++)
 		{
-			if (c is Label)
-			{
-				Label cL = (Label)c;
-				cL.Text = Math.Round(maxVal - (maxVal / 4 * i), 0).ToString();
+			Label cL = labels[i];
+			HSeparator cS = separators[i];
+			cL.Text = Math.Round(maxVal - (maxVal / yAxisCount * i), 0).ToString();
 
-				float y = cL.Position.Y + cL.Size.Y / 4;
-				labelYPositions[i] = y;
-				i++;
-			}
+			float y = cL.Position.Y + cL.Size.Y / yAxisCount;
+			cS.Position = new Vector2(0, y);
 		}
+	}
 
-		i = 0;
-		foreach (var c in panel.GetChildren())
+	private void InitYAxis()
+	{
+		for (int i = 0; i < yAxisCount; i++)
 		{
-			if (c is HSeparator)
-			{
-				HSeparator cS = (HSeparator)c;
-				cS.Position = new Vector2(0, labelYPositions[i]);
-				i++;
-			}
+			Label labelFps = yAxisLabel.Instantiate<Label>();
+			fpsYaxis.AddChild(labelFps);
+			fpsYAxisLabels[i] = labelFps;
+
+			Label labelFrametime = yAxisLabel.Instantiate<Label>();
+			frametimeYaxis.AddChild(labelFrametime);
+			frametimeYAxisLabels[i] = labelFrametime;
+
+			Label labelMemory = yAxisLabel.Instantiate<Label>();
+			memoryYaxis.AddChild(labelMemory);
+			memoryYAxisLabels[i] = labelMemory;
+
+			HSeparator separatorFps = yAxisHSeparator.Instantiate<HSeparator>();
+			fpsPanel.AddChild(separatorFps);
+			fpsYAxisSeparators[i] = separatorFps;
+
+			HSeparator separatorFrametime = yAxisHSeparator.Instantiate<HSeparator>();
+			frameTimePanel.AddChild(separatorFrametime);
+			frametimeYAxisSeparators[i] = separatorFrametime;
+
+			HSeparator separatorMemory = yAxisHSeparator.Instantiate<HSeparator>();
+			memoryUsagePanel.AddChild(separatorMemory);
+			memoryYAxisSeparators[i] = separatorMemory;
 		}
 	}
 
