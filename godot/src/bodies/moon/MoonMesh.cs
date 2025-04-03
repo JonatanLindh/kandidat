@@ -31,6 +31,16 @@ public partial class MoonMesh : Node
 			OnResourceSet();
 		}
 	}
+	[Export]
+	public int Resolution
+	{
+		get => _resolution;
+		set
+		{
+			_resolution = value;
+			OnResourceSet();
+		}
+	}
 	
 	[ExportCategory("Material Settings")]
 	[Export] public Material MeshMaterial { get; set; }
@@ -114,6 +124,7 @@ public partial class MoonMesh : Node
 	private MarchingCube _marchingCube;
 	private int _radius = 50;
 	private MeshInstance3D _mesh;
+	private int _resolution = 40;
 	
 	
 	private int _amountOfCraters = 10;
@@ -140,7 +151,9 @@ public partial class MoonMesh : Node
 
 	private float[,,] GenerateDataPoints(int radius)
 	{
-		var dataPoints = new float[2 * radius + 1, 2 * radius + 1, 2 * radius + 1];
+		var diameter = radius * 2 + 1;
+		var dataPoints = new float[diameter, diameter, diameter];
+		Vector3 center = new Vector3(radius, radius, radius);
 
 		for (var x = 0; x < dataPoints.GetLength(0); x++)
 		{
@@ -148,16 +161,16 @@ public partial class MoonMesh : Node
 			{
 				for (var z = 0; z < dataPoints.GetLength(2); z++)
 				{
-					float value = -1;
-					if (new Vector3(radius, radius, radius).DistanceTo(new Vector3(x, y, z)) < radius)
-					{
-						value = 1;
-					}
-					else
-					{
-						value = -1;
-					}
-					
+					Vector3 point = new Vector3(x, y, z);
+					float distance = center.DistanceTo(point);
+                 
+					// Adjust threshold to match radius more precisely
+					// Using radius - 0.5 creates a more visually accurate sphere
+					float value = (radius - 0.5f) - distance;
+                 
+					// Clamp to ensure values stay in [-1, 1] range
+					value = Mathf.Clamp(value, -1.0f, 1.0f);
+                 
 					dataPoints[x, y, z] = value;
 				}
 			}
@@ -179,7 +192,7 @@ public partial class MoonMesh : Node
 			_mesh.QueueFree();
 			_mesh = null;
 		}
-		var dataPoints = GenerateDataPoints(_radius);
+		var dataPoints = GenerateDataPoints(_resolution);
 		_marchingCube ??= new MarchingCube();
 		_mesh = _marchingCube.GenerateMesh(dataPoints);
 		_craters = GenerateCraterCenters(_amountOfCraters);
@@ -187,16 +200,26 @@ public partial class MoonMesh : Node
 		if(MeshMaterial != null)
 			_mesh.MaterialOverride = MeshMaterial;
 		GenerateCraters();
+		_mesh.Scale = Vector3.One * (1 / (float)_resolution);
+		_mesh.Scale *= _radius;
 		AddChild(_mesh);
 	}
 	
 
 	private void GenerateCraters()
 	{
-		if (_craters == null) return;
+		if (_craters == null || _mesh?.Mesh == null) return;
+		// Check if mesh is valid and has surfaces
+		if (_mesh.Mesh.GetSurfaceCount() == 0)
+		{
+			//GD.PrintErr("Mesh has no surfaces to modify for craters");
+			return;
+		}
+    
 		var meshData = _mesh.Mesh.SurfaceGetArrays(0);
 		var positions = meshData[(int)Mesh.ArrayType.Vertex].AsVector3Array();
 		var normal = meshData[(int)Mesh.ArrayType.Normal].AsVector3Array();
+
 		foreach (var crater in _craters)
 		{
 			for (int i = 0; i < positions.Length; i++)
@@ -240,7 +263,7 @@ public partial class MoonMesh : Node
 		{
 			// Randomize the Crater Radius
 			var craterRadius = Mathf.Lerp(_minCraterRadius, _maxCraterRadius, (float)GD.RandRange(0f, 1f));
-			var centre = RandomVector3(_radius - 5, _radius,_radius * Vector3.One);
+			var centre = RandomVector3(_resolution - 5, _resolution,_resolution * Vector3.One);
 			craters[i] = new Crater(craterRadius, centre);
 		}
 		return craters;

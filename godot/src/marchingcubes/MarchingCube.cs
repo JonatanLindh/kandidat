@@ -54,7 +54,17 @@ public class MarchingCube
     public MeshInstance3D GenerateMesh(float[,,] datapoints)
     {
         var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
-
+        
+        // Calculate the actual geometric center of the vertices
+        var center = Vector3.Zero;
+        if (vertices.Count > 0)
+        {
+            foreach (var vertex in vertices)
+            {
+                center += vertex;
+            }
+            center /= vertices.Count;
+        }
         var surfaceTool = new SurfaceTool();
         surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
 
@@ -63,7 +73,9 @@ public class MarchingCube
 
         foreach (var vertex in vertices)
         {
-            surfaceTool.AddVertex(vertex);
+            // Center the mesh using the actual geometric center
+            var newVertex = vertex - center;
+            surfaceTool.AddVertex(newVertex);
         }
         vertices.Clear();
         surfaceTool.GenerateNormals();
@@ -71,6 +83,7 @@ public class MarchingCube
         Mesh mesh = surfaceTool.Commit();
         var meshInstance = new MeshInstance3D();
         meshInstance.Mesh = mesh;
+        meshInstance.CreateMultipleConvexCollisions();
         return meshInstance;
     }
 }

@@ -16,11 +16,6 @@ shader_parameter/occlusion_strength = 1.0
 shader_parameter/texture_scale = Vector2(0.02, 0.02)
 shader_parameter/texture_offset = Vector2(0, 0)
 
-[node name="Moon" type="Node3D"]
+[node name="Moon" type="GravityBody"]
 script = ExtResource("1_7s32x")
-Radius = 40
 MeshMaterial = SubResource("ShaderMaterial_b3avl")
-AmountOfCraters = 30
-MinCraterRadius = 2.0
-MaxCraterRadius = 5.0
-Smoothness = 1.0
