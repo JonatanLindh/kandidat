@@ -126,9 +126,9 @@ public partial class Benchmark : Node3D
 		var timeSpan = DateTime.Parse(lastTime) - DateTime.Parse(firstTime);
 		GD.Print($"Test took: {timeSpan.Minutes} min and {timeSpan.Seconds} seconds\n");
 
-		GD.Print($"Average FPS: {processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FPS)}");
-		GD.Print($"1% low FPS: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.01f)}");
-		GD.Print($"0.1% low FPS: {processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.001f)}\n");
+		GD.Print($"Average FPS: {Math.Round(processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FPS), 1)}");
+		GD.Print($"1% low FPS: {Math.Round(processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.01f), 1)}");
+		GD.Print($"0.1% low FPS: {Math.Round(processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FPS, low: true, 0.001f), 1)}\n");
 
 		float averageFrameTime = processor.GetAverage(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime);
 		float onePercentHighFrameTime = processor.GetPercentageLowOrHigh(currentSceneIndex, result, BenchmarkDatapointEnum.FrameTime, low: false, 0.01f);
@@ -186,9 +186,9 @@ public partial class Benchmark : Node3D
 			var averageFPS = processor.GetAverage(i, result, BenchmarkDatapointEnum.FPS);
 			var onePercentLowFPS = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FPS, low: true, 0.01f);
 			var pointOnePercentLowFPS = processor.GetPercentageLowOrHigh(i, result, BenchmarkDatapointEnum.FPS, low: true, 0.001f);
-			resultFile.StoreString($"Average FPS: {averageFPS}\n");
-			resultFile.StoreString($"1% low FPS: {onePercentLowFPS}\n");
-			resultFile.StoreString($"0.1% low FPS: {pointOnePercentLowFPS}\n\n");
+			resultFile.StoreString($"Average FPS: {Math.Round(averageFPS, 1)}\n");
+			resultFile.StoreString($"1% low FPS: {Math.Round(onePercentLowFPS, 1)}\n");
+			resultFile.StoreString($"0.1% low FPS: {Math.Round(pointOnePercentLowFPS, 1)}\n\n");
 
 			// Frametime
 			var averageFrameTime = processor.GetAverage(i, result, BenchmarkDatapointEnum.FrameTime);
