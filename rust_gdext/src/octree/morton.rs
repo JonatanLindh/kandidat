@@ -215,7 +215,7 @@ impl<'a> MortonOctree<'a> {
         encoded_bodies.par_sort_unstable();
 
         // --- Stage 3: Build Explicit Tree Hierarchy ---
-        let mut nodes = Vec::new();
+        let mut nodes = Vec::with_capacity(encoded_bodies.len() * 2 + 128);
         let _root_index = Self::build_recursive(
             &mut nodes,
             &encoded_bodies, // Pass immutable slice
