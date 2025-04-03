@@ -37,6 +37,10 @@ public partial class GraphPlotter : Control
 	HSeparator[] frametimeYAxisSeparators;
 	HSeparator[] memoryYAxisSeparators;
 
+	GraphYAxis fpsYAxis;
+	GraphYAxis frametimeYAxis;
+	GraphYAxis memoryYAxis;
+
 	[Export] PackedScene yAxisLabel;
 	[Export] PackedScene yAxisHSeparator;
 
@@ -67,17 +71,9 @@ public partial class GraphPlotter : Control
 		memory1Label = GetNode<Label>("%1Memory");
 		memory0Label = GetNode<Label>("%0Memory");
 
-		fpsYaxis = GetNode<VBoxContainer>("%FPSYAxis");
-		frametimeYaxis = GetNode<VBoxContainer>("%FrametimeYAxis");
-		memoryYaxis = GetNode<VBoxContainer>("%MemoryYAxis");
-
-		fpsYAxisLabels = new Label[yAxisCount];
-		frametimeYAxisLabels = new Label[yAxisCount];
-		memoryYAxisLabels = new Label[yAxisCount];
-		fpsYAxisSeparators = new HSeparator[yAxisCount];
-		frametimeYAxisSeparators = new HSeparator[yAxisCount];
-		memoryYAxisSeparators = new HSeparator[yAxisCount];
-		InitYAxis();
+		fpsYAxis = new GraphYAxis(GetNode<VBoxContainer>("%FPSYAxis"), fpsPanel, yAxisLabel, yAxisHSeparator, yAxisCount);
+		frametimeYAxis = new GraphYAxis(GetNode<VBoxContainer>("%FrametimeYAxis"), frameTimePanel, yAxisLabel, yAxisHSeparator, yAxisCount);
+		memoryYAxis = new GraphYAxis(GetNode<VBoxContainer>("%MemoryYAxis"), memoryUsagePanel, yAxisLabel, yAxisHSeparator, yAxisCount);
 	}
 
 	public override void _Process(double delta)
@@ -146,7 +142,7 @@ public partial class GraphPlotter : Control
 		{
 			maxValue = value + padding;
 			RescaleGraph(type);
-			RedrawYAxis(type);
+			RedrawYAxis(type, maxValue);
 
 			UpdateMaxMinLabels();
 		}
@@ -169,6 +165,22 @@ public partial class GraphPlotter : Control
 		if (pointsList.Count > 0 && newPoint.X >= panelWidth)
 		{
 			ShiftAllGraphsLeft();
+		}
+	}
+
+	private void RedrawYAxis(BenchmarkDatapointEnum type, float maxValue)
+	{
+		switch (type)
+		{
+			case BenchmarkDatapointEnum.FPS:
+				fpsYAxis.RedrawYAxis(maxValue);
+				break;
+			case BenchmarkDatapointEnum.FrameTime:
+				frametimeYAxis.RedrawYAxis(maxValue);
+				break;
+			case BenchmarkDatapointEnum.MemoryUsage:
+				memoryYAxis.RedrawYAxis(maxValue);
+				break;
 		}
 	}
 
@@ -200,83 +212,6 @@ public partial class GraphPlotter : Control
 
 		// Clear and redraw line
 		RedrawGraph(points, line);
-	}
-
-	private void RedrawYAxis(BenchmarkDatapointEnum datapointType)
-	{
-		Panel panel = fpsPanel;
-		VBoxContainer yAxis = fpsYaxis;
-		float maxVal = 0.0f;
-
-		Label[] labels = fpsYAxisLabels;
-		HSeparator[] separators = fpsYAxisSeparators;
-
-		float[] labelYPositions = new float[yAxisCount];
-
-		switch (datapointType)
-		{
-			case BenchmarkDatapointEnum.FPS:
-				panel = fpsPanel;
-				yAxis = fpsYaxis;
-				maxVal = maxFps;
-				labels = fpsYAxisLabels;
-				separators = fpsYAxisSeparators;
-				break;
-			case BenchmarkDatapointEnum.FrameTime:
-				panel = frameTimePanel;
-				yAxis = frametimeYaxis;
-				maxVal = maxFrameTime;
-				labels = frametimeYAxisLabels;
-				separators = frametimeYAxisSeparators;
-				break;
-			case BenchmarkDatapointEnum.MemoryUsage:
-				panel = memoryUsagePanel;
-				yAxis = memoryYaxis;
-				maxVal = maxMemoryUsage;
-				labels = memoryYAxisLabels;
-				separators = memoryYAxisSeparators;
-				break;
-		}
-
-		for(int i = 0; i < yAxisCount; i++)
-		{
-			Label cL = labels[i];
-			HSeparator cS = separators[i];
-			cL.Text = Math.Round(maxVal - (maxVal / yAxisCount * i), 0).ToString();
-
-			float y = cL.Position.Y + cL.Size.Y / yAxisCount;
-			cS.Position = new Vector2(0, y);
-		}
-	}
-
-	private void InitYAxis()
-	{
-		for (int i = 0; i < yAxisCount; i++)
-		{
-			Label labelFps = yAxisLabel.Instantiate<Label>();
-			fpsYaxis.AddChild(labelFps);
-			fpsYAxisLabels[i] = labelFps;
-
-			Label labelFrametime = yAxisLabel.Instantiate<Label>();
-			frametimeYaxis.AddChild(labelFrametime);
-			frametimeYAxisLabels[i] = labelFrametime;
-
-			Label labelMemory = yAxisLabel.Instantiate<Label>();
-			memoryYaxis.AddChild(labelMemory);
-			memoryYAxisLabels[i] = labelMemory;
-
-			HSeparator separatorFps = yAxisHSeparator.Instantiate<HSeparator>();
-			fpsPanel.AddChild(separatorFps);
-			fpsYAxisSeparators[i] = separatorFps;
-
-			HSeparator separatorFrametime = yAxisHSeparator.Instantiate<HSeparator>();
-			frameTimePanel.AddChild(separatorFrametime);
-			frametimeYAxisSeparators[i] = separatorFrametime;
-
-			HSeparator separatorMemory = yAxisHSeparator.Instantiate<HSeparator>();
-			memoryUsagePanel.AddChild(separatorMemory);
-			memoryYAxisSeparators[i] = separatorMemory;
-		}
 	}
 
 	private void RedrawGraph(List<Vector2> points, Line2D line)
