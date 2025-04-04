@@ -207,7 +207,6 @@ func on_gravity_field_exited():
 	velocity = Vector3.ZERO
 	gravity_strength = 0
 	flying = true
-	align_with_vector(Vector3.DOWN,0.1)
 
 func apply_velocity(dir : Vector3, speed_multiplier):
 	velocity.x = dir.x * current_speed * speed_multiplier
