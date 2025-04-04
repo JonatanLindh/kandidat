@@ -59,6 +59,6 @@ func _on_body_entered(body):
 func _on_body_exited(body):
 	if body is not Player:
 		return
-	elif body is Player or RigidBodyPlayer:
+	elif body is Player:
 		body.on_gravity_field_exited()
 		_player_inside_field = false
