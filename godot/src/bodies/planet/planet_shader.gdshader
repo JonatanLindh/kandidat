@@ -21,12 +21,6 @@ void fragment() {
 	vec3 cliff_color = vec3(0.1);
 	float slope = abs(dot(dir_to_center, normal));
 	float cliff_amount = 1.0 - smoothstep(0.25, 0.45, slope);
-	if((0.1 > slope && slope >= 0.0)){
-		ALBEDO = cliff_color;
-	}
-	else {
-		ALBEDO = color;
-	}
 	ALBEDO = mix(color, cliff_color, cliff_amount);
 }
 
