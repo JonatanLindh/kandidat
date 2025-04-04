@@ -5,10 +5,10 @@ public partial class StarFinder : Node
 {
 	public InfiniteGalaxy galaxy { private get; set; }
 
-    [Export(PropertyHint.Range, "1, 1000, 10")] float maxRadius = 10;
+    [Export(PropertyHint.Range, "1, 100, 1")] float maxRadius = 25;
     [Export(PropertyHint.Range, "0.1, 10, 0.1")] float initialRadius = 1.0f;
-    [Export(PropertyHint.Range, "1.0, 2.0, 0.05")] float radiusGrowthRate = 1.2f;
-    [Export(PropertyHint.Range, "0.1, 1.0, 0.05")] float intervalSizeRatio = 0.5f;
+    [Export(PropertyHint.Range, "1.0, 2.0, 0.05")] float radiusGrowthRate = 1.1f;
+    [Export(PropertyHint.Range, "0.1, 5.0, 0.1")] float intervalSizeRatio = 1.7f;
 
 	/// <summary>
 	/// Finds along a line from one point to another.
