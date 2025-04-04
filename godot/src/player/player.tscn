@@ -1,18 +1,31 @@
-[gd_scene load_steps=4 format=3 uid="uid://c78s68trv7dj3"]
+[gd_scene load_steps=5 format=3 uid="uid://c78s68trv7dj3"]
 
 [ext_resource type="Script" uid="uid://bhsc7s0vmsm5m" path="res://src/player/player.gd" id="1_x5q4h"]
 [ext_resource type="PackedScene" uid="uid://dkx5f3mgc3mdq" path="res://src/player/hud.tscn" id="2_u6rmv"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ymbmu"]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_rxibo"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_rxibo"]
 
 [node name="Player" type="CharacterBody3D"]
+floor_block_on_wall = false
 script = ExtResource("1_x5q4h")
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_rxibo")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("CapsuleShape3D_ymbmu")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("SphereShape3D_rxibo")
 
 [node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.439417)
 
 [node name="HUD" parent="." instance=ExtResource("2_u6rmv")]
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.304541, 0)
+target_position = Vector3(0, -0.755, 0)

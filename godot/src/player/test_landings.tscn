@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=3 uid="uid://bxm7mmp2csxrr"]
+
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="1_3wd6y"]
+[ext_resource type="Script" uid="uid://ba2chkln3f48f" path="res://src/bodies/planet/planet_gravity_field.gd" id="2_2yc86"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_wrfox"]
+radius = 94.249
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_3wd6y"]
+height = 27.89
+
+[node name="GravityBody" type="GravityBody"]
+
+[node name="Player" parent="." instance=ExtResource("1_3wd6y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 73, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.803057, 0.595903, 0, -0.595903, 0.803057, -0.548458, 76.3712, 25.8177)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.266767, -0.789766, 0.552363, -1.35701e-08, 0.573133, 0.819462, -0.963761, 0.218606, -0.152893, 620.152, 369.086, 488.764)
+
+[node name="PlanetGravityField" type="Area3D" parent="."]
+script = ExtResource("2_2yc86")
+base_gravity = 40.0
+metadata/_custom_type_script = "uid://ba2chkln3f48f"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlanetGravityField"]
+shape = SubResource("SphereShape3D_wrfox")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="."]
+use_collision = true
+radius = 70.256
+radial_segments = 100
+rings = 100
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 81.1946, 0)
+mesh = SubResource("CylinderMesh_3wd6y")
