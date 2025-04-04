@@ -34,3 +34,11 @@ offset_top = 127.0
 offset_right = 40.0
 offset_bottom = 150.0
 text = "FPS: XXX"
+
+[node name="HelpLabel" type="Label" parent="Control"]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 159.0
+offset_right = 123.0
+offset_bottom = 182.0
+text = "Press h for help"
