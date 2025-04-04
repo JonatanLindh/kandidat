@@ -2,6 +2,9 @@
 extends GravityBody
 
 var atmosphere
+#var planet_gravity_field: PlanetGravityField
+@onready var planet_gravity_field: PlanetGravityField = $PlanetGravityField
+
 
 @export var planet_data: PlanetData:
 	set(val):
@@ -14,6 +17,10 @@ func _ready() -> void:
 	planet_data = planet_data.duplicate()
 	generate()
 	
+	#Create gravity field
+	planet_gravity_field = PlanetGravityField.new()
+	planet_gravity_field.radius = planet_data.radius
+	
 func _process(delta: float) -> void:
 	set_atmosphere_sun_dir()
 	
@@ -24,7 +31,6 @@ func generate_atmosphere() -> void:
 		
 	var radius = planet_data.radius
 	atmosphere.radius = radius
-	
 	# call method when node is ready
 	call_deferred("set_atmosphere_sun_dir")
 
