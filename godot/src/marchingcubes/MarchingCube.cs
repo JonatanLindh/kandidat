@@ -56,7 +56,7 @@ public class MarchingCube
 	public MeshInstance3D GenerateMesh(float[,,] datapoints)
 	{
 		var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
-		
+
 		// Calculate the actual geometric center of the vertices
 		var center = Vector3.Zero;
 		if (vertices.Count > 0)
@@ -64,10 +64,6 @@ public class MarchingCube
 			foreach (var vertex in vertices)
 			{
 				center += vertex;
-
-				float height = vertex.Length();
-				if (height > _maxHeight) _maxHeight = height;
-				if (height < _minHeight) _minHeight = height;
 			}
 			center /= vertices.Count;
 		}
@@ -81,6 +77,9 @@ public class MarchingCube
 		{
 			// Center the mesh using the actual geometric center
 			var newVertex = vertex - center;
+			float height = newVertex.Length();
+			if (height > _maxHeight) _maxHeight = height;
+			if (height < _minHeight) _minHeight = height;
 			surfaceTool.AddVertex(newVertex);
 		}
 		vertices.Clear();
@@ -91,14 +90,31 @@ public class MarchingCube
 		meshInstance.Mesh = mesh;
 		meshInstance.CreateMultipleConvexCollisions();
 
-		// Load the shader correctly 
+		// Load the shader correctly
+		var shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		var shaderMaterial = new ShaderMaterial();
-		shaderMaterial.Shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
-
-		// Assign the material properly
-		meshInstance.MaterialOverride = shaderMaterial;
+		shaderMaterial.Shader = shader;
+		GD.Print("Max Height: ", _maxHeight);
+		GD.Print("Min Height: ", _minHeight);
 		shaderMaterial.SetShaderParameter("min_height", _minHeight);
 		shaderMaterial.SetShaderParameter("max_height", _maxHeight);
+
+		// Generate and assign a gradient texture
+		Gradient gradient = new Gradient();
+		gradient.AddPoint(0.0f, new Color(0.0f, 0.3f, 0.7f)); // Ocean
+		gradient.AddPoint(0.2f, new Color(0.5f, 0.4f, 0.1f)); // Mid heights: brownish
+		gradient.AddPoint(0.5f, new Color(0.81f, 0.44f, 0.65f)); // Low heights: dark green
+		gradient.AddPoint(0.7f, new Color(0.86f, 0.63f, 0.47f)); // High heights: gray
+		gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 1.0f)); // Peaks: white (snow)
+
+
+		GradientTexture1D gradientTexture = new GradientTexture1D();
+		gradientTexture.Gradient = gradient;
+		gradientTexture.Width = 256 * 2;
+
+		shaderMaterial.SetShaderParameter("height_color", gradientTexture);
+
+		meshInstance.MaterialOverride = shaderMaterial;
 
 		return meshInstance;
 	}
