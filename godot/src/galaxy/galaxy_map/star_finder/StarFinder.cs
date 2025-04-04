@@ -5,19 +5,22 @@ public partial class StarFinder : Node
 {
 	public InfiniteGalaxy galaxy { private get; set; }
 
-	// Radius should probably at least equal interval to avoid most misses
-	[Export(PropertyHint.Range, "1, 1000, 10")] float radius = 10;
-	[Export(PropertyHint.Range, "1, 1000, 10")] float interval = 10;
+    [Export(PropertyHint.Range, "1, 1000, 10")] float maxRadius = 10;
+    [Export(PropertyHint.Range, "0.1, 10, 0.1")] float initialRadius = 1.0f;
+    [Export(PropertyHint.Range, "1.0, 2.0, 0.05")] float radiusGrowthRate = 1.2f;
+    [Export(PropertyHint.Range, "0.1, 1.0, 0.05")] float intervalSizeRatio = 0.5f;
 
 	/// <summary>
 	/// Finds along a line from one point to another.
-	/// 
-	/// range is the maximum distance to check, 0 for infinite (until chunks run out)
+	/// <c>range</c> is the maximum distance to check, 0 for infinite (until chunks run out)
 	/// </summary>
 	public Star FindStar(Vector3 from, Vector3 dir, float range = 0)
 	{
 		IStarChunkData currentChunk = GetChunkData(from);
 		Vector3 currentPos = from;
+
+		float currentRadius = initialRadius;
+		float currentInterval;
 
 		while (range == 0 || from.DistanceTo(currentPos) < range)
 		{
@@ -31,14 +34,17 @@ public partial class StarFinder : Node
 
 			foreach (Vector3 starPos in currentChunk.stars)
 			{
-				if ((starPos - currentPos).Length() < radius)
+				if ((starPos - currentPos).Length() < currentRadius)
 				{
 					Star star = CreateStar(starPos, galaxy.GetSeed());
 					return star;
 				}
 			}
 
-			currentPos += dir * interval;
+			currentRadius = Mathf.Min(currentRadius * radiusGrowthRate, maxRadius);
+			currentInterval = currentRadius * intervalSizeRatio;
+
+			currentPos += dir.Normalized() * currentInterval;
 		}
 
 		return null;
