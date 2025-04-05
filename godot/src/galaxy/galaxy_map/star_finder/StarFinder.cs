@@ -57,6 +57,11 @@ public partial class StarFinder : Node
 		return Vector3.Zero;
 	}
 
+	/// <summary>
+	/// Checks if the chunk at the given position is generated.
+	/// </summary>
+	/// <param name="position"></param>
+	/// <returns></returns>
 	private IStarChunkData GetChunkData(Vector3 position)
 	{
 		ChunkCoord chunkPos = ChunkCoord.ToChunkCoord(chunks[0].size, position);
