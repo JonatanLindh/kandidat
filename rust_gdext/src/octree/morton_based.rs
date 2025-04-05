@@ -17,7 +17,7 @@ use std::{num::NonZeroUsize, ops::Range};
 pub type MortonCode = u64;
 
 // Max depth for u64 Morton code in 3D
-pub const MAX_DEPTH: u32 = (size_of::<MortonCode>() as u32 * 8) / 3;
+pub const MAX_DEPTH: u32 = (core::mem::size_of::<MortonCode>() as u32 * 8) / 3;
 
 /// Calculates the 3D Morton code for a point within given bounds.
 pub fn encode(point: Vec3A, bounds: &BoundingBox) -> MortonCode {
