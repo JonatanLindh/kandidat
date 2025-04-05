@@ -8,6 +8,8 @@ public partial class Benchmark : Node3D
 	[Export] PackedScene[] scenes;
 	[Export] bool saveResults = true;
 	[Export] bool saveFullResults = false;
+
+	[ExportCategory("Graph (Impacts performance)")]
 	[Export] bool plotGraph = false;
 
 	GraphPlotter plot;
