@@ -20,7 +20,6 @@ glam = { version = "0.30", features = [
     "core-simd",
     "debug-glam-assert",
 ] }
-sharded-slab = "0.1"
 parking_lot = { version = "0.12", features = ["nightly"] }
 either = "1.15"
 derivative = { version = "2.2", features = ["use_core"] }
