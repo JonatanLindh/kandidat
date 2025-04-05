@@ -180,6 +180,10 @@ impl VisualizeOctree for MortonOctree<'_> {
 }
 
 impl<'a> MortonOctree<'a> {
+    // ** IMPORTANT: Tune this threshold based on benchmarks! **
+    const PARALLEL_RECURSION_THRESHOLD: usize = 4096;
+    const PARALLEL_ENCODE_THRESHOLD: usize = 3000;
+
     /// Main function to build the octree from body data using Morton codes.
     pub fn new(bodies: &'a [GravityData]) -> Self {
         if bodies.is_empty() {
@@ -200,15 +204,16 @@ impl<'a> MortonOctree<'a> {
 
         // Use parallel iteration for large datasets, otherwise sequential
         // The value was chosen based on benchmarks
-        let mut encoded_bodies: Vec<MortonEncodedItem<_>> = if bodies.len() >= 3000 {
-            bodies
-                .into_par_iter()
-                .enumerate()
-                .map(encode_item)
-                .collect()
-        } else {
-            bodies.iter().enumerate().map(encode_item).collect()
-        };
+        let mut encoded_bodies: Vec<MortonEncodedItem<_>> =
+            if bodies.len() >= Self::PARALLEL_ENCODE_THRESHOLD {
+                bodies
+                    .into_par_iter()
+                    .enumerate()
+                    .map(encode_item)
+                    .collect()
+            } else {
+                bodies.iter().enumerate().map(encode_item).collect()
+            };
 
         // --- Stage 2: Sort by Morton Code ---
         // Parallel sort is not slower than sequential even for small datasets (benchmarked)

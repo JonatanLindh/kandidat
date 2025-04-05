@@ -13,9 +13,9 @@ use rayon::{
 };
 use rust_gdext::{
     octree::{
-        BoundingBox, GravityData, Octree,
+        BoundingBox, GravityData,
         morton::{self, MortonEncodedItem, MortonOctree},
-        parallel::ParallelOctree,
+        old_versions::{insert_based::InsertBasedOctree, partition_based::PartitionBasedOctree},
     },
     physics::gravity::controller::{GravityController, SimulatedBody},
 };
@@ -135,7 +135,7 @@ fn octree_build(c: &mut Criterion) {
             size,
             |b, &_size| {
                 b.iter(|| {
-                    let mut octree = Octree::new(&bodies);
+                    let mut octree = InsertBasedOctree::new(&bodies);
                     octree.build();
                     black_box(octree);
                 });
@@ -168,7 +168,8 @@ fn parallel_octree_partition(c: &mut Criterion) {
                 b.iter_batched(
                     || data_ref.clone(),
                     |data| {
-                        let octants = ParallelOctree::partition_bodies_parallel(&bounds, data);
+                        let octants =
+                            PartitionBasedOctree::partition_bodies_parallel(&bounds, data);
                         black_box(octants);
                     },
                     BatchSize::LargeInput,
@@ -183,7 +184,8 @@ fn parallel_octree_partition(c: &mut Criterion) {
                 b.iter_batched(
                     || data_ref.clone(),
                     |data| {
-                        let octants = ParallelOctree::partition_bodies_parallel2(&bounds, data);
+                        let octants =
+                            PartitionBasedOctree::partition_bodies_parallel2(&bounds, data);
                         black_box(octants);
                     },
                     BatchSize::LargeInput,
@@ -198,7 +200,8 @@ fn parallel_octree_partition(c: &mut Criterion) {
                 b.iter_batched(
                     || data_ref.clone(),
                     |data| {
-                        let octants = ParallelOctree::partition_bodies_parallel3(&bounds, data);
+                        let octants =
+                            PartitionBasedOctree::partition_bodies_parallel3(&bounds, data);
                         black_box(octants);
                     },
                     BatchSize::LargeInput,
@@ -213,7 +216,8 @@ fn parallel_octree_partition(c: &mut Criterion) {
                 b.iter_batched(
                     || data_ref.clone(),
                     |data| {
-                        let octants = ParallelOctree::partition_bodies_sequential(&bounds, data);
+                        let octants =
+                            PartitionBasedOctree::partition_bodies_sequential(&bounds, data);
                         black_box(octants);
                     },
                     BatchSize::LargeInput,

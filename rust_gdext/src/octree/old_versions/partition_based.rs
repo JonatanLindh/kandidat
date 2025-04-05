@@ -1,8 +1,11 @@
-use super::{BoundingBox, MAX_BODIES_PER_LEAF, visualize::VisualizeOctree};
 use crate::octree::GravityData;
+use crate::octree::{BoundingBox, MAX_BODIES_PER_LEAF, visualize::VisualizeOctree};
+use either::Either;
 use itertools::Itertools;
 use rayon::prelude::*;
 use std::array;
+
+pub type Partition<T> = Either<T, T>;
 
 #[derive(Debug)]
 pub struct Node {
@@ -23,12 +26,12 @@ pub struct Node {
 
 // The Octree structure holding the final arena
 #[derive(Debug, Default)]
-pub struct ParallelOctree {
+pub struct PartitionBasedOctree {
     pub nodes: Vec<Node>, // Final arena
     pub bounds: BoundingBox,
 }
 
-impl VisualizeOctree for ParallelOctree {
+impl VisualizeOctree for PartitionBasedOctree {
     fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
         let root_half_width = self.bounds.half_width;
         self.nodes
@@ -49,7 +52,7 @@ impl VisualizeOctree for ParallelOctree {
     }
 }
 
-impl ParallelOctree {
+impl PartitionBasedOctree {
     pub const ROOT_IDX: usize = 0;
     pub const HALF_WIDTH_MERGE_THRESHOLD: f32 = 1e-2;
 
@@ -92,7 +95,7 @@ impl ParallelOctree {
     /// Builds the octree in parallel using the hybrid strategy.
     pub fn build(bodies: Vec<GravityData>) -> Self {
         if bodies.is_empty() {
-            return ParallelOctree::default();
+            return PartitionBasedOctree::default();
         }
 
         // 1. Compute Root Bounds
@@ -102,7 +105,7 @@ impl ParallelOctree {
         let (root_node, subtree_arena) = Self::construct_branch(&root_bounds, bodies);
 
         // 3. Create the octree
-        ParallelOctree {
+        PartitionBasedOctree {
             nodes: core::iter::once(root_node).chain(subtree_arena).collect(),
             bounds: root_bounds,
         }
@@ -339,7 +342,7 @@ fn feature() {
 
     dbg!(&bodies);
 
-    let octree = ParallelOctree::build(bodies);
+    let octree = PartitionBasedOctree::build(bodies);
     dbg!(
         octree
             .nodes
