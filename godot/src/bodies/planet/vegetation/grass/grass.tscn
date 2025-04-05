@@ -1,0 +1,16 @@
+[gd_scene load_steps=5 format=3 uid="uid://doevou8354f8n"]
+
+[ext_resource type="Script" uid="uid://kcn8uepufs1" path="res://src/bodies/planet/vegetation/grass/Grass.cs" id="1_0mig3"]
+[ext_resource type="Shader" uid="uid://m5bxrlmv6lb2" path="res://src/bodies/planet/vegetation/grass/assets/grass.gdshader" id="2_21r8j"]
+[ext_resource type="ArrayMesh" uid="uid://dxkc0afuebjoi" path="res://src/bodies/planet/vegetation/grass/assets/grass_high.obj" id="2_nql11"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nql11"]
+render_priority = 0
+shader = ExtResource("2_21r8j")
+shader_parameter/base_color = Color(0.05, 0.2, 0.01, 1)
+shader_parameter/tip_color = Color(0.5, 0.5, 0.1, 1)
+
+[node name="Grass" type="Node3D"]
+script = ExtResource("1_0mig3")
+GrassMesh = ExtResource("2_nql11")
+GrassMaterial = SubResource("ShaderMaterial_nql11")

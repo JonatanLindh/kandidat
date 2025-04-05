@@ -7,16 +7,15 @@
 
 [node name="RandomPlanet" type="Node3D"]
 script = ExtResource("1_8t10l")
-Radius = 64
-Width = 130
-Height = 130
-Depth = 130
-Octaves = 4
-Frequency = 1.08
-Amplitude = 7.2
-Lacunarity = 2.84
-Persistence = 0.1
-seed = 819357616
+Width = 66
+Height = 66
+Depth = 66
+Octaves = 7
+Frequency = 1.28
+Amplitude = 5.0
+Lacunarity = 2.68
+Persistence = 0.25
+seed = 1798326958
 
 [node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("2_455go")]
 CelestialBody = NodePath("../Random")
