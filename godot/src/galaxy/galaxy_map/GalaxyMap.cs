@@ -11,6 +11,9 @@ public partial class GalaxyMap : Node3D
 
 	Node3D player;
 
+	[ExportGroup("Debug")]
+	[Export] bool debugPrint = false;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -51,7 +54,7 @@ public partial class GalaxyMap : Node3D
 				if (starPos != Vector3.Zero)
 				{
 					Star star = starFactory.CreateStar(starPos, galaxy.GetSeed());
-					GD.Print($"Selected star: [Name: {star.name} | Position: {star.transform.Origin} | Seed: {star.seed}]");
+					if(debugPrint) GD.Print($"GalaxyMap: Selected star: [Name: {star.name} | Position: {star.transform.Origin} | Seed: {star.seed}]");
 
 					uiSelectableStar.SetStar(star);
 					uiSelectableStar.SetPlayer(player);
