@@ -15,8 +15,19 @@ public partial class GalaxyMap : Node3D
 	public override void _Ready()
 	{
 		galaxy = GetNode<InfiniteGalaxy>("%InfiniteGalaxy");
-		this.player = GetTree().CurrentScene.GetNode<Node3D>("Player");
-		galaxy.SetPlayer(player);
+
+		if(GetTree().CurrentScene.HasNode("Player"))
+		{
+			player = GetTree().CurrentScene.GetNode<Node3D>("Player");
+			galaxy.SetPlayer(player);
+		}
+
+		// Use the current node (galaxy center) as the player if no player is found
+		else
+		{
+			player = this;
+			galaxy.SetPlayer(player);
+		}
 
 		starFinder = GetNode<StarFinder>("%StarFinder");
 		starFactory = new StarFactory();
