@@ -1,6 +1,9 @@
-use super::{Massive, Spacial, body::GravityBody, trajectories::TrajectoryWorker};
+use super::{
+    Massive, NBodyGravityCalculator, Spacial, body::GravityBody, direct_summation::DirectSummation,
+    trajectories::TrajectoryWorker,
+};
 use crate::{
-    octree::{morton_based::MortonOctree, visualize::OctreeVisualizer},
+    octree::{morton_based::MortonBasedOctree, visualize::OctreeVisualizer},
     to_glam_vec3,
 };
 use glam::Vec3A;
@@ -10,7 +13,6 @@ use godot::{
 };
 use itertools::Itertools;
 use proc::editor;
-use rayon::prelude::*;
 
 /// Manages gravity interactions between [`GravityBody`] instances in a 3D space.
 ///
@@ -180,34 +182,6 @@ impl GravityController {
         self.bodies = bodies;
     }
 
-    /// Calculates the acceleration vector for a body due to gravitational forces.
-    ///
-    /// This method computes the net gravitational acceleration acting on a body by:
-    /// 1. Finding the direction and distance to each other body
-    /// 2. Applying the gravitational force formula (F = G * m1 * m2 / r²)
-    /// 3. Converting force to acceleration and summing all contributions
-    ///
-    /// # Parameters
-    /// - `grav_const`: The gravitational constant to use in calculations
-    /// - `body`: The body for which to calculate acceleration
-    /// - `bodies`: All bodies in the system that exert gravitational force
-    ///
-    /// # Returns
-    /// The net acceleration vector resulting from all gravitational interactions
-    pub fn calc_acc(grav_const: f32, body: &SimulatedBody, bodies: &[SimulatedBody]) -> Vec3A {
-        bodies
-            .iter()
-            .map(|other| (other.pos - body.pos, other.mass))
-            .filter(|(diff, _)| !diff.length_squared().is_zero_approx())
-            .map(|(diff, other_mass)| {
-                let r2 = diff.length_squared();
-                let dir = diff.normalize();
-
-                grav_const * dir * (other_mass) / r2
-            })
-            .sum()
-    }
-
     /// Advances the physical simulation by one time step.
     ///
     /// This method:
@@ -222,49 +196,17 @@ impl GravityController {
     /// - `delta`: The time step duration in seconds
     /// - `bodies_sim`: The bodies to simulate, will be updated in-place
     /// - `accelerations`: A reusable buffer for storing the calculated accelerations
-    pub fn step_time(
-        grav_const: f32,
-        delta: f32,
-        bodies_sim: &mut [SimulatedBody],
-        accelerations: &mut Vec<Vec3A>,
-    ) {
+    pub fn step_time(grav_const: f32, delta: f32, bodies_sim: &mut [SimulatedBody]) {
         // 1: Calculate accelerations
-        bodies_sim
-            .par_iter()
-            .map(|body| Self::calc_acc(grav_const, body, bodies_sim))
-            .collect_into_vec(accelerations);
+        let accelerations =
+            DirectSummation::calculate_accelerations::<false>(grav_const, bodies_sim);
 
         // 2: Update velocities and positions
         bodies_sim
             .iter_mut()
             .zip(accelerations)
             .for_each(|(body, acc)| {
-                body.vel += *acc * delta;
-                body.pos += body.vel * delta;
-            });
-    }
-
-    /// Advances the physical simulation by one time step using a single core.
-    /// This function is kept for benchmarking purposes.
-    #[doc(hidden)]
-    pub fn step_time_single_core(
-        grav_const: f32,
-        delta: f32,
-        bodies_sim: &mut [SimulatedBody],
-        accelerations: &mut Vec<Vec3A>,
-    ) {
-        // 1: Calculate accelerations
-        bodies_sim
-            .iter()
-            .map(|body| GravityController::calc_acc(grav_const, body, bodies_sim))
-            .collect_into(accelerations);
-
-        // 2: Update velocities and positions
-        bodies_sim
-            .iter_mut()
-            .zip(accelerations)
-            .for_each(|(body, acc)| {
-                body.vel += *acc * delta;
+                body.vel += acc * delta;
                 body.pos += body.vel * delta;
             });
     }
@@ -305,16 +247,11 @@ impl INode3D for GravityController {
         let mut bodies_sim = self.bodies.iter().map(SimulatedBody::from).collect_vec();
 
         // Simulate a physics step
-        Self::step_time(
-            self.grav_const,
-            delta as f32,
-            &mut bodies_sim,
-            &mut Vec::new(),
-        );
+        Self::step_time(self.grav_const, delta as f32, &mut bodies_sim);
 
         if let Some(ov) = self.octree_visualizer.as_mut() {
             // Update the octree visualizer with the simulated bodies
-            let octree = MortonOctree::new(&bodies_sim);
+            let octree = MortonBasedOctree::new(&bodies_sim);
 
             ov.bind_mut().update_visualization(&octree);
         }

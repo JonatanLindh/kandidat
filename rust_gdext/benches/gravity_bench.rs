@@ -14,10 +14,12 @@ use rayon::{
 use rust_gdext::{
     octree::{
         BoundingBox, GravityData,
-        morton_based::{self, MortonEncodedItem, MortonOctree},
+        morton_based::{self, MortonBasedOctree, MortonEncodedItem},
         old_versions::{insert_based::InsertBasedOctree, partition_based::PartitionBasedOctree},
     },
-    physics::gravity::controller::{GravityController, SimulatedBody},
+    physics::gravity::{
+        NBodyGravityCalculator, controller::SimulatedBody, direct_summation::DirectSummation,
+    },
 };
 
 const BENCH_SEED: u64 = 20240401;
@@ -68,51 +70,53 @@ fn custom_criterion() -> Criterion {
 }
 
 #[criterion(custom_criterion())]
-fn from_elem(c: &mut Criterion) {
+fn compute_accelerations(c: &mut Criterion) {
     static GRAV_CONST: f32 = 1.0;
-    static STEP_DELTA: f32 = 0.01;
 
-    let mut group = c.benchmark_group("Gravity: Single time step");
-    for size in [
-        10, 50, 100, 200, 350, 500, 750, 1000, 2000, 4000, 7000, 10000,
-    ]
-    .iter()
-    {
-        group.bench_with_input(
-            BenchmarkId::new("single-threaded", size),
-            size,
-            |b, &size| {
-                let mut bodies = create_bench_bodies(size);
-                let mut accelerations = vec![Vec3A::ZERO; size as usize];
+    let mut group = c.benchmark_group("compute_accelerations");
 
-                b.iter(|| {
-                    GravityController::step_time_single_core(
-                        GRAV_CONST,
-                        STEP_DELTA,
-                        &mut bodies,
-                        &mut accelerations,
-                    );
-                });
-            },
-        );
+    let sizes = [10, 100, 1000, 10000, 30000, 60000, 80000, 100000, 150000];
 
-        group.bench_with_input(
-            BenchmarkId::new("rayon-parallel", size),
-            size,
-            |b, &size| {
-                let mut bodies = create_bench_bodies(size);
-                let mut accelerations = vec![Vec3A::ZERO; size as usize];
+    // Direct summation
+    for size in sizes.iter().filter(|s| **s <= 10000) {
+        let bodies = create_bench_bodies(*size);
 
-                b.iter(|| {
-                    GravityController::step_time(
-                        GRAV_CONST,
-                        STEP_DELTA,
-                        &mut bodies,
-                        &mut accelerations,
-                    )
-                });
-            },
-        );
+        group.bench_function(BenchmarkId::new("direct/sequential", size), |b| {
+            b.iter(|| {
+                let accelerations =
+                    DirectSummation::calculate_accelerations::<false>(GRAV_CONST, &bodies);
+                black_box(accelerations);
+            });
+        });
+
+        group.bench_function(BenchmarkId::new("direct/parellel", size), |b| {
+            b.iter(|| {
+                let accelerations =
+                    DirectSummation::calculate_accelerations::<true>(GRAV_CONST, &bodies);
+                black_box(accelerations);
+            });
+        });
+    }
+
+    // Barnes-Hut
+    for size in sizes.iter() {
+        let bodies = create_bench_bodies(*size);
+
+        group.bench_function(BenchmarkId::new("barnes_hut/sequential", size), |b| {
+            b.iter(|| {
+                let accelerations =
+                    MortonBasedOctree::calculate_accelerations::<false>(GRAV_CONST, &bodies);
+                black_box(accelerations);
+            });
+        });
+
+        group.bench_function(BenchmarkId::new("barnes_hut/parallel", size), |b| {
+            b.iter(|| {
+                let accelerations =
+                    MortonBasedOctree::calculate_accelerations::<true>(GRAV_CONST, &bodies);
+                black_box(accelerations);
+            });
+        });
     }
     group.finish();
 }
@@ -144,7 +148,7 @@ fn octree_build(c: &mut Criterion) {
 
         group.bench_with_input(BenchmarkId::new("morton", size), size, |b, &_size| {
             b.iter(|| {
-                let octree = MortonOctree::new(&bodies_gd);
+                let octree = MortonBasedOctree::new(&bodies_gd);
                 black_box(octree);
             });
         });

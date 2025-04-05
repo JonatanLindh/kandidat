@@ -143,7 +143,7 @@ pub struct Node {
     /// The half-width is the maximum distance from the center to any corner of the box.
     pub bounds: BoundingBox,
 
-    pub children: [Option<NonZeroUsize>; 8],
+    pub children: Option<[Option<NonZeroUsize>; 8]>,
     pub body_range: Range<usize>,
     pub depth: u32,
 
@@ -156,7 +156,7 @@ pub struct Node {
 /// The resulting octree structure.
 /// Might evolve, but starts with nodes and bounds.
 #[derive(Debug)]
-pub struct MortonOctree<'a, T: Spacial> {
+pub struct MortonBasedOctree<'a, T: Spacial> {
     /// Arena storing the explicit node hierarchy built from the sorted list.
     /// Note: The 'Node' struct might need modification from the top-down
     /// version (e.g., explicit child pointers instead of n_subtree_nodes).
@@ -168,9 +168,13 @@ pub struct MortonOctree<'a, T: Spacial> {
 
     /// Reference to the original data used to build the octree.
     pub data_ref: &'a [T],
+
+    pub sorted_indices: Vec<MortonEncodedItem<usize>>,
+
+    pub root_index: Option<usize>,
 }
 
-impl<T: Spacial> VisualizeOctree for MortonOctree<'_, T> {
+impl<T: Spacial> VisualizeOctree for MortonBasedOctree<'_, T> {
     fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
         self.nodes
             .iter()
@@ -179,7 +183,7 @@ impl<T: Spacial> VisualizeOctree for MortonOctree<'_, T> {
     }
 }
 
-impl<'a, T> MortonOctree<'a, T>
+impl<'a, T> MortonBasedOctree<'a, T>
 where
     T: Particle + Sync,
 {
@@ -194,6 +198,8 @@ where
                 data_ref: bodies,
                 nodes: Vec::new(),
                 bounds: BoundingBox::default(),
+                sorted_indices: Vec::new(),
+                root_index: None,
             };
         }
 
@@ -224,7 +230,7 @@ where
 
         // --- Stage 3: Build Explicit Tree Hierarchy ---
         let mut nodes = Vec::with_capacity(encoded_bodies.len() * 2 + 128);
-        let _root_index = Self::build_recursive(
+        let root_index = Self::build_recursive(
             &mut nodes,
             &encoded_bodies, // Pass immutable slice
             bodies,
@@ -233,10 +239,12 @@ where
             0,                       // current depth
         );
 
-        MortonOctree {
+        MortonBasedOctree {
             nodes,
             bounds,
             data_ref: bodies,
+            sorted_indices: encoded_bodies,
+            root_index: Some(root_index),
         }
     }
 
@@ -255,7 +263,7 @@ where
             let node_index = node_arena.len();
             node_arena.push(Node {
                 body_range,
-                children: [None; 8],
+                children: None,
                 bounds: *node_bounds,
                 data: Default::default(),
                 depth: current_depth,
@@ -272,7 +280,7 @@ where
 
             node_arena.push(Node {
                 body_range,
-                children: [None; 8],
+                children: None,
                 bounds: *node_bounds,
                 data,
                 depth: current_depth,
@@ -285,7 +293,7 @@ where
         // Add a placeholder node first, we'll fill it later after children are processed
         node_arena.push(Node {
             body_range: body_range.clone(),
-            children: [None; 8],  // Placeholder
+            children: None,       // Placeholder
             bounds: *node_bounds, // Placeholder
             depth: current_depth,
             ..Default::default() // Placeholder
@@ -359,7 +367,7 @@ where
         *current_node = Node {
             body_range,
             bounds: *node_bounds,
-            children: child_node_indices,
+            children: Some(child_node_indices),
             data: GravityData {
                 center_of_mass,
                 mass: total_mass_acc,

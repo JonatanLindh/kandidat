@@ -6,6 +6,7 @@
 pub mod barnes_hut;
 pub mod body;
 pub mod controller;
+pub mod direct_summation;
 pub mod trajectories;
 
 use glam::Vec3A;
@@ -31,6 +32,6 @@ pub trait Particle: Spacial + Massive {
 
 impl<T: Spacial + Massive> Particle for T {}
 
-pub trait NBodyGravityCalculator<T: Particle> {
-    fn step_time(&self, particles: &[T]) -> Vec<Vec3A>;
+pub trait NBodyGravityCalculator<'a, T: Particle> {
+    fn calculate_accelerations<const PARALLEL: bool>(g: f32, particles: &'a [T]) -> Vec<Vec3A>;
 }

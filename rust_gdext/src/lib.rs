@@ -1,6 +1,7 @@
 #![feature(iter_collect_into)]
 #![feature(anonymous_lifetime_in_impl_trait)]
 #![feature(array_windows)]
+#![feature(assert_matches)]
 
 pub mod octree;
 pub mod physics;

@@ -275,12 +275,9 @@ impl GravityController {
             n_steps,
         }: SimulationInfo,
     ) -> Vec<Trajectory> {
-        let n_bodies = bodies_sim.len();
-        let mut accelerations = Vec::with_capacity(n_bodies);
-
         for _ in 1..n_steps {
             // Step
-            Self::step_time(grav_const, delta, &mut bodies_sim, &mut accelerations);
+            Self::step_time(grav_const, delta, &mut bodies_sim);
 
             let offset = offset_info
                 .map(|(idx, init)| bodies_sim[idx].pos - init)
