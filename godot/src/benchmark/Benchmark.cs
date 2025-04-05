@@ -8,6 +8,7 @@ public partial class Benchmark : Node3D
 	[Export] PackedScene[] scenes;
 	[Export] bool saveResults = true;
 	[Export] bool saveFullResults = false;
+	[Export] bool plotGraph = false;
 
 	GraphPlotter plot;
 
@@ -33,6 +34,7 @@ public partial class Benchmark : Node3D
 	public override void _Ready()
 	{
 		this.plot = GetNode<GraphPlotter>("GraphPlotter");
+		if(!plotGraph) plot.Visible = false;
 
 		string absResultPath = ProjectSettings.GlobalizePath(_resultPath);
 		filePath = absResultPath + $"/{time}.txt";
@@ -72,7 +74,7 @@ public partial class Benchmark : Node3D
 			};
 
 			result[currentSceneIndex].Add(benchmarkDatapoint);
-			plot.AddDataPoint(benchmarkDatapoint);
+			if(plotGraph) plot.AddDataPoint(benchmarkDatapoint);
 		}
 
 		if(currentTime > downtime && !benchmarkSetupDone)
