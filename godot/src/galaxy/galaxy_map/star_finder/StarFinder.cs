@@ -10,6 +10,9 @@ public partial class StarFinder : Node
 
 	IStarChunkData[] chunks;
 
+	[ExportGroup("Debug")]
+	[Export] bool debugPrint = false;
+
 	/// <summary>
 	/// Finds along a line from one point to another.
 	/// <c>range</c> is the maximum distance to check, 0 for infinite (until chunks run out)
@@ -20,7 +23,7 @@ public partial class StarFinder : Node
 
 		if (chunks.Length == 0)
 		{
-			GD.PrintErr("No chunks found in galaxy");
+			GD.PrintErr("StarFinder: No chunks found in galaxy");
 			return Vector3.Zero;
 		}
 
@@ -36,7 +39,7 @@ public partial class StarFinder : Node
 
 			if (currentChunk == null)
 			{
-				GD.Print("No star found, done checking chunks");
+				if(debugPrint) GD.Print("StarFinder: No star found. Exiting.");
 				return Vector3.Zero;
 			}
 
@@ -44,6 +47,7 @@ public partial class StarFinder : Node
 			{
 				if ((starPos - currentPos).Length() < currentRadius)
 				{
+					if (debugPrint) GD.Print($"StarFinder: Found star at {starPos} in chunk {currentChunk.pos}");
 					return starPos;
 				}
 			}
