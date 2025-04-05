@@ -1,6 +1,6 @@
 use super::{body::GravityBody, trajectories::TrajectoryWorker};
 use crate::{
-    octree::{morton::MortonOctree, visualize::OctreeVisualizer},
+    octree::{morton_based::MortonOctree, visualize::OctreeVisualizer},
     to_glam_vec3,
 };
 use glam::Vec3A;

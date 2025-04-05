@@ -14,7 +14,7 @@ use rayon::{
 use rust_gdext::{
     octree::{
         BoundingBox, GravityData,
-        morton::{self, MortonEncodedItem, MortonOctree},
+        morton_based::{self, MortonEncodedItem, MortonOctree},
         old_versions::{insert_based::InsertBasedOctree, partition_based::PartitionBasedOctree},
     },
     physics::gravity::controller::{GravityController, SimulatedBody},
@@ -246,7 +246,7 @@ fn morton_encode(c: &mut Criterion) {
                         .iter()
                         .map(|body| {
                             // Pass the calculated cubic bounds to the encode function
-                            let code = morton::encode(body.center_of_mass, &bounds);
+                            let code = morton_based::encode(body.center_of_mass, &bounds);
                             MortonEncodedItem {
                                 morton_code: code,
                                 item: body,
@@ -268,7 +268,7 @@ fn morton_encode(c: &mut Criterion) {
                         .into_par_iter()
                         .map(|body| {
                             // Pass the calculated cubic bounds to the encode function
-                            let code = morton::encode(body.center_of_mass, &bounds);
+                            let code = morton_based::encode(body.center_of_mass, &bounds);
                             MortonEncodedItem {
                                 morton_code: code,
                                 item: body,
@@ -298,7 +298,7 @@ fn morton_sort(c: &mut Criterion) {
             .into_par_iter()
             .map(|body| {
                 // Pass the calculated cubic bounds to the encode function
-                let morton_code = morton::encode(body.center_of_mass, &bounds);
+                let morton_code = morton_based::encode(body.center_of_mass, &bounds);
                 MortonEncodedItem {
                     morton_code,
                     item: body,
