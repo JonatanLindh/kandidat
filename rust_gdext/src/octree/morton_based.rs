@@ -1,5 +1,5 @@
-use super::BoundingBox;
 use super::visualize::VisualizeOctree;
+use super::{BoundingBox, Particle, Spacial};
 use crate::octree::GravityData;
 use derivative::Derivative;
 use glam::{U64Vec3, Vec3A};
@@ -155,8 +155,8 @@ pub struct Node {
 
 /// The resulting octree structure.
 /// Might evolve, but starts with nodes and bounds.
-#[derive(Debug, Default)]
-pub struct MortonOctree<'a> {
+#[derive(Debug)]
+pub struct MortonOctree<'a, T: Spacial> {
     /// Arena storing the explicit node hierarchy built from the sorted list.
     /// Note: The 'Node' struct might need modification from the top-down
     /// version (e.g., explicit child pointers instead of n_subtree_nodes).
@@ -167,10 +167,10 @@ pub struct MortonOctree<'a> {
     pub bounds: BoundingBox,
 
     /// Reference to the original data used to build the octree.
-    pub data_ref: &'a [GravityData],
+    pub data_ref: &'a [T],
 }
 
-impl VisualizeOctree for MortonOctree<'_> {
+impl<T: Spacial> VisualizeOctree for MortonOctree<'_, T> {
     fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
         self.nodes
             .iter()
@@ -179,23 +179,30 @@ impl VisualizeOctree for MortonOctree<'_> {
     }
 }
 
-impl<'a> MortonOctree<'a> {
+impl<'a, T> MortonOctree<'a, T>
+where
+    T: Particle + Sync,
+{
     // ** IMPORTANT: Tune this threshold based on benchmarks! **
     const PARALLEL_RECURSION_THRESHOLD: usize = 4096;
     const PARALLEL_ENCODE_THRESHOLD: usize = 3000;
 
     /// Main function to build the octree from body data using Morton codes.
-    pub fn new(bodies: &'a [GravityData]) -> Self {
+    pub fn new(bodies: &'a [T]) -> Self {
         if bodies.is_empty() {
-            return Default::default();
+            return Self {
+                data_ref: bodies,
+                nodes: Vec::new(),
+                bounds: BoundingBox::default(),
+            };
         }
 
         // --- Stage 1: Calculate Morton Codes ---
-        let bounds = BoundingBox::containing_gravity_data(bodies);
+        let bounds = BoundingBox::containing(bodies);
 
-        let encode_item = |(index, data): (usize, &GravityData)| {
+        let encode_item = |(index, data): (usize, &T)| {
             // Pass the calculated cubic bounds to the encode function
-            let code = encode(data.center_of_mass, &bounds);
+            let code = encode(data.get_pos(), &bounds);
             MortonEncodedItem {
                 morton_code: code,
                 item: index,
@@ -206,11 +213,7 @@ impl<'a> MortonOctree<'a> {
         // The value was chosen based on benchmarks
         let mut encoded_bodies: Vec<MortonEncodedItem<_>> =
             if bodies.len() >= Self::PARALLEL_ENCODE_THRESHOLD {
-                bodies
-                    .into_par_iter()
-                    .enumerate()
-                    .map(encode_item)
-                    .collect()
+                bodies.par_iter().enumerate().map(encode_item).collect()
             } else {
                 bodies.iter().enumerate().map(encode_item).collect()
             };
@@ -240,7 +243,7 @@ impl<'a> MortonOctree<'a> {
     fn build_recursive(
         node_arena: &mut Vec<Node>,
         sorted_bodies: &[MortonEncodedItem<usize>],
-        data_ref: &[GravityData],
+        data_ref: &[T],
         body_range: Range<usize>,
         node_bounds: &BoundingBox,
         current_depth: u32,
@@ -338,7 +341,7 @@ impl<'a> MortonOctree<'a> {
                 // Read the properties from the newly created child node
                 let child_node = &node_arena[child_node_index]; // Read back the child node
                 total_mass_acc += child_node.data.mass;
-                weighted_pos_sum_acc += child_node.data.weighted_center();
+                weighted_pos_sum_acc += child_node.data.weighted_pos();
             } else {
                 child_node_indices[octant] = None;
             }

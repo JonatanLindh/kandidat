@@ -24,6 +24,19 @@ pub trait Massive {
     fn get_mass(&self) -> f32;
 }
 
+pub trait Particle: Spacial + Massive {
+    #[inline]
+    fn weighted_pos(&self) -> Vec3A {
+        if self.get_mass() > 0.0 {
+            self.get_pos() * self.get_mass()
+        } else {
+            Vec3A::ZERO
+        }
+    }
+}
+
+impl<T: Spacial + Massive> Particle for T {}
+
 #[derive(Clone, Debug, Default)]
 pub struct GravityData {
     pub mass: f32,
@@ -31,8 +44,16 @@ pub struct GravityData {
 }
 
 impl Spacial for GravityData {
+    #[inline(always)]
     fn get_pos(&self) -> Vec3A {
         self.center_of_mass
+    }
+}
+
+impl Massive for GravityData {
+    #[inline(always)]
+    fn get_mass(&self) -> f32 {
+        self.mass
     }
 }
 
@@ -47,24 +68,16 @@ impl From<&SimulatedBody> for GravityData {
 
 impl GravityData {
     #[inline]
-    pub fn merge_reduce_fn(self, other: &Self) -> Self {
-        let total_mass = self.mass + other.mass;
+    pub fn merge_reduce_fn<T: Particle>(self, other: &T) -> Self {
+        let total_mass = self.mass + other.get_mass();
         Self {
-            center_of_mass: (self.weighted_center() + other.weighted_center()) / total_mass,
+            center_of_mass: (self.weighted_pos() + other.weighted_pos()) / total_mass,
             mass: total_mass,
         }
     }
 
     #[inline]
-    pub fn weighted_center(&self) -> Vec3A {
-        if self.mass > 0.0 {
-            self.center_of_mass * self.mass
-        } else {
-            Vec3A::ZERO
-        }
-    }
-
-    fn merge(ds: impl IntoIterator<Item = &Self>) -> Self {
+    pub fn merge<'a, T: Particle + 'a>(ds: impl IntoIterator<Item = &'a T>) -> Self {
         ds.into_iter()
             .fold(Self::default(), |acc, v| acc.merge_reduce_fn(v))
     }

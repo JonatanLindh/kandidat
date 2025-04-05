@@ -106,6 +106,7 @@ pub struct SimulatedBody {
 /// This implementation provides a clean way to extract the essential physical properties
 /// from a [`GravityBody`] node for use in physics simulations.
 impl From<&Gd<GravityBody>> for SimulatedBody {
+    #[inline]
     fn from(body: &Gd<GravityBody>) -> Self {
         let b = body.bind();
 
@@ -299,8 +300,7 @@ impl INode3D for GravityController {
 
         if let Some(ov) = self.octree_visualizer.as_mut() {
             // Update the octree visualizer with the simulated bodies
-            let bs = bodies_sim.iter().map(|b| b.into()).collect::<Vec<_>>();
-            let octree = MortonOctree::new(&bs);
+            let octree = MortonOctree::new(&bodies_sim);
 
             ov.bind_mut().update_visualization(&octree);
         }
