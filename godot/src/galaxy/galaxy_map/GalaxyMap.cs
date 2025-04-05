@@ -7,7 +7,7 @@ public partial class GalaxyMap : Node3D
 	UISelectableStar uiSelectableStar;
 
 	StarFinder starFinder;
-	StarFactory starFactory = new StarFactory();
+	StarFactory starFactory;
 
 	Node3D player;
 
@@ -19,7 +19,7 @@ public partial class GalaxyMap : Node3D
 		galaxy.SetPlayer(player);
 
 		starFinder = GetNode<StarFinder>("%StarFinder");
-		starFinder.galaxy = galaxy;
+		starFactory = new StarFactory();
 
 		uiSelectableStar = GetNode<UISelectableStar>("%UiSelectableStar");
 		AddToGroup("GalaxyMap");
@@ -34,7 +34,8 @@ public partial class GalaxyMap : Node3D
 				Camera3D camera = GetViewport().GetCamera3D();
 				Vector3 dir = camera.ProjectRayNormal(eventButton.Position);
 
-				Vector3 starPos = starFinder.FindStar(this.player.Position, dir);
+				IStarChunkData[] chunks = galaxy.GetGeneratedChunks();
+				Vector3 starPos = starFinder.FindStar(this.player.Position, dir, chunks);
 
 				if (starPos != Vector3.Zero)
 				{
