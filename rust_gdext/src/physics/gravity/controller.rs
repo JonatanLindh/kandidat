@@ -198,8 +198,12 @@ impl GravityController {
     /// - `accelerations`: A reusable buffer for storing the calculated accelerations
     pub fn step_time(grav_const: f32, delta: f32, bodies_sim: &mut [SimulatedBody]) {
         // 1: Calculate accelerations
-        let accelerations =
-            DirectSummation::calculate_accelerations::<false>(grav_const, bodies_sim);
+        let accelerations = if bodies_sim.len() < 100 {
+            // Use sequential direct summation for small number of bodies
+            DirectSummation::calculate_accelerations::<false>(grav_const, bodies_sim)
+        } else {
+            MortonBasedOctree::calculate_accelerations::<true>(grav_const, bodies_sim)
+        };
 
         // 2: Update velocities and positions
         bodies_sim

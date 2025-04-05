@@ -8,10 +8,9 @@
 [node name="System" type="Node3D"]
 script = ExtResource("1_7my1l")
 
-[node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body", "octree_visualizer")]
+[node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
 simulation_steps = 1000
 sim_center_body = NodePath("Star")
-octree_visualizer = NodePath("../OctreeVisualizer")
 script = ExtResource("6_wayc2")
 
 [node name="Star" parent="GravityController" groups=["gravity_body"] instance=ExtResource("5_5coes")]
