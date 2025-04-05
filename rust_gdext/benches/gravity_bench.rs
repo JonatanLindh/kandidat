@@ -89,7 +89,7 @@ fn compute_accelerations(c: &mut Criterion) {
             });
         });
 
-        group.bench_function(BenchmarkId::new("direct/parellel", size), |b| {
+        group.bench_function(BenchmarkId::new("direct/parallel", size), |b| {
             b.iter(|| {
                 let accelerations =
                     DirectSummation::calculate_accelerations::<true>(GRAV_CONST, &bodies);
