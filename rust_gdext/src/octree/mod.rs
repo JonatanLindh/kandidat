@@ -2,7 +2,7 @@ pub mod morton_based;
 pub mod old_versions;
 pub mod visualize;
 
-use crate::physics::gravity::controller::SimulatedBody;
+use crate::physics::gravity::{Massive, Particle, Spacial, controller::SimulatedBody};
 use core::array;
 use either::Either;
 use glam::Vec3A;
@@ -14,28 +14,6 @@ const MAX_BODIES_PER_LEAF: usize = 1; // Standard for Barnes-Hut is 1 body per l
 const SOFTENING_SQUARED: f32 = 1e-4;
 // Minimum node half-width to prevent infinite subdivision
 const MIN_HALF_WIDTH: f32 = 1e-5;
-
-// --- Data Structures ---
-pub trait Spacial {
-    fn get_pos(&self) -> Vec3A;
-}
-
-pub trait Massive {
-    fn get_mass(&self) -> f32;
-}
-
-pub trait Particle: Spacial + Massive {
-    #[inline]
-    fn weighted_pos(&self) -> Vec3A {
-        if self.get_mass() > 0.0 {
-            self.get_pos() * self.get_mass()
-        } else {
-            Vec3A::ZERO
-        }
-    }
-}
-
-impl<T: Spacial + Massive> Particle for T {}
 
 #[derive(Clone, Debug, Default)]
 pub struct GravityData {

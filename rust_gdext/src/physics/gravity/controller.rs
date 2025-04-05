@@ -1,4 +1,4 @@
-use super::{body::GravityBody, trajectories::TrajectoryWorker};
+use super::{Massive, Spacial, body::GravityBody, trajectories::TrajectoryWorker};
 use crate::{
     octree::{morton_based::MortonOctree, visualize::OctreeVisualizer},
     to_glam_vec3,
@@ -99,6 +99,20 @@ pub struct SimulatedBody {
 
     /// Current velocity vector
     pub vel: Vec3A,
+}
+
+impl Spacial for SimulatedBody {
+    #[inline(always)]
+    fn get_pos(&self) -> Vec3A {
+        self.pos
+    }
+}
+
+impl Massive for SimulatedBody {
+    #[inline(always)]
+    fn get_mass(&self) -> f32 {
+        self.mass
+    }
 }
 
 /// Converts a gravity body node reference into its simulation representation.
