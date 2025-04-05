@@ -9,8 +9,8 @@ public partial class Star
 
 	public Star(Transform3D transform, uint seed, string name = "Star")
 	{
-		this.name = name;
 		this.transform = transform;
 		this.seed = seed;
+		this.name = name;
 	}
 }

@@ -5,7 +5,10 @@ public partial class GalaxyMap : Node3D
 {
 	InfiniteGalaxy galaxy;
 	UISelectableStar uiSelectableStar;
+
 	StarFinder starFinder;
+	StarFactory starFactory = new StarFactory();
+
 	Node3D player;
 
 	// Called when the node enters the scene tree for the first time.
@@ -31,10 +34,11 @@ public partial class GalaxyMap : Node3D
 				Camera3D camera = GetViewport().GetCamera3D();
 				Vector3 dir = camera.ProjectRayNormal(eventButton.Position);
 
-				Star star = starFinder.FindStar(this.player.Position, dir);
+				Vector3 starPos = starFinder.FindStar(this.player.Position, dir);
 
-				if (star != null)
+				if (starPos != Vector3.Zero)
 				{
+					Star star = starFactory.CreateStar(starPos, galaxy.GetSeed());
 					GD.Print($"Selected star: [Name: {star.name} | Position: {star.transform.Origin} | Seed: {star.seed}]");
 
 					uiSelectableStar.SetStar(star);
