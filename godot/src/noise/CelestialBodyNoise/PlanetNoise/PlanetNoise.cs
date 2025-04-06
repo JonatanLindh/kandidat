@@ -4,6 +4,7 @@ using System;
 /// <summary>
 /// A class for creating different types of noise to be used when generating planets
 /// </summary>
+[Tool]
 public partial class PlanetNoise
 {
     private NoiseTexture3D texture3d;

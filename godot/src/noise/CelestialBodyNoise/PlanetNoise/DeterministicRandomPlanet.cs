@@ -9,8 +9,8 @@ public partial class DeterministicRandomPlanet : RandomCelestialBodyNoise
     Random random;
     protected override void RandomizeParameters(CelestialBodyParameters param)
     {
-        Node3D systemManager = GetNode<Node3D>("SystemManager");
-        int systemSeed = (int) systemManager.Call("getSystemSeed");
+        var systemManager = GetNode<Node3D>("SystemManager");
+        int systemSeed = (int)systemManager.Get("currentSeed");
         random = new Random(systemSeed);
 
         param.Width = GetRadius() * 2 + 2;

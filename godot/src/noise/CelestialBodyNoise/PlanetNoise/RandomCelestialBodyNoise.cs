@@ -3,9 +3,10 @@ using System;
 using System.Threading.Tasks;
 
 [Tool]
-public abstract partial class RandomCelestialBodyNoise : Node, CelestialBodyNoise, ModifiableCelestialBody
+public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNoise, ModifiableCelestialBody
 {
     [Export] private int radius = 0;
+ 
     private CelestialBodyParameters param;
     private PlanetNoise planetNoise;
     private FastNoiseLite fastNoise;
@@ -29,11 +30,11 @@ public abstract partial class RandomCelestialBodyNoise : Node, CelestialBodyNois
 
     public int GetRadius()
     {
-        return param.Radius;
+        return radius;
     }
 
     public void SetRadius(int radius)
     {
-        param.Radius = radius;
+        this.radius = radius;
     }
 }
