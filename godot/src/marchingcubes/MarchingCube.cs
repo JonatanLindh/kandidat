@@ -99,8 +99,11 @@ public class MarchingCube
 		shaderMaterial.SetShaderParameter("min_height", _minHeight);
 		shaderMaterial.SetShaderParameter("max_height", _maxHeight);
 
-		// Generate and assign a gradient texture
-		Gradient gradient = new Gradient();
+		PlanetThemeGenerator themeGenerator = new PlanetThemeGenerator();
+
+		// Access exported property (gradient)
+		Gradient gradient = themeGenerator.Gradient;
+
 		// PINK
 		// gradient.AddPoint(0.0f, new Color(0.0f, 0.3f, 0.7f));
 		// gradient.AddPoint(0.2f, new Color(0.5f, 0.4f, 0.1f));
@@ -123,11 +126,11 @@ public class MarchingCube
 		// gradient.AddPoint(1.0f, new Color(0.9f, 1.0f, 1.0f));        // Icy glowing peaks
 
 		// MARS
-		gradient.AddPoint(0.0f, new Color(0.35f, 0.2f, 0.1f));       // Dark sand
-		gradient.AddPoint(0.2f, new Color(0.7f, 0.3f, 0.1f));        // Reddish terrain
-		gradient.AddPoint(0.5f, new Color(0.85f, 0.6f, 0.3f));       // Orange dunes
-		gradient.AddPoint(0.7f, new Color(0.95f, 0.8f, 0.5f));       // Pale sandstone cliffs
-		gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 0.9f));        // Bleached peaks
+		// gradient.AddPoint(0.0f, new Color(0.35f, 0.2f, 0.1f));       // Dark sand
+		// gradient.AddPoint(0.2f, new Color(0.7f, 0.3f, 0.1f));        // Reddish terrain
+		// gradient.AddPoint(0.5f, new Color(0.85f, 0.6f, 0.3f));       // Orange dunes
+		// gradient.AddPoint(0.7f, new Color(0.95f, 0.8f, 0.5f));       // Pale sandstone cliffs
+		// gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 0.9f));        // Bleached peaks
 
 		// // ICE WORLD
 		// gradient.AddPoint(0.0f, new Color(0.0f, 0.2f, 0.4f));        // Deep ice ocean
