@@ -4,41 +4,23 @@ using System;
 /// <summary>
 /// A class for creating different types of noise to be used when generating planets
 /// </summary>
-[Tool]
-public partial class PlanetNoise : Node, CelestialBodyNoise, ModifiableCelestialBody
+public partial class PlanetNoise
 {
     private NoiseTexture3D texture3d;
-    private CelestialBodyInput Input;
-    private CelestialBodyInput input;
-    private FastNoiseLite fastNoise;
 
-    public override void _Ready()
-    {
-        Input = GetParent<CelestialBodyInput>();
-        if (Input == null)
-        {
-            GD.PrintErr("Input is null");
-        }
-        input = Input as CelestialBodyInput;
-    }
+    public PlanetNoise() {}
 
-    public float[,,] CreateDataPoints()
+    public float[,,] CreateDataPoints(CelestialBodyParameters param, FastNoiseLite fastNoise)
     {
-        int radius = input.GetRadius();
+        int radius = param.Radius;
         int diameter = 2 * radius;
 
-        int width = input.GetWidth();  
-        int height = input.GetHeight(); 
-        int depth = input.GetDepth();
+        int width = param.Width;  
+        int height = param.Height;
+        int depth = param.Depth;
 
         float[,,] points = new float[width, height, depth];
         Vector3 centerPoint = new Vector3I(radius, radius, radius);
-        
-        fastNoise = new FastNoiseLite()
-        {
-            NoiseType = input.GetNoiseType(),
-            Seed = input.GetSeed()
-        };
 
          // creates a cube of points
          for (int x = 0; x < width; x++)
@@ -60,7 +42,7 @@ public partial class PlanetNoise : Node, CelestialBodyNoise, ModifiableCelestial
                     float distanceAwayFromCenter = (float)radius - distanceToCenter;
 
                     // Apply fbm to layer noise
-                    float value = Fbm(distanceAwayFromCenter, currentPosition);
+                    float value = Fbm(distanceAwayFromCenter, currentPosition, param, fastNoise);
 
                     // Update point (x,y,z) with value from fbm
                     points[x, y, z] = value;
@@ -80,26 +62,26 @@ public partial class PlanetNoise : Node, CelestialBodyNoise, ModifiableCelestial
     /// <returns>
     /// The sum of all noise layers added to value
     /// </returns>
-    private float Fbm(float value, Vector3 currentPosition)
+    private float Fbm(float value, Vector3 currentPosition, CelestialBodyParameters param, FastNoiseLite fastNoise)
     {
         float valueAfterFbm = value;
 
         // Get parameters from editor which will change locally in the loop
-        float amplitude = input.GetAmplitude();
-        float frequency = input.GetFrequency();
+        float amplitude = param.Amplitude;
+        float frequency = param.Frequency;
 
         // Used to slightly offset the position when getting noise-value for each octave
         Vector3 offset = Vector3.Zero;
-        Random random = new Random();
+        Random random = new Random(param.Seed);
 
         // FBM - Fractal Brownian Motion 
-        for (int i = 0; i < input.GetOctaves(); i++)
+        for (int i = 0; i < param.Octaves; i++)
         {
             // TODO Add offset before or after *frequency?
             valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
-            amplitude *= input.GetPersistence();
-            frequency *= input.GetLacunarity();
-            offset += new Vector3(random.Next(input.GetOctaves()), random.Next(input.GetOctaves()), random.Next(input.GetOctaves()));
+            amplitude *= param.Persistence;
+            frequency *= param.Frequency;
+            offset += new Vector3(random.Next(param.Octaves), random.Next(param.Octaves), random.Next(param.Octaves));
         }
 
         return valueAfterFbm;
@@ -120,76 +102,5 @@ public partial class PlanetNoise : Node, CelestialBodyNoise, ModifiableCelestial
         ImageTexture3D texture = new ImageTexture3D();
         texture.Create(noiseSlices[0].GetFormat(), width, height, depth, useMipmaps, noiseSlices);
         return texture;
-    }
-
-    public float[,,] GetNoise()
-    {
-        return CreateDataPoints();
-    }
-
-    public int GetRadius()
-    {
-        return input.GetRadius();
-    }
-    public void SetRadius(int newRadius)
-    {
-        input.SetRadius(newRadius);
-    }
-
-    public void SetWidth(int newWidth)
-    {
-        input.SetWidth(newWidth);
-    }
-
-    public void SetHeight(int newHeight)
-    {
-        input.SetHeight(newHeight);
-    }
-
-    public void SetDepth(int newDepth)
-    {
-        input.SetDepth(newDepth);
-    }
-
-    public void SetSize(int size)
-    {
-        SetWidth(size);
-        SetHeight(size);
-        SetDepth(size);
-    }
-
-    public void SetOctaves(int newOctaves)
-    {
-        input.SetOctaves(newOctaves);
-    }
-
-    public void SetFrequency(float newFrequency)
-    {
-        input.SetFrequency(newFrequency);
-    }
-
-    public void SetAmplitude(float newAmplitude)
-    {
-        input.SetAmplitude(newAmplitude);
-    }
-
-    public void SetLacunarity(float newLacunarity)
-    {
-        input.SetLacunarity(newLacunarity);
-    }
-
-    public void SetPersistence(float newPersistence)
-    {
-        input.SetPersistence(newPersistence);
-    }
-
-    public void SetNoiseType(FastNoiseLite.NoiseTypeEnum newNoiseType)
-    {
-        input.SetNoiseType(newNoiseType);
-    }
-
-    public void SetSeed(int newSeed)
-    {
-        input.SetSeed(newSeed);
     }
 }
