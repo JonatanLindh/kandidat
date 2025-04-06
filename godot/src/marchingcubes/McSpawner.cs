@@ -16,7 +16,6 @@ public partial class McSpawner : Node
         set
         {
             _reload = !value;
-            //OnResourceSet();
         }
     }
 
@@ -28,7 +27,6 @@ public partial class McSpawner : Node
 		set
 		{
 			cb = value;
-            // OnResourceSet(); TODO THIS MAKES THE SpawnMesh() FUNCTION RUN TWICE!
         }
     }
 
@@ -61,22 +59,24 @@ public partial class McSpawner : Node
 		_marchingCube ??= new MarchingCube();
 
         celestialBody = CelestialBody as CelestialBodyNoise;
-		if(celestialBody != null)
+		if(celestialBody == null)
 		{
-            float[,,] dataPoints = celestialBody.GetNoise();
-			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
-
-			// Disable backface culling
-			StandardMaterial3D material = new StandardMaterial3D();
-			Color o = new Color();
-			material.AlbedoColor = Color.Color8((byte)152, (byte)102, (byte)0);
-			material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex;
-			material.DisableReceiveShadows = true;
-			_meshInstance3D.MaterialOverride = material;
-			((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
-
-			this.AddChild(_meshInstance3D);
+			GD.PrintErr("celestialBody is null");
 		}
+
+        float[,,] dataPoints = celestialBody.GetNoise();
+		_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
+
+		// Disable backface culling
+		StandardMaterial3D material = new StandardMaterial3D();
+		Color o = new Color();
+		material.AlbedoColor = Color.Color8((byte)152, (byte)102, (byte)0);
+		material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex;
+		material.DisableReceiveShadows = true;
+		_meshInstance3D.MaterialOverride = material;
+		((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
+
+		this.AddChild(_meshInstance3D);
 	}
 
 	// Old test method for generating datapoints
