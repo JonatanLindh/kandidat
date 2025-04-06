@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://du6jp713wv2h5"]
 
 [ext_resource type="Script" uid="uid://be8xbyj5m5urc" path="res://src/bodies/planet/PlanetMarchingCube.cs" id="1_ha83e"]
-[ext_resource type="PackedScene" uid="uid://5e7ris75mkdi" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomPlanet.tscn" id="2_736bg"]
+[ext_resource type="PackedScene" uid="uid://banvyfc3vuq6t" path="res://src/noise/CelestialBodyNoise/PlanetNoise/DeterministicRandomPlanet.tscn" id="2_736bg"]
 [ext_resource type="Shader" uid="uid://b2yi8ib46fc6k" path="res://src/bodies/planet/atmosphere/atmosphere.gdshader" id="2_umdtg"]
 [ext_resource type="Script" uid="uid://1e7tm60t4h55" path="res://src/bodies/planet/atmosphere/atmosphere.gd" id="3_f3734"]
 [ext_resource type="Script" uid="uid://ba2chkln3f48f" path="res://src/bodies/planet/planet_gravity_field.gd" id="5_736bg"]
