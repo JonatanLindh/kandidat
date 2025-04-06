@@ -102,18 +102,46 @@ public class MarchingCube
 		// Generate and assign a gradient texture
 		Gradient gradient = new Gradient();
 		// PINK
+		// gradient.AddPoint(0.0f, new Color(0.0f, 0.3f, 0.7f));
+		// gradient.AddPoint(0.2f, new Color(0.5f, 0.4f, 0.1f));
+		// gradient.AddPoint(0.5f, new Color(0.81f, 0.44f, 0.65f));
+		// gradient.AddPoint(0.7f, new Color(0.86f, 0.63f, 0.47f));
+		// gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 1.0f));
+
+		// // Earth like
 		// gradient.AddPoint(0.0f, new Color(0.0f, 0.3f, 0.7f)); // Ocean
-		// gradient.AddPoint(0.2f, new Color(0.5f, 0.4f, 0.1f)); // Mid heights: brownish
-		// gradient.AddPoint(0.5f, new Color(0.81f, 0.44f, 0.65f)); // Low heights: dark green
-		// gradient.AddPoint(0.7f, new Color(0.86f, 0.63f, 0.47f)); // High heights: gray
+		// gradient.AddPoint(0.2f, new Color(0.439f, 0.255f, 0.0f)); // Mid heights: brownish
+		// gradient.AddPoint(0.5f, new Color(0.035f, 0.31f, 0.0f)); // Low heights: dark green
+		// gradient.AddPoint(0.7f, new Color(0.3f, 0.3f, 0.3f)); // High heights: gray
 		// gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 1.0f)); // Peaks: white (snow)
 
-		gradient.AddPoint(0.0f, new Color(0.0f, 0.3f, 0.7f)); // Ocean
-		gradient.AddPoint(0.2f, new Color(0.439f, 0.255f, 0.0f)); // Mid heights: brownish
-		gradient.AddPoint(0.5f, new Color(0.035f, 0.31f, 0.0f)); // Low heights: dark green
-		gradient.AddPoint(0.7f, new Color(0.3f, 0.3f, 0.3f)); // High heights: gray
-		gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 1.0f)); // Peaks: white (snow)
+		// // // ALIEN
+		// gradient.AddPoint(0.0f, new Color(0.02f, 0.0f, 0.1f));       // Deep void-like ocean
+		// gradient.AddPoint(0.2f, new Color(0.1f, 0.0f, 0.2f));        // Purple lowlands
+		// gradient.AddPoint(0.5f, new Color(0.0f, 0.8f, 0.6f));        // Glowing teal flora
+		// gradient.AddPoint(0.7f, new Color(0.3f, 0.1f, 0.5f));        // Magenta cliffs
+		// gradient.AddPoint(1.0f, new Color(0.9f, 1.0f, 1.0f));        // Icy glowing peaks
 
+		// MARS
+		gradient.AddPoint(0.0f, new Color(0.35f, 0.2f, 0.1f));       // Dark sand
+		gradient.AddPoint(0.2f, new Color(0.7f, 0.3f, 0.1f));        // Reddish terrain
+		gradient.AddPoint(0.5f, new Color(0.85f, 0.6f, 0.3f));       // Orange dunes
+		gradient.AddPoint(0.7f, new Color(0.95f, 0.8f, 0.5f));       // Pale sandstone cliffs
+		gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 0.9f));        // Bleached peaks
+
+		// // ICE WORLD
+		// gradient.AddPoint(0.0f, new Color(0.0f, 0.2f, 0.4f));        // Deep ice ocean
+		// gradient.AddPoint(0.2f, new Color(0.2f, 0.4f, 0.7f));        // Slushy water
+		// gradient.AddPoint(0.5f, new Color(0.6f, 0.8f, 0.9f));        // Ice crust
+		// gradient.AddPoint(0.7f, new Color(0.8f, 0.9f, 1.0f));        // Snowy cliffs
+		// gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 1.0f));        // Frozen peaks
+
+		// // VOLCANIC WORLD (MARS LIKE)
+		// gradient.AddPoint(0.0f, new Color(0.05f, 0.0f, 0.0f));       // Basalt base
+		// gradient.AddPoint(0.2f, new Color(0.3f, 0.1f, 0.0f));        // Scorched rock
+		// gradient.AddPoint(0.5f, new Color(0.6f, 0.1f, 0.0f));        // Lava flows
+		// gradient.AddPoint(0.7f, new Color(0.8f, 0.4f, 0.1f));        // Glowing terrain
+		// gradient.AddPoint(1.0f, new Color(1.0f, 0.9f, 0.7f));        // Molten peaks
 
 		GradientTexture1D gradientTexture = new GradientTexture1D();
 		gradientTexture.Gradient = gradient;
