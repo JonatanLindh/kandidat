@@ -2,6 +2,9 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// Class for generating a color theme for the planets and shaders. Randomly selects a theme from a selection of hard coded planetary themes.
+/// </summary>
 public class PlanetThemeGenerator
 {
 private Gradient gradient = new Gradient();
