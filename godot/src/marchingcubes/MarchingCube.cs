@@ -101,10 +101,17 @@ public class MarchingCube
 
 		// Generate and assign a gradient texture
 		Gradient gradient = new Gradient();
+		// PINK
+		// gradient.AddPoint(0.0f, new Color(0.0f, 0.3f, 0.7f)); // Ocean
+		// gradient.AddPoint(0.2f, new Color(0.5f, 0.4f, 0.1f)); // Mid heights: brownish
+		// gradient.AddPoint(0.5f, new Color(0.81f, 0.44f, 0.65f)); // Low heights: dark green
+		// gradient.AddPoint(0.7f, new Color(0.86f, 0.63f, 0.47f)); // High heights: gray
+		// gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 1.0f)); // Peaks: white (snow)
+
 		gradient.AddPoint(0.0f, new Color(0.0f, 0.3f, 0.7f)); // Ocean
-		gradient.AddPoint(0.2f, new Color(0.5f, 0.4f, 0.1f)); // Mid heights: brownish
-		gradient.AddPoint(0.5f, new Color(0.81f, 0.44f, 0.65f)); // Low heights: dark green
-		gradient.AddPoint(0.7f, new Color(0.86f, 0.63f, 0.47f)); // High heights: gray
+		gradient.AddPoint(0.2f, new Color(0.439f, 0.255f, 0.0f)); // Mid heights: brownish
+		gradient.AddPoint(0.5f, new Color(0.035f, 0.31f, 0.0f)); // Low heights: dark green
+		gradient.AddPoint(0.7f, new Color(0.3f, 0.3f, 0.3f)); // High heights: gray
 		gradient.AddPoint(1.0f, new Color(1.0f, 1.0f, 1.0f)); // Peaks: white (snow)
 
 
@@ -113,6 +120,7 @@ public class MarchingCube
 		gradientTexture.Width = 256 * 2;
 
 		shaderMaterial.SetShaderParameter("height_color", gradientTexture);
+		shaderMaterial.SetShaderParameter("cliff_color", new Vector3(0.5f, 0.5f, 0.5f));
 
 		meshInstance.MaterialOverride = shaderMaterial;
 
