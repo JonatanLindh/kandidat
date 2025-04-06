@@ -9,8 +9,16 @@ public partial class DeterministicRandomPlanet : RandomCelestialBodyNoise
     Random random;
     protected override void RandomizeParameters(CelestialBodyParameters param)
     {
-        var systemManager = GetNode<Node3D>("SystemManager");
-        int systemSeed = (int)systemManager.Get("currentSeed");
+        // Get seed from star system
+        var systemManager = GetParent().GetParent();
+        if(systemManager == null || !IsInsideTree())
+        {
+            GD.PrintErr("system manager is null in DeterministicRandomPlanet.cs OR planet not in scene tree");
+        }
+
+        int systemSeed = (int)systemManager.Call("getSystemSeed");
+
+        // Set seed of Random to system-seed to make deterministic
         random = new Random(systemSeed);
 
         param.Width = GetRadius() * 2 + 2;
