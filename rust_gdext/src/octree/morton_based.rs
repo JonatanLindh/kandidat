@@ -187,8 +187,6 @@ impl<'a, T> MortonBasedOctree<'a, T>
 where
     T: Particle + Sync,
 {
-    // ** IMPORTANT: Tune this threshold based on benchmarks! **
-    const PARALLEL_RECURSION_THRESHOLD: usize = 4096;
     const PARALLEL_ENCODE_THRESHOLD: usize = 3000;
 
     /// Main function to build the octree from body data using Morton codes.
