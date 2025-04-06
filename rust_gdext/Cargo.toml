@@ -12,7 +12,6 @@ godot = { version = "0.2.4", features = [
     "experimental-threads",
 ] }
 itertools = "0.14"
-ndarray = { version = "0.16", features = ["rayon"] }
 rayon = "1.10"
 proc = { path = "proc" }
 glam = { version = "0.30", features = [
@@ -20,7 +19,6 @@ glam = { version = "0.30", features = [
     "core-simd",
     "debug-glam-assert",
 ] }
-parking_lot = { version = "0.12", features = ["nightly"] }
 either = "1.15"
 derivative = { version = "2.2", features = ["use_core"] }
 
