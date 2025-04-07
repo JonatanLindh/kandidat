@@ -7,17 +7,17 @@
 
 [node name="System" type="Node3D"]
 script = ExtResource("1_7my1l")
-distanceBetweenPlanets = 400
-baseDistanceFromSun = 400
+distanceBetweenPlanets = 800
+baseDistanceFromSun = 600
 
 [node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
-simulation_steps = 2000
+simulation_steps = 1000
 simulation_step_delta = 1.0
 sim_center_body = NodePath("Star")
 script = ExtResource("6_wayc2")
 
 [node name="Star" parent="GravityController" groups=["gravity_body"] instance=ExtResource("5_5coes")]
-mass = 20000.0
+mass = 300000.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.625992, 0, 0.313004)
 radius = 200.0
 

@@ -16,6 +16,7 @@ extends Node3D
 
 const G = 1.0;
 var PLANET_SCENE:PackedScene = load("res://src/bodies/planet/planet.tscn");
+var PLANET_MARCHING_CUBE_SCENE:PackedScene = load("res://src/bodies/planet/planet_marching_cube.tscn");
 var MOON_SCENE:PackedScene = load("res://src/bodies/moon/moon.tscn"); # DOESNT WORK THE MOON SCENE IS ONLY A TOOL?!??!
 var rand = RandomNumberGenerator.new();
 var bodies = [];
@@ -63,7 +64,7 @@ func randomPlanetRadius(r):
 	return r.randf_range(1,8);
 
 
-func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpeed = 0, moons = 0):
+func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpeed = 0):
 	#Planet stuff
 	if (planetRadius == 0):
 		planetRadius = randomPlanetRadius(r);
@@ -77,29 +78,33 @@ func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSp
 	if (orbitSpeed == 0):
 		orbitSpeed = orbitSpeedFromRadius(orbitRadius, SUN.mass);
 		
-	var planetInstance = spawnPlanet(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle)
-	for m in range(moons):
-		generateMoon(r,planetInstance)
+	var planetInstance = spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle)
+	return planetInstance
 
-func generateMoon(r, planetInstance):
-	var moonRadius = r.randf_range(planetInstance.planet_data.radius/10, planetInstance.planet_data.radius/5)
-	var orbitRadius = r.randf_range(moonRadius*10, moonRadius*50)
+func generateMoon(r, planetInstance, orbitRadius):
+	var moonRadius = r.randf_range(planetInstance.Radius/10, planetInstance.Radius/5)
+	#var orbitRadius = r.randf_range(moonRadius*10, moonRadius*50)
 	var orbitAngle = randomOrbitAngle(r);
 	var orbitSpeed = orbitSpeedFromRadius(orbitRadius, planetInstance.mass);
 	
-	var randomID = rand.randi_range(100000, 999999);
-	var bodyInstance = MOON_SCENE.instantiate();
-	bodyInstance.mass = 0.01;
-	bodyInstance.velocity = planetInstance.velocity + Vector3(cos(orbitAngle)*orbitSpeed,0,-sin(orbitAngle)*orbitSpeed)
-	bodyInstance.position = planetInstance.position + Vector3(sin(orbitAngle)*orbitRadius,0,cos(orbitAngle)*orbitRadius)
-	bodyInstance._radius = moonRadius
-	bodyInstance.name = "Body" + str(randomID);
-	bodyInstance.trajectory_color = Color.from_hsv(rand.randf_range(0,1),0.80,0.80)*3;
-	$GravityController.add_child(bodyInstance);
-	bodyInstance.owner = self
-	bodies.append(randomID);
-	return bodyInstance;
-	#return spawnBody(MOON_SCENE ,moonRadius, 0.01, orbitRadius, orbitSpeed, orbitAngle, planetInstance.position, planetInstance.velocity);
+	return spawnBody(PLANET_SCENE ,moonRadius, 0.01, orbitRadius, orbitSpeed, orbitAngle, planetInstance.position, planetInstance.velocity);
+
+func generatePlanets(n:int, r):
+	for i in n:
+		var planetInstance = generatePlanet(r, 0,0,baseDistanceFromSun + i*distanceBetweenPlanets,0);
+		var moons = 1
+		for m in range(moons):
+			generateMoon(r,planetInstance, distanceBetweenPlanets / 100)
+
+func generateSystemFromSeed(s:int):
+	print(s);
+	clearBodies();
+	var r = RandomNumberGenerator.new();
+	r.seed = s;
+	
+	var n = r.randi_range(3,10);
+	generatePlanets(n,r)
+
 
 func spawnBody(bodyScene , bodyRadius, bodyMass, orbitRadius, orbitSpeed, orbitAngle, primaryPosition = Vector3.ZERO, primaryVelocity= Vector3.ZERO):
 	var randomID = rand.randi_range(100000, 999999);
@@ -118,15 +123,16 @@ func spawnBody(bodyScene , bodyRadius, bodyMass, orbitRadius, orbitSpeed, orbitA
 func spawnPlanet(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle):
 	return spawnBody(PLANET_SCENE, planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle);
 
-func generatePlanets(n:int, r):
-	for i in n:
-		generatePlanet(r, 0,0,baseDistanceFromSun + i*distanceBetweenPlanets,0, min(n,1));
-
-func generateSystemFromSeed(s:int):
-	print(s);
-	clearBodies();
-	var r = RandomNumberGenerator.new();
-	r.seed = s;
-	
-	var n = r.randi_range(3,10);
-	generatePlanets(n,r)
+func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle):
+	var randomID = rand.randi_range(100000, 999999);
+	var bodyInstance = PLANET_MARCHING_CUBE_SCENE.instantiate();
+	bodyInstance.mass = planetMass;
+	bodyInstance.velocity = Vector3(cos(orbitAngle)*orbitSpeed,0,-sin(orbitAngle)*orbitSpeed)
+	bodyInstance.position = Vector3(sin(orbitAngle)*orbitRadius,0,cos(orbitAngle)*orbitRadius)
+	bodyInstance.Radius = planetRadius
+	bodyInstance.name = "Body" + str(randomID);
+	bodyInstance.trajectory_color = Color.from_hsv(rand.randf_range(0,1),0.80,0.80)*3;
+	$GravityController.add_child(bodyInstance);
+	bodyInstance.owner = self
+	bodies.append(randomID);
+	return bodyInstance;

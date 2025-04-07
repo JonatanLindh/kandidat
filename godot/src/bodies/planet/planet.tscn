@@ -205,9 +205,3 @@ script = ExtResource("8_dj11n")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlanetGravityField"]
 shape = SubResource("SphereShape3D_gyegr")
-
-[node name="CSGSphere3D" type="CSGSphere3D" parent="."]
-use_collision = true
-radius = 15.0
-radial_segments = 100
-rings = 100
