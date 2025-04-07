@@ -1,3 +1,5 @@
+use crate::from_glam_vec3;
+
 use super::controller::{
     __gdext_GravityController_Funcs as GravityController_Funcs, GravityController, SimulatedBody,
 };
@@ -108,8 +110,8 @@ impl GravityBody {
 
     pub fn update_from_sim(&mut self, sim: &SimulatedBody) {
         self.mass = sim.mass;
-        self.velocity = sim.vel;
-        self.base_mut().set_position(sim.pos);
+        self.velocity = from_glam_vec3(sim.vel);
+        self.base_mut().set_position(from_glam_vec3(sim.pos));
     }
 
     /// Traverses up the node tree to find the parent `GravityController`.
