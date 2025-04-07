@@ -9,6 +9,15 @@ extends MeshInstance3D
 		sun_direction = new_dir
 		_update_runtime_shader_params()
 
+var _atmopshere_color : Vector3
+@export var atmosphere_color: Vector3:
+	get():
+		return _atmopshere_color
+	set(new_val):
+		_atmopshere_color = new_val
+		print("ATMOSPJERE COLRO", _atmopshere_color)
+		mesh.material.set_shader_parameter("wavelengths", new_val)
+
 # CHEATING SINCE WE DON'T HAVE MIE SCATTERING
 const EARTH_LIKE := Vector3(700, 530, 440)
 const PURPLE_ISH := Vector3(540, 700, 380)
@@ -24,8 +33,9 @@ func _ready() -> void:
 		mesh.material = mesh.material.duplicate()
 	
 	_update_runtime_shader_params()
-	var random_wave_length = wave_lenghts_array.pick_random()
-	mesh.material.set_shader_parameter("wavelengths", random_wave_length)
+	#atmosphere_color = wave_lenghts_array.pick_random()
+	#mesh.material.set_shader_parameter("wavelengths", atmosphere_color)
+	print("ATMOSPJERE COLRO", _atmopshere_color)
 	mesh.material.set_shader_parameter("planet_radius", radius)
 	mesh.size = Vector3(radius*6,radius*6,radius*6)
 

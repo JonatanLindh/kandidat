@@ -41,6 +41,7 @@ transform = Transform3D(16.7, 0, 0, 0, 16.7, 0, 0, 0, 16.7, 0, 0, 0)
 mesh = SubResource("BoxMesh_736bg")
 script = ExtResource("3_f3734")
 radius = 1.0
+atmosphere_color = Vector3(620, 800, 1000)
 
 [node name="PlanetGravityField" type="Area3D" parent="."]
 gravity_space_override = 3

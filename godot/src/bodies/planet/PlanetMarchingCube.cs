@@ -53,6 +53,8 @@ public partial class PlanetMarchingCube : Node3D
 	private Node3D _planet;
 	private Node _atmosphere;
 	private Area3D _planet_gravity_field;
+
+	private PlanetThemeGenerator _themeGenerator;
 	
 
 	public override void _Ready()
@@ -93,7 +95,8 @@ public partial class PlanetMarchingCube : Node3D
 			{
 				_planet.Set("radius", _resolution);
 				_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
-
+				// _themeGenerator = (PlanetThemeGenerator)_planet.Get("ThemeGenerator");
+				// GD.Print(_themeGenerator);
 				// Add the planet as a child of the current node
 				AddChild(_planet);
 			}
@@ -101,7 +104,9 @@ public partial class PlanetMarchingCube : Node3D
 		
 		_atmosphere = GetNodeOrNull("Atmosphere");
 		_atmosphere?.Set("radius", _radius);
+		CallDeferred(nameof(SetThemeGenerator));
 		CallDeferred(nameof(SetAtmosphereSunDir));
+		CallDeferred(nameof(SetAtmosphereColor));
 	}
 
 	private void SetAtmosphereSunDir()
@@ -119,5 +124,33 @@ public partial class PlanetMarchingCube : Node3D
 			GD.PrintErr($"Error updating atmosphere: {e.Message}");
 		}
 	}
+
+	private void SetAtmosphereColor() 
+	{
+		if (!IsInsideTree() || _atmosphere == null)
+			return;
+		
+		try 
+		{	
+			_atmosphere.Set("atmosphere_color", _themeGenerator.AtmosphereColor);
+			GD.Print("Done setting color");
+		}
+		catch (Exception e)
+		{
+			GD.PrintErr($"Error updating atmosphere color: {e.Message}");
+		}
+	}
 	
+	private void SetThemeGenerator()
+	{	
+		if(_planet != null)
+		{
+			_themeGenerator = (PlanetThemeGenerator)_planet.Get("ThemeGenerator");
+			GD.Print("Done setting generator");
+		}
+		else
+		{
+			GD.Print("No planet");
+		}
+	}
 }

@@ -2,17 +2,27 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-/// <summary>
-/// Class for generating a color theme for the planets and shaders. Randomly selects a theme from a selection of hard coded planetary themes.
-/// </summary>
-public class PlanetThemeGenerator
+[Tool]
+[GlobalClass]
+public partial class PlanetThemeGenerator : Resource
 {
-private Gradient gradient = new Gradient();
-public Gradient Gradient
-{
-    get => gradient;
-    set => gradient = value;
-}
+    [Export]
+    public Gradient Gradient
+    {
+        get => gradient;
+        set => gradient = value;
+    }
+
+    [Export]
+    public Vector3 AtmosphereColor
+    {
+        get => _atmosphereColor;
+        set => _atmosphereColor = value;
+    }
+    private Vector3 _atmosphereColor;
+
+    private Gradient gradient = new Gradient();
+    private Vector3 atmosphereWavelengths;
 
     // Enums for clarity
     public enum ThemeNames
@@ -94,10 +104,10 @@ public Gradient Gradient
     private List<(List<Color> PlanetColors, Vector3 Atmosphere)> colorPairs;
 
     public PlanetThemeGenerator() {
-        generatePair();
+        GeneratePair();
     }
 
-    private void generatePair()
+    private void GeneratePair()
     {
         GD.Randomize(); // Optional: ensure true randomness
 
@@ -116,6 +126,7 @@ public Gradient Gradient
         var random = new RandomNumberGenerator();
         int index = random.RandiRange(0, colorPairs.Count - 1);
         var (planetColors, atmosphereColor) = colorPairs[index];
+        _atmosphereColor = atmosphereColor;
 
         GD.Print("Selected Theme Index: ", index);
 
