@@ -107,7 +107,12 @@ public partial class PlanetMarchingCube : Node3D
 				_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
 
 				AddChild(_planet);
-			}
+
+                // Find McSpawner node and set Warmth
+                var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
+                if (mcSpawner != null)
+                    mcSpawner.Warmth = warmth;
+            }
 		}
 		
 		_atmosphere = GetNodeOrNull("Atmosphere");

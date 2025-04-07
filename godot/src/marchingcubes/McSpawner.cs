@@ -32,7 +32,22 @@ public partial class McSpawner : Node
 		}
 	}
 
-	private ShaderMaterial _planetShader;
+	private double _warmth;
+    public double Warmth
+    {
+        get => _warmth;
+        set
+        {
+            _warmth = value;
+
+            if (_themeGenerator != null)
+            {
+                _themeGenerator.Warmth = value; // Tell it to pick a new theme
+            }
+        }
+    }
+
+    private ShaderMaterial _planetShader;
 	public ShaderMaterial PlanetShader
 	{
 		get => _planetShader;

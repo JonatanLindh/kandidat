@@ -1,17 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://d0cdpoktouwfj"]
+[gd_scene load_steps=2 format=3 uid="uid://d0cdpoktouwfj"]
 
 [ext_resource type="Script" uid="uid://j0p1lsdx3u6s" path="res://src/marchingcubes/McSpawner.cs" id="1_k0vbw"]
-[ext_resource type="Script" uid="uid://cymyjpjofvw5w" path="res://src/bodies/planet/PlanetThemeGenerator.cs" id="2_c8iub"]
-
-[sub_resource type="Gradient" id="Gradient_xbab5"]
-offsets = PackedFloat32Array(0, 1, 0, 0.2, 0.5, 0.7, 1)
-colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0.3, 0.7, 1, 0.5, 0.4, 0.1, 1, 0.81, 0.44, 0.65, 1, 0.86, 0.63, 0.47, 1, 1, 1, 1, 1)
-
-[sub_resource type="Resource" id="Resource_64aop"]
-script = ExtResource("2_c8iub")
-Gradient = SubResource("Gradient_xbab5")
-AtmosphereColor = Vector3(540, 700, 380)
 
 [node name="MarchingCube" type="Node3D"]
 script = ExtResource("1_k0vbw")
-ThemeGenerator = SubResource("Resource_64aop")
