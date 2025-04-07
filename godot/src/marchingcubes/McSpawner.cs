@@ -43,12 +43,6 @@ public partial class McSpawner : Node
 	}
 
 	private PlanetThemeGenerator _themeGenerator = new PlanetThemeGenerator();
-	[Export]
-	public PlanetThemeGenerator ThemeGenerator
-	{
-		get => _themeGenerator;
-		set{}
-	}
 
 	private int _maxHeight = 16;
 	private int _size = 32;
@@ -140,7 +134,7 @@ public partial class McSpawner : Node
 		Gradient gradient = _themeGenerator.Gradient;
 		GradientTexture1D gradientTexture = new GradientTexture1D();
 		gradientTexture.Gradient = gradient;
-		gradientTexture.Width = 256 * 2;
+		gradientTexture.Width = 256;
 
 		shaderMaterial.SetShaderParameter("height_color", gradientTexture);
 		shaderMaterial.SetShaderParameter("cliff_color", gradient.GetColor(3));

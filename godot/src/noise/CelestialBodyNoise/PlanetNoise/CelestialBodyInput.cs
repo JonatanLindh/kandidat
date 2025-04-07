@@ -9,19 +9,11 @@ public partial class CelestialBodyInput : Node3D
 {
     [ExportToolButton("Regenerate Mesh")]
     public Callable ClickMeButton => Callable.From(RegenMesh);
-    
-    private PlanetThemeGenerator _themeGenerator = new PlanetThemeGenerator();
-    [Export]
-    public PlanetThemeGenerator ThemeGenerator{
-        get => _themeGenerator;
-        set{}
-    }
 
     public void RegenMesh()
     {
         // GetNode<McSpawner>("MarchingCube").RegenerateMesh();
         var _mcSpawner = GetNode<McSpawner>("MarchingCube");
-        _mcSpawner.ThemeGenerator = _themeGenerator;
         _mcSpawner.RegenerateMesh();
     }
 

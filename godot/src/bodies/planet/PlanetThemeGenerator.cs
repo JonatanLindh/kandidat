@@ -91,6 +91,55 @@ public partial class PlanetThemeGenerator : Resource
             new Color(0.6f, 0.1f, 0.0f),
             new Color(0.8f, 0.4f, 0.1f),
             new Color(1.0f, 0.9f, 0.7f)
+        },
+        // LAVA PLANET 6
+        new List<Color>
+        {
+            new Color(0.1f, 0.0f, 0.0f),
+            new Color(0.4f, 0.0f, 0.0f),
+            new Color(0.8f, 0.1f, 0.0f),
+            new Color(1.0f, 0.4f, 0.0f),
+            new Color(1.0f, 0.8f, 0.5f)
+        },
+
+        // GAS GIANT 7
+        new List<Color>
+        {
+            new Color(0.1f, 0.1f, 0.3f),
+            new Color(0.3f, 0.3f, 0.6f),
+            new Color(0.6f, 0.6f, 0.9f),
+            new Color(0.9f, 0.9f, 1.0f),
+            new Color(1.0f, 1.0f, 1.0f)
+        },
+
+        // TOXIC PLANET 8
+        new List<Color>
+        {
+            new Color(0.0f, 0.2f, 0.0f),
+            new Color(0.1f, 0.4f, 0.0f),
+            new Color(0.5f, 0.6f, 0.0f),
+            new Color(0.7f, 0.8f, 0.1f),
+            new Color(1.0f, 1.0f, 0.3f)
+        },
+
+        // CRYSTAL PLANET 9
+        new List<Color>
+        {
+            new Color(0.2f, 0.0f, 0.4f),
+            new Color(0.4f, 0.1f, 0.6f),
+            new Color(0.6f, 0.3f, 0.9f),
+            new Color(0.8f, 0.6f, 1.0f),
+            new Color(1.0f, 0.9f, 1.0f)
+        },
+
+        // JUNGLE PLANET 10
+        new List<Color>
+        {
+            new Color(0.0f, 0.2f, 0.0f),
+            new Color(0.0f, 0.4f, 0.1f),
+            new Color(0.0f, 0.6f, 0.2f),
+            new Color(0.2f, 0.7f, 0.3f),
+            new Color(0.4f, 0.9f, 0.5f)
         }
     };
 
@@ -110,23 +159,11 @@ public partial class PlanetThemeGenerator : Resource
     private void GeneratePair()
     {
         GD.Randomize(); // Optional: ensure true randomness
-
-        // Construct color pairs once here (can also do it in constructor)
-        colorPairs = new List<(List<Color>, Vector3)>
-        {
-            (planetThemes[0], PURPLE_ISH), // PINK
-            (planetThemes[1], EARTH_LIKE), // EARTH
-            (planetThemes[2], GREEN),      // ALIEN
-            (planetThemes[3], ORANGE),     // DESERT
-            (planetThemes[4], EARTH_LIKE), // ICE
-            (planetThemes[5], ORANGE)      // MARS
-        };
-
+        
         // Select a random theme
         var random = new RandomNumberGenerator();
-        int index = random.RandiRange(0, colorPairs.Count - 1);
-        var (planetColors, atmosphereColor) = colorPairs[index];
-        _atmosphereColor = atmosphereColor;
+        int index = random.RandiRange(0, planetThemes.Count - 1);
+        var planetColors = planetThemes[index];
 
         GD.Print("Selected Theme Index: ", index);
 
