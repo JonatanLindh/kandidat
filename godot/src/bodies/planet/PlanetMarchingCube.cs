@@ -43,10 +43,23 @@ public partial class PlanetMarchingCube : Node3D
 	}
 
 	[Export] public PackedScene Planet { get; set; }
-	
-	
-	
-	private MarchingCube _marchingCube;
+
+    [Export(PropertyHint.Range, "0,1,0.1")]
+    public double Warmth 
+	{ 
+		get => warmth; 
+		set
+		{
+			warmth = value;
+			SpawnMesh();
+		}
+	}
+	private double warmth;
+
+
+
+
+    private MarchingCube _marchingCube;
 	private int _resolution = 16;
 	private float _radius = 1;
 	private Vector3 _sunPosition;
