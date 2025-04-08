@@ -5,9 +5,9 @@ using System.Transactions;
 public partial class SystemBenchmark : BenchmarkScene
 {
 	[Export] Node3D system;
-	[Export] Camera3D player;
+	[Export] Node3D pivot;
 
-	[Export] float speed = 60.0f;
+	[Export] float speed = 30.0f;
 	[Export] uint seed = 420;
 
 	public override void BenchmarkReady()
@@ -17,6 +17,6 @@ public partial class SystemBenchmark : BenchmarkScene
 
 	public override void BenchmarkProcess(double delta)
 	{
-		player.Position += Vector3.Forward * speed * (float)delta;
+		pivot.RotateY(Mathf.DegToRad(speed * (float)delta));
 	}
 }
