@@ -10,7 +10,7 @@ public class MarchingCube
 {
     private IVerticesGenerationStrategy _strategy;
     private float[,,] _datapoints;
-    private readonly int _scale;
+    private float _scale;
     private readonly float _threshold;
 
 
@@ -51,12 +51,15 @@ public class MarchingCube
     /// </summary>
     /// <param name="datapoints">3D array of float values representing the scalar field</param>
     /// <returns>A MeshInstance3D object representing the generated mesh</returns>
-    public MeshInstance3D GenerateMesh(float[,,] datapoints)
+    public MeshInstance3D GenerateMesh(float[,,] datapoints, float scale = 1)
     {
+        _scale = scale;
         var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
-        
+        if (vertices.Count == 0) return new MeshInstance3D();
         // Calculate the actual geometric center of the vertices
         var center = Vector3.Zero;
+        
+        /*
         if (vertices.Count > 0)
         {
             foreach (var vertex in vertices)
@@ -65,12 +68,13 @@ public class MarchingCube
             }
             center /= vertices.Count;
         }
+        */
         var surfaceTool = new SurfaceTool();
         surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
 
         //surfaceTool.SetSmoothGroup(UInt32.MaxValue);
         surfaceTool.SetSmoothGroup(0);
-
+    
         foreach (var vertex in vertices)
         {
             // Center the mesh using the actual geometric center
