@@ -45,6 +45,19 @@ public partial class NewPlanetGen : Node3D
 			}
 		}
 	}
+	[Export]
+	public Vector3I Offset
+	{
+		get => _offset;
+		set
+		{
+			if (value != _offset)
+			{
+				_offset = value;
+				SpawnMesh();
+			}
+		}
+	}
 	
 	private float _radius = 32;
 	private int _resolution = 64;
@@ -56,6 +69,8 @@ public partial class NewPlanetGen : Node3D
 	private int _depth = 0;
 	private int _maxDepth;
 	private float _baseVoxelSize;
+	private MeshInstance3D _boundingBox;
+	private Vector3I _offset = Vector3I.Zero;
 
 	public override void _Ready()
 	{
@@ -64,7 +79,6 @@ public partial class NewPlanetGen : Node3D
 
 	private void SpawnMesh()
 	{
-		//_maxDepth = (int)Math.Log2(_radius);
 		_maxDepth = 8;
 		_baseVoxelSize = (_radius * 2) / (64 * 256);
 		GD.Print("Max depth: ", _maxDepth);
@@ -73,10 +87,13 @@ public partial class NewPlanetGen : Node3D
 		_instance?.QueueFree();
 		_marchingCube ??= new MarchingCube();
 		var data = GenerateDataPoints();
-		//var scaleFactor = (_radius * 2) / _resolution;
 		var scaleFactor = GetVoxelSize(_depth);
 		_instance = _marchingCube.GenerateMesh(data, scale: scaleFactor);
+		var offsetNew = (Vector3)_offset * (2 * _radius) * (1 / (float)Math.Pow(2, _depth));
+		_instance.Translate(offsetNew);
 		AddChild(_instance);
+		DrawBoundingBox(Vector3.Zero, 
+			_radius * (1 / (float)Math.Pow(2, _depth)));
 	}
 
 
@@ -84,7 +101,7 @@ public partial class NewPlanetGen : Node3D
 	{
 		var resolution = _resolution;
 		var radius = _radius;
-		int size = 64 + 5;
+		int size = 64 + 1;
 		var dataPoints = new float[size, size, size];
 
 		for (int x = 0; x < size; x++)
@@ -93,7 +110,8 @@ public partial class NewPlanetGen : Node3D
 			{
 				for (int z = 0; z < size; z++)
 				{
-					Vector3 worldPos = new Vector3(x, y, z) * GetVoxelSize(_depth);
+					var offsetNew = (Vector3)_offset * (2 * _radius) * (1 / (float)Math.Pow(2, _depth));
+					Vector3 worldPos = offsetNew + new Vector3(x, y, z) * GetVoxelSize(_depth);
 					var value = -Sphere(worldPos, Vector3.One * radius, radius);
 					value = Mathf.Clamp(value, -1.0f, 1.0f);
 					dataPoints[x, y, z] = value;
@@ -112,5 +130,55 @@ public partial class NewPlanetGen : Node3D
 		float BASE_VOXEL_SIZE = _baseVoxelSize;
 		return Mathf.Pow(2, (MAX_DEPTH - depth)) * BASE_VOXEL_SIZE;
 	}
+
+	private void DrawBoundingBox(Vector3 center, float radius)
+	{
+		var offsetNew = (Vector3)_offset * (2 * _radius) * (1 / (float)Math.Pow(2, _depth));
+		center = Vector3.One * radius + offsetNew;
+		_boundingBox?.QueueFree();
+		GD.Print("Bounding box center: ", center);
+		GD.Print("Bounding box radius: ", radius);
+		
+		var mesh = new ImmediateMesh();
+		mesh.SurfaceBegin(Mesh.PrimitiveType.Lines);
+		var edges = new []
+		{
+			new Vector3(-radius, -radius, -radius),
+			new Vector3(radius, -radius, -radius),
+			new Vector3(radius, radius, -radius),
+			new Vector3(-radius, radius, -radius),
+			new Vector3(-radius, -radius, radius),
+			new Vector3(radius, -radius, radius),
+			new Vector3(radius, radius, radius),
+			new Vector3(-radius, radius, radius)
+		};
+		var lines = new int[,]
+		{
+			{0, 1}, {1, 2}, {2, 3}, {3, 0},
+			{4, 5}, {5, 6}, {6, 7}, {7, 4},
+			{0, 4}, {1, 5}, {2, 6}, {3, 7}
+		};
+		for (int i = 0; i < lines.GetLength(0); i++)
+		{
+			mesh.SurfaceSetColor(new Color(255, 0, 0));
+			mesh.SurfaceAddVertex(center + edges[lines[i, 0]]);
+			mesh.SurfaceSetColor(new Color(255, 0, 0));
+			mesh.SurfaceAddVertex(center + edges[lines[i, 1]]);
+			
+		}
+		mesh.SurfaceEnd();
+		_boundingBox = new MeshInstance3D();
+		_boundingBox.Mesh = mesh;
+		_boundingBox.MaterialOverride = new StandardMaterial3D
+		{
+			ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+			VertexColorUseAsAlbedo = true,
+			DisableFog = true
+		};
+		_boundingBox.Name = "BoundingBox";
+		AddChild(_boundingBox);
+		
+	}
+		
 	
 }
