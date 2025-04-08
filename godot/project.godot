@@ -28,6 +28,7 @@ project/assembly_name="Kandidat"
 folder_colors={
 "res://src/galaxy/": "orange",
 "res://src/galaxy/galaxies/other_galaxies/": "gray",
+"res://src/ocean/": "teal",
 "res://src/system/": "purple",
 "res://src/system_manager/": "purple"
 }
