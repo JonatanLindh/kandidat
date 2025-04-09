@@ -17,7 +17,7 @@ void vertex() {
 
 void fragment() {
 	float t = (height / (max_height-min_height)) - (min_height / (max_height-min_height));
-	t += 0.01;
+	t = clamp(t, 0.0, 1.0);
 	vec3 color = texture(height_color, vec2(t, 0.)).rgb;
 	float slope = abs(dot(dir_to_center, normal));
 	float cliff_amount = 1.0 - smoothstep(0.25, 0.45, slope);
