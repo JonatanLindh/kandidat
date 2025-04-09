@@ -5,9 +5,11 @@ public partial class PlanetBenchmark : BenchmarkScene
 {
 	[Export] Node3D orbitPivot;
 	[Export] Node3D planetPivot;
+	[Export] Node3D movePivot;
 
-	[Export] float orbitSpeed = 5.0f;
-	[Export] float planetSpeed = 15.0f;
+	[Export] float orbitSpeed = 3.0f;
+	[Export] float planetSpeed = 10.0f;
+	[Export] float moveSpeed = 30.0f;
 	[Export] uint seed = 420;
 
 	public override void BenchmarkReady()
@@ -19,5 +21,6 @@ public partial class PlanetBenchmark : BenchmarkScene
 	{
 		orbitPivot.RotateY(Mathf.DegToRad(orbitSpeed * (float)delta));
 		planetPivot.RotateZ(Mathf.DegToRad(-planetSpeed * (float)delta));
+		movePivot.RotateZ(Mathf.DegToRad(moveSpeed * (float)delta));
 	}
 }
