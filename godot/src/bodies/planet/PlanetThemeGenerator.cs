@@ -66,6 +66,30 @@ public partial class PlanetThemeGenerator : Resource
             new Color(0.95f, 0.8f, 0.5f),
             new Color(1.0f, 1.0f, 0.9f)
         };
+    private List<Color> redDunes = new List<Color>
+    {
+        new Color(0.45f, 0.15f, 0.10f),
+        new Color(0.60f, 0.25f, 0.15f),
+        new Color(0.75f, 0.35f, 0.20f),
+        new Color(0.90f, 0.55f, 0.35f),
+        new Color(1.00f, 0.80f, 0.60f)
+    };
+    private List<Color> red = new List<Color>
+    {
+        new Color(1.00f, 0.00f, 0.00f),
+        new Color(1.00f, 0.00f, 0.00f),
+        new Color(1.00f, 0.00f, 0.00f),
+        new Color(1.00f, 0.00f, 0.00f),
+        new Color(1.00f, 0.00f, 0.00f)
+    };
+    private List<Color> rockyDesert = new List<Color>
+    {
+        new Color(0.25f, 0.18f, 0.14f),
+        new Color(0.40f, 0.28f, 0.20f),
+        new Color(0.55f, 0.38f, 0.25f),
+        new Color(0.70f, 0.50f, 0.35f),
+        new Color(0.85f, 0.70f, 0.55f)
+    };
     private List<Color> iceWorld = new List<Color>
         {
             new Color(0.0f, 0.2f, 0.4f),
@@ -106,13 +130,13 @@ public partial class PlanetThemeGenerator : Resource
             new Color(0.7f, 0.8f, 0.1f),
             new Color(1.0f, 1.0f, 0.3f)
         };
-    private List<Color> crystal = new List<Color>
+    private List<Color> blue = new List<Color>
         {
-            new Color(0.2f, 0.0f, 0.4f),
-            new Color(0.4f, 0.1f, 0.6f),
-            new Color(0.6f, 0.3f, 0.9f),
-            new Color(0.8f, 0.6f, 1.0f),
-            new Color(1.0f, 0.9f, 1.0f)
+            new Color(0.0f, 0.1f, 0.2f),
+            new Color(0.0f, 0.3f, 0.4f),
+            new Color(0.0f, 0.3f, 0.6f),
+            new Color(0.0f, 0.7f, 0.8f),
+            new Color(0.0f, 0.5f, 1.0f)
         };
     private List<Color> jungle = new List<Color>
         {
@@ -137,10 +161,10 @@ public partial class PlanetThemeGenerator : Resource
         // Dictionary of themes, cooler at lower indicies
         planetThemes = new Dictionary<double, List<List<Color>>>()
         {
-            { themeWarmths[0], new List<List<Color>> { iceWorld, crystal }},
-            { themeWarmths[1], new List<List<Color>> { alien, pink, gas }},
+            { themeWarmths[0], new List<List<Color>> { iceWorld, blue, gas }},
+            { themeWarmths[1], new List<List<Color>> { alien, pink }},
             { themeWarmths[2], new List<List<Color>> { earth, jungle, toxic }},
-            { themeWarmths[3], new List<List<Color>> { mars, desert }},
+            { themeWarmths[3], new List<List<Color>> { mars, desert, rockyDesert, redDunes }},
             { themeWarmths[4], new List<List<Color>> { lava }}
         };
         GeneratePair();
@@ -156,31 +180,36 @@ public partial class PlanetThemeGenerator : Resource
         double bestKey = 0;
         double closestDiff = Math.Abs(themeWarmths[0] - _warmth);
 
-        for (int i = 1; i < themeWarmths.Count-1; i++)
+        for (int i = 1; i < themeWarmths.Count; i++)
         {
             double diff = Math.Abs(themeWarmths[i] - _warmth);
             if (diff < closestDiff)
             {
                 closestDiff = diff;
+
                 // Randomize chosen key further to simulate thinner atmospheres etc.
-                randomI = rnd.Next(-1, 2);
-                randomI = Math.Max(0, i + randomI);
+                randomI = rnd.Next(-1, 2);  
+                randomI = i + randomI;     
+                randomI = Math.Max(0, randomI); 
+                randomI = Math.Min(themeWarmths.Count - 1, randomI); 
+
                 bestKey = themeWarmths[randomI];
             }
         }
         var selectedTemperatureThemes = planetThemes[bestKey];
         randomI = rnd.Next(selectedTemperatureThemes.Count);
 
-        GD.Print("Selected Warmth: ", _warmth, " -> Theme Index: ", bestKey);
-
         var planetColors = selectedTemperatureThemes[randomI];
         float[] positions = { 0.0f, 0.2f, 0.5f, 0.7f, 1.0f };
 
         Gradient = new Gradient();
+
         for (int i = 0; i < planetColors.Count; i++)
         {
             Gradient.AddPoint(positions[i], planetColors[i]);
         }
-
+        // Remove default points from gradient that godot initializes the gradient with.
+        Gradient.RemovePoint(0);
+        Gradient.RemovePoint(0);
     }
 }
