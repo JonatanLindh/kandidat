@@ -93,28 +93,6 @@ public class MarchingCube
 		meshInstance.Mesh = mesh;
 		meshInstance.CreateMultipleConvexCollisions();
 
-		// Load the shader correctly
-		// var shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
-		// var shaderMaterial = new ShaderMaterial();
-		// shaderMaterial.Shader = shader;
-		// GD.Print("Max Height: ", _maxHeight);
-		// GD.Print("Min Height: ", _minHeight);
-		// shaderMaterial.SetShaderParameter("min_height", _minHeight);
-		// shaderMaterial.SetShaderParameter("max_height", _maxHeight);
-
-		// PlanetThemeGenerator themeGenerator = new PlanetThemeGenerator();
-
-		// // Access exported property (gradient)
-		// Gradient gradient = themeGenerator.Gradient;
-		// GradientTexture1D gradientTexture = new GradientTexture1D();
-		// gradientTexture.Gradient = gradient;
-		// gradientTexture.Width = 256 * 2;
-
-		// shaderMaterial.SetShaderParameter("height_color", gradientTexture);
-		// shaderMaterial.SetShaderParameter("cliff_color", new Vector3(0.5f, 0.5f, 0.5f));
-
-		// meshInstance.MaterialOverride = shaderMaterial;
-
 		return meshInstance;
 	}
 }
