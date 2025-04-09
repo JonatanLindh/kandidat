@@ -14,7 +14,9 @@ public sealed class MarchingCubeDispatch
 	private MarchingCube _marchingCube;
 	private bool _insideTree = false;
 	
-
+	private readonly ConcurrentBag<long> _workerThreads = new();
+	private uint _maxThreads = 8;
+	private readonly object _generateMeshLock = new object();
 
 	public MarchingCubeDispatch()
 	{
@@ -48,19 +50,33 @@ public sealed class MarchingCubeDispatch
 
 	private void HandleGeneratingTask(ConcurrentQueue<MarchingCubeRequest> queue)
 	{
+		// Check if the queue is empty
 		while (!queue.IsEmpty)
 		{
+			// Try to dequeue the first item
 			queue.TryPeek(out MarchingCubeRequest request);
+			
+			// If the request is null, continue to the next iteration
 			if (request != null)
 			{
+				// Try to dequeue the request
 				queue.TryDequeue(out request);
+				
+				// If the request is null, continue to the next iteration
 				if (request == null) continue;
-				var mesh = _marchingCube.GenerateMesh(request.DataPoints, request.Scale);
-				// Handle the generated mesh (e.g., add it to the scene)
-				// For example: AddChild(mesh);
-				mesh.Translate(request.Offset); 
-				request.Root.CallDeferred(Node.MethodName.AddChild, mesh);
-
+				
+				
+				// Add the task to the worker thread pool
+				_workerThreads.Add(WorkerThreadPool.AddTask(Callable.From(() =>
+				{
+					lock (_generateMeshLock) // Ensure only one thread calls GenerateMesh at a time
+					{
+						var mesh = _marchingCube.GenerateMesh(request.DataPoints, request.Scale);
+						mesh.Translate(request.Offset); 
+						request.Root.CallDeferred(Node.MethodName.AddChild, mesh);
+					}
+				})));
+				
 			}
 		}
 	}
@@ -70,6 +86,21 @@ public sealed class MarchingCubeDispatch
 		while (_insideTree)
 		{
 			HandleGeneratingTask(_planetQueue);
+			
+			// Check if the worker threads are busy
+			if (_workerThreads.Count >= _maxThreads)
+			{
+				// Wait for all worker threads to finish
+				foreach (var threadId in _workerThreads)
+				{
+					WorkerThreadPool.WaitForTaskCompletion(threadId);
+				}
+				_workerThreads.Clear();
+			}
+			else
+			{
+				Thread.Sleep(100); // Sleep for a short duration to avoid busy waiting
+			}
 		}
 	}
 	
