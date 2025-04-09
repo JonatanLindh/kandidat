@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://df1ff860m4sy4"]
+
+[node name="DispatchWorker" type="Node3D"]

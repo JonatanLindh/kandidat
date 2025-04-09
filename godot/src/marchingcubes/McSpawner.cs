@@ -63,6 +63,7 @@ public partial class McSpawner : Node
         celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody != null)
 		{
+			/*
             float[,,] dataPoints = celestialBody.GetNoise();
 			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
 
@@ -76,6 +77,15 @@ public partial class McSpawner : Node
 			((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
 
 			this.AddChild(_meshInstance3D);
+			*/
+			MarchingCubeRequest cubeRequest = new MarchingCubeRequest
+			{
+				DataPoints = celestialBody.GetNoise(),
+				Scale = 1,
+				Offset = -Vector3.One * celestialBody.GetRadius(),
+				Root = this
+			};
+			MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 		}
 	}
 
