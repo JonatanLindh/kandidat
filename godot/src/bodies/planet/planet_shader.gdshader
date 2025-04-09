@@ -12,6 +12,7 @@ varying vec3 normal;
 
 void vertex() {
 	height = length(VERTEX);
+	// Convert node position from world coordinates to local
 	dir_to_center = normalize(VERTEX - ((inverse(MODEL_MATRIX) * vec4(NODE_POSITION_WORLD, 1.0)).xyz));
 	normal = NORMAL;
 }
