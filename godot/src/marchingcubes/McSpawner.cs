@@ -94,15 +94,6 @@ public partial class McSpawner : Node
 			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
 			_meshInstance3D.MaterialOverride = GeneratePlanetShader();
 
-			// Disable backface culling
-			// StandardMaterial3D material = new StandardMaterial3D();
-			// Color o = new Color();
-			// material.AlbedoColor = Color.Color8((byte)152, (byte)102, (byte)0);
-			// material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex;
-			// material.DisableReceiveShadows = true;
-			// _meshInstance3D.MaterialOverride = material;
-			// ((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
-
 			this.AddChild(_meshInstance3D);
 		}
 	}
@@ -143,7 +134,6 @@ public partial class McSpawner : Node
 		shaderMaterial.SetShaderParameter("min_height", _marchingCube.MinHeight);
 		shaderMaterial.SetShaderParameter("max_height", _marchingCube.MaxHeight);
 
-		// _themeGenerator = new PlanetThemeGenerator();
 
 		// Access exported property (gradient)
 		Gradient gradient = _themeGenerator.Gradient;
