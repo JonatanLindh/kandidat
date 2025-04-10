@@ -139,6 +139,7 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	bodyInstance.velocity = Vector3(cos(orbitAngle)*orbitSpeed,0,-sin(orbitAngle)*orbitSpeed)
 	bodyInstance.position = Vector3(sin(orbitAngle)*orbitRadius,0,cos(orbitAngle)*orbitRadius)
 	bodyInstance.Radius = planetRadius
+	bodyInstance.SunPosition = Vector3.ZERO;
 	bodyInstance.name = "Body" + str(randomID);
 	bodyInstance.trajectory_color = Color.from_hsv(rand.randf_range(0,1),0.80,0.80)*3;
 	$GravityController.add_child(bodyInstance);
