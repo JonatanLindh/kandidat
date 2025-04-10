@@ -1,12 +1,17 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class DiscGalaxy : Node3D
 {
 	[Export] FastNoiseLite noise;
 
+	[Export] StarMultiMesh starMultiMesh;
+	[Export] Mesh starMesh;
+
+	Vector3[] starPos;
+
 	int starCount = 10000;
-	[Export] PackedScene starScene;
 
 	float rotationSpeed = 0.05f;
 
@@ -23,6 +28,8 @@ public partial class DiscGalaxy : Node3D
 		
 		random = new Random(seed);
 		noise.Seed = seed;
+
+		starPos = new Vector3[starCount];
 
 		Generate();
 	}
@@ -48,12 +55,12 @@ public partial class DiscGalaxy : Node3D
 
 			if (GetISOLevel(point) > noiseVal)
 			{
-				MeshInstance3D star = (MeshInstance3D)starScene.Instantiate();
-				star.Position = point;
-				AddChild(star);
+				starPos[starsGenerated] = point;
 				starsGenerated++;
 			}
 		}
+
+		starMultiMesh.DrawStars(starPos, starMesh);
 	}
 
 	private Vector3 SamplePointInSphere()
