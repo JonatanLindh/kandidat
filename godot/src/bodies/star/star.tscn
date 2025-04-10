@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c4qg4a1uuvy8x"]
+[gd_scene load_steps=11 format=3 uid="uid://c4qg4a1uuvy8x"]
 
 [ext_resource type="Script" uid="uid://b2bwrjafcs0ma" path="res://src/bodies/star/star.gd" id="1_v5nms"]
 [ext_resource type="Script" uid="uid://cw6871tnevxgg" path="res://src/bodies/star/star_mesh.gd" id="2_8pwqv"]
@@ -12,9 +12,32 @@ material = SubResource("StandardMaterial3D_2v4w2")
 radius = 5.0
 height = 10.0
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_m6dof"]
+noise_type = 0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bw6gg"]
+noise = SubResource("FastNoiseLite_m6dof")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_cp7ty"]
+noise_type = 3
+frequency = 0.0029
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_r4hvf"]
+seamless = true
+noise = SubResource("FastNoiseLite_cp7ty")
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sajin"]
 render_priority = 0
 shader = ExtResource("2_yo06i")
+shader_parameter/Glow_Power = 10.0
+shader_parameter/Lightness_Difference = 7.921
+shader_parameter/Sun_Color = Color(1, 0.350018, 0.00454797, 1)
+shader_parameter/voronoi_noise = SubResource("NoiseTexture2D_r4hvf")
+shader_parameter/emission_noise = SubResource("NoiseTexture2D_bw6gg")
+shader_parameter/waveSpeed = 0.875
+shader_parameter/fresnel = 1.079
+shader_parameter/scale = 0.382
+shader_parameter/blendSharpness = 0.0
 
 [node name="Star" type="GravityBody"]
 script = ExtResource("1_v5nms")
@@ -26,5 +49,6 @@ script = ExtResource("2_8pwqv")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.353493, 0)
+light_energy = 10.231
 omni_range = 4096.0
 omni_attenuation = 0.1
