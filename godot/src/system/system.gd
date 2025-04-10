@@ -51,17 +51,27 @@ func orbitRadiusFromSpeed(v:float):
 func orbitSpeedFromRadius(r:float, m:float):
 	return sqrt(m*G/r)
 
+const MOON_ORBIT_RATIO_PLANET_DISTANCE = 80.
+const MIN_ORBIT_RADIUS = 2.
+const MAX_ORBIT_RADIUS = 80.
+const MIN_ORBIT_ANGLE = 0.
+const MAX_ORBIT_ANGLE = 2. * PI
+const MIN_PLANET_MASS = 10.
+const MAX_PLANET_MASS = 30.
+const MIN_PLANET_RADIUS = 0.5
+const MAX_PLANET_RADIUS = 4.
+
 func randomOrbitRadius(r):
-	return r.randf_range(2,80);
+	return r.randf_range(MIN_ORBIT_RADIUS, MAX_ORBIT_RADIUS)
 	
 func randomOrbitAngle(r):
-	return r.randf_range(0, 2*PI);
+	return r.randf_range(MIN_ORBIT_ANGLE, MAX_ORBIT_ANGLE)
 	
 func randomPlanetMass(r):
-	return r.randf_range(10,30);
+	return r.randf_range(MIN_PLANET_MASS, MAX_PLANET_MASS)
 
 func randomPlanetRadius(r):
-	return r.randf_range(1,8);
+	return r.randf_range(MIN_PLANET_RADIUS, MAX_PLANET_RADIUS)
 
 
 func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpeed = 0):
@@ -94,7 +104,7 @@ func generatePlanets(n:int, r):
 		var planetInstance = generatePlanet(r, 0,0,baseDistanceFromSun + i*distanceBetweenPlanets,0);
 		var moons = 1
 		for m in range(moons):
-			generateMoon(r,planetInstance, distanceBetweenPlanets / 100)
+			generateMoon(r,planetInstance, (m+1) * distanceBetweenPlanets / MOON_ORBIT_RATIO_PLANET_DISTANCE)
 
 func generateSystemFromSeed(s:int):
 	print(s);
