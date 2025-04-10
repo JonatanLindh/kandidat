@@ -16,6 +16,21 @@ public partial class DebugDraw : Node
 
 	public void DrawSphere(Vector3 position, float radius)
 	{
+		MeshInstance3D mesh = CreateSphere(position, radius, sphereMaterial);
+		AddChild(mesh);
+	}
+
+	public void DrawSphere(Vector3 position, float radius, Color color)
+	{
+		StandardMaterial3D mat = sphereMaterial.Duplicate() as StandardMaterial3D;
+		mat.AlbedoColor = color;
+
+		MeshInstance3D mesh = CreateSphere(position, radius, mat);
+		AddChild(mesh);
+	}
+
+	private MeshInstance3D CreateSphere(Vector3 position, float radius, StandardMaterial3D material)
+	{
 		MeshInstance3D mesh = new MeshInstance3D();
 		SphereMesh sphereMesh = new SphereMesh();
 
@@ -23,13 +38,28 @@ public partial class DebugDraw : Node
 		sphereMesh.Height = radius * 2;
 
 		mesh.Mesh = sphereMesh;
-		mesh.MaterialOverride = sphereMaterial;
+		mesh.MaterialOverride = material;
 		mesh.Position = position;
 
-		AddChild(mesh);
+		return mesh;
 	}
 
 	public void DrawLine(Vector3 from, Vector3 to)
+	{
+		MeshInstance3D mesh = CreateLine(from, to, lineMaterial);
+		AddChild(mesh);
+	}
+
+	public void DrawLine(Vector3 from, Vector3 to, Color color)
+	{
+		StandardMaterial3D mat = lineMaterial.Duplicate() as StandardMaterial3D;
+		mat.AlbedoColor = color;
+
+		MeshInstance3D mesh = CreateLine(from, to, mat);
+		AddChild(mesh);
+	}
+
+	private MeshInstance3D CreateLine(Vector3 from, Vector3 to, StandardMaterial3D material)
 	{
 		MeshInstance3D mesh = new MeshInstance3D();
 		ImmediateMesh immediateMesh = new ImmediateMesh();
@@ -40,8 +70,7 @@ public partial class DebugDraw : Node
 		immediateMesh.SurfaceEnd();
 
 		mesh.Mesh = immediateMesh;
-		mesh.MaterialOverride = lineMaterial;
-
-		AddChild(mesh);
+		mesh.MaterialOverride = material;
+		return mesh;
 	}
 }
