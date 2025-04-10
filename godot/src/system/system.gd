@@ -93,11 +93,12 @@ func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSp
 
 func generateMoon(r, planetInstance, orbitRadius):
 	var moonRadius = r.randf_range(planetInstance.Radius/10, planetInstance.Radius/5)
-	#var orbitRadius = r.randf_range(moonRadius*10, moonRadius*50)
+
 	var orbitAngle = randomOrbitAngle(r);
 	var orbitSpeed = orbitSpeedFromRadius(orbitRadius, planetInstance.mass);
+	var moonMass = 0.01
 	
-	return spawnBody(PLANET_SCENE ,moonRadius, 0.01, orbitRadius, orbitSpeed, orbitAngle, planetInstance.position, planetInstance.velocity);
+	return spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planetInstance.position, planetInstance.velocity);
 
 func generatePlanets(n:int, r):
 	for i in n:
@@ -116,13 +117,13 @@ func generateSystemFromSeed(s:int):
 	generatePlanets(n,r)
 
 
-func spawnBody(bodyScene , bodyRadius, bodyMass, orbitRadius, orbitSpeed, orbitAngle, primaryPosition = Vector3.ZERO, primaryVelocity= Vector3.ZERO):
+func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primaryPosition = Vector3.ZERO, primaryVelocity= Vector3.ZERO):
 	var randomID = rand.randi_range(100000, 999999);
-	var bodyInstance = bodyScene.instantiate();
-	bodyInstance.mass = bodyMass;
+	var bodyInstance = PLANET_SCENE.instantiate(); #Uses PLANET_SCENE for now since moon scene didn't quite work
+	bodyInstance.mass = moonMass;
 	bodyInstance.velocity = primaryVelocity + Vector3(cos(orbitAngle)*orbitSpeed,0,-sin(orbitAngle)*orbitSpeed)
 	bodyInstance.position = primaryPosition + Vector3(sin(orbitAngle)*orbitRadius,0,cos(orbitAngle)*orbitRadius)
-	bodyInstance.planet_data.radius = bodyRadius
+	bodyInstance.planet_data.radius = moonRadius
 	bodyInstance.name = "Body" + str(randomID);
 	bodyInstance.trajectory_color = Color.from_hsv(rand.randf_range(0,1),0.80,0.80)*3;
 	$GravityController.add_child(bodyInstance);
@@ -130,8 +131,6 @@ func spawnBody(bodyScene , bodyRadius, bodyMass, orbitRadius, orbitSpeed, orbitA
 	bodies.append(randomID);
 	return bodyInstance;
 
-func spawnPlanet(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle):
-	return spawnBody(PLANET_SCENE, planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle);
 
 func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle):
 	var randomID = rand.randi_range(100000, 999999);
