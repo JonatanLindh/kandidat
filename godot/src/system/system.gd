@@ -1,12 +1,23 @@
 @tool
 extends Node3D
 
-@export var numberOfPlanets:int = 5;
-@export var distanceBetweenPlanets = 50;
-@export var baseDistanceFromSun = 100;
+@export var MOON_ORBIT_RATIO_PLANET_DISTANCE: float = 80.0
+@export var MIN_NUMBER_OF_PLANETS: int = 3
+@export var MAX_NUMBER_OF_PLANETS: int = 8
+@export var MIN_ORBIT_RADIUS: float = 2.0
+@export var MAX_ORBIT_RADIUS: float = 80.0
+@export var MIN_ORBIT_ANGLE: float = 0.0
+@export var MAX_ORBIT_ANGLE: float = 2.0 * PI
+@export var MIN_PLANET_MASS: float = 10.0
+@export var MAX_PLANET_MASS: float = 30.0
+@export var MIN_PLANET_RADIUS: float = 0.5
+@export var MAX_PLANET_RADIUS: float = 4.0
+@export var DISTANCE_BETWEEN_PLANETS: float = 50.0;
+@export var BASE_DISTANCE_FROM_SUN: float = 100.0;
+
 @export var generate: bool:
 	set(val):
-		generatePlanets(self.rand,self.numberOfPlanets);
+		generatePlanets(self.rand);
 		
 @export var clear: bool:
 	set(val):
@@ -51,16 +62,6 @@ func orbitRadiusFromSpeed(v:float):
 func orbitSpeedFromRadius(r:float, m:float):
 	return sqrt(m*G/r)
 
-const MOON_ORBIT_RATIO_PLANET_DISTANCE = 80.
-const MIN_ORBIT_RADIUS = 2.
-const MAX_ORBIT_RADIUS = 80.
-const MIN_ORBIT_ANGLE = 0.
-const MAX_ORBIT_ANGLE = 2. * PI
-const MIN_PLANET_MASS = 10.
-const MAX_PLANET_MASS = 30.
-const MIN_PLANET_RADIUS = 0.5
-const MAX_PLANET_RADIUS = 4.
-
 func randomOrbitRadius(r):
 	return r.randf_range(MIN_ORBIT_RADIUS, MAX_ORBIT_RADIUS)
 	
@@ -100,21 +101,20 @@ func generateMoon(r, planetInstance, orbitRadius):
 	
 	return spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planetInstance.position, planetInstance.velocity);
 
-func generatePlanets(n:int, r):
+func generatePlanets(r):
+	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS);
 	for i in n:
-		var planetInstance = generatePlanet(r, 0,0,baseDistanceFromSun + i*distanceBetweenPlanets,0);
+		var planetInstance = generatePlanet(r, 0,0,BASE_DISTANCE_FROM_SUN + i*DISTANCE_BETWEEN_PLANETS,0);
 		var moons = 1
 		for m in range(moons):
-			generateMoon(r,planetInstance, (m+1) * distanceBetweenPlanets / MOON_ORBIT_RATIO_PLANET_DISTANCE)
+			generateMoon(r,planetInstance, (m+1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE)
 
 func generateSystemFromSeed(s:int):
 	print(s);
 	clearBodies();
 	var r = RandomNumberGenerator.new();
 	r.seed = s;
-	
-	var n = r.randi_range(3,10);
-	generatePlanets(n,r)
+	generatePlanets(r)
 
 
 func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primaryPosition = Vector3.ZERO, primaryVelocity= Vector3.ZERO):
