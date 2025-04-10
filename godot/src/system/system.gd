@@ -12,8 +12,8 @@ extends Node3D
 @export var MAX_PLANET_MASS: float = 30.0
 @export var MIN_PLANET_RADIUS: float = 0.5
 @export var MAX_PLANET_RADIUS: float = 4.0
-@export var DISTANCE_BETWEEN_PLANETS: float = 50.0;
-@export var BASE_DISTANCE_FROM_SUN: float = 100.0;
+@export var DISTANCE_BETWEEN_PLANETS: float = 400.0;
+@export var BASE_DISTANCE_FROM_SUN: float = 400.0;
 
 @export var generate: bool:
 	set(val):
