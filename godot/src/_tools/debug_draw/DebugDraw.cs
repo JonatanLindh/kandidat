@@ -13,7 +13,10 @@ public partial class DebugDraw : Node
 	{
 		foreach (Node child in GetChildren())
 		{
-			child.QueueFree();
+			if(child is MeshInstance3D)
+			{
+				child.QueueFree();
+			}
 		}
 	}
 
