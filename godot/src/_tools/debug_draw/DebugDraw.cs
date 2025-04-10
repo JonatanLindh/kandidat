@@ -5,6 +5,14 @@ public partial class DebugDraw : Node
 {
 	[Export] StandardMaterial3D sphereMaterial;
 
+	public void Clear()
+	{
+		foreach (Node child in GetChildren())
+		{
+			child.QueueFree();
+		}
+	}
+
 	public void DrawSphere(Vector3 position, float radius)
 	{
 		MeshInstance3D mesh = CreateSphere(position, radius, sphereMaterial);
@@ -32,4 +40,6 @@ public partial class DebugDraw : Node
 
 		return meshInstance;
 	}
+
+
 }
