@@ -4,4 +4,4 @@
 transparency = 1
 shading_mode = 0
 disable_fog = true
-albedo_color = Color(0, 0, 1, 1)
+albedo_color = Color(0.827451, 0.239216, 0.290196, 1)
