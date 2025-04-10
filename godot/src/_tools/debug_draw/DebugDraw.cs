@@ -6,6 +6,9 @@ public partial class DebugDraw : Node
 	[Export] StandardMaterial3D sphereMaterial;
 	[Export] StandardMaterial3D lineMaterial;
 
+	/// <summary>
+	/// Clears all drawn debug objects.
+	/// </summary>
 	public void Clear()
 	{
 		foreach (Node child in GetChildren())
@@ -14,12 +17,24 @@ public partial class DebugDraw : Node
 		}
 	}
 
+	/// <summary>
+	/// Draws a sphere at the given position with the given radius.
+	/// </summary>
+	/// <param name="position"></param>
+	/// <param name="radius"></param>
 	public void DrawSphere(Vector3 position, float radius)
 	{
 		MeshInstance3D mesh = CreateSphere(position, radius, sphereMaterial);
 		AddChild(mesh);
 	}
 
+	/// <summary>
+	/// Draws a sphere at the given position with the given radius.
+	/// Overrides the material color.
+	/// </summary>
+	/// <param name="position"></param>
+	/// <param name="radius"></param>
+	/// <param name="color"></param>
 	public void DrawSphere(Vector3 position, float radius, Color color)
 	{
 		StandardMaterial3D mat = sphereMaterial.Duplicate() as StandardMaterial3D;
@@ -44,12 +59,24 @@ public partial class DebugDraw : Node
 		return mesh;
 	}
 
+	/// <summary>
+	/// Draws a line from <c>from</c> to <c>to</c>.
+	/// </summary>
+	/// <param name="from"></param>
+	/// <param name="to"></param>
 	public void DrawLine(Vector3 from, Vector3 to)
 	{
 		MeshInstance3D mesh = CreateLine(from, to, lineMaterial);
 		AddChild(mesh);
 	}
 
+	/// <summary>
+	/// Draws a line from <c>from</c> to <c>to</c>.
+	/// Overrides the material color.
+	/// </summary>
+	/// <param name="from"></param>
+	/// <param name="to"></param>
+	/// <param name="color"></param>
 	public void DrawLine(Vector3 from, Vector3 to, Color color)
 	{
 		StandardMaterial3D mat = lineMaterial.Duplicate() as StandardMaterial3D;
