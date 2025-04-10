@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class StarChunkMultiMesh : MultiMeshInstance3D
+public partial class StarMultiMesh : MultiMeshInstance3D
 {
 	public void DrawStars(Vector3[] positions, Mesh mesh)
 	{
