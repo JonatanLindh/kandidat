@@ -1,12 +1,13 @@
 using Godot;
 using System;
-using System.Collections.Generic;
 
 public partial class DiscGalaxy : Node3D
 {
 	[Export] FastNoiseLite noise;
 	[Export] StarMultiMesh starMultiMesh;
 	[Export] Mesh starMesh;
+
+	[Export] uint seed;
 
 	Vector3[] starPos;
 
@@ -15,16 +16,12 @@ public partial class DiscGalaxy : Node3D
 	float baseISOLevel = 0.5f;
 	float radius = 1000;
 
-	[Export] int seed;
-	Random random;
-
 	public override void _Ready()
 	{
 		// Sets a random seed if no seed is provided
-		if (seed == 0) seed = new Random().Next();
-		
-		random = new Random(seed);
-		noise.Seed = seed;
+		if (seed == 0) seed = (uint)new Random().Next();
+
+		GD.Seed(seed);
 
 		starPos = new Vector3[starCount];
 
@@ -57,9 +54,9 @@ public partial class DiscGalaxy : Node3D
 
 	private Vector3 SamplePointInSphere()
 	{
-		double u = random.NextDouble();
-		double v = random.NextDouble();
-		double w = random.NextDouble();
+		double u = GD.RandRange(0f, 1f);
+		double v = GD.RandRange(0f, 1f);
+		double w = GD.RandRange(0f, 1f);
 
 		double theta = 2 * Math.PI * u;
 		double phi = Math.Acos(2 * v - 1);
