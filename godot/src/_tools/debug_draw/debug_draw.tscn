@@ -1,8 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://pyc3xof62f1e"]
+[gd_scene load_steps=4 format=3 uid="uid://pyc3xof62f1e"]
 
 [ext_resource type="Script" uid="uid://beymc22ykk1e4" path="res://src/_tools/debug_draw/DebugDraw.cs" id="1_f86v8"]
 [ext_resource type="Material" uid="uid://r31prsuqi1yd" path="res://src/_tools/debug_draw/materials/sphere_mat.tres" id="2_wn1r3"]
+[ext_resource type="Material" uid="uid://bkk0ts5rd8hfr" path="res://src/_tools/debug_draw/materials/line_mat.tres" id="3_58rao"]
 
 [node name="DebugDraw" type="Node"]
 script = ExtResource("1_f86v8")
 sphereMaterial = ExtResource("2_wn1r3")
+lineMaterial = ExtResource("3_58rao")
