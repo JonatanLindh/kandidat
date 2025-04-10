@@ -5,15 +5,12 @@ using System.Collections.Generic;
 public partial class DiscGalaxy : Node3D
 {
 	[Export] FastNoiseLite noise;
-
 	[Export] StarMultiMesh starMultiMesh;
 	[Export] Mesh starMesh;
 
 	Vector3[] starPos;
 
 	int starCount = 10000;
-
-	float rotationSpeed = 0.05f;
 
 	float baseISOLevel = 0.5f;
 	float radius = 1000;
@@ -37,11 +34,6 @@ public partial class DiscGalaxy : Node3D
 	public override void _Process(double delta)
 	{
 
-	}
-
-	public override void _PhysicsProcess(double delta)
-	{
-		RotateY((float)delta * rotationSpeed);
 	}
 
 	private void Generate()
