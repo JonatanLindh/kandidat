@@ -97,4 +97,9 @@ public partial class DiscGalaxy : Node3D
 	{
 		return stars;
 	}
+
+	public void RedrawStars(Transform3D[] stars)
+	{
+		starMultiMesh.RedrawStars(stars);
+	}
 }

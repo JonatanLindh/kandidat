@@ -62,4 +62,24 @@ public partial class TrueGalaxy : Node3D
 
 		RedrawStars();
 	}
+
+	/// <summary>
+	/// Redraws the stars in the multimesh.
+	/// </summary>
+	public void RedrawStars()
+	{
+		if (!starsInitialized)
+		{
+			GD.PrintErr("Stars not initialized yet.");
+			return;
+		}
+
+		Transform3D[] starTransforms = new Transform3D[stars.Length];
+		for (int i = 0; i < stars.Length; i++)
+		{
+			starTransforms[i] = stars[i].transform;
+		}
+
+		discGalaxy.RedrawStars(starTransforms);
+	}
 }
