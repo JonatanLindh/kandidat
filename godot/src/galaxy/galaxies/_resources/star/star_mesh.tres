@@ -1,0 +1,8 @@
+[gd_resource type="SphereMesh" load_steps=2 format=3 uid="uid://briv1nx3v7fnv"]
+
+[ext_resource type="Material" uid="uid://5haov76b3va7" path="res://src/galaxy/galaxies/_resources/star/star.tres" id="1_r62ga"]
+
+[resource]
+material = ExtResource("1_r62ga")
+radius = 1.0
+height = 2.0

@@ -6,11 +6,11 @@
 
 [node name="InfiniteGalaxyTest" type="Node3D"]
 
-[node name="SpaceEnvironment" parent="." instance=ExtResource("4_svm21")]
-
 [node name="InfiniteGalaxy" parent="." node_paths=PackedStringArray("player") instance=ExtResource("1_r7vsn")]
 player = NodePath("../Player")
 
 [node name="DummyPlayer" type="Node3D" parent="."]
 
 [node name="Player" parent="." instance=ExtResource("2_ix1v3")]
+
+[node name="SpaceEnvironment" parent="." instance=ExtResource("4_svm21")]
