@@ -11,14 +11,21 @@ godot = { version = "0.2.4", features = [
     "register-docs",
     "experimental-threads",
 ] }
-itertools = "0.14.0"
-ndarray = { version = "0.16.1", features = ["rayon"] }
-rayon = "1.10.0"
+itertools = "0.14"
+rayon = "1.10"
 proc = { path = "proc" }
+glam = { version = "0.30", features = [
+    "fast-math",
+    "core-simd",
+    "debug-glam-assert",
+] }
+either = "1.15"
+derivative = { version = "2.2", features = ["use_core"] }
 
 [dev-dependencies]
-criterion = { version = "0.5.1", features = ["html_reports"] }
-criterion-macro = "0.4.0"
+criterion = { version = "0.5", features = ["html_reports"] }
+criterion-macro = "0.4"
+rand = "0.9"
 
 [[bench]]
 name = "gravity_bench"

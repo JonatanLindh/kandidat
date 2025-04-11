@@ -41,6 +41,16 @@ public partial class PlanetMarchingCube : Node3D
 			OnResourceSet();
 		}
 	}
+	[Export]
+	public int Seed
+	{
+		get => _seed;
+		set
+		{
+			_seed = value;
+			OnResourceSet();
+		}
+	}
 
 	[Export] public PackedScene Planet { get; set; }
 	
@@ -49,6 +59,7 @@ public partial class PlanetMarchingCube : Node3D
 	private MarchingCube _marchingCube;
 	private int _resolution = 16;
 	private float _radius = 1;
+	private int _seed = 0;
 	private Vector3 _sunPosition;
 	private Node3D _planet;
 	private Node _atmosphere;
@@ -92,6 +103,8 @@ public partial class PlanetMarchingCube : Node3D
 			if (_planet != null)
 			{
 				_planet.Set("radius", _resolution);
+				_planet.Set("seed", _seed);
+				
 				_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
 
 				// Add the planet as a child of the current node

@@ -6,20 +6,14 @@ public partial class DeterministicRandomPlanet : RandomCelestialBodyNoise
 {
     private const int MAX_OCTAVES = 8;
     private const float MAX_AMPLITUDE = 20.0f;
-    Random random;
+    private Random random;
+
     protected override void RandomizeParameters(CelestialBodyParameters param)
     {
-        // Get seed from star system
-        var systemManager = GetParent().GetParent();
-        if(systemManager == null || !IsInsideTree())
-        {
-            GD.PrintErr("system manager is null in DeterministicRandomPlanet.cs OR planet not in scene tree");
-        }
-
-        int systemSeed = (int)systemManager.Call("getSystemSeed");
+        GD.Print("Planet seed: " + param.Seed);
 
         // Set seed of Random to system-seed to make deterministic
-        random = new Random(systemSeed);
+        random = new Random(param.Seed);
 
         param.Width = GetRadius() * 2 + 2;
         param.Height = GetRadius() * 2 + 2;
@@ -27,7 +21,6 @@ public partial class DeterministicRandomPlanet : RandomCelestialBodyNoise
         param.Size = GetRadius() * 2 + 2;
 
         param.Octaves = random.Next(4, MAX_OCTAVES);
-        param.Seed = systemSeed;
 
         // The latter decides which range the one directly underneath can be
         // e.g. amplitdue < 4 then frequency can be within 0-16

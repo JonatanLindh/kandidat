@@ -11,4 +11,10 @@ public interface ModifiableCelestialBody
     /// </summary>
     /// <param name="radius"></param>
     void SetRadius(int radius);
+
+    /// <summary>
+    /// Sets the seed of the celestial body
+    /// </summary>
+    /// <param name="seed"></param>
+    void SetSeed(int seed);
 }

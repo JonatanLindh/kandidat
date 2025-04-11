@@ -1,8 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://b7rjjuvby3wg0"]
+[gd_scene load_steps=4 format=3 uid="uid://b7rjjuvby3wg0"]
 
 [ext_resource type="Script" uid="uid://dsipaxjpjfvm8" path="res://src/benchmark/Benchmark.cs" id="1_xicp2"]
 [ext_resource type="PackedScene" uid="uid://cvt4egt04rlx1" path="res://src/benchmark/scenes/galaxy_map/galaxy_map_benchmark.tscn" id="2_b22y5"]
+[ext_resource type="PackedScene" uid="uid://bn03e1m8twjh0" path="res://src/benchmark/scenes/_dev/graph/graph_plotter.tscn" id="3_b22y5"]
 
 [node name="Benchmark" type="Node3D"]
 script = ExtResource("1_xicp2")
 scenes = Array[PackedScene]([ExtResource("2_b22y5")])
+
+[node name="GraphPlotter" parent="." instance=ExtResource("3_b22y5")]
