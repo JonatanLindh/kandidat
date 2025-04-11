@@ -4,6 +4,7 @@ class_name Player
 @onready var head: Node3D = $Head
 @onready var camera_3d: Camera3D = $Head/Camera3D
 @onready var ray_cast_3d: RayCast3D = $RayCast3D
+@onready var spot_light_3d: SpotLight3D = $Head/SpotLight3D
 
 signal updated_status(position, speed)
 
@@ -27,6 +28,7 @@ var on_sufarce_movement := false
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	spot_light_3d.visible = false
 	PlayerVariables.player_position = camera_3d.global_transform.origin
 	PlayerVariables.camera_direction = -camera_3d.global_transform.basis.z.normalized()
 
@@ -49,6 +51,8 @@ func _input(event):
 		toggle_mouse_lock()
 		
 func _physics_process(delta: float) -> void:
+	if Input.is_action_just_pressed("flashlight"):
+		spot_light_3d.visible = not spot_light_3d.visible
 	if not in_gravity_field:
 		in_space_state_movement(delta)
 	else:
