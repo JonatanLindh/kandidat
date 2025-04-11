@@ -15,13 +15,13 @@ public sealed class MarchingCubeDispatch
 	private bool _insideTree = false;
 	
 	private readonly ConcurrentBag<long> _workerThreads = new();
-	private uint _maxThreads = 8;
-	private readonly object _generateMeshLock = new object();
+	private uint _maxThreads = 16;
+	private readonly object _generateMeshLock = new();
 
 	public MarchingCubeDispatch()
 	{
 		_insideTree = true;
-		_marchingCube = new MarchingCube();
+		_marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.CpuMultiThread);
 		_planetGenerator = new Thread(GenerateLoop);
 		_planetGenerator.Start();
 		
@@ -71,6 +71,8 @@ public sealed class MarchingCubeDispatch
 				{
 					lock (_generateMeshLock) // Ensure only one thread calls GenerateMesh at a time
 					{
+						request.TempNode?.CallDeferred(Node.MethodName.QueueFree);
+						
 						var mesh = _marchingCube.GenerateMesh(request.DataPoints, request.Scale);
 						mesh.Translate(request.Offset); 
 						request.Root.CallDeferred(Node.MethodName.AddChild, mesh);
@@ -99,7 +101,7 @@ public sealed class MarchingCubeDispatch
 			}
 			else
 			{
-				Thread.Sleep(100); // Sleep for a short duration to avoid busy waiting
+				//Thread.Sleep(100); // Sleep for a short duration to avoid busy waiting
 			}
 		}
 	}
@@ -149,4 +151,5 @@ public record MarchingCubeRequest
 	public Vector3 Offset { get; init; }
 	public Node Root { get; init; }
 	public Material MeshMaterial { get; init; }
+	public Node TempNode { get; init; }
 }
