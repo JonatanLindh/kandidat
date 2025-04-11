@@ -7,10 +7,12 @@ public partial class TrueGalaxy : Node3D
 	TrueStar[] stars;
 	bool starsInitialized = false;
 
+	TrueStarAdapter starAdapter = new TrueStarAdapter();
+
 	public override void _Ready()
 	{
 		discGalaxy = GetNode<DiscGalaxy>("%DiscGalaxy");
-		CallDeferred(nameof(InitializeStars));
+		InitializeStars();
 	}
 
 	private void InitializeStars()
@@ -28,58 +30,47 @@ public partial class TrueGalaxy : Node3D
 	/// To get the stars of the galaxy.
 	/// </summary>
 	/// <returns></returns>
-	public TrueStar[] GetStars()
+	public Godot.Collections.Dictionary GetStars()
 	{
 		if (!starsInitialized)
 		{
-			GD.PrintErr("Stars not initialized yet.");
+			GD.PrintErr("TrueGalaxy: Stars not initialized yet.");
 			return null;
 		}
 
-		return stars;
-	}
-
-	/// <summary>
-	/// To update the stars to a new array of stars.
-	/// Redraws the multimesh as well.
-	/// </summary>
-	/// <param name="newStars"></param>
-	public void SetStars(TrueStar[] newStars)
-	{
-		if (!starsInitialized)
-		{
-			GD.PrintErr("Stars not initialized yet.");
-			return;
-		}
-
-		if (newStars.Length != stars.Length)
-		{
-			GD.PrintErr("New stars array length does not match the existing stars array length.");
-			return;
-		}
-
-		stars = newStars;
-
-		RedrawStars();
+		return starAdapter.StarsToPhysicsData(stars);
 	}
 
 	/// <summary>
 	/// Redraws the stars in the multimesh.
+	/// Updates star transform and velocity.
 	/// </summary>
-	public void RedrawStars()
+	private void UpdateStars(Godot.Collections.Dictionary newStars)
 	{
 		if (!starsInitialized)
 		{
-			GD.PrintErr("Stars not initialized yet.");
+			GD.PrintErr("TrueGalaxy: Stars not initialized yet.");
 			return;
 		}
 
-		Transform3D[] starTransforms = new Transform3D[stars.Length];
-		for (int i = 0; i < stars.Length; i++)
+		if (newStars.Count != stars.Length)
 		{
-			starTransforms[i] = stars[i].transform;
+			GD.PrintErr("TrueGalaxy: New transform array length does not match the existing stars array length.");
+			return;
 		}
 
-		discGalaxy.RedrawStars(starTransforms);
+		Godot.Collections.Array<Transform3D> transformArray = newStars["transform"].AsGodotArray<Transform3D>();
+		Godot.Collections.Array<Vector3> velocityArray = newStars["velocity"].AsGodotArray<Vector3>();
+
+		Transform3D[] transformArrayConverted = new Transform3D[transformArray.Count];
+		for (int i = 0; i < stars.Length; i++)
+		{
+			stars[i].transform = transformArray[i];
+			stars[i].velocity = velocityArray[i];
+
+			transformArrayConverted[i] = stars[i].transform;
+		}
+
+		discGalaxy.RedrawStars(transformArrayConverted);
 	}
 }
