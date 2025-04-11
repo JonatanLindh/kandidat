@@ -34,7 +34,7 @@ func get_stars() -> Dictionary:
 func get_delta() -> float:
 	return get_process_delta_time()
 
-## Updates star transforms
+## Updates star transforms and velocity
 ##
 ## [codeblock]
 ## Godot.Collections.Dictionary dict {
