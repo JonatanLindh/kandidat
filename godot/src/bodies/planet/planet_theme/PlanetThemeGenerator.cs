@@ -8,6 +8,7 @@ public partial class PlanetThemeGenerator : Resource
 {
     [Export]
     public Godot.Collections.Array<PlanetThemeSet> ThemeSets { get; set; } = new Godot.Collections.Array<PlanetThemeSet>();
+    private const string ThemeDirectoryPath = "res://src/bodies/planet/planet_theme/theme_sets/";
 
     [Export]
     public Gradient Gradient
@@ -170,49 +171,131 @@ public partial class PlanetThemeGenerator : Resource
             { themeWarmths[3], new List<List<Color>> { mars, desert, rockyDesert, redDunes }},
             { themeWarmths[4], new List<List<Color>> { lava }}
         };
+
+        LoadThemeSets();
         GeneratePair();
     }
 
+    //private void GeneratePair()
+    //{
+
+    //    GD.Randomize();
+    //    var rnd = new Random();
+    //    var randomI = 0;
+
+    //    // Find the theme index with the closest warmth
+    //    double bestKey = 0;
+    //    double closestDiff = Math.Abs(themeWarmths[0] - _warmth);
+
+    //    for (int i = 1; i < themeWarmths.Count; i++)
+    //    {
+    //        double diff = Math.Abs(themeWarmths[i] - _warmth);
+    //        if (diff < closestDiff)
+    //        {
+    //            closestDiff = diff;
+
+    //            // Randomize chosen key further to simulate thinner atmospheres etc.
+    //            randomI = rnd.Next(-1, 2);  
+    //            randomI = i + randomI;     
+    //            randomI = Math.Max(0, randomI); 
+    //            randomI = Math.Min(themeWarmths.Count - 1, randomI); 
+
+    //            bestKey = themeWarmths[randomI];
+    //        }
+    //    }
+    //    var selectedTemperatureThemes = planetThemes[bestKey];
+    //    randomI = rnd.Next(selectedTemperatureThemes.Count);
+
+    //    var planetColors = selectedTemperatureThemes[randomI];
+    //    float[] positions = { 0.0f, 0.2f, 0.5f, 0.7f, 1.0f };
+
+    //    Gradient = new Gradient();
+
+    //    for (int i = 0; i < planetColors.Count; i++)
+    //    {
+    //        Gradient.AddPoint(positions[i], planetColors[i]);
+    //    }
+    //    // Remove default points from gradient that godot initializes the gradient with.
+    //    Gradient.RemovePoint(0);
+    //    Gradient.RemovePoint(0);
+    //}
+
     private void GeneratePair()
     {
-        GD.Randomize();
+        if (ThemeSets == null || ThemeSets.Count == 0)
+            return;
+
         var rnd = new Random();
-        var randomI = 0;
 
-        // Find the theme index with the closest warmth
-        double bestKey = 0;
-        double closestDiff = Math.Abs(themeWarmths[0] - _warmth);
+        // Step 1: Find the closest ThemeSet by Warmth
+        PlanetThemeSet closestSet = ThemeSets[0];
+        float smallestDiff = Math.Abs(closestSet.Warmth - (float)_warmth);
 
-        for (int i = 1; i < themeWarmths.Count; i++)
+        foreach (var set in ThemeSets)
         {
-            double diff = Math.Abs(themeWarmths[i] - _warmth);
-            if (diff < closestDiff)
+            float diff = Math.Abs(set.Warmth - (float)_warmth);
+            if (diff < smallestDiff)
             {
-                closestDiff = diff;
-
-                // Randomize chosen key further to simulate thinner atmospheres etc.
-                randomI = rnd.Next(-1, 2);  
-                randomI = i + randomI;     
-                randomI = Math.Max(0, randomI); 
-                randomI = Math.Min(themeWarmths.Count - 1, randomI); 
-
-                bestKey = themeWarmths[randomI];
+                smallestDiff = diff;
+                closestSet = set;
             }
         }
-        var selectedTemperatureThemes = planetThemes[bestKey];
-        randomI = rnd.Next(selectedTemperatureThemes.Count);
 
-        var planetColors = selectedTemperatureThemes[randomI];
+        // Step 2: Randomly select a PlanetTheme from the closest set
+        if (closestSet.Themes.Count == 0)
+            return;
+
+        int randomIndex = rnd.Next(closestSet.Themes.Count);
+        var selectedTheme = closestSet.Themes[randomIndex];
+
+        // Step 3: Assign the colors to the gradient
+        var planetColors = selectedTheme.Colors;
         float[] positions = { 0.0f, 0.2f, 0.5f, 0.7f, 1.0f };
 
         Gradient = new Gradient();
-
-        for (int i = 0; i < planetColors.Count; i++)
+        for (int i = 0; i < Math.Min(planetColors.Count, positions.Length); i++)
         {
             Gradient.AddPoint(positions[i], planetColors[i]);
         }
-        // Remove default points from gradient that godot initializes the gradient with.
+
+        // Remove default Godot-initialized points
         Gradient.RemovePoint(0);
         Gradient.RemovePoint(0);
+
     }
+
+    private void LoadThemeSets()
+    {
+        var dir = DirAccess.Open(ThemeDirectoryPath);
+
+        if (dir == null)
+        {
+            GD.PrintErr($"Could not open theme directory at {ThemeDirectoryPath}");
+            return;
+        }
+
+        dir.ListDirBegin();
+
+        string fileName;
+        while ((fileName = dir.GetNext()) != "")
+        {
+            if (dir.CurrentIsDir()) continue;
+            if (!fileName.EndsWith(".tres")) continue;
+
+            string fullPath = ThemeDirectoryPath + fileName;
+            var themeSet = ResourceLoader.Load<PlanetThemeSet>(fullPath);
+
+            if (themeSet != null)
+            {
+                ThemeSets.Add(themeSet);
+            }
+            else
+            {
+                GD.PrintErr($"Failed to load theme set at {fullPath}");
+            }
+        }
+
+        dir.ListDirEnd();
+    }
+
 }

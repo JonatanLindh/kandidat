@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="PlanetThemeSet" load_steps=2 format=3 uid="uid://d2ux5gyew8cvv"]
+
+[ext_resource type="Script" uid="uid://csscujj5yg1co" path="res://src/bodies/planet/planet_theme/PlanetThemeSet.cs" id="1_mykq7"]
+
+[resource]
+script = ExtResource("1_mykq7")
+Warmth = 0.5
+Themes = []
+metadata/_custom_type_script = "uid://csscujj5yg1co"
