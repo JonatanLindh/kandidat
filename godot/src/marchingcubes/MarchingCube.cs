@@ -18,6 +18,7 @@ public class MarchingCube
     public enum GenerationMethod
     {
         Cpu,
+        CpuMultiThread,
         Gpu
     }
 
@@ -36,6 +37,7 @@ public class MarchingCube
         {
             GenerationMethod.Cpu => new CpuVerticesGenerator(),
             GenerationMethod.Gpu => new GpuVerticesGenerator(),
+            GenerationMethod.CpuMultiThread => new CpuVerticesGeneratorMultiThread(),
             _ => new GpuVerticesGenerator()
         };
     }
