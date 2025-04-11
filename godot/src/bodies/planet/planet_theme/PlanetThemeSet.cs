@@ -2,6 +2,7 @@
 using Godot;
 using System.Collections.Generic;
 
+[Tool]
 [GlobalClass]
 public partial class PlanetThemeSet : Resource
 {
