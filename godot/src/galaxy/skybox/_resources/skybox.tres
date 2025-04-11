@@ -11,3 +11,11 @@ sky_material = SubResource("PanoramaSkyMaterial_14deh")
 [resource]
 background_mode = 2
 sky = SubResource("Sky_4qlyv")
+tonemap_mode = 1
+tonemap_white = 6.0
+glow_enabled = true
+glow_levels/1 = 15.46
+glow_levels/2 = 16.0
+glow_levels/3 = 16.0
+glow_levels/4 = 16.0
+glow_levels/5 = 0.0

@@ -20,7 +20,7 @@ noise = SubResource("FastNoiseLite_m6dof")
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_cp7ty"]
 noise_type = 3
-frequency = 0.0029
+frequency = 0.1948
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_r4hvf"]
 seamless = true
@@ -30,14 +30,14 @@ noise = SubResource("FastNoiseLite_cp7ty")
 render_priority = 0
 shader = ExtResource("2_yo06i")
 shader_parameter/Glow_Power = 10.0
-shader_parameter/Lightness_Difference = 7.921
-shader_parameter/Sun_Color = Color(1, 0.350018, 0.00454797, 1)
+shader_parameter/Lightness_Difference = 6.596
+shader_parameter/Sun_Color = Color(1, 0.0588235, 0.00392157, 1)
 shader_parameter/voronoi_noise = SubResource("NoiseTexture2D_r4hvf")
 shader_parameter/emission_noise = SubResource("NoiseTexture2D_bw6gg")
-shader_parameter/waveSpeed = 0.875
-shader_parameter/fresnel = 1.079
-shader_parameter/scale = 0.382
-shader_parameter/blendSharpness = 0.0
+shader_parameter/waveSpeed = 0.313
+shader_parameter/fresnel = 2.0
+shader_parameter/scale = 0.27
+shader_parameter/blendSharpness = 1.393
 
 [node name="Star" type="GravityBody"]
 script = ExtResource("1_v5nms")
