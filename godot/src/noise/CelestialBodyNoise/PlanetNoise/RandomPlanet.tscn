@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://5e7ris75mkdi"]
 
 [ext_resource type="Script" uid="uid://cnikwq6bgmy1k" path="res://src/noise/CelestialBodyNoise/PlanetNoise/CelestialBodyInput.cs" id="1_8t10l"]
-[ext_resource type="Script" uid="uid://cymyjpjofvw5w" path="res://src/bodies/planet/PlanetThemeGenerator.cs" id="2_0h02l"]
+[ext_resource type="Script" uid="uid://cymyjpjofvw5w" path="res://src/bodies/planet/planet_theme/PlanetThemeGenerator.cs" id="2_0h02l"]
 [ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="2_455go"]
 [ext_resource type="Script" uid="uid://nqgu7rpdrhhf" path="res://src/noise/CelestialBodyNoise/PlanetNoise/PlanetNoise.cs" id="3_455go"]
 [ext_resource type="Script" uid="uid://bbu2bvnkwq6r3" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomCelestialBodyNoise.cs" id="4_0h02l"]
