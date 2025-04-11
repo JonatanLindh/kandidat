@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNoise, ModifiableCelestialBody
 {
     [Export] private int radius = 0;
+    [Export] private int seed = 0;
  
     private CelestialBodyParameters param;
     private PlanetNoise planetNoise;
@@ -15,6 +16,7 @@ public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNo
     {
         this.param = new CelestialBodyParameters();
         param.Radius = radius;
+        param.Seed = seed;
 
         this.planetNoise = new PlanetNoise();
         this.fastNoise = new FastNoiseLite();
@@ -36,5 +38,10 @@ public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNo
     public void SetRadius(int radius)
     {
         this.radius = radius;
+    }
+
+    public void SetSeed(int seed)
+    {
+        this.seed = seed;
     }
 }

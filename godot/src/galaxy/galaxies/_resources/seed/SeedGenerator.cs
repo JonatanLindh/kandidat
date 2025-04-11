@@ -1,7 +1,8 @@
 using Godot;
 using System;
 
-public class SeedGenerator
+[GlobalClass]
+public partial class SeedGenerator: Godot.GodotObject
 {
 	/// <summary>
 	/// Generates a new seed based on an initial seed and a vector.
