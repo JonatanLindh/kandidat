@@ -1,9 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://cnloj1c2nbq17"]
+[gd_scene load_steps=4 format=3 uid="uid://cnloj1c2nbq17"]
 
 [ext_resource type="Script" uid="uid://c3vfl6ev5atr8" path="res://src/galaxy/true_galaxy/TrueGalaxy.cs" id="1_sjnac"]
 [ext_resource type="PackedScene" uid="uid://vmhj0qhqny6p" path="res://src/galaxy/galaxies/other_galaxies/disc_galaxy/disc_galaxy.tscn" id="2_v8p2y"]
+[ext_resource type="PackedScene" uid="uid://c5pjt4x5iosr" path="res://src/galaxy/true_galaxy/physics_bridge/galaxy_physics_bridge.tscn" id="3_v8p2y"]
 
 [node name="TrueGalaxy" type="Node3D"]
 script = ExtResource("1_sjnac")
 
 [node name="DiscGalaxy" parent="." instance=ExtResource("2_v8p2y")]
+unique_name_in_owner = true
+
+[node name="GalaxyPhysicsBridge" parent="." instance=ExtResource("3_v8p2y")]
