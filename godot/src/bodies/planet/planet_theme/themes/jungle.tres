@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="PlanetTheme" load_steps=2 format=3 uid="uid://ynwi6f3rjgau"]
 
-[ext_resource type="Script" uid="uid://ccka61wu76x4n" path="res://src/bodies/planet/planet_theme/PlanetTheme.cs" id="1_jxhot"]
+[ext_resource type="Script" uid="uid://ccka61wu76x4n" path="res://src/bodies/planet/planet_theme/PlanetTheme.cs" id="1_icha6"]
 
 [resource]
-script = ExtResource("1_jxhot")
-Colors = Array[Color]([])
+script = ExtResource("1_icha6")
+Colors = Array[Color]([Color(0.241102, 0.462534, 1, 1), Color(0.67451, 0.466667, 0.164706, 1), Color(0, 0.6, 0.2, 1), Color(0.2, 0.701961, 0.301961, 1), Color(0.4, 0.901961, 0.501961, 1)])
 AtmosphereWavelength = Vector3(0, 0, 0)
 metadata/_custom_type_script = "uid://ccka61wu76x4n"
