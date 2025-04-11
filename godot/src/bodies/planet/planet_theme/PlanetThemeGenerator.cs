@@ -11,6 +11,9 @@ public partial class PlanetThemeGenerator : Resource
     private const string ThemeDirectoryPath = "res://src/bodies/planet/planet_theme/theme_sets/";
 
     [Export]
+    public int Seed { get; set; } = 1;
+
+    [Export]
     public Gradient Gradient
     {
         get => gradient;
@@ -41,7 +44,7 @@ public partial class PlanetThemeGenerator : Resource
         if (ThemeSets == null || ThemeSets.Count == 0)
             return;
 
-        var rnd = new Random();
+        var rnd = new Random(Seed);
 
         PlanetThemeSet closestSet = ThemeSets[0];
         float smallestDiff = Math.Abs(closestSet.Warmth - (float)_warmth);
