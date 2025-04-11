@@ -1,13 +1,13 @@
 [gd_scene load_steps=7 format=3 uid="uid://c4qg4a1uuvy8x"]
 
-[ext_resource type="Script" uid="uid://bgj6vs7cmvoov" path="res://src/bodies/star/star.gd" id="1_v5nms"]
-[ext_resource type="Script" uid="uid://cffb4gdcfdh5t" path="res://src/bodies/star/star_mesh.gd" id="2_8pwqv"]
-[ext_resource type="Shader" uid="uid://cmh2j2l6jjlld" path="res://src/bodies/star/star.gdshader" id="2_yo06i"]
+[ext_resource type="Script" uid="uid://b2bwrjafcs0ma" path="res://src/bodies/star/star.gd" id="1_v5nms"]
+[ext_resource type="Script" uid="uid://cw6871tnevxgg" path="res://src/bodies/star/star_mesh.gd" id="2_8pwqv"]
+[ext_resource type="Shader" uid="uid://bk85yd8owqrfw" path="res://src/bodies/star/star.gdshader" id="2_yo06i"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2v4w2"]
 albedo_color = Color(1, 0.831373, 0.356863, 1)
 
-[sub_resource type="SphereMesh" id="SphereMesh_xfx0h"]
+[sub_resource type="SphereMesh" id="SphereMesh_m6dof"]
 material = SubResource("StandardMaterial3D_2v4w2")
 radius = 5.0
 height = 10.0
@@ -20,7 +20,7 @@ shader = ExtResource("2_yo06i")
 script = ExtResource("1_v5nms")
 
 [node name="StarMesh" type="MeshInstance3D" parent="."]
-mesh = SubResource("SphereMesh_xfx0h")
+mesh = SubResource("SphereMesh_m6dof")
 surface_material_override/0 = SubResource("ShaderMaterial_sajin")
 script = ExtResource("2_8pwqv")
 
