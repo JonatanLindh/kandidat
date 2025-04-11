@@ -128,8 +128,8 @@ public partial class McSpawner : Node
 
 	private ShaderMaterial GeneratePlanetShader() {
 		// Load the shader correctly
-		var shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
-		var shaderMaterial = new ShaderMaterial();
+		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
+		ShaderMaterial shaderMaterial = new ShaderMaterial();
 		shaderMaterial.Shader = shader;
 		shaderMaterial.SetShaderParameter("min_height", _marchingCube.MinHeight);
 		shaderMaterial.SetShaderParameter("max_height", _marchingCube.MaxHeight);
