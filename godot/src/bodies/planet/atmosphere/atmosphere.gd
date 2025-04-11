@@ -31,8 +31,8 @@ func _ready() -> void:
 	
 	var rng = RandomNumberGenerator.new()
 	rng.seed = planet_seed
-	var random_index = rng.rand_range(0, wave_lenghts_array.size() - 1)
-	var atmosphere_color = wave_lenghts_array[random_index]
+	var random_index = rng.randf_range(0, wave_lenghts_array.size() - 1)
+	var atmosphere_color = wave_lenghts_array[int(random_index)]
 	
 	mesh.material.set_shader_parameter("wavelengths", atmosphere_color)
 	mesh.material.set_shader_parameter("planet_radius", radius)
