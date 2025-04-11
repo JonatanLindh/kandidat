@@ -7,6 +7,9 @@ using System.Collections.Generic;
 public partial class PlanetThemeGenerator : Resource
 {
     [Export]
+    public Godot.Collections.Array<PlanetThemeSet> ThemeSets { get; set; } = new Godot.Collections.Array<PlanetThemeSet>();
+
+    [Export]
     public Gradient Gradient
     {
         get => gradient;
