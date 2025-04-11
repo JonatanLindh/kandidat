@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_sq2ii")
-Colors = Array[Color]([Color(0.223103, 0.223103, 0.223103, 1), Color(0, 0.0545596, 0.402067, 1), Color(0.484128, 0.366169, 0.0410397, 1), Color(0.303233, 0.303233, 0.303233, 1), Color(0.439049, 0.439049, 0.439049, 1)])
+Colors = Array[Color]([Color(0.133196, 0.133196, 0.133196, 1), Color(0.223103, 0.223103, 0.223103, 1), Color(0.484128, 0.366169, 0.0410397, 1), Color(0.303233, 0.303233, 0.303233, 1), Color(0.439049, 0.439049, 0.439049, 1)])
 AtmosphereWavelength = Vector3(0, 0, 0)
 metadata/_custom_type_script = "uid://ccka61wu76x4n"

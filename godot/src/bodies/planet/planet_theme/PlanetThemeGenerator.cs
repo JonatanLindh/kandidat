@@ -44,7 +44,8 @@ public partial class PlanetThemeGenerator : Resource
         if (ThemeSets == null || ThemeSets.Count == 0)
             return;
 
-        var rnd = new Random(Seed);
+        // TODO: add seed here, not here currently to avoid the same planet theme being selected all the time
+        var rnd = new Random();
 
         PlanetThemeSet closestSet = ThemeSets[0];
         float smallestDiff = Math.Abs(closestSet.Warmth - (float)_warmth);
