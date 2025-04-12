@@ -16,9 +16,9 @@ func init_stars():
 ##
 ## [codeblock]
 ## Godot.Collections.Dictionary dict {
-##     {"transform", Transform3D},
-##     {"velocity", Vector3},
-##     {"mass", float}
+##     {"transform", Godot.Collections.Array<Transform3D>},
+##     {"velocity", Godot.Collections.Array<Vector3>},
+##     {"mass", Godot.Collections.Array<float>}
 ## }
 ## [/codeblock]
 ##
