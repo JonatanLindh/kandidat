@@ -3,7 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
-public sealed class MarchingCubeDispatch
+public sealed partial class MarchingCubeDispatch : Node
 {
 	private static MarchingCubeDispatch _instance = null;
 	private static readonly object Lock = new object();
@@ -15,21 +15,46 @@ public sealed class MarchingCubeDispatch
 	private bool _insideTree = false;
 	
 	private readonly ConcurrentBag<long> _workerThreads = new();
-	private uint _maxThreads = 16;
+	private const uint MaxThreads = 16;
 	private readonly object _generateMeshLock = new();
 
-	public MarchingCubeDispatch()
+
+	public override void _Notification(int what)
 	{
-		_insideTree = true;
-		_marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.CpuMultiThread);
-		_planetGenerator = new Thread(GenerateLoop);
-		_planetGenerator.Start();
-		
+		if (what == NotificationPredelete || what == NotificationExitTree)
+		{
+			// Cleanup logic here
+			Instance.Cleanup();
+		}
+		if (what == NotificationReady)
+		{
+			// Initialization logic here
+			Instance.Initialize();
+		}
 	}
 
-	~MarchingCubeDispatch()
+	private void Initialize()
+	{
+		_insideTree = true;
+		// Initialize the marching cube instance
+		_marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.CpuMultiThread);
+		
+		// Start the planet generator thread
+		if (_planetGenerator is { IsAlive: true }) return;
+		_planetGenerator = new Thread(GenerateLoop);
+		_planetGenerator.Start();
+	}
+
+
+	private void Cleanup()
 	{
 		_insideTree = false;
+		_planetQueue.Clear();
+		foreach (var threadId in _workerThreads)
+		{
+			WorkerThreadPool.WaitForTaskCompletion(threadId);
+		}
+		_workerThreads.Clear();
 	}
 	
 	public static MarchingCubeDispatch Instance
@@ -41,11 +66,13 @@ public sealed class MarchingCubeDispatch
 				if (_instance == null)
 				{
 					_instance = new MarchingCubeDispatch();
+					// Initialize the instance
+					_instance.Initialize();
 				}
 				return _instance;
 			}
 		}
-	}
+	}	
 
 
 	private void HandleGeneratingTask(ConcurrentQueue<MarchingCubeRequest> queue)
@@ -71,11 +98,18 @@ public sealed class MarchingCubeDispatch
 				{
 					lock (_generateMeshLock) // Ensure only one thread calls GenerateMesh at a time
 					{
-						request.TempNode?.CallDeferred(Node.MethodName.QueueFree);
-						
 						var mesh = _marchingCube.GenerateMesh(request.DataPoints, request.Scale);
-						mesh.Translate(request.Offset); 
-						request.Root.CallDeferred(Node.MethodName.AddChild, mesh);
+						
+						var meshInstance = new MeshInstance3D();
+						meshInstance.Mesh = mesh;
+						meshInstance.CreateMultipleConvexCollisions();
+						meshInstance.Translate(request.Offset); 
+						
+						if (IsInstanceValid(request.TempNode))
+							request.TempNode.CallDeferred(Node.MethodName.QueueFree);
+
+						if (IsInstanceValid(request.Root))
+							request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
 					}
 				})));
 				
@@ -90,7 +124,7 @@ public sealed class MarchingCubeDispatch
 			HandleGeneratingTask(_planetQueue);
 			
 			// Check if the worker threads are busy
-			if (_workerThreads.Count >= _maxThreads)
+			if (_workerThreads.Count >= MaxThreads)
 			{
 				// Wait for all worker threads to finish
 				foreach (var threadId in _workerThreads)
