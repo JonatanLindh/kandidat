@@ -35,6 +35,7 @@ public sealed partial class MarchingCubeDispatch : Node
 
 	private void Initialize()
 	{
+		Cleanup();
 		_insideTree = true;
 		// Initialize the marching cube instance
 		_marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.CpuMultiThread);
@@ -83,7 +84,7 @@ public sealed partial class MarchingCubeDispatch : Node
 			// Try to dequeue the first item
 			queue.TryPeek(out MarchingCubeRequest request);
 			
-			// If the request is null, continue to the next iteration
+			
 			if (request != null)
 			{
 				// Try to dequeue the request
@@ -98,24 +99,25 @@ public sealed partial class MarchingCubeDispatch : Node
 				{
 					lock (_generateMeshLock) // Ensure only one thread calls GenerateMesh at a time
 					{
-						// Acts as a type of either CelestialBodyNoise or a regular float[,,] array
+						// Either CelestialBodyNoise or a regular float[,,] array
 						var datapoints = request.DataPoints ?? request.PlanetDataPoints.GetNoise();
-						
 						var mesh = _marchingCube.GenerateMesh(datapoints, request.Scale);
 
-						var meshInstance = new MeshInstance3D();
-						if (request.CustomMeshInstance != null)
-							meshInstance = request.CustomMeshInstance;
+						var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
 						meshInstance.Mesh = mesh;
 						meshInstance.CreateMultipleConvexCollisions();
 						meshInstance.Translate(request.Offset); 
 
 						
 						if (IsInstanceValid(request.TempNode))
+						{
 							request.TempNode.CallDeferred(Node.MethodName.QueueFree);
+						}
 
 						if (IsInstanceValid(request.Root))
+						{
 							request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
+						}
 					}
 				})));
 				

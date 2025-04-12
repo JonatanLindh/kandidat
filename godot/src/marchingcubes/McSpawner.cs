@@ -38,6 +38,8 @@ public partial class McSpawner : Node
 	private int _size = 32;
 	private MarchingCube _marchingCube;
 	private MeshInstance3D _meshInstance3D;
+	private MeshInstance3D _temporaryMeshInstance;
+	private bool _useTemp = true;
 	
 	
 	// Called when the node enters the scene tree for the first time.
@@ -60,6 +62,9 @@ public partial class McSpawner : Node
     private void SpawnMesh()
 	{
 		_meshInstance3D?.QueueFree();
+		if(IsInstanceValid(_temporaryMeshInstance))
+			_temporaryMeshInstance.QueueFree();
+
 		celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody != null)
 		{
@@ -73,14 +78,28 @@ public partial class McSpawner : Node
 			material.DisableReceiveShadows = true;
 			_meshInstance3D.MaterialOverride = material;
 			((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
-
+			
+			// Set up a temporary mesh instance that will disappear after the mesh is generated
+			if (_useTemp)
+			{
+				_temporaryMeshInstance = new MeshInstance3D();
+				_temporaryMeshInstance.Mesh = new SphereMesh
+				{
+					Radius = celestialBody.GetRadius(),
+					Height = celestialBody.GetRadius() * 2
+				};
+				_temporaryMeshInstance.MaterialOverride = material;
+				AddChild(_temporaryMeshInstance);
+			}
+			
 			MarchingCubeRequest cubeRequest = new MarchingCubeRequest
 			{
 				PlanetDataPoints = celestialBody,
 				Scale = 1,
 				Offset = Vector3.Zero,
 				Root = this,
-				CustomMeshInstance = _meshInstance3D
+				CustomMeshInstance = _meshInstance3D,
+				TempNode = _useTemp ? _temporaryMeshInstance : null
 			};
 			MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 		}
