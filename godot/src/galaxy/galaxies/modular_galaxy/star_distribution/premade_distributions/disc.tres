@@ -4,5 +4,8 @@
 
 [resource]
 script = ExtResource("1_hqmj6")
-starCount = 0
+starCount = 1000
+galaxySize = 1000
+armCount = 4
+armWidth = 0.8
 metadata/_custom_type_script = "uid://b07jgkap0ct7b"

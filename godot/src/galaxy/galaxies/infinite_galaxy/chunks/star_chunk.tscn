@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://56op0q07yym7"]
+[gd_scene load_steps=4 format=3 uid="uid://56op0q07yym7"]
 
 [ext_resource type="Script" uid="uid://333sb3fcykf1" path="res://src/galaxy/galaxies/infinite_galaxy/chunks/StarChunk.cs" id="1_c4x60"]
+[ext_resource type="Script" uid="uid://dvymm8ywk3fcb" path="res://src/galaxy/galaxies/infinite_galaxy/chunks/StarMultiMesh.cs" id="2_m8qbu"]
 [ext_resource type="PackedScene" uid="uid://cl48jm75yyftt" path="res://src/galaxy/galaxies/infinite_galaxy/chunks/StarMultiMesh.tscn" id="2_vkajo"]
 
 [node name="StarChunk" type="Node3D" node_paths=PackedStringArray("starMultiMesh")]
@@ -8,3 +9,4 @@ script = ExtResource("1_c4x60")
 starMultiMesh = NodePath("StarMultiMesh")
 
 [node name="StarMultiMesh" parent="." instance=ExtResource("2_vkajo")]
+script = ExtResource("2_m8qbu")

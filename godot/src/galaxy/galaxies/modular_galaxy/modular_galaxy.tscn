@@ -1,10 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://cjvmm3a73jfqb"]
+[gd_scene load_steps=4 format=3 uid="uid://cjvmm3a73jfqb"]
 
 [ext_resource type="Script" uid="uid://uvs7i8cbqj0" path="res://src/galaxy/galaxies/modular_galaxy/ModularGalaxy.cs" id="1_jnn0t"]
 [ext_resource type="PackedScene" uid="uid://cl48jm75yyftt" path="res://src/galaxy/galaxies/infinite_galaxy/chunks/StarMultiMesh.tscn" id="2_ildmd"]
+[ext_resource type="SphereMesh" uid="uid://briv1nx3v7fnv" path="res://src/galaxy/galaxies/_resources/star/star_mesh.tres" id="2_jblag"]
 
 [node name="ModularGalaxy" type="Node3D" node_paths=PackedStringArray("starMultiMesh")]
 script = ExtResource("1_jnn0t")
 starMultiMesh = NodePath("StarMultiMesh")
+starMesh = ExtResource("2_jblag")
 
 [node name="StarMultiMesh" parent="." instance=ExtResource("2_ildmd")]
