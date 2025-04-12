@@ -52,14 +52,23 @@ public partial class ModularGalaxy : Node3D
 	private Vector3 SamplePoint()
 	{
 		Vector3 point = Vector3.Zero;
-		double armAngle =  2 * Math.PI / distribution.armCount;
+
+		point = SamplePointOnArm();
+
+		return point;
+	}
+
+	private Vector3 SamplePointOnArm()
+	{
+		Vector3 point = Vector3.Zero;
+		double armAngle = 2 * Math.PI / distribution.armCount;
 
 		// Pick a random arm
 		int arm = GD.RandRange(0, distribution.armCount - 1);
 
 		// Calculate the angle of the arm
 		double armStartAngle = arm * armAngle;
-		double armEndAngle = armStartAngle + armAngle * distribution.armWidth;
+		double armEndAngle = armStartAngle + armAngle * distribution.armFactor;
 
 		double starAngle = GD.RandRange(armStartAngle, armEndAngle);
 		double starDistance = GD.RandRange(0, distribution.galaxySize);
@@ -68,7 +77,7 @@ public partial class ModularGalaxy : Node3D
 		double x = starDistance * Math.Cos(starAngle);
 		double z = starDistance * Math.Sin(starAngle);
 
-		return new Vector3((float) x, 0, (float) z);
+		return new Vector3((float)x, 0, (float)z);
 	}
 
 	public Vector3[] GetStars()
