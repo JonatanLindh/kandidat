@@ -2,6 +2,10 @@
 using System.Threading.Tasks;
 using Godot;
 
+/// <summary>
+/// A multithreaded implementation of the marching cubes algorithm for generating vertices
+/// on the CPU. 
+/// </summary>
 public class CpuVerticesGeneratorMultiThread : IVerticesGenerationStrategy
 {
 	private float _isoLevel = 0f;

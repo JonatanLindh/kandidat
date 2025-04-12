@@ -61,7 +61,9 @@ public partial class McSpawner : Node
 
     private void SpawnMesh()
 	{
-		_meshInstance3D?.QueueFree();
+		// Remove old mesh instances
+		if(IsInstanceValid(_meshInstance3D))
+			_meshInstance3D.QueueFree();
 		if(IsInstanceValid(_temporaryMeshInstance))
 			_temporaryMeshInstance.QueueFree();
 
@@ -92,6 +94,7 @@ public partial class McSpawner : Node
 				AddChild(_temporaryMeshInstance);
 			}
 			
+			// Send the request to the MarchingCubeDispatch
 			MarchingCubeRequest cubeRequest = new MarchingCubeRequest
 			{
 				PlanetDataPoints = celestialBody,

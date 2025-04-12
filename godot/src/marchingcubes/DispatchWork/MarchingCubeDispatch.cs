@@ -3,11 +3,17 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
+
+/// <summary>
+/// A singleton class responsible for managing and dispatching Marching Cube mesh generation tasks.
+/// It handles task queuing, multithreaded processing, and mesh generation using the Marching Cube algorithm.
+/// </summary>
 public sealed partial class MarchingCubeDispatch : Node
 {
 	private static MarchingCubeDispatch _instance = null;
-	private static readonly object Lock = new object();
 	
+	private static readonly object Lock = new object();
+	private readonly object _generateMeshLock = new();
 	
 	private Thread _planetGenerator;
 	private readonly ConcurrentQueue<MarchingCubeRequest> _planetQueue = new();
@@ -16,7 +22,6 @@ public sealed partial class MarchingCubeDispatch : Node
 	
 	private readonly ConcurrentBag<long> _workerThreads = new();
 	private const uint MaxThreads = 16;
-	private readonly object _generateMeshLock = new();
 
 
 	public override void _Notification(int what)
@@ -33,6 +38,10 @@ public sealed partial class MarchingCubeDispatch : Node
 		}
 	}
 
+	/// <summary>
+	/// Initializes the `MarchingCubeDispatch` instance, setting up the necessary resources
+	/// such as the marching cube generator and the thread for processing mesh generation tasks.
+	/// </summary>
 	private void Initialize()
 	{
 		Cleanup();
@@ -47,6 +56,11 @@ public sealed partial class MarchingCubeDispatch : Node
 	}
 
 
+	/// <summary>
+	/// Cleans up resources and resets the state of the `MarchingCubeDispatch` instance.
+	/// This includes clearing the task queue, waiting for worker threads to complete,
+	/// and resetting the worker thread collection.
+	/// </summary>
 	private void Cleanup()
 	{
 		_insideTree = false;
@@ -76,6 +90,13 @@ public sealed partial class MarchingCubeDispatch : Node
 	}	
 
 
+	/// <summary>
+	/// Processes the tasks in the provided queue by generating meshes for each request.
+	/// It dequeues tasks, generates the mesh using the Marching Cube algorithm, and adds
+	/// the resulting mesh to the scene while managing temporary nodes and thread safety.
+	/// </summary>
+	/// <param name="queue">The queue containing <see cref="MarchingCubeRequest"/> tasks to process.</param>
+	/// <seealso cref="MarchingCubeRequest"/>
 	private void HandleGeneratingTask(ConcurrentQueue<MarchingCubeRequest> queue)
 	{
 		// Check if the queue is empty
@@ -155,6 +176,10 @@ public sealed partial class MarchingCubeDispatch : Node
 	
 }
 
+/// <summary>
+/// Represents a request for generating a Marching Cube mesh, containing data points,
+/// scaling, offset, and references to nodes for mesh generation and scene management.
+/// </summary>
 public record MarchingCubeRequest
 {
 	public float[,,] DataPoints { get; init; }
