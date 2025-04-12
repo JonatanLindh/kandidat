@@ -59,16 +59,12 @@ public partial class McSpawner : Node
 
     private void SpawnMesh()
 	{
-		if(_meshInstance3D != null) RemoveChild(_meshInstance3D);
-		_marchingCube ??= new MarchingCube();
-
-        celestialBody = CelestialBody as CelestialBodyNoise;
+		_meshInstance3D?.QueueFree();
+		celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody != null)
 		{
-			/*
-            float[,,] dataPoints = celestialBody.GetNoise();
-			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
-
+			_meshInstance3D = new MeshInstance3D();
+			
 			// Disable backface culling
 			StandardMaterial3D material = new StandardMaterial3D();
 			Color o = new Color();
@@ -78,14 +74,13 @@ public partial class McSpawner : Node
 			_meshInstance3D.MaterialOverride = material;
 			((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
 
-			this.AddChild(_meshInstance3D);
-			*/
 			MarchingCubeRequest cubeRequest = new MarchingCubeRequest
 			{
-				DataPoints = celestialBody.GetNoise(),
+				PlanetDataPoints = celestialBody,
 				Scale = 1,
 				Offset = Vector3.Zero,
-				Root = this
+				Root = this,
+				CustomMeshInstance = _meshInstance3D
 			};
 			MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 		}

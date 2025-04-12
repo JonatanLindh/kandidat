@@ -98,12 +98,18 @@ public sealed partial class MarchingCubeDispatch : Node
 				{
 					lock (_generateMeshLock) // Ensure only one thread calls GenerateMesh at a time
 					{
-						var mesh = _marchingCube.GenerateMesh(request.DataPoints, request.Scale);
+						// Acts as a type of either CelestialBodyNoise or a regular float[,,] array
+						var datapoints = request.DataPoints ?? request.PlanetDataPoints.GetNoise();
 						
+						var mesh = _marchingCube.GenerateMesh(datapoints, request.Scale);
+
 						var meshInstance = new MeshInstance3D();
+						if (request.CustomMeshInstance != null)
+							meshInstance = request.CustomMeshInstance;
 						meshInstance.Mesh = mesh;
 						meshInstance.CreateMultipleConvexCollisions();
 						meshInstance.Translate(request.Offset); 
+
 						
 						if (IsInstanceValid(request.TempNode))
 							request.TempNode.CallDeferred(Node.MethodName.QueueFree);
@@ -145,45 +151,16 @@ public sealed partial class MarchingCubeDispatch : Node
 		_planetQueue.Enqueue(request);
 	}
 	
-	public void ClearQueue()
-	{
-		_planetQueue.Clear();
-	}
-	
-	private float[,,] GenerateDataPoints()
-	{
-		var radius = 32;
-		int size = radius * 2 + 1;
-		var dataPoints = new float[size, size, size];
-
-		for (int x = 0; x < size; x++)
-		{
-			for (int y = 0; y < size; y++)
-			{
-				for (int z = 0; z < size; z++)
-				{
-					Vector3 worldPos = new Vector3(x, y, z);
-					var value = -Sphere(worldPos, Vector3.One * radius, radius);
-					value = Mathf.Clamp(value, -1.0f, 1.0f);
-					dataPoints[x, y, z] = value;
-				}
-			}
-		}
-		return dataPoints;
-	}
-	
-	private static float Sphere(Vector3 worldPos, Vector3 origin, float radius) {
-		return (worldPos - origin).Length() - radius;
-	}
-	
 }
 
 public record MarchingCubeRequest
 {
 	public float[,,] DataPoints { get; init; }
+	public CelestialBodyNoise PlanetDataPoints { get; init; }
 	public float Scale { get; init; }
 	public Vector3 Offset { get; init; }
 	public Node Root { get; init; }
-	public Material MeshMaterial { get; init; }
 	public Node TempNode { get; init; }
+	
+	public MeshInstance3D CustomMeshInstance { get; init; }
 }
