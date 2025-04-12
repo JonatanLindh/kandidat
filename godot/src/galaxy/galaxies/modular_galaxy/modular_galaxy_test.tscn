@@ -8,6 +8,7 @@
 
 [node name="ModularGalaxy" parent="." instance=ExtResource("1_gq225")]
 distribution = ExtResource("2_mdmjv")
+debugDrawGravity = true
 
 [node name="Player" parent="." instance=ExtResource("2_kxa3r")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.272554, 62.3574, 89.3913)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.272554, 102.069, 126.421)
