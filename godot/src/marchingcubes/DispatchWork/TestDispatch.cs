@@ -21,7 +21,6 @@ public partial class TestDispatch : Node3D
 					meshInstance.Mesh = mesh;
 					AddChild(meshInstance);
 					meshInstance.GlobalPosition = new Vector3(64 * i, 64 * j, 64 * k);
-					meshInstance.GlobalPosition += new Vector3(32, 32, 32);
 					
 					// Create a new MarchingCubeRequest
 					MarchingCubeRequest request = new MarchingCubeRequest
