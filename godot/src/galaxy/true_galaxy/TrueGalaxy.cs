@@ -1,6 +1,7 @@
 using Godot;
 using System;
 
+[GlobalClass]
 public partial class TrueGalaxy : Node3D
 {
 	DiscGalaxy discGalaxy;

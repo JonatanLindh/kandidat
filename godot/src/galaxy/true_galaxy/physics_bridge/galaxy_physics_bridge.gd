@@ -1,6 +1,6 @@
 class_name galaxy_physics_bridge extends Node
 
-@onready var true_galaxy = $".."
+@onready var true_galaxy : TrueGalaxy = $".."
 var stars : Dictionary = {}
 var init : bool = false
 
