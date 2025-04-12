@@ -53,15 +53,15 @@ public class MarchingCube
     /// </summary>
     /// <param name="datapoints">3D array of float values representing the scalar field</param>
     /// <returns>A MeshInstance3D object representing the generated mesh</returns>
-    public MeshInstance3D GenerateMesh(float[,,] datapoints, float scale = 1)
+    public Mesh GenerateMesh(float[,,] datapoints, float scale = 1)
     {
         _scale = scale;
         var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
-        if (vertices.Count == 0) return new MeshInstance3D();
+        if (vertices.Count == 0) return new Mesh();
         // Calculate the actual geometric center of the vertices
         var center = Vector3.Zero;
         
-        /*
+        
         if (vertices.Count > 0)
         {
             foreach (var vertex in vertices)
@@ -70,7 +70,7 @@ public class MarchingCube
             }
             center /= vertices.Count;
         }
-        */
+        
         var surfaceTool = new SurfaceTool();
         surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
 
@@ -87,9 +87,6 @@ public class MarchingCube
         surfaceTool.GenerateNormals();
         surfaceTool.Index();
         Mesh mesh = surfaceTool.Commit();
-        var meshInstance = new MeshInstance3D();
-        meshInstance.Mesh = mesh;
-        meshInstance.CreateMultipleConvexCollisions();
-        return meshInstance;
+        return mesh;
     }
 }

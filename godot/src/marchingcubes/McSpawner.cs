@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Numerics;
+using Vector3 = Godot.Vector3;
 
 
 /// <summary>
@@ -82,7 +84,7 @@ public partial class McSpawner : Node
 			{
 				DataPoints = celestialBody.GetNoise(),
 				Scale = 1,
-				Offset = -Vector3.One * celestialBody.GetRadius(),
+				Offset = Vector3.Zero,
 				Root = this
 			};
 			MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
