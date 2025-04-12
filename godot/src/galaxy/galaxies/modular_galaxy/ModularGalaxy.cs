@@ -54,36 +54,21 @@ public partial class ModularGalaxy : Node3D
 		Vector3 point = Vector3.Zero;
 		double armAngle =  2 * Math.PI / distribution.armCount;
 
-		bool valid = false;
-		while(!valid)
-		{
-			// Sample a random point from within the galaxy size
-			float x = (float)GD.RandRange(-distribution.galaxySize, distribution.galaxySize);
-			float y = (float)GD.RandRange(-distribution.galaxySize, distribution.galaxySize);
-			float z = (float)GD.RandRange(-distribution.galaxySize, distribution.galaxySize);
-			point = new Vector3(x, y, z);
+		// Pick a random arm
+		int arm = GD.RandRange(0, distribution.armCount - 1);
 
-			double angle = Math.Atan2(point.Z, point.X);
+		// Calculate the angle of the arm
+		double armStartAngle = arm * armAngle;
+		double armEndAngle = armStartAngle + armAngle * distribution.armWidth;
 
-			for (double i = -Math.PI; i < Math.PI; i += armAngle)
-			{
-				if(angle > i && angle < i + armAngle * distribution.armWidth)
-				{
-					valid = true;
-					break;
-				}
+		double starAngle = GD.RandRange(armStartAngle, armEndAngle);
+		double starDistance = GD.RandRange(0, distribution.galaxySize);
 
-			}
-		}
+		// Calculate star position from polar coodinates
+		double x = starDistance * Math.Cos(starAngle);
+		double z = starDistance * Math.Sin(starAngle);
 
-		point.Y = 0;
-
-
-
-		
-
-
-		return point;
+		return new Vector3((float) x, 0, (float) z);
 	}
 
 	public Vector3[] GetStars()
