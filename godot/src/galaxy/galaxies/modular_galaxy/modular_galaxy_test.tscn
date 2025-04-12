@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://br2e4o1tpjbhn"]
+
+[ext_resource type="PackedScene" uid="uid://cjvmm3a73jfqb" path="res://src/galaxy/galaxies/modular_galaxy/modular_galaxy.tscn" id="1_gq225"]
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="2_kxa3r"]
+[ext_resource type="Resource" uid="uid://dxitopmu1w3t2" path="res://src/galaxy/galaxies/modular_galaxy/star_distribution/premade_distributions/disc.tres" id="2_mdmjv"]
+
+[node name="ModularGalaxyTest" type="Node3D"]
+
+[node name="ModularGalaxy" parent="." instance=ExtResource("1_gq225")]
+distribution = ExtResource("2_mdmjv")
+
+[node name="Player" parent="." instance=ExtResource("2_kxa3r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.272554, 62.3574, 89.3913)
