@@ -8,10 +8,15 @@ using System;
 /// </summary>
 public class MarchingCube
 {
-    private IVerticesGenerationStrategy _strategy;
-    private float[,,] _datapoints;
-    private float _scale;
-    private readonly float _threshold;
+	private IVerticesGenerationStrategy _strategy;
+	private float[,,] _datapoints;
+	private float _scale;
+	private readonly float _threshold;
+	
+	private float _maxHeight = float.MinValue;
+	private float _minHeight = float.MaxValue;
+	public float MaxHeight => _maxHeight;
+	public float MinHeight => _minHeight;
 
 
     // Enum for strategy selection
@@ -42,11 +47,11 @@ public class MarchingCube
         };
     }
 
-    ~MarchingCube()
-    {
-        _strategy = null;
-        _datapoints = null;
-    }
+	~MarchingCube()
+	{
+		_strategy = null;
+		_datapoints = null;
+	}
 
     /// <summary>
     /// Generates a mesh from a 3D array of float values with the Marching Cubes Algorithm
@@ -81,12 +86,15 @@ public class MarchingCube
         {
             // Center the mesh using the actual geometric center
             var newVertex = vertex - center;
-            surfaceTool.AddVertex(newVertex);
-        }
-        vertices.Clear();
-        surfaceTool.GenerateNormals();
-        surfaceTool.Index();
-        Mesh mesh = surfaceTool.Commit();
-        return mesh;
-    }
+            float height = newVertex.Length();
+			if (height > _maxHeight) _maxHeight = height;
+			if (height < _minHeight) _minHeight = height;
+			surfaceTool.AddVertex(newVertex);
+		}
+		vertices.Clear();
+		surfaceTool.GenerateNormals();
+		surfaceTool.Index();
+		Mesh mesh = surfaceTool.Commit();
+		return mesh;
+	}
 }

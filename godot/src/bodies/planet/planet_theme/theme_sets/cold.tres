@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="PlanetThemeSet" load_steps=5 format=3 uid="uid://dbb4brlkmx1my"]
+
+[ext_resource type="Script" uid="uid://csscujj5yg1co" path="res://src/bodies/planet/planet_theme/PlanetThemeSet.cs" id="1_p7s4a"]
+[ext_resource type="Script" uid="uid://ccka61wu76x4n" path="res://src/bodies/planet/planet_theme/PlanetTheme.cs" id="1_rul84"]
+[ext_resource type="Resource" uid="uid://db6mj5rbeffaw" path="res://src/bodies/planet/planet_theme/themes/alien.tres" id="2_htsb5"]
+[ext_resource type="Resource" uid="uid://bno880i1bhwqt" path="res://src/bodies/planet/planet_theme/themes/pink.tres" id="3_q7q7c"]
+
+[resource]
+script = ExtResource("1_p7s4a")
+Warmth = 0.2
+Themes = Array[ExtResource("1_rul84")]([ExtResource("2_htsb5"), ExtResource("3_q7q7c")])
+metadata/_custom_type_script = "uid://csscujj5yg1co"
