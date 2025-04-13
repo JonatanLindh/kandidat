@@ -9,6 +9,10 @@ extends MeshInstance3D
 		sun_direction = new_dir
 		_update_runtime_shader_params()
 
+@export var planet_seed: int:
+	set(new_seed):
+		planet_seed = new_seed
+
 # CHEATING SINCE WE DON'T HAVE MIE SCATTERING
 const EARTH_LIKE := Vector3(700, 530, 440)
 const PURPLE_ISH := Vector3(540, 700, 380)
@@ -24,8 +28,13 @@ func _ready() -> void:
 		mesh.material = mesh.material.duplicate()
 	
 	_update_runtime_shader_params()
-	var random_wave_length = wave_lenghts_array.pick_random()
-	mesh.material.set_shader_parameter("wavelengths", random_wave_length)
+	
+	var rng = RandomNumberGenerator.new()
+	rng.seed = planet_seed
+	var random_index = rng.randf_range(0, wave_lenghts_array.size() - 1)
+	var atmosphere_color = wave_lenghts_array[int(random_index)]
+	
+	mesh.material.set_shader_parameter("wavelengths", atmosphere_color)
 	mesh.material.set_shader_parameter("planet_radius", radius)
 	mesh.size = Vector3(radius*6,radius*6,radius*6)
 
