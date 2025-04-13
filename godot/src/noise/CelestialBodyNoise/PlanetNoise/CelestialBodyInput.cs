@@ -12,7 +12,8 @@ public partial class CelestialBodyInput : Node3D
 
     public void RegenMesh()
     {
-        GetNode<McSpawner>("MarchingCube").RegenerateMesh();
+        McSpawner _mcSpawner = GetNode<McSpawner>("MarchingCube");
+        _mcSpawner.RegenerateMesh();
     }
 
     [ExportCategory("Celestial body parameters")]

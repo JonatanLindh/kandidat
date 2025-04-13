@@ -8,31 +8,58 @@ using System;
 [Tool]
 public partial class McSpawner : Node
 {
-    private bool _reload;
-    [Export]
-    public bool reload
-    {
-        get => _reload;
-        set
-        {
-            _reload = !value;
-            //OnResourceSet();
-        }
-    }
+	private bool _reload;
+	[Export]
+	public bool reload
+	{
+		get => _reload;
+		set
+		{
+			_reload = !value;
+			//OnResourceSet();
+		}
+	}
 
-    private CelestialBodyNoise celestialBody;
+	private CelestialBodyNoise celestialBody;
 	private Node cb;
-    [Export] private Node CelestialBody
+	[Export] private Node CelestialBody
 	{
 		get => cb;
 		set
 		{
 			cb = value;
-            // OnResourceSet(); TODO THIS MAKES THE SpawnMesh() FUNCTION RUN TWICE!
+			// OnResourceSet(); TODO THIS MAKES THE SpawnMesh() FUNCTION RUN TWICE!
+		}
+	}
+
+	private double _warmth;
+    public double Warmth
+    {
+        get => _warmth;
+        set
+        {
+            _warmth = value;
+
+            if (_themeGenerator != null)
+            {
+                _themeGenerator.Warmth = value; // Tell it to pick a new theme
+            }
         }
     }
 
-    private int _maxHeight = 16;
+    private ShaderMaterial _planetShader;
+	public ShaderMaterial PlanetShader
+	{
+		get => _planetShader;
+		set
+		{
+			_planetShader = value;
+		}
+	}
+
+	private PlanetThemeGenerator _themeGenerator = new PlanetThemeGenerator();
+
+	private int _maxHeight = 16;
 	private int _size = 32;
 	private MarchingCube _marchingCube;
 	private MeshInstance3D _meshInstance3D;
@@ -55,25 +82,17 @@ public partial class McSpawner : Node
 		SpawnMesh();
 	}
 
-    private void SpawnMesh()
+	private void SpawnMesh()
 	{
 		if(_meshInstance3D != null) RemoveChild(_meshInstance3D);
 		_marchingCube ??= new MarchingCube();
 
-        celestialBody = CelestialBody as CelestialBodyNoise;
+		celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody != null)
 		{
-            float[,,] dataPoints = celestialBody.GetNoise();
+			float[,,] dataPoints = celestialBody.GetNoise();
 			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
-
-			// Disable backface culling
-			StandardMaterial3D material = new StandardMaterial3D();
-			Color o = new Color();
-			material.AlbedoColor = Color.Color8((byte)152, (byte)102, (byte)0);
-			material.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex;
-			material.DisableReceiveShadows = true;
-			_meshInstance3D.MaterialOverride = material;
-			((StandardMaterial3D)_meshInstance3D.MaterialOverride).SetCullMode(BaseMaterial3D.CullModeEnum.Disabled);
+			_meshInstance3D.MaterialOverride = GeneratePlanetShader();
 
 			this.AddChild(_meshInstance3D);
 		}
@@ -105,6 +124,28 @@ public partial class McSpawner : Node
 			}
 		}
 		return dataPoints;
+	}
+
+	private ShaderMaterial GeneratePlanetShader() {
+		// Load the shader correctly
+		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
+		ShaderMaterial shaderMaterial = new ShaderMaterial();
+		shaderMaterial.Shader = shader;
+		shaderMaterial.SetShaderParameter("min_height", _marchingCube.MinHeight);
+		shaderMaterial.SetShaderParameter("max_height", _marchingCube.MaxHeight);
+
+
+		// Access exported property (gradient)
+		Gradient gradient = _themeGenerator.Gradient;
+		GradientTexture1D gradientTexture = new GradientTexture1D();
+		gradientTexture.Gradient = gradient;
+		gradientTexture.Width = 256;
+
+		shaderMaterial.SetShaderParameter("height_color", gradientTexture);
+		shaderMaterial.SetShaderParameter("cliff_color", gradient.GetColor(3));
+
+		return shaderMaterial;
+
 	}
 	
 }
