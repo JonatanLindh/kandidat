@@ -95,12 +95,12 @@ public partial class McSpawner : Node
 			_temporaryMeshInstance.QueueFree();
 
 		celestialBody = CelestialBody as CelestialBodyNoise;
+		
 		if(celestialBody != null)
 		{
-			_meshInstance3D = new MeshInstance3D();
+			var planetRadius = celestialBody.GetRadius();
 
-			var material = GeneratePlanetShader();
-			_meshInstance3D.MaterialOverride = material;
+			_meshInstance3D = new MeshInstance3D();
 			
 			// Set up a temporary mesh instance that will disappear after the mesh is generated
 			if (_useTemp)
@@ -108,10 +108,10 @@ public partial class McSpawner : Node
 				_temporaryMeshInstance = new MeshInstance3D();
 				_temporaryMeshInstance.Mesh = new SphereMesh
 				{
-					Radius = celestialBody.GetRadius(),
-					Height = celestialBody.GetRadius() * 2
+					Radius = planetRadius,
+					Height = planetRadius * 2
 				};
-				_temporaryMeshInstance.MaterialOverride = material;
+				_temporaryMeshInstance.MaterialOverride = GeneratePlanetShader(planetRadius, planetRadius);
 				AddChild(_temporaryMeshInstance);
 			}
 			
@@ -123,7 +123,8 @@ public partial class McSpawner : Node
 				Offset = Vector3.Zero,
 				Root = this,
 				CustomMeshInstance = _meshInstance3D,
-				TempNode = _useTemp ? _temporaryMeshInstance : null
+				TempNode = _useTemp ? _temporaryMeshInstance : null,
+				GeneratePlanetShader = GeneratePlanetShader
 			};
 			MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 		}
@@ -157,13 +158,13 @@ public partial class McSpawner : Node
 		return dataPoints;
 	}
 
-	private ShaderMaterial GeneratePlanetShader() {
+	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		ShaderMaterial shaderMaterial = new ShaderMaterial();
 		shaderMaterial.Shader = shader;
-		shaderMaterial.SetShaderParameter("min_height", _marchingCube.MinHeight);
-		shaderMaterial.SetShaderParameter("max_height", _marchingCube.MaxHeight);
+		shaderMaterial.SetShaderParameter("min_height", minHeight);
+		shaderMaterial.SetShaderParameter("max_height", maxHeight);
 
 
 		// Access exported property (gradient)

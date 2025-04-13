@@ -128,6 +128,12 @@ public sealed partial class MarchingCubeDispatch : Node
 						meshInstance.Mesh = mesh;
 						meshInstance.CreateMultipleConvexCollisions();
 						meshInstance.Translate(request.Offset); 
+						
+						if (request.GeneratePlanetShader != null)
+						{
+							var material = request.GeneratePlanetShader(_marchingCube.MinHeight, _marchingCube.MaxHeight);
+							meshInstance.MaterialOverride = material;
+						}
 
 						
 						if (IsInstanceValid(request.TempNode))
@@ -190,4 +196,6 @@ public record MarchingCubeRequest
 	public Node TempNode { get; init; }
 	
 	public MeshInstance3D CustomMeshInstance { get; init; }
+	
+	public Func<float, float, ShaderMaterial> GeneratePlanetShader { get; init; }
 }
