@@ -71,6 +71,20 @@ public partial class RandomCelestialBodyNoise : Node, CelestialBodyNoise, Modifi
 
     public int GetRadius()
     {
+        if (celestialBodyNoise is not null) return celestialBodyNoise.GetRadius();
+        
+        celestialBodyNoise = CelestialBody as CelestialBodyNoise;
+        if (celestialBodyNoise is not CelestialBodyNoise)
+        {
+            GD.PrintErr("CelestialBody needs to implement CelestialBodyNoise");
+        }
+
+        modifiableBody = CelestialBody as ModifiableCelestialBody;
+        if(modifiableBody is not ModifiableCelestialBody)
+        {
+            GD.PrintErr("CelestialBody needs to implement ModifiableCelestialBody");
+        }
+
         return celestialBodyNoise.GetRadius();
     }
 

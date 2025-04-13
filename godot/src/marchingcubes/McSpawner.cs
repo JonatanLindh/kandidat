@@ -98,8 +98,9 @@ public partial class McSpawner : Node
 		if(celestialBody != null)
 		{
 			_meshInstance3D = new MeshInstance3D();
-			
-			_meshInstance3D.MaterialOverride = GeneratePlanetShader();
+
+			var material = GeneratePlanetShader();
+			_meshInstance3D.MaterialOverride = material;
 			
 			// Set up a temporary mesh instance that will disappear after the mesh is generated
 			if (_useTemp)
