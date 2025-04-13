@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PlanetThemeSet" load_steps=7 format=3 uid="uid://ypswhva56o0g"]
+
+[ext_resource type="Script" uid="uid://csscujj5yg1co" path="res://src/bodies/planet/planet_theme/PlanetThemeSet.cs" id="1_168h2"]
+[ext_resource type="Script" uid="uid://ccka61wu76x4n" path="res://src/bodies/planet/planet_theme/PlanetTheme.cs" id="1_geghd"]
+[ext_resource type="Resource" uid="uid://52ybf7ibihm1" path="res://src/bodies/planet/planet_theme/themes/desert.tres" id="2_a264y"]
+[ext_resource type="Resource" uid="uid://3ucqj7upbrpu" path="res://src/bodies/planet/planet_theme/themes/rocky_desert.tres" id="3_56khf"]
+[ext_resource type="Resource" uid="uid://dj1kun5sjhnpb" path="res://src/bodies/planet/planet_theme/themes/red_dunes.tres" id="4_fk7gw"]
+[ext_resource type="Resource" uid="uid://vy3u5y1oxip5" path="res://src/bodies/planet/planet_theme/themes/mars.tres" id="5_fb8cs"]
+
+[resource]
+script = ExtResource("1_168h2")
+Warmth = 0.8
+Themes = Array[ExtResource("1_geghd")]([ExtResource("2_a264y"), ExtResource("3_56khf"), ExtResource("4_fk7gw"), ExtResource("5_fb8cs")])
+metadata/_custom_type_script = "uid://csscujj5yg1co"
