@@ -15,7 +15,6 @@ extends GravityBody
 		return star_color
 	set(c):
 		star_color = c
-
-@export var star_corona_color : Color = star_color.lightened(0.5).lerp(Color(1,1,1), 0.4):
-	get():
-		return star_color
+		if (star_mesh == null):
+			star_mesh = $StarMesh
+		star_mesh.set_color(c)

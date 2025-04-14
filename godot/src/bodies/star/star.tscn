@@ -1,10 +1,8 @@
-[gd_scene load_steps=15 format=3 uid="uid://c4qg4a1uuvy8x"]
+[gd_scene load_steps=11 format=3 uid="uid://c4qg4a1uuvy8x"]
 
 [ext_resource type="Script" uid="uid://b2bwrjafcs0ma" path="res://src/bodies/star/star.gd" id="1_v5nms"]
 [ext_resource type="Script" uid="uid://cw6871tnevxgg" path="res://src/bodies/star/star_mesh.gd" id="2_8pwqv"]
 [ext_resource type="Shader" uid="uid://bk85yd8owqrfw" path="res://src/bodies/star/star.gdshader" id="2_yo06i"]
-[ext_resource type="Shader" uid="uid://baak4dvvro4ar" path="res://src/bodies/star/star_corona_shader.gdshader" id="4_cp7ty"]
-[ext_resource type="Script" uid="uid://o3m2gw1lkyjc" path="res://src/bodies/star/star_corona.gd" id="5_r4hvf"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2v4w2"]
 albedo_color = Color(1, 0.831373, 0.356863, 1)
@@ -32,8 +30,8 @@ noise = SubResource("FastNoiseLite_cp7ty")
 render_priority = 0
 shader = ExtResource("2_yo06i")
 shader_parameter/Glow_Power = 10.0
-shader_parameter/Lightness_Difference = 6.596
-shader_parameter/Sun_Color = Color(1, 0.0588235, 0.00392157, 1)
+shader_parameter/Lightness_Difference = 10.0
+shader_parameter/Sun_Color = Color(1, 0.145098, 0.00392157, 1)
 shader_parameter/voronoi_noise = SubResource("NoiseTexture2D_r4hvf")
 shader_parameter/emission_noise = SubResource("NoiseTexture2D_bw6gg")
 shader_parameter/waveSpeed = 0.313
@@ -41,22 +39,9 @@ shader_parameter/fresnel = 2.0
 shader_parameter/scale = 0.27
 shader_parameter/blendSharpness = 1.393
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_2watn"]
-render_priority = 0
-shader = ExtResource("4_cp7ty")
-shader_parameter/color = Color(1, 0.522149, 0.179433, 1)
-shader_parameter/star_radius = 5.0
-shader_parameter/thickness_scale = 0.5
-shader_parameter/intensity = 9.71
-shader_parameter/glow_power = 6.835
-
-[sub_resource type="BoxMesh" id="BoxMesh_i142y"]
-material = SubResource("ShaderMaterial_2watn")
-flip_faces = true
-size = Vector3(15, 15, 15)
-
 [node name="Star" type="GravityBody"]
 script = ExtResource("1_v5nms")
+star_color = Color(1, 0, 0, 1)
 
 [node name="StarMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("SphereMesh_m6dof")
@@ -68,7 +53,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.353493, 0)
 light_energy = 10.231
 omni_range = 4096.0
 omni_attenuation = 0.1
-
-[node name="StarCorona" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxMesh_i142y")
-script = ExtResource("5_r4hvf")
