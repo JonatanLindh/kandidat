@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://bofhg0a64o1ap"]
+[gd_scene load_steps=12 format=3 uid="uid://bofhg0a64o1ap"]
 
 [ext_resource type="Shader" uid="uid://dhdtae8rob82a" path="res://src/ocean/water.gdshader" id="1_hsljn"]
+[ext_resource type="Script" uid="uid://dkujr10uhcgp5" path="res://src/ocean/Water.cs" id="2_3yyav"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_hsljn"]
 radius = 56.0
@@ -26,6 +27,16 @@ seamless = true
 as_normal_map = true
 noise = SubResource("FastNoiseLite_na11i")
 
+[sub_resource type="Cubemap" id="Cubemap_na11i"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ttfuv"]
+noise_type = 0
+fractal_type = 2
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_5qegk"]
+seamless = true
+noise = SubResource("FastNoiseLite_ttfuv")
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_na11i"]
 render_priority = 0
 shader = ExtResource("1_hsljn")
@@ -36,11 +47,14 @@ shader_parameter/roughness = 0.25
 shader_parameter/specular = 0.25
 shader_parameter/bump_map1 = SubResource("NoiseTexture2D_3yyav")
 shader_parameter/bump_map2 = SubResource("NoiseTexture2D_ttfuv")
+shader_parameter/texture_3d = SubResource("NoiseTexture3D_5qegk")
+shader_parameter/cubemap = SubResource("Cubemap_na11i")
 shader_parameter/dir_bump_map1 = Vector2(1, 0)
 shader_parameter/dir_bump_map2 = Vector2(0.25, 0.75)
-shader_parameter/speed_bump_map1 = 0.01
-shader_parameter/speed_bump_map2 = 0.01
+shader_parameter/speed_bump_map1 = 0.005
+shader_parameter/speed_bump_map2 = 0.005
 
 [node name="WaterMesh" type="MeshInstance3D"]
 mesh = SubResource("SphereMesh_hsljn")
 surface_material_override/0 = SubResource("ShaderMaterial_na11i")
+script = ExtResource("2_3yyav")
