@@ -61,7 +61,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			warmth = value;
-			//SpawnMesh(); // If uncommented, planets will generate twice
 		}
 	}
 	private double warmth;
