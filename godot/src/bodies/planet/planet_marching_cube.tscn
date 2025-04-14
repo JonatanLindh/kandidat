@@ -16,8 +16,8 @@ shader_parameter/sun_direction = Vector3(1, 0, 0)
 shader_parameter/thickness_scale = 0.042
 shader_parameter/planet_radius = 1.0
 shader_parameter/density_falloff = 4.0
-shader_parameter/num_in_scattering_points = 30
-shader_parameter/num_optical_depth_points = 30
+shader_parameter/num_in_scattering_points = 10
+shader_parameter/num_optical_depth_points = 10
 shader_parameter/wavelengths = Vector3(1000, 530, 800)
 shader_parameter/scattering_strenght = 8.55
 shader_parameter/atmosphere_scale = 1.3
@@ -35,6 +35,7 @@ resource_local_to_scene = true
 script = ExtResource("1_ha83e")
 Resolution = 32
 Planet = ExtResource("2_736bg")
+Warmth = 1.0
 
 [node name="Atmosphere" type="MeshInstance3D" parent="."]
 transform = Transform3D(16.7, 0, 0, 0, 16.7, 0, 0, 0, 16.7, 0, 0, 0)
