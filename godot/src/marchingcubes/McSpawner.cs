@@ -8,17 +8,16 @@ using System;
 [Tool]
 public partial class McSpawner : Node
 {
-	private bool _reload;
-	[Export]
-	public bool reload
-	{
-		get => _reload;
-		set
-		{
-			_reload = !value;
-			//OnResourceSet();
-		}
-	}
+    private bool _reload;
+    [Export]
+    public bool reload
+    {
+        get => _reload;
+        set
+        {
+            _reload = !value;
+        }
+    }
 
 	private CelestialBodyNoise celestialBody;
 	private Node cb;
@@ -28,7 +27,6 @@ public partial class McSpawner : Node
 		set
 		{
 			cb = value;
-			// OnResourceSet(); TODO THIS MAKES THE SpawnMesh() FUNCTION RUN TWICE!
 		}
 	}
 
@@ -88,14 +86,15 @@ public partial class McSpawner : Node
 		_marchingCube ??= new MarchingCube();
 
 		celestialBody = CelestialBody as CelestialBodyNoise;
-		if(celestialBody != null)
+		if(celestialBody == null)
 		{
-			float[,,] dataPoints = celestialBody.GetNoise();
-			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
-			_meshInstance3D.MaterialOverride = GeneratePlanetShader();
-
-			this.AddChild(_meshInstance3D);
+			GD.PrintErr("celestialBody is null");
 		}
+		float[,,] dataPoints = celestialBody.GetNoise();
+		_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
+		_meshInstance3D.MaterialOverride = GeneratePlanetShader();
+
+		this.AddChild(_meshInstance3D);
 	}
 
 	// Old test method for generating datapoints
