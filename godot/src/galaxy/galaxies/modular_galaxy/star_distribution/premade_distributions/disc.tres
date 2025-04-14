@@ -5,8 +5,9 @@
 [resource]
 script = ExtResource("1_hqmj6")
 starCount = 5000
-galaxySize = 2000
+galaxySize = 800
 gravity = 40.0
 armCount = 8
 armFactor = 0.6
+curveStrength = 300.0
 metadata/_custom_type_script = "uid://b07jgkap0ct7b"

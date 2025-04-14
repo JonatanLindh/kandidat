@@ -12,6 +12,7 @@ public partial class ModularGalaxy : Node3D
 	[ExportGroup("Debug")]
 	[Export] bool debugPrint = false;
 	[Export] bool debugDrawGravity = false;
+	[Export] bool debugDrawCurve = false;
 	DebugDraw debugDrawer;
 
 	public override void _Ready()
@@ -69,6 +70,17 @@ public partial class ModularGalaxy : Node3D
 		if(debugDrawGravity) debugDrawer.DrawLine(point, point + gravityOffset);
 		point += gravityOffset;
 
+		// Central vertical offset
+		// ...
+
+		// Wave vertical offset
+		// ...
+
+		// Curve the star position
+		Vector3 curveOffset = GetCurveOffset(point);
+		if (debugDrawCurve) debugDrawer.DrawLine(point, point + curveOffset);
+		point += curveOffset;
+
 		return point;
 	}
 
@@ -99,6 +111,18 @@ public partial class ModularGalaxy : Node3D
 		Vector3 gravityDirection = -startPos.Normalized();
 
 		Vector3 offset = gravityDirection * gravityStrength;
+		return offset;
+	}
+
+	private Vector3 GetCurveOffset(Vector3 startPos)
+	{
+		double distance = startPos.Length();
+		double rotationStrengthFactor = Math.Pow((distance / distribution.galaxySize), 2);
+		float rotationStrength = (float)(distribution.curveStrength * rotationStrengthFactor);
+
+		Vector3 cross = startPos.Cross(Vector3.Up).Normalized();
+		Vector3 offset = cross * rotationStrength;
+
 		return offset;
 	}
 

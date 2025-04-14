@@ -11,4 +11,6 @@ public partial class ModularGalaxyDistribution : Resource
 
 	[Export] public int armCount { get; private set; }
 	[Export] public float armFactor { get; private set; }
+
+	[Export] public float curveStrength { get; private set; }
 }
