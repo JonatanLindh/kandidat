@@ -15,9 +15,10 @@ var colors := [
 	Color(0.8, 0.6, 0.4) # Yellow-brownish (G-type star, slightly more red)
 ]
 
-@export var seed : int = 10:
+@export var seed : int:
 	set(new_seed):
 		seed = new_seed
+		recolor()
 	get():
 		return seed
 
@@ -32,9 +33,22 @@ func _ready() -> void:
 	if star_mesh != null:
 		var rng = RandomNumberGenerator.new()
 		rng.seed = seed
+		print("SUN seed", seed)
 		var random_i = rng.randf_range(0, len(colors)-1)
-		# TODO add random here after seed has been integrated
-		var star_color_random = colors[1]
+		var star_color_random = colors[random_i]
+		print(star_color_random)
+		star_mesh.set_color(star_color_random)
+	else:
+		print("Star mesh not found.")
+
+# Temp function, needed now since the sun is only instansiated once in the beginning of the game
+func recolor():
+	if star_mesh != null:
+		var rng = RandomNumberGenerator.new()
+		rng.seed = seed
+		print("SUN seed", seed)
+		var random_i = rng.randf_range(0, len(colors)-1)
+		var star_color_random = colors[random_i]
 		print(star_color_random)
 		star_mesh.set_color(star_color_random)
 	else:

@@ -110,6 +110,7 @@ func generateSystemFromSeed(s:int):
 	clearPlanets();
 	var r = RandomNumberGenerator.new();
 	r.seed = s;
+	SUN.seed = s
 	
 	var n = r.randi_range(3,10);
 	generatePlanets(n,r)

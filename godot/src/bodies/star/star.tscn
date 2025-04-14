@@ -22,7 +22,7 @@ render_priority = 0
 shader = ExtResource("2_yo06i")
 shader_parameter/Glow_Power = 10.0
 shader_parameter/Lightness_Difference = 10.0
-shader_parameter/Sun_Color = Color(0.860675, 0.354761, 0.155926, 1)
+shader_parameter/Sun_Color = Color(1, 0.5, 0, 1)
 shader_parameter/voronoi_noise = SubResource("NoiseTexture2D_r4hvf")
 shader_parameter/emission_noise = SubResource("NoiseTexture2D_bw6gg")
 shader_parameter/waveSpeed = 0.175
@@ -37,7 +37,7 @@ height = 10.0
 
 [node name="Star" type="GravityBody"]
 script = ExtResource("1_v5nms")
-seed = null
+seed = 10
 
 [node name="StarMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("SphereMesh_m6dof")
