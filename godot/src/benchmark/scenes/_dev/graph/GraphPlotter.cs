@@ -5,9 +5,12 @@ using System.Collections.Generic;
 public partial class GraphPlotter : Control
 {
 	List<GraphContainer> graphContainers = new List<GraphContainer>();
+	CurrentContainer currentContainer;
 
 	public override void _Ready()
 	{
+		currentContainer = GetNode<CurrentContainer>("%CurrentContainer");
+
 		List<Node> children = new List<Node>();
 		foreach (Node child in GetChildren())
 		{
@@ -58,5 +61,36 @@ public partial class GraphPlotter : Control
 					break;
 			}
 		}
+	}
+
+	public void UpdateCurrentData(BenchmarkDatapoint data)
+	{
+		currentContainer.UpdateCurrentData(data);
+	}
+
+	public void HideAllGraphs()
+	{
+		foreach (GraphContainer graphContainer in graphContainers)
+		{
+			graphContainer.Hide();
+		}
+	}
+
+	public void ShowAllGraphs()
+	{
+		foreach (GraphContainer graphContainer in graphContainers)
+		{
+			graphContainer.Show();
+		}
+	}
+
+	public void HideCurrentValues()
+	{
+		currentContainer.Hide();
+	}
+
+	public void ShowCurrentValues()
+	{
+		currentContainer.Show();
 	}
 }

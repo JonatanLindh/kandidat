@@ -1,12 +1,29 @@
-[gd_scene load_steps=3 format=3 uid="uid://bn03e1m8twjh0"]
+[gd_scene load_steps=4 format=3 uid="uid://bn03e1m8twjh0"]
 
 [ext_resource type="Script" uid="uid://bopwc70j3myag" path="res://src/benchmark/scenes/_dev/graph/GraphPlotter.cs" id="1_vtf27"]
+[ext_resource type="PackedScene" uid="uid://bh4078ciy4bsr" path="res://src/benchmark/scenes/_dev/graph/current_container/current_container.tscn" id="3_fem5t"]
 [ext_resource type="PackedScene" uid="uid://msfulctl4nlw" path="res://src/benchmark/scenes/_dev/graph/container/graph_container.tscn" id="4_3n881"]
 
 [node name="GraphPlotter" type="Control"]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_vtf27")
+
+[node name="CurrentContainer" parent="." instance=ExtResource("3_fem5t")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_right = 0.0
+anchor_bottom = 0.5
+offset_top = -38.5
+offset_right = 140.0
+offset_bottom = 38.5
+grow_horizontal = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2

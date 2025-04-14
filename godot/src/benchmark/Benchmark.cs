@@ -8,9 +8,13 @@ public partial class Benchmark : Node3D
 	[Export] PackedScene[] scenes;
 	[Export] bool saveResults = true;
 	[Export] bool saveFullResults = false;
+	[Export] bool showCurrentValues = true;
 
 	[ExportCategory("Graph (Impacts performance)")]
 	[Export] bool plotGraph = false;
+
+	bool showingCurrentValues = false;
+	bool showingGraphs = false;
 
 	GraphPlotter plot;
 
@@ -36,7 +40,26 @@ public partial class Benchmark : Node3D
 	public override void _Ready()
 	{
 		this.plot = GetNode<GraphPlotter>("GraphPlotter");
-		if(!plotGraph) plot.Visible = false;
+
+		if (plotGraph)
+		{
+			plot.ShowAllGraphs();
+			plot.HideCurrentValues();
+			showingGraphs = true;
+		}
+
+		else if (showCurrentValues)
+		{
+			plot.HideAllGraphs();
+			plot.ShowCurrentValues();
+			showingCurrentValues = true;
+		}
+
+		else
+		{
+			plot.HideAllGraphs();
+			plot.HideCurrentValues();
+		}
 
 		string absResultPath = ProjectSettings.GlobalizePath(_resultPath);
 		filePath = absResultPath + $"/{time}.txt";
@@ -76,7 +99,8 @@ public partial class Benchmark : Node3D
 			};
 
 			result[currentSceneIndex].Add(benchmarkDatapoint);
-			if(plotGraph) plot.AddDataPoint(benchmarkDatapoint);
+			if(showingGraphs) plot.AddDataPoint(benchmarkDatapoint);
+			if(showingCurrentValues) plot.UpdateCurrentData(benchmarkDatapoint);
 		}
 
 		if(currentTime > downtime && !benchmarkSetupDone)
