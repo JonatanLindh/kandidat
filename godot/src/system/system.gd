@@ -62,6 +62,11 @@ func randomPlanetMass(r):
 func randomPlanetRadius(r):
 	return r.randf_range(5,20);
 
+# Creates a unique seed for every planet in a system based on the seed for that solar system
+func generatePlanetSeed(systemSeed: int, position: Vector3):
+	var seedGen = SeedGenerator.new();
+	return seedGen.GenerateSeed(systemSeed, position);
+
 
 func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpeed= 0):
 	#Planet stuff
@@ -82,6 +87,11 @@ func generatePlanet(r,planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSp
 	planetInstance.velocity = Vector3(cos(orbitAngle)*orbitSpeed,0,-sin(orbitAngle)*orbitSpeed)
 	planetInstance.position = Vector3(sin(orbitAngle)*orbitRadius,0,cos(orbitAngle)*orbitRadius)
 	planetInstance._radius = planetRadius
+	
+	# Create a new seed for each planet to be used when generating marching cubes planet
+	var planetSeed = generatePlanetSeed(r.seed, planetInstance.position);
+	planetInstance._seed = planetSeed;
+	
 	# NEEDED FOR ATMOSPHERE, IF MULTIPLE SUN SOLAR SYSTEM, MAYBE USE ONE OF THE SUNS AS THE MAIN LIGHT SOURCE?
 	planetInstance._sunPosition = SUN.global_position
 	planetInstance.name = "Planet" + str(randomID);
