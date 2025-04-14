@@ -95,11 +95,10 @@ public partial class McSpawner : Node
 			_meshInstance3D.MaterialOverride = GeneratePlanetShader();
 
 			this.AddChild(_meshInstance3D);
-			var grass = GD.Load("res://src/bodies/planet/vegetation/grass/grass.tscn") as PackedScene;
-			var grassInstance = grass?.Instantiate();
-			grassInstance?.Set("TargetMesh", _meshInstance3D);
-			grassInstance?.Set("Density", 500f);
-			AddChild(grassInstance);
+
+			var grass = new NewGrass();
+			var meshSurface = _meshInstance3D.Mesh.SurfaceGetArrays(0);
+			AddChild(grass.PopulateMesh(meshSurface, 500000));
 		}
 	}
 

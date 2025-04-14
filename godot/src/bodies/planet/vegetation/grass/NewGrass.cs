@@ -30,8 +30,7 @@ public class NewGrass
 		_material = new ShaderMaterial();
 		_material.Shader = shader;
 	}
-
-
+	
 	public MultiMeshInstance3D PopulateMesh(Godot.Collections.Array meshData, int totalInstanceCount = 5000)
 	{
 		var vertices = meshData[(int)Mesh.ArrayType.Vertex].AsVector3Array();
@@ -40,6 +39,7 @@ public class NewGrass
 		MultiMesh multiMesh = new MultiMesh();
 		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
 		multiMesh.Mesh = _mesh;
+		multiMesh.UseCustomData = true; // Enable custom data
 		
 		// Set the total instance count
 		multiMesh.InstanceCount = totalInstanceCount;
@@ -105,6 +105,18 @@ public class NewGrass
 				transform.Basis = new Basis(xVector, upVector, zVector);
 				transform.Origin = pos;
 
+				// Add random value as custom data (stable across movements)
+				float randomValue1 = (float)GD.RandRange(0, 1000) / 1000f;
+				float randomValue2 = (float)GD.RandRange(0, 1000) / 1000f;
+				float randomValue3 = (float)GD.RandRange(0, 1000) / 1000f;
+				multiMesh.SetInstanceCustomData(instanceIndex, 
+					new Color
+						(
+							randomValue1, 
+							randomValue2,
+							randomValue3, 
+							0)
+					);
 				multiMesh.SetInstanceTransform(instanceIndex, transform);
 				instanceIndex++;
 			}

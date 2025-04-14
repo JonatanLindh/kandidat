@@ -6,6 +6,7 @@ render_mode cull_disabled, ensure_correct_normals;
 group_uniforms GrassColor;
 uniform vec3 base_color : source_color = vec3(0.05,0.2,0.01);
 uniform vec3 tip_color : source_color = vec3(0.5,0.5,0.1);
+uniform float grid_size = 50.0; // Size of the repeating grid
 
 // Source: https://www.shadertoy.com/view/Xt3cDn
 float hash12(vec2 x) {
@@ -37,11 +38,19 @@ float ease_out_quartic(float x) {
 	return 1.0 - b*b;
 }
 
+
+
 void vertex() {
 	// Called for every vertex the material is visible on.
 	float height_percent = 1.0 - UV.y;
-	float hash0 = hash12(NODE_POSITION_WORLD.xz);
-	float hash1 = hash12(-NODE_POSITION_WORLD.zx);
+	
+	
+	// Transform to mesh local space (this will be stable regardless of mesh movement)
+	vec3 local_pos = (inverse(MODEL_MATRIX) * vec4(NODE_POSITION_WORLD, 1.0)).xyz;
+	
+    // Use INSTANCE_CUSTOM.x instead of hash based on position
+    float hash0 = hash12(INSTANCE_CUSTOM.xz);
+	float hash1 = hash12(-INSTANCE_CUSTOM.xz);
 	
 	VERTEX.x *= mix(0.6, 1.0, hash1);
 	
@@ -69,6 +78,10 @@ void fragment() {
 	ALBEDO *= mix(0.1, 1.0, height_factor*height_factor);
 	ROUGHNESS = mix(1.0, 0.4, ease_out_quartic(height_factor));
 	ANISOTROPY = 0.85;
+	
+	if(!FRONT_FACING){
+		NORMAL = -NORMAL;
+	}
 }
 
 //void light() {
