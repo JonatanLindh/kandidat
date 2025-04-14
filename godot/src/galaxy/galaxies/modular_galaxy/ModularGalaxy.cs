@@ -23,6 +23,9 @@ public partial class ModularGalaxy : Node3D
 		if (seed == 0) seed = (uint)new Random().Next();
 		GD.Seed(seed);
 
+		// Apply the galaxy axis rotation
+		this.Rotate(distribution.axis.Normalized(), Mathf.Pi / 2);
+
 		_stars = Generate();
 		DrawStars(_stars);
 	}
@@ -122,7 +125,6 @@ public partial class ModularGalaxy : Node3D
 
 		Vector3 cross = startPos.Cross(Vector3.Up).Normalized();
 		Vector3 offset = cross * rotationStrength;
-
 		return offset;
 	}
 

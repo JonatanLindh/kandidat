@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_hqmj6")
+axis = Vector3(0, 1, 0)
 starCount = 5000
 galaxySize = 800
 gravity = 40.0
