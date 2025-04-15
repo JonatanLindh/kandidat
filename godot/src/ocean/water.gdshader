@@ -18,8 +18,15 @@ uniform float speed_bump_map2 = 0.01;
 
 uniform sampler2D depth_texture : hint_depth_texture;
 
+varying vec3 world_position;
+
 void vertex() {
 	// Called for every vertex the material is visible on.
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float height = texture(bump_map1, world_position.xz / 5.0 + TIME * 0.003).r;
+//	float wave = sin(world_position.x + TIME * 0.01) * 1.0;
+
+	VERTEX += NORMAL * height * 2.0;
 }
 
 void fragment() {
@@ -49,22 +56,23 @@ void fragment() {
 	NORMAL_MAP = water_surface;
 	
 	vec3 distance_to_center = VERTEX;
-	float depth = texture(depth_texture, SCREEN_UV).x;
+	//float depth = texture(depth_texture, SCREEN_UV).x;
 	
-	/*
- 	float depth = texture(depth_texture, SCREEN_UV).x;
+
+ 	float depth = texture(depth_texture, SCREEN_UV).r;
  	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth);
   	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
-  	view.xyz /= view.w;
+  	view.xyz /= view.w; // perspective division - go from homogeneous coordinates
   	float linear_depth = -view.z;
+	float depth_smooth = smoothstep(view.z + 0.5, view.z, VERTEX.z);
 
   	vec4 world = INV_VIEW_MATRIX * INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
-  	vec3 world_position = world.xyz / world.w;*/
+  	vec3 worldPos = world.xyz / world.w;
 
 	float length_surface_to_water = max(length(distance_to_center), depth) - min(length(distance_to_center), depth);
 	vec3 water_color = mix(highlight_color, color, length_surface_to_water / length(distance_to_center));
-	ALBEDO = water_color;
-	ALPHA = bump1_color.r;
+	ALBEDO = mix(color, highlight_color, depth_smooth);
+	//ALPHA = bump1_color.r;
 	METALLIC = metal;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;

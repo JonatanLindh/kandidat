@@ -55,6 +55,7 @@ shader_parameter/speed_bump_map1 = 0.005
 shader_parameter/speed_bump_map2 = 0.005
 
 [node name="WaterMesh" type="MeshInstance3D"]
+cast_shadow = 0
 mesh = SubResource("SphereMesh_hsljn")
 surface_material_override/0 = SubResource("ShaderMaterial_na11i")
 script = ExtResource("2_3yyav")
