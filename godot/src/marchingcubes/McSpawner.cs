@@ -1,7 +1,5 @@
 using Godot;
 using System;
-using System.Numerics;
-using Vector3 = Godot.Vector3;
 
 
 /// <summary>
@@ -10,17 +8,16 @@ using Vector3 = Godot.Vector3;
 [Tool]
 public partial class McSpawner : Node
 {
-	private bool _reload;
-	[Export]
-	public bool reload
-	{
-		get => _reload;
-		set
-		{
-			_reload = !value;
-			//OnResourceSet();
-		}
-	}
+    private bool _reload;
+    [Export]
+    public bool reload
+    {
+        get => _reload;
+        set
+        {
+            _reload = !value;
+        }
+    }
 
 	private CelestialBodyNoise celestialBody;
 	private Node cb;
@@ -30,7 +27,6 @@ public partial class McSpawner : Node
 		set
 		{
 			cb = value;
-			// OnResourceSet(); TODO THIS MAKES THE SpawnMesh() FUNCTION RUN TWICE!
 		}
 	}
 
@@ -95,39 +91,39 @@ public partial class McSpawner : Node
 			_temporaryMeshInstance.QueueFree();
 
 		celestialBody = CelestialBody as CelestialBodyNoise;
-		
-		if(celestialBody != null)
+		if(celestialBody == null)
 		{
-			var planetRadius = celestialBody.GetRadius();
+			GD.PrintErr("celestialBody is null");
+		}
+		var planetRadius = celestialBody.GetRadius();
 
-			_meshInstance3D = new MeshInstance3D();
+		_meshInstance3D = new MeshInstance3D();
 			
 			// Set up a temporary mesh instance that will disappear after the mesh is generated
-			if (_useTemp)
+		if (_useTemp)
+		{
+			_temporaryMeshInstance = new MeshInstance3D();
+			_temporaryMeshInstance.Mesh = new SphereMesh
 			{
-				_temporaryMeshInstance = new MeshInstance3D();
-				_temporaryMeshInstance.Mesh = new SphereMesh
-				{
-					Radius = planetRadius,
-					Height = planetRadius * 2
-				};
-				_temporaryMeshInstance.MaterialOverride = GeneratePlanetShader(planetRadius, planetRadius);
-				AddChild(_temporaryMeshInstance);
-			}
-			
-			// Send the request to the MarchingCubeDispatch
-			MarchingCubeRequest cubeRequest = new MarchingCubeRequest
-			{
-				PlanetDataPoints = celestialBody,
-				Scale = 1,
-				Offset = Vector3.Zero,
-				Root = this,
-				CustomMeshInstance = _meshInstance3D,
-				TempNode = _useTemp ? _temporaryMeshInstance : null,
-				GeneratePlanetShader = GeneratePlanetShader
+				Radius = planetRadius,
+				Height = planetRadius * 2
 			};
-			MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
+			_temporaryMeshInstance.MaterialOverride = GeneratePlanetShader(planetRadius, planetRadius);
+			AddChild(_temporaryMeshInstance);
 		}
+			
+		// Send the request to the MarchingCubeDispatch
+		MarchingCubeRequest cubeRequest = new MarchingCubeRequest
+		{
+			PlanetDataPoints = celestialBody,
+			Scale = 1,
+			Offset = Vector3.Zero,
+			Root = this,
+			CustomMeshInstance = _meshInstance3D,
+			TempNode = _useTemp ? _temporaryMeshInstance : null,
+			GeneratePlanetShader = GeneratePlanetShader
+		};
+		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 	}
 
 	// Old test method for generating datapoints
