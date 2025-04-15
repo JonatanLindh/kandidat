@@ -16,7 +16,7 @@ public class TrueStarAdapter
 	/// </summary>
 	/// <param name="stars">An array of TrueStar objects to be converted.</param>
 	/// <returns>A dictionary containing the physics data of the stars.</returns>
-	public Godot.Collections.Dictionary StarsToPhysicsData(TrueStar[] stars)
+	public Godot.Collections.Dictionary StarsToPhysicsData(PhysicsStar[] stars)
 	{
 		Vector3[] position = new Vector3[stars.Length];
 		Vector3[] velocity = new Vector3[stars.Length];

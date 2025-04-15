@@ -5,7 +5,7 @@ using System;
 public partial class TrueGalaxy : Node3D
 {
 	DiscGalaxy discGalaxy;
-	TrueStar[] stars;
+	PhysicsStar[] stars;
 	bool starsInitialized = false;
 
 	TrueStarAdapter starAdapter = new TrueStarAdapter();
