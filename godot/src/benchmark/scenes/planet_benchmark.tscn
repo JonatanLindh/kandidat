@@ -21,6 +21,7 @@ movePivot = NodePath("OrbitPivot/PlanetPivot/MovePivot")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 0, 0)
 
 [node name="PlanetMarchingCube" parent="OrbitPivot/PlanetPivot" instance=ExtResource("2_v08pw")]
+Seed = 89
 
 [node name="MovePivot" type="Node3D" parent="OrbitPivot/PlanetPivot"]
 transform = Transform3D(0.831819, 0, 0.555048, 0, 1, 0, -0.555048, 0, 0.831819, 0, 0.0886338, 0)
