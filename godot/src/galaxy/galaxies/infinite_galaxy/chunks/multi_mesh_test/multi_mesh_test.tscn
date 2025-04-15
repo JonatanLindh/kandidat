@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3 uid="uid://dcmbkjqmshwv6"]
+
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="1_0b7xp"]
+[ext_resource type="Script" path="res://src/galaxy/galaxies/infinite_galaxy/chunks/multi_mesh_test/MultiMeshTest.cs" id="1_mtq7t"]
+[ext_resource type="SphereMesh" uid="uid://briv1nx3v7fnv" path="res://src/galaxy/galaxies/_resources/star/star_mesh.tres" id="3_s1ybe"]
+
+[sub_resource type="MultiMesh" id="MultiMesh_kgjlt"]
+transform_format = 1
+mesh = ExtResource("3_s1ybe")
+
+[node name="MultiMeshTest" type="Node3D"]
+
+[node name="MultiMeshInstance3D" type="MultiMeshInstance3D" parent="."]
+multimesh = SubResource("MultiMesh_kgjlt")
+script = ExtResource("1_mtq7t")
+MeshResource = ExtResource("3_s1ybe")
+
+[node name="Player" parent="." instance=ExtResource("1_0b7xp")]

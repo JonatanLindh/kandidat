@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public partial class InfiniteGalaxy : Node3D
 {
-	[Export] PackedScene starScene;
+	[Export] Mesh starMesh;
 	[Export] FastNoiseLite noise;
 	[Export] Node3D player;
 
@@ -29,10 +29,11 @@ public partial class InfiniteGalaxy : Node3D
 	public override void _Process(double delta)
 	{
 		if (player == null)
-			{
-				GD.PrintErr("Player object is null.");
-				return;
-			}
+		{
+			GD.PrintErr("Player object is null.");
+			return;
+		}
+
 		ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
 
 		for (int x = -viewDistance; x <= viewDistance; x++)
@@ -58,7 +59,7 @@ public partial class InfiniteGalaxy : Node3D
 		StarChunk chunk = (StarChunk) starChunk.Instantiate();
 		chunk.Name = "Chunk (" + pos.x + ", " + pos.y + ", " + pos.z + ")";
 
-		chunk.starScene = starScene;
+		chunk.starMesh = starMesh;
 		chunk.galaxyNoise = noise;
 
 		chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos);
@@ -71,7 +72,7 @@ public partial class InfiniteGalaxy : Node3D
 	{
 		foreach (StarChunk c in starChunks)
 		{
-			if (c.chunkPos.Equals(chunk))
+			if (c.pos.Equals(chunk))
 			{
 				return true;
 			}
@@ -85,14 +86,24 @@ public partial class InfiniteGalaxy : Node3D
 		for(int i = starChunks.Count - 1; i >= 0; i--)
 		{
 			StarChunk chunk = starChunks[i];
-			if (Math.Abs(chunk.chunkPos.x - playerChunk.x) > viewDistance || 
-				Math.Abs(chunk.chunkPos.y - playerChunk.y) > viewDistance || 
-				Math.Abs(chunk.chunkPos.z - playerChunk.z) > viewDistance)
+			if (Math.Abs(chunk.pos.x - playerChunk.x) > viewDistance || 
+				Math.Abs(chunk.pos.y - playerChunk.y) > viewDistance || 
+				Math.Abs(chunk.pos.z - playerChunk.z) > viewDistance)
 			{
 				starChunks.RemoveAt(i);
 				chunk.QueueFree();
 			}
 		}
+	}
+
+	public IStarChunkData[] GetGeneratedChunks()
+	{
+		return starChunks.ToArray();
+	}
+
+	public uint GetSeed()
+	{
+		return seed;
 	}
 
 	public void SetPlayer(Node3D player)

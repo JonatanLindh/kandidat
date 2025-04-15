@@ -34,4 +34,6 @@ grow_vertical = 0
 text = "Toggle Trajectories"
 script = ExtResource("4_btp4s")
 
+[node name="OctreeVisualizer" type="OctreeVisualizer" parent="."]
+
 [connection signal="toggled" from="CheckButton" to="CheckButton" method="_on_toggled"]

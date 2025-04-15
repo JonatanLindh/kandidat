@@ -19,6 +19,9 @@ func _on_star_clicked(newSeed):
 	lastGalaxyMapPosition = player.position
 	goToSystem()
 	# Handle the seed as needed
+	
+func getSystemSeed():
+	return currentSeed;
 
 func getSystemRadius():
 	return system.getSystemRadius();

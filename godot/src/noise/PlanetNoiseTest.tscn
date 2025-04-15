@@ -12,6 +12,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 32, 256)
 
 [node name="BasicPlanet" parent="." instance=ExtResource("1_ycu4v")]
 seed = 1761808417
+RandomizeSeed = false
 
 [node name="RandomPlanet" parent="." instance=ExtResource("4_hnbm4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.305, 0, 0)

@@ -3,7 +3,8 @@ using System;
 
 public partial class UISelectableStar : CanvasLayer
 {
-	SelectableStar star;
+	Star star;
+
 	Node3D player;
 	[Signal] public delegate void ExploreStarEventHandler(int seed);
 	
@@ -212,14 +213,14 @@ public partial class UISelectableStar : CanvasLayer
 	/// Sets the star to be displayed by the UI.
 	/// </summary>
 	/// <param name="star"></param>
-	public void SetStar(SelectableStar star)
+	public void SetStar(Star star)
 	{
 		this.star = star;
-		this.targetPosition = star.Position;
+		this.targetPosition = star.transform.Origin;
 
-		starNameLabel.Text = "Star"; // todo, set actual name
-		starPosLabel.Text = star.Position.ToString("F2");
-		starSeed.Text = star.GetSeed().ToString();
+		starNameLabel.Text = star.name;
+		starPosLabel.Text = star.transform.Origin.ToString("F2");
+		starSeed.Text = star.seed.ToString();
 
 		Show();
 	}
@@ -246,7 +247,8 @@ public partial class UISelectableStar : CanvasLayer
 	public void OnVisitButtonPressed()
 	{
 		if (star != null) {
-			EmitSignal(nameof(ExploreStar), this.star.GetSeed());
+			EmitSignal(nameof(ExploreStar), this.star.seed);
+			GD.Print("Emits signal to enter solar system, of seed " + this.star.seed);
 		}
 	}
 

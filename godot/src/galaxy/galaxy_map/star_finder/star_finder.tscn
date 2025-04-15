@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://byngp3rjfc0jm"]
+
+[ext_resource type="Script" path="res://src/galaxy/galaxy_map/star_finder/StarFinder.cs" id="1_yi3ww"]
+
+[node name="StarFinder" type="Node"]
+script = ExtResource("1_yi3ww")

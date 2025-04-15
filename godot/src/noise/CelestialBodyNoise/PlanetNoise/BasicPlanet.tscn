@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cnikwq6bgmy1k" path="res://src/noise/CelestialBodyNoise/PlanetNoise/CelestialBodyInput.cs" id="1_7ds2o"]
 [ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="1_au8v0"]
-[ext_resource type="Script" uid="uid://nqgu7rpdrhhf" path="res://src/noise/CelestialBodyNoise/PlanetNoise/PlanetNoise.cs" id="2_fsbsu"]
+[ext_resource type="Script" uid="uid://3wf1c75vaqkp" path="res://src/noise/CelestialBodyNoise/PlanetNoise/BasicPlanet.cs" id="3_2amqi"]
 
 [node name="BasicPlanet" type="Node3D"]
 script = ExtResource("1_7ds2o")
@@ -15,11 +15,10 @@ Frequency = 2.0
 Amplitude = 20.0
 Lacunarity = 1.5
 Persistence = 0.2
-seed = 1557559149
-RandomizeSeed = true
+seed = 1558686223
 
 [node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("1_au8v0")]
-CelestialBody = NodePath("../PlanetNoise")
+CelestialBody = NodePath("../BasicPlanet")
 
-[node name="PlanetNoise" type="Node" parent="."]
-script = ExtResource("2_fsbsu")
+[node name="BasicPlanet" type="Node" parent="."]
+script = ExtResource("3_2amqi")
