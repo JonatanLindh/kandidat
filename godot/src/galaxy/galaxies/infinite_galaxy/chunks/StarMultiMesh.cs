@@ -6,6 +6,11 @@ public partial class StarMultiMesh : MultiMeshInstance3D
 {
 	MultiMesh multiMesh = new MultiMesh();
 
+	/// <summary>
+	/// Initalizes the multimesh and draws the stars.
+	/// </summary>
+	/// <param name="positions"></param>
+	/// <param name="mesh"></param>
 	public void DrawStars(Vector3[] positions, Mesh mesh)
 	{
 		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
@@ -20,11 +25,16 @@ public partial class StarMultiMesh : MultiMeshInstance3D
 		}
 	}
 
+	/// <summary>
+	/// <para>Redraws the stars in the multimesh.</para>
+	/// Make sure to initialize the multimesh with <code>DrawStars()</code> before calling this method.
+	/// </summary>
+	/// <param name="stars"></param>
 	public void RedrawStars(Transform3D[] stars)
 	{
 		if(multiMesh == null)
 		{
-			GD.PrintErr("MultiMesh is not initialized.");
+			GD.PrintErr("StarMultimesh: MultiMesh is not initialized.");
 			return;
 		}
 
