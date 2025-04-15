@@ -1,3 +1,4 @@
+// Heavily based on https://godotshaders.com/shader/3d-sun-shader/ by DeveloperOats
 shader_type spatial;
 render_mode specular_schlick_ggx, world_vertex_coords;
 
