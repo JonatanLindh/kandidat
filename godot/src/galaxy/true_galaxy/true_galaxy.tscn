@@ -11,3 +11,5 @@ script = ExtResource("1_sjnac")
 unique_name_in_owner = true
 
 [node name="GalaxyPhysicsBridge" parent="." instance=ExtResource("3_v8p2y")]
+
+[node name="GalaxyController" type="GalaxyController" parent="."]

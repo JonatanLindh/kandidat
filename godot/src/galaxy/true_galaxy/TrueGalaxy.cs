@@ -43,10 +43,9 @@ public partial class TrueGalaxy : Node3D
 	}
 
 	/// <summary>
-	/// Redraws the stars in the multimesh.
-	/// Updates star transform and velocity.
+	/// Redraws the stars in the multimesh. Updates star transform taking into account the velocity.
 	/// </summary>
-	private void UpdateStars(Godot.Collections.Dictionary newStars)
+	public void ApplyVelocities(Vector3[] newVelocities)
 	{
 		if (!starsInitialized)
 		{
@@ -54,24 +53,24 @@ public partial class TrueGalaxy : Node3D
 			return;
 		}
 
-		if (newStars.Count != stars.Length)
+		if (newVelocities.Length != stars.Length)
 		{
 			GD.PrintErr("TrueGalaxy: New transform array length does not match the existing stars array length.");
 			return;
 		}
 
-		Godot.Collections.Array<Transform3D> transformArray = newStars["transform"].AsGodotArray<Transform3D>();
-		Godot.Collections.Array<Vector3> velocityArray = newStars["velocity"].AsGodotArray<Vector3>();
-
-		Transform3D[] transformArrayConverted = new Transform3D[transformArray.Count];
+		Transform3D[] newTransforms = new Transform3D[newVelocities.Length];
 		for (int i = 0; i < stars.Length; i++)
 		{
-			stars[i].transform = transformArray[i];
-			stars[i].velocity = velocityArray[i];
+			Transform3D newTransform = new Transform3D(
+				stars[i].transform.Basis,
+				stars[i].transform.Origin + newVelocities[i]
+			);
 
-			transformArrayConverted[i] = stars[i].transform;
+			newTransforms[i] = newTransform;
+			stars[i].transform = newTransform;
 		}
 
-		discGalaxy.RedrawStars(transformArrayConverted);
+		discGalaxy.RedrawStars(newTransforms);
 	}
 }
