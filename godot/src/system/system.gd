@@ -94,7 +94,7 @@ func generatePlanet(r, planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitS
 	if (orbitSpeed == 0):
 		orbitSpeed = orbitSpeedFromRadius(orbitRadius, SUN.mass);
 		
-	var planetInstance = spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle)
+	var planetInstance = spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle, r)
 	return planetInstance
 
 func generateMoon(r, planetInstance, orbitRadius):
@@ -137,14 +137,10 @@ func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primar
 	return bodyInstance;
 
 
-func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle):
+func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle, r):
 	var randomID = rand.randi_range(100000, 999999);
 	var planetInstance = PLANET_MARCHING_CUBE_SCENE.instantiate();
 	
-	# Create a new seed for each planet to be used when generating marching cubes planet
-	var planetSeed = generatePlanetSeed(r.seed, planetInstance.position);
-	planetInstance._seed = planetSeed;
-
 	planetInstance.mass = planetMass;
 	planetInstance.velocity = Vector3(cos(orbitAngle) * orbitSpeed, 0, -sin(orbitAngle) * orbitSpeed)
 	planetInstance.position = Vector3(sin(orbitAngle) * orbitRadius, 0, cos(orbitAngle) * orbitRadius)
@@ -152,6 +148,10 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	planetInstance.SunPosition = Vector3.ZERO;
 	planetInstance.name = "Body" + str(randomID);
 	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
+	
+	# Create a new seed for each planet to be used when generating marching cubes planet
+	planetInstance._seed = generatePlanetSeed(r.seed, planetInstance.position);
+	
 	$GravityController.add_child(planetInstance);
 	planetInstance.owner = self
 	bodies.append(randomID);
