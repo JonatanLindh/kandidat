@@ -45,7 +45,7 @@ public partial class TrueGalaxy : Node3D
 	/// <summary>
 	/// Redraws the stars in the multimesh. Updates star transform taking into account the velocity.
 	/// </summary>
-	private void ApplyVelocities(Vector3[] newVelocities)
+	public void ApplyVelocities(Vector3[] newVelocities)
 	{
 		if (!starsInitialized)
 		{
