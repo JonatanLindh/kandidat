@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://banvyfc3vuq6t"]
+
+[ext_resource type="Script" uid="uid://r87jfre8pihr" path="res://src/noise/CelestialBodyNoise/PlanetNoise/DeterministicRandomPlanet.cs" id="1_71g84"]
+[ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="1_wi2un"]
+
+[node name="DeterministicRandomPlanet" type="Node3D"]
+script = ExtResource("1_71g84")
+radius = 32
+
+[node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("1_wi2un")]
+CelestialBody = NodePath("..")

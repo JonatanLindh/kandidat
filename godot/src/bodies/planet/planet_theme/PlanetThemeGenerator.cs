@@ -34,7 +34,13 @@ public partial class PlanetThemeGenerator : Resource
     private Gradient gradient = new Gradient();
     private Vector3 atmosphereWavelengths;
 
-    public PlanetThemeGenerator() {
+    public PlanetThemeGenerator()
+    {
+        CallDeferred(nameof(Initialize));
+    }
+    private void Initialize()
+    {
+        // Called when the resource is initialized
         LoadThemeSets();
         GenerateTheme();
     }
