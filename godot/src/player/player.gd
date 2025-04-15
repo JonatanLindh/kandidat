@@ -98,7 +98,6 @@ func in_gravity_field_movement(delta : float):
 	
 	if Input.is_action_just_pressed("fly"):
 		flying = not flying
-		velocity.y = 0 if flying else get_gravity().y * delta * current_speed
 
 	if flying:
 		handle_flying()
