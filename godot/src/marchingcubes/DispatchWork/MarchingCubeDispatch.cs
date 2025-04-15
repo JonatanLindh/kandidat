@@ -39,7 +39,7 @@ public sealed partial class MarchingCubeDispatch : Node
 	}
 
 	/// <summary>
-	/// Initializes the `MarchingCubeDispatch` instance, setting up the necessary resources
+	/// Initializes the <see cref="MarchingCubeDispatch"/> instance, setting up the necessary resources
 	/// such as the marching cube generator and the thread for processing mesh generation tasks.
 	/// </summary>
 	private void Initialize()
@@ -57,7 +57,7 @@ public sealed partial class MarchingCubeDispatch : Node
 
 
 	/// <summary>
-	/// Cleans up resources and resets the state of the `MarchingCubeDispatch` instance.
+	/// Cleans up resources and resets the state of the <see cref="MarchingCubeDispatch"/>  instance.
 	/// This includes clearing the task queue, waiting for worker threads to complete,
 	/// and resetting the worker thread collection.
 	/// </summary>
