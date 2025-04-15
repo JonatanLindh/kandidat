@@ -1,0 +1,20 @@
+[gd_resource type="StandardMaterial3D" load_steps=6 format=3 uid="uid://dbnkenooccm7r"]
+
+[ext_resource type="Texture2D" uid="uid://tb3c8dlyesaf" path="res://src/bodies/planet/vegetation/tree/assets/textures/Cluster_albedo.png" id="1_lvmtt"]
+[ext_resource type="Texture2D" uid="uid://k46d4loxkvxg" path="res://src/bodies/planet/vegetation/tree/assets/textures/Cluster_AO.png" id="2_6yjqb"]
+[ext_resource type="Texture2D" uid="uid://bip4a3epsljv1" path="res://src/bodies/planet/vegetation/tree/assets/textures/Cluster_Opacity.png" id="3_6yjqb"]
+[ext_resource type="Texture2D" uid="uid://oteum6c3dd8n" path="res://src/bodies/planet/vegetation/tree/assets/textures/Cluster_Normal.png" id="3_7nbwx"]
+[ext_resource type="Texture2D" uid="uid://ddk7kh2y25wnh" path="res://src/bodies/planet/vegetation/tree/assets/textures/Cluster_Roughness.jpg" id="4_tvr0o"]
+
+[resource]
+resource_name = "Cluster_Mat"
+vertex_color_use_as_albedo = true
+roughness_texture = ExtResource("4_tvr0o")
+emission_enabled = true
+normal_enabled = true
+ao_enabled = true
+ao_texture = ExtResource("2_6yjqb")
+detail_enabled = true
+detail_mask = ExtResource("3_6yjqb")
+detail_albedo = ExtResource("1_lvmtt")
+detail_normal = ExtResource("3_7nbwx")

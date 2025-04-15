@@ -6,7 +6,7 @@ using System;
 /// Spawns a Marching Cube mesh in the scene without chunking
 /// </summary>
 [Tool]
-public partial class McSpawner : Node
+public partial class McSpawner : Node3D
 {
 	private bool _reload;
 	[Export]
@@ -99,6 +99,10 @@ public partial class McSpawner : Node
 			var grass = new NewGrass();
 			var meshSurface = _meshInstance3D.Mesh.SurfaceGetArrays(0);
 			AddChild(grass.PopulateMesh(meshSurface, 500000));
+			
+			var genTree = new GenTree(50, 100f);
+			var aabb = _meshInstance3D.GetAabb();
+			AddChild(genTree.SpawnTrees(aabb, GetWorld3D().DirectSpaceState));
 		}
 	}
 

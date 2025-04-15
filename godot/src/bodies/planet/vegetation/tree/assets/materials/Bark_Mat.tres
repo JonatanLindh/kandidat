@@ -1,0 +1,18 @@
+[gd_resource type="StandardMaterial3D" load_steps=5 format=3 uid="uid://bq3msfhujt6qc"]
+
+[ext_resource type="Texture2D" uid="uid://bkmkvptbik2ev" path="res://src/bodies/planet/vegetation/tree/assets/textures/bark_basecolor.png" id="1_pghrn"]
+[ext_resource type="Texture2D" uid="uid://b2crvyl81gj1t" path="res://src/bodies/planet/vegetation/tree/assets/textures/bark_ambientocclusion.png" id="2_ilpa5"]
+[ext_resource type="Texture2D" uid="uid://bw18te5wrlewh" path="res://src/bodies/planet/vegetation/tree/assets/textures/bark_normal.png" id="2_qgxd2"]
+[ext_resource type="Texture2D" uid="uid://tpfuydgvv3s5" path="res://src/bodies/planet/vegetation/tree/assets/textures/bark_roughness.png" id="3_qgxd2"]
+
+[resource]
+resource_name = "Bark_Mat"
+albedo_texture = ExtResource("1_pghrn")
+roughness_texture = ExtResource("3_qgxd2")
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 0.0
+normal_enabled = true
+normal_texture = ExtResource("2_qgxd2")
+ao_enabled = true
+ao_texture = ExtResource("2_ilpa5")
