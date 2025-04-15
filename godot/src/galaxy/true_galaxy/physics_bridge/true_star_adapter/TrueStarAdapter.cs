@@ -4,10 +4,18 @@ using System;
 public class TrueStarAdapter
 {
 	/// <summary>
-	/// Converts the stars to a dictionary format for physics data.
+	/// <para>Converts the stars to a dictionary format for physics data.</para>
+	/// The dictionary contains the following:
+	/// <code>
+	/// Dictionary dict = New Dictionary {
+	///		{"position", Vector3[]},
+	///		{"velocity", Vector3[]},
+	///		{"mass", float[]}
+	/// }
+	/// </code>
 	/// </summary>
-	/// <param name="stars"></param>
-	/// <returns></returns>
+	/// <param name="stars">An array of TrueStar objects to be converted.</param>
+	/// <returns>A dictionary containing the physics data of the stars.</returns>
 	public Godot.Collections.Dictionary StarsToPhysicsData(TrueStar[] stars)
 	{
 		Vector3[] position = new Vector3[stars.Length];
