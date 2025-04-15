@@ -9,8 +9,6 @@ public partial class GalaxyMapBenchmark : BenchmarkScene
 	[Export] float speed = 1500.0f;
 	[Export] uint seed = 1234;
 
-	float currentTime = 0.0f;
-
 	public override void BenchmarkReady()
 	{
 		InfiniteGalaxy galaxy = galaxyMap.GetNode<InfiniteGalaxy>("InfiniteGalaxy");
@@ -21,6 +19,5 @@ public partial class GalaxyMapBenchmark : BenchmarkScene
 	public override void BenchmarkProcess(double delta)
 	{
 		player.Position += Vector3.Forward * speed * (float)delta;
-		currentTime += (float)delta;
 	}
 }

@@ -102,7 +102,7 @@ func in_gravity_field_movement(delta : float):
 	
 	if Input.is_action_just_pressed("fly"):
 		flying = not flying
-	
+
 	if flying:
 		handle_flying()
 		if Input.is_action_pressed("speedup"):
