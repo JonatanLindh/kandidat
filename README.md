@@ -6,4 +6,4 @@
 2. Install nightly with: `rustup toolchain install nightly`
 3. Build
    1. `cd rust_gdext`
-   2. `cargo build`
+   2. `cargo build --release`
