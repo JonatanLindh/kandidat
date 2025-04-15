@@ -78,6 +78,11 @@ public partial class RandomCelestialBodyNoise : Node, CelestialBodyNoise, Modifi
     {
         modifiableBody.SetRadius(radius);
     }
+    
+    public Vector3 GetScale()
+    {
+        return celestialBodyNoise.GetScale();
+    }
 
     public void SetWidth(int width)
     {

@@ -16,4 +16,6 @@ public interface CelestialBodyNoise
     /// </summary>
     /// <returns>The radius</returns>
     int GetRadius();
+
+    Vector3 GetScale();
 }

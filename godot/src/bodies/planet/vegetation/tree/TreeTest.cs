@@ -23,6 +23,6 @@ public partial class TreeTest : Node3D
 		_parentNode = new Node3D();
 		AddChild(_parentNode);
 		Aabb bounds = MeshInstance.GetAabb();
-		AddChild(genTree.SpawnTrees(bounds, GetWorld3D().DirectSpaceState));
+		//AddChild(genTree.SpawnTrees(bounds, GetWorld3D().DirectSpaceState));
 	}
 }

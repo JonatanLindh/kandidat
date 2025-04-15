@@ -15,12 +15,16 @@ public class GenTree
 		_scale = scale;
 	}
 	
-	public MultiMeshInstance3D SpawnTrees(Aabb aabb, PhysicsDirectSpaceState3D spaceState)
+	public MultiMeshInstance3D SpawnTrees(PhysicsDirectSpaceState3D spaceState, Aabb aabb, Vector3 offset = default, Vector3 size = default)
 	{
+		
+		
 		MultiMesh multiMesh = new MultiMesh();
 		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
 		multiMesh.Mesh = _treeMesh;
 		multiMesh.InstanceCount = 6 * _amountPerSide;
+
+		int amountHit = 0;
 
 		var corners = new[] {
 			new Vector3(aabb.Position.X, aabb.Position.Y, aabb.Position.Z),
@@ -63,11 +67,10 @@ public class GenTree
 		int j = 0;
 		foreach (var face in aabbFaces)
 		{
-			var v1 = face[0];
-			var v2 = face[1];
-			var v3 = face[2];
-			var v4 = face[3];
-
+			var v1 = (face[0] * size) + offset;
+			var v2 = (face[1] * size) + offset; 
+			var v3 = (face[2] * size) + offset; 
+			var v4 = (face[3] * size) + offset; 
 			
 			for (int k = 0; k < _amountPerSide; k++)
 			{
@@ -76,11 +79,10 @@ public class GenTree
 				float v = (float)GD.RandRange(0.0, 1.0);
 				// Bilinear interpolation
 				Vector3 randomPoint = v1 + u * (v2 - v1) + v * (v4 - v1);
-				//multiMesh.SetInstanceTransform(j, new Transform3D(Basis.Identity, randomPoint));
 			
 				Vector3 faceNormal = faceNormals[j];
-
-				var query = PhysicsRayQueryParameters3D.Create(randomPoint, faceNormal * -5f);
+				Vector3 rayVector = (randomPoint + faceNormal * -5f);
+				var query = PhysicsRayQueryParameters3D.Create(randomPoint, rayVector);
 				var result = spaceState.IntersectRay(query);
 				if (result.Count > 0)
 				{
@@ -104,10 +106,10 @@ public class GenTree
 					
 					// Set the basis with these orthogonal vectors
 					transform.Basis = new Basis(xVector, upVector, zVector);
-					transform.Origin = collisionPoint;
+					transform.Origin = (collisionPoint - offset) / size;
 					
 					multiMesh.SetInstanceTransform(j + k * 6, transform.ScaledLocal(Vector3.One * _scale));
-				
+					amountHit++;
 				}
 			}
 			j++;

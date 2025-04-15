@@ -136,6 +136,11 @@ public partial class PlanetNoise : Node, CelestialBodyNoise, ModifiableCelestial
         input.SetRadius(newRadius);
     }
 
+    public Vector3 GetScale()
+    {
+        return input.Scale;
+    }
+
     public void SetWidth(int newWidth)
     {
         input.SetWidth(newWidth);
