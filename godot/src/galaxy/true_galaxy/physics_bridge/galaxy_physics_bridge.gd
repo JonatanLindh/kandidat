@@ -1,6 +1,6 @@
 class_name galaxy_physics_bridge extends Node
 
-@onready var true_galaxy = $".."
+@onready var true_galaxy : TrueGalaxy = $".."
 var stars : Dictionary = {}
 var init : bool = false
 
@@ -16,9 +16,9 @@ func init_stars():
 ##
 ## [codeblock]
 ## Godot.Collections.Dictionary dict {
-##     {"transform", Transform3D},
-##     {"velocity", Vector3},
-##     {"mass", float}
+##     {"position", PackedVector3Array},
+##     {"velocity", PackedVector3Array},
+##     {"mass", PackedFloat32Array}
 ## }
 ## [/codeblock]
 ##
@@ -34,18 +34,9 @@ func get_stars() -> Dictionary:
 func get_delta() -> float:
 	return get_process_delta_time()
 
-## Updates star transforms and velocity
-##
-## [codeblock]
-## Godot.Collections.Dictionary dict {
-##     {"transform", Transform3D},
-##     {"velocity", Vector3},
-##     {"mass", float} # Nothing is done with mass.
-## }
-## [/codeblock]
-##
-func update_stars(new_stars : Dictionary):
+## Updates star velocities and applies them to the transforms
+func apply_velocities(new_velocites : PackedVector3Array):
 	if(!init):
 		printerr("Physics bridge: Stars not initialized yet.")
 		return
-	true_galaxy.UpdateStars(new_stars)
+	true_galaxy.ApplyVelocities(new_velocites)

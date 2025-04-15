@@ -10,20 +10,20 @@ public class TrueStarAdapter
 	/// <returns></returns>
 	public Godot.Collections.Dictionary StarsToPhysicsData(TrueStar[] stars)
 	{
-		Godot.Collections.Array<Transform3D> transform = new Godot.Collections.Array<Transform3D>();
-		Godot.Collections.Array<Vector3> velocity = new Godot.Collections.Array<Vector3>();
-		Godot.Collections.Array<float> mass = new Godot.Collections.Array<float>();
+		Vector3[] position = new Vector3[stars.Length];
+		Vector3[] velocity = new Vector3[stars.Length];
+		float[] mass = new float[stars.Length];
 
-		foreach (var star in stars)
+		for (int i = 0; i < stars.Length; i++)
 		{
-			transform.Add(star.transform);
-			velocity.Add(star.velocity);
-			mass.Add(star.mass);
+			position[i] = stars[i].transform.Origin;
+			velocity[i] = stars[i].velocity;
+			mass[i] = stars[i].mass;
 		}
 
 		Godot.Collections.Dictionary dict = new Godot.Collections.Dictionary
 		{
-			{ "transform", transform },
+			{ "position", position },
 			{ "velocity", velocity },
 			{ "mass", mass }
 		};

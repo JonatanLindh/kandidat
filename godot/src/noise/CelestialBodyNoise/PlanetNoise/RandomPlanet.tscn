@@ -1,25 +1,46 @@
-[gd_scene load_steps=5 format=3 uid="uid://5e7ris75mkdi"]
+[gd_scene load_steps=10 format=3 uid="uid://5e7ris75mkdi"]
 
 [ext_resource type="Script" uid="uid://cnikwq6bgmy1k" path="res://src/noise/CelestialBodyNoise/PlanetNoise/CelestialBodyInput.cs" id="1_8t10l"]
+[ext_resource type="Script" uid="uid://cymyjpjofvw5w" path="res://src/bodies/planet/planet_theme/PlanetThemeGenerator.cs" id="2_0h02l"]
 [ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="2_455go"]
 [ext_resource type="Script" uid="uid://nqgu7rpdrhhf" path="res://src/noise/CelestialBodyNoise/PlanetNoise/PlanetNoise.cs" id="3_455go"]
 [ext_resource type="Script" uid="uid://bbu2bvnkwq6r3" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomCelestialBodyNoise.cs" id="4_0h02l"]
 
+[sub_resource type="Gradient" id="Gradient_0h02l"]
+offsets = PackedFloat32Array(0, 1, 0, 0.2, 0.5, 0.7, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 0, 0.2, 0.4, 1, 0.2, 0.4, 0.7, 1, 0.6, 0.8, 0.9, 1, 0.8, 0.9, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="Resource" id="Resource_tvx67"]
+script = ExtResource("2_0h02l")
+Gradient = SubResource("Gradient_0h02l")
+AtmosphereColor = Vector3(700, 530, 440)
+
+[sub_resource type="Gradient" id="Gradient_fynss"]
+offsets = PackedFloat32Array(0, 0, 0.2, 0.5, 0.7, 1, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0.02, 0, 0.1, 1, 0.1, 0, 0.2, 1, 0, 0.8, 0.6, 1, 0.3, 0.1, 0.5, 1, 1, 1, 1, 1, 0.9, 1, 1, 1)
+
+[sub_resource type="Resource" id="Resource_di6a4"]
+script = ExtResource("2_0h02l")
+Gradient = SubResource("Gradient_fynss")
+AtmosphereColor = Vector3(1000, 530, 800)
+
 [node name="RandomPlanet" type="Node3D"]
 script = ExtResource("1_8t10l")
+ThemeGenerator = SubResource("Resource_tvx67")
 Radius = 64
 Width = 130
 Height = 130
 Depth = 130
-Octaves = 4
-Frequency = 1.08
-Amplitude = 7.2
-Lacunarity = 2.84
-Persistence = 0.1
-seed = 819357616
+Octaves = 6
+Frequency = 1.84
+Amplitude = 16.8
+Lacunarity = 3.04
+Persistence = 0.25
+seed = 991237465
 
 [node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("2_455go")]
 CelestialBody = NodePath("../Random")
+ThemeGenerator = SubResource("Resource_di6a4")
 
 [node name="Random" type="Node" parent="." node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("4_0h02l")

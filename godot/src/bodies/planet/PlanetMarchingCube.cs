@@ -43,17 +43,29 @@ public partial class PlanetMarchingCube : Node3D
 	}
 
 	[Export] public PackedScene Planet { get; set; }
-	
-	
-	
-	private MarchingCube _marchingCube;
+
+    [Export(PropertyHint.Range, "0,1,0.1")]
+    public double Warmth 
+	{ 
+		get => warmth; 
+		set
+		{
+			warmth = value;
+			SpawnMesh();
+		}
+	}
+	private double warmth;
+
+
+
+
+    private MarchingCube _marchingCube;
 	private int _resolution = 16;
 	private float _radius = 1;
 	private Vector3 _sunPosition;
 	private Node3D _planet;
 	private Node _atmosphere;
 	private Area3D _planet_gravity_field;
-	
 
 	public override void _Ready()
 	{
@@ -94,9 +106,13 @@ public partial class PlanetMarchingCube : Node3D
 				_planet.Set("radius", _resolution);
 				_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
 
-				// Add the planet as a child of the current node
 				AddChild(_planet);
-			}
+
+                // Find McSpawner node and set Warmth
+                var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
+                if (mcSpawner != null)
+                    mcSpawner.Warmth = warmth;
+            }
 		}
 		
 		_atmosphere = GetNodeOrNull("Atmosphere");
@@ -119,5 +135,4 @@ public partial class PlanetMarchingCube : Node3D
 			GD.PrintErr($"Error updating atmosphere: {e.Message}");
 		}
 	}
-	
 }
