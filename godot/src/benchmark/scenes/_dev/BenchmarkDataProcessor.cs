@@ -35,28 +35,35 @@ public class BenchmarkDataProcessor
 
 	public float GetAverage(int scene, List<List<BenchmarkDatapoint>> data, BenchmarkDatapointEnum dataType)
 	{
-		List<float> dataSeparated = null;
-		switch (dataType)
+		// Special handling for FPS calculation
+		if (dataType == BenchmarkDatapointEnum.FPS)
 		{
-			case BenchmarkDatapointEnum.FPS:
-				dataSeparated = GetDataSeparated(scene, data[scene], BenchmarkDatapointEnum.FPS);
-				break;
-			case BenchmarkDatapointEnum.FrameTime:
-				dataSeparated = GetDataSeparated(scene, data[scene], BenchmarkDatapointEnum.FrameTime);
-				break;
-			case BenchmarkDatapointEnum.MemoryUsage:
-				dataSeparated = GetDataSeparated(scene, data[scene], BenchmarkDatapointEnum.MemoryUsage);
-				break;
+			// Get all frame times
+			List<float> frameTimes = GetDataSeparated(scene, data[scene], BenchmarkDatapointEnum.FrameTime);
+			
+			// Calculate average frame time
+			float sum = 0;
+			foreach (var frameTime in frameTimes)
+			{
+				sum += frameTime;
+			}
+			
+			float avgFrameTime = sum / frameTimes.Count;
+			return 1.0f / avgFrameTime;
 		}
-
-		float sum = 0;
-		foreach (var value in dataSeparated)
+		else
 		{
-			sum += value;
+			List<float> dataSeparated = GetDataSeparated(scene, data[scene], dataType);
+			
+			float sum = 0;
+			foreach (var value in dataSeparated)
+			{
+				sum += value;
+			}
+			
+			float average = sum / dataSeparated.Count;
+			return average;
 		}
-
-		float average = sum / dataSeparated.Count;
-		return average;
 	}
 
 	/// <summary>
