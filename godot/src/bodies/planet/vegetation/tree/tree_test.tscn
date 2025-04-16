@@ -12,6 +12,7 @@ radius = 6.0
 [node name="TreeTest" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
 mesh = SubResource("SphereMesh_qe3ky")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
