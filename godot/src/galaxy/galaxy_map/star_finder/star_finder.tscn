@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://byngp3rjfc0jm"]
+[gd_scene load_steps=3 format=3 uid="uid://byngp3rjfc0jm"]
 
-[ext_resource type="Script" path="res://src/galaxy/galaxy_map/star_finder/StarFinder.cs" id="1_yi3ww"]
+[ext_resource type="Script" uid="uid://8p6ey3ev7hfc" path="res://src/galaxy/galaxy_map/star_finder/StarFinder.cs" id="1_yi3ww"]
+[ext_resource type="PackedScene" uid="uid://pyc3xof62f1e" path="res://src/_tools/debug_draw/debug_draw.tscn" id="2_yu0oc"]
 
 [node name="StarFinder" type="Node"]
 script = ExtResource("1_yi3ww")
+
+[node name="DebugDraw" parent="." instance=ExtResource("2_yu0oc")]
+unique_name_in_owner = true
