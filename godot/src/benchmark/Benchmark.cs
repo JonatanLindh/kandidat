@@ -89,8 +89,7 @@ public partial class Benchmark : Node3D
 		{
 			currentTime = 0;
 
-			double fps = Engine.GetFramesPerSecond();
-			double frameTime = Math.Round(delta, 6);
+			double frameTime = delta;
 			ulong memoryUsage = OS.GetStaticMemoryUsage();
 			string measurementTime = DateTime.Now.ToString("HH:mm:ss.fff");
 
@@ -101,7 +100,7 @@ public partial class Benchmark : Node3D
 
 			BenchmarkDatapoint benchmarkDatapoint = new BenchmarkDatapoint
 			{
-				fps = (float)fps,
+				fps = (float)(1f / frameTime),
 				frameTime = (float)frameTime,
 				memoryUsage = memoryUsage,
 				time = measurementTime
