@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bue15j6sochwd"]
+
+[ext_resource type="Script" uid="uid://dic13ujysaolo" path="res://src/marchingcubes/ImprovedPlanetGen/OctreePlanetSpawner.cs" id="1_j5x0m"]
+
+[node name="OctreeTest" type="Node3D"]
+script = ExtResource("1_j5x0m")
+Center = Vector3(16, 16, 16)
+Depth = 1
