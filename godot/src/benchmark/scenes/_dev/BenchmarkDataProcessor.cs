@@ -47,9 +47,14 @@ public class BenchmarkDataProcessor
 			{
 				sum += frameTime;
 			}
-			
-			float avgFrameTime = sum / frameTimes.Count;
-			return 1.0f / avgFrameTime;
+
+			if (frameTimes.Count != 0) // To avoid division by zero
+			{
+				float avgFrameTime = sum / frameTimes.Count;
+				return 1.0f / avgFrameTime;
+			}
+
+			return 0.0f;
 		}
 		else
 		{
@@ -99,9 +104,14 @@ public class BenchmarkDataProcessor
 					sum += frameTimes[i];
 				}
 			}
-			
-			float avgFrameTime = sum / percentCount;
-			return 1.0f / avgFrameTime;
+
+			if(percentCount > 0) // To avoid division by zero
+			{
+				float avgFrameTime = sum / percentCount;
+				return 1.0f / avgFrameTime;
+			}
+
+			return 0.0f;
 		}
 		else
 		{
