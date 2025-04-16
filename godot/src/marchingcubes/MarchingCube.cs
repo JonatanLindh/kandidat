@@ -91,7 +91,13 @@ public class MarchingCube
 		Mesh mesh = surfaceTool.Commit();
 		var meshInstance = new MeshInstance3D();
 		meshInstance.Mesh = mesh;
-		meshInstance.CreateMultipleConvexCollisions();
+		meshInstance.CreateMultipleConvexCollisions(new MeshConvexDecompositionSettings
+		{
+			Resolution = 50000,
+			ConvexHullDownsampling = 8,
+			MaxNumVerticesPerConvexHull = 128,
+			PlaneDownsampling = 8
+		});
 
 		return meshInstance;
 	}
