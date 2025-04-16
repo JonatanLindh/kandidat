@@ -116,7 +116,15 @@ public partial class GraphContainer : VBoxContainer
 		}
 
 		// Update the current label with the latest value
-		currentLabel.Text = Math.Round(value, currentLabelDecimalCount).ToString();
+		if(dataType == BenchmarkDatapointEnum.FPS) // Uses Engine FPS instead of value based on frame time each tick
+		{
+			currentLabel.Text = Engine.GetFramesPerSecond().ToString();
+		}
+
+		else
+		{
+			currentLabel.Text = Math.Round(value, currentLabelDecimalCount).ToString();
+		}
 	}
 
 	/// <summary>

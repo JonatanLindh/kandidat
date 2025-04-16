@@ -16,7 +16,7 @@ public partial class CurrentContainer : VBoxContainer
 
 	public void UpdateCurrentData(BenchmarkDatapoint data)
 	{
-		FPSLabel.Text = data.fps.ToString();
+		FPSLabel.Text = Engine.GetFramesPerSecond().ToString();
 		frameTimeLabel.Text = Math.Round(data.frameTime * 1000, 4).ToString();
 		memoryLabel.Text = Math.Round(data.memoryUsage / (1024 * 1024), 2).ToString();
 	}
