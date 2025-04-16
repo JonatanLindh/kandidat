@@ -20,6 +20,15 @@ public class StarFactory
 		return star;
 	}
 
+	public PhysicsStar CreatePhysicsStar(Vector3 position, uint galaxySeed, float mass, Vector3 initialVelocity)
+	{
+		Transform3D starTransform = new Transform3D(Basis.Identity, position);
+		uint starSeed = GenerateSeed(galaxySeed, position);
+		string starName = GenerateName();
+		PhysicsStar star = new PhysicsStar(starTransform, starSeed, mass, initialVelocity, starName);
+		return star;
+	}
+
 	/// <summary>
 	/// Generates a unique seed for the star based on the galaxy seed and its position.
 	/// </summary>

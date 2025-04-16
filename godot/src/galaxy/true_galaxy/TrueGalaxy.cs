@@ -4,21 +4,50 @@ using System;
 [GlobalClass]
 public partial class TrueGalaxy : Node3D
 {
-	DiscGalaxy discGalaxy;
+	[Export] Node3D _galaxyNode;
+	IGalaxy galaxy;
+
 	PhysicsStar[] stars;
 	bool starsInitialized = false;
 
+	StarFactory starFactory;
 	TrueStarAdapter starAdapter = new TrueStarAdapter();
+
+	[ExportCategory("Star Properties")]
+	[Export] Vector3 initialStarVelocity = new Vector3(0, 0, 0);
+	[Export] float starMass = 10.0f;
 
 	public override void _Ready()
 	{
-		discGalaxy = GetNode<DiscGalaxy>("%DiscGalaxy");
+		if (_galaxyNode == null)
+		{
+			GD.PrintErr("TrueGalaxy: Galaxy node is not initialized.");
+			return;
+		}
+
+		else if(!(_galaxyNode is IGalaxy))
+		{
+			GD.PrintErr("TrueGalaxy: Galaxy node is not of type IGalaxy.");
+			return;
+		}
+
+		starFactory = new StarFactory();
+
+		galaxy = (IGalaxy) _galaxyNode;
 		InitializeStars();
 	}
 
 	private void InitializeStars()
 	{
-		stars = discGalaxy.GetStars();
+		Vector3[] starPositions = galaxy.GetStarPositions();
+		stars = new PhysicsStar[starPositions.Length];
+
+		// star factory to create stars...
+		for (int i = 0; i < starPositions.Length; i++)
+		{
+			stars[i] = starFactory.CreatePhysicsStar(starPositions[i], galaxy.GetSeed(), starMass, initialStarVelocity);
+		}
+
 		starsInitialized = true;
 	}
 
@@ -71,6 +100,6 @@ public partial class TrueGalaxy : Node3D
 			stars[i].transform = newTransform;
 		}
 
-		discGalaxy.RedrawStars(newTransforms);
+		galaxy.RedrawStars(newTransforms);
 	}
 }

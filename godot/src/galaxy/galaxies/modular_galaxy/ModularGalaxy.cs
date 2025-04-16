@@ -1,13 +1,13 @@
 using Godot;
 using System;
 
-public partial class ModularGalaxy : Node3D
+public partial class ModularGalaxy : Node3D, IGalaxy
 {
 	[Export] StarMultiMesh starMultiMesh;
 	[Export] Mesh starMesh;
 	[Export] ModularGalaxyDistribution distribution;
 	[Export] uint seed;
-	Vector3[] _stars;
+	Vector3[] stars;
 
 	[ExportGroup("Debug")]
 	[Export] bool debugPrint = false;
@@ -26,8 +26,7 @@ public partial class ModularGalaxy : Node3D
 		// Apply the galaxy axis rotation
 		this.Rotate(distribution.axis.Normalized(), Mathf.Pi / 2);
 
-		_stars = Generate();
-		DrawStars(_stars);
+		InitializeStars();
 	}
 
 	private void DrawStars(Vector3[] stars)
@@ -47,9 +46,9 @@ public partial class ModularGalaxy : Node3D
 		starMultiMesh.DrawStars(stars, starMesh);
 	}
 
-	private Vector3[] Generate()
+	private void InitializeStars()
 	{
-		Vector3[] stars = new Vector3[distribution.starCount];
+		stars = new Vector3[distribution.starCount];
 
 		for (int i = 0; i < distribution.starCount; i++)
 		{
@@ -57,7 +56,7 @@ public partial class ModularGalaxy : Node3D
 			stars[i] = point;
 		}
 
-		return stars;
+		DrawStars(stars);
 	}
 
 	private Vector3 SamplePoint()
@@ -128,8 +127,18 @@ public partial class ModularGalaxy : Node3D
 		return offset;
 	}
 
-	public Vector3[] GetStars()
+	public uint GetSeed()
 	{
-		return _stars;
+		return seed;
+	}
+
+	public Vector3[] GetStarPositions()
+	{
+		return stars;
+	}
+
+	public void RedrawStars(Transform3D[] stars)
+	{
+		starMultiMesh.RedrawStars(stars);
 	}
 }

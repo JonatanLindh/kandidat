@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class DiscGalaxy : Node3D
+public partial class DiscGalaxy : Node3D, IGalaxy
 {
 	[Export] FastNoiseLite noise;
 	[Export] StarMultiMesh starMultiMesh;
@@ -11,7 +11,7 @@ public partial class DiscGalaxy : Node3D
 
 	SeedGenerator seedGen = new SeedGenerator();
 
-	TrueStar[] stars;
+	Vector3[] starPositions;
 
 	int starCount = 10000;
 
@@ -25,8 +25,7 @@ public partial class DiscGalaxy : Node3D
 
 		GD.Seed(seed);
 
-		stars = new TrueStar[starCount];
-
+		starPositions = new Vector3[starCount];
 		Generate();
 	}
 
@@ -46,23 +45,9 @@ public partial class DiscGalaxy : Node3D
 
 			if (GetISOLevel(point) > noiseVal)
 			{
-				TrueStar star = new TrueStar(
-					new Transform3D(Basis.Identity, point),
-					seedGen.GenerateSeed(seed, point),
-					10f,
-					Vector3.Zero,
-					"Star"
-				);
-
-				stars[starsGenerated] = star;
+				starPositions[starsGenerated] = point;
 				starsGenerated++;
 			}
-		}
-		
-		Vector3[] starPositions = new Vector3[starCount];
-		for (int i = 0; i < starCount; i++)
-		{
-			starPositions[i] = stars[i].transform.Origin;
 		}
 
 		starMultiMesh.DrawStars(starPositions, starMesh);
@@ -93,9 +78,14 @@ public partial class DiscGalaxy : Node3D
 		return iso;
 	}
 
-	public TrueStar[] GetStars()
+	public uint GetSeed()
 	{
-		return stars;
+		return seed;
+	}
+
+	public Vector3[] GetStarPositions()
+	{
+		return starPositions;
 	}
 
 	public void RedrawStars(Transform3D[] stars)
