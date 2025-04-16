@@ -7,6 +7,10 @@ public partial class GraphPlotter : Control
 	List<GraphContainer> graphContainers = new List<GraphContainer>();
 	CurrentContainer currentContainer;
 
+	bool fpsHidden = false;
+	bool frameTimeHidden = false;
+	bool memoryHidden = false;
+
 	public override void _Ready()
 	{
 		currentContainer = GetNode<CurrentContainer>("%CurrentContainer");
@@ -68,29 +72,65 @@ public partial class GraphPlotter : Control
 		currentContainer.UpdateCurrentData(data);
 	}
 
-	public void HideAllGraphs()
+	public void HideAllGraphs(bool hide)
 	{
 		foreach (GraphContainer graphContainer in graphContainers)
 		{
-			graphContainer.Hide();
+			if (hide)
+				graphContainer.Hide();
+			else
+				graphContainer.Show();
 		}
 	}
 
-	public void ShowAllGraphs()
+	public void HideCurrentValues(bool hide)
+	{
+		if(hide)
+			currentContainer.Hide();
+		else
+			currentContainer.Show();	
+	}
+
+	public void HideGraphType(BenchmarkDatapointEnum dataType, bool hide)
 	{
 		foreach (GraphContainer graphContainer in graphContainers)
 		{
-			graphContainer.Show();
+			if (graphContainer.GetDataType() == dataType)
+			{
+				if (hide)
+				{
+					graphContainer.Hide();
+					switch (dataType)
+					{
+						case BenchmarkDatapointEnum.FPS:
+							fpsHidden = true;
+							break;
+						case BenchmarkDatapointEnum.FrameTime:
+							frameTimeHidden = true;
+							break;
+						case BenchmarkDatapointEnum.MemoryUsage:
+							memoryHidden = true;
+							break;
+					}
+				}
+
+				else
+				{
+					graphContainer.Show();
+					switch (dataType)
+					{
+						case BenchmarkDatapointEnum.FPS:
+							fpsHidden = false;
+							break;
+						case BenchmarkDatapointEnum.FrameTime:
+							frameTimeHidden = false;
+							break;
+						case BenchmarkDatapointEnum.MemoryUsage:
+							memoryHidden = false;
+							break;
+					}
+				}
+			}
 		}
-	}
-
-	public void HideCurrentValues()
-	{
-		currentContainer.Hide();
-	}
-
-	public void ShowCurrentValues()
-	{
-		currentContainer.Show();
 	}
 }

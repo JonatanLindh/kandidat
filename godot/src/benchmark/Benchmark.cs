@@ -10,8 +10,13 @@ public partial class Benchmark : Node3D
 	[Export] bool saveFullResults = false;
 	[Export] bool showCurrentValues = true;
 
-	[ExportCategory("Graph (Impacts performance)")]
+	[ExportGroup("Graph (Impacts performance)")]
 	[Export] bool plotGraph = false;
+
+	[ExportSubgroup("Graph settings")]
+	[Export] bool hideFPS = false;
+	[Export] bool hideFrameTime = false;
+	[Export] bool hideMemoryUsage = false;
 
 	bool showingCurrentValues = false;
 	bool showingGraphs = false;
@@ -43,23 +48,27 @@ public partial class Benchmark : Node3D
 
 		if (plotGraph)
 		{
-			plot.ShowAllGraphs();
-			plot.HideCurrentValues();
+			plot.HideAllGraphs(false);
+			plot.HideCurrentValues(true);
 			showingGraphs = true;
 		}
 
 		else if (showCurrentValues)
 		{
-			plot.HideAllGraphs();
-			plot.ShowCurrentValues();
+			plot.HideAllGraphs(true);
+			plot.HideCurrentValues(false);
 			showingCurrentValues = true;
 		}
 
 		else
 		{
-			plot.HideAllGraphs();
-			plot.HideCurrentValues();
+			plot.HideAllGraphs(true);
+			plot.HideCurrentValues(true);
 		}
+
+		if(hideFPS) plot.HideGraphType(BenchmarkDatapointEnum.FPS, true);
+		if (hideFrameTime) plot.HideGraphType(BenchmarkDatapointEnum.FrameTime, true);
+		if (hideMemoryUsage) plot.HideGraphType(BenchmarkDatapointEnum.MemoryUsage, true);
 
 		string absResultPath = ProjectSettings.GlobalizePath(_resultPath);
 		filePath = absResultPath + $"/{time}.txt";
