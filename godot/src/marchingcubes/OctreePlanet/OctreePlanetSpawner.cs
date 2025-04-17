@@ -85,6 +85,9 @@ public partial class OctreePlanetSpawner : Node
 		instance.Transform = transform3D;
 		
 		_rootTest.AddChild(instance);
+		
+		// Maybe return the MeshInstance3D?
+		// return instance;
 	}
 
 	// Either the octree handles mesh instances and remove them when we unload the chunk
