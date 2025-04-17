@@ -8,16 +8,16 @@ using System;
 [Tool]
 public partial class McSpawner : Node
 {
-    private bool _reload;
-    [Export]
-    public bool reload
-    {
-        get => _reload;
-        set
-        {
-            _reload = !value;
-        }
-    }
+	private bool _reload;
+	[Export]
+	public bool reload
+	{
+		get => _reload;
+		set
+		{
+			_reload = !value;
+		}
+	}
 
 	private CelestialBodyNoise celestialBody;
 	private Node cb;
@@ -31,21 +31,21 @@ public partial class McSpawner : Node
 	}
 
 	private double _warmth;
-    public double Warmth
-    {
-        get => _warmth;
-        set
-        {
-            _warmth = value;
+	public double Warmth
+	{
+		get => _warmth;
+		set
+		{
+			_warmth = value;
 
-            if (_themeGenerator != null)
-            {
-                _themeGenerator.Warmth = value; // Tell it to pick a new theme
-            }
-        }
-    }
+			if (_themeGenerator != null)
+			{
+				_themeGenerator.Warmth = value; // Tell it to pick a new theme
+			}
+		}
+	}
 
-    private ShaderMaterial _planetShader;
+	private ShaderMaterial _planetShader;
 	public ShaderMaterial PlanetShader
 	{
 		get => _planetShader;
@@ -62,7 +62,10 @@ public partial class McSpawner : Node
 		set
 		{
 			_themeGenerator = value;
-			GeneratePlanetShader();
+			if (_themeGenerator != null)
+			{
+				CallDeferred(nameof(GeneratePlanetShader));
+			}
 		}
 	}
 
