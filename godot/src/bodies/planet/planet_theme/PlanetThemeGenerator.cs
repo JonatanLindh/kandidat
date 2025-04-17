@@ -10,8 +10,16 @@ public partial class PlanetThemeGenerator : Resource
     public Godot.Collections.Array<PlanetThemeSet> ThemeSets { get; set; } = new Godot.Collections.Array<PlanetThemeSet>();
     private const string ThemeDirectoryPath = "res://src/bodies/planet/planet_theme/theme_sets/";
 
+    private int seed = 0;
     [Export]
-    public int Seed { get; set; } = 1;
+    public int Seed { 
+        get => seed; 
+        set
+        {
+            seed = value;
+            GenerateTheme();
+        } 
+    }
 
     [Export]
     public Gradient Gradient
@@ -50,8 +58,7 @@ public partial class PlanetThemeGenerator : Resource
         if (ThemeSets == null || ThemeSets.Count == 0)
             return;
 
-        // TODO: add seed here, not here currently to avoid the same planet theme being selected all the time
-        var rnd = new Random();
+        var rnd = new Random(seed);
 
         PlanetThemeSet closestSet = ThemeSets[0];
         float smallestDiff = Math.Abs(closestSet.Warmth - (float)_warmth);

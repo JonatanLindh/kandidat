@@ -48,6 +48,7 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_seed = value;
+			_themeGenerator.Seed = value;
 			OnResourceSet();
 		}
 	}
@@ -61,6 +62,8 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			warmth = value;
+			_themeGenerator.Warmth = value;
+			OnResourceSet();
 		}
 	}
 	private double warmth;
@@ -76,9 +79,11 @@ public partial class PlanetMarchingCube : Node3D
 	private Node3D _planet;
 	private Node _atmosphere;
 	private Area3D _planet_gravity_field;
+	private PlanetThemeGenerator _themeGenerator;
 
 	public override void _Ready()
 	{
+		_themeGenerator = new PlanetThemeGenerator();
 		SpawnMesh();
 		_planet_gravity_field = GetNode<Area3D>("PlanetGravityField");
 		_planet_gravity_field.Set("radius", _radius);
@@ -122,7 +127,8 @@ public partial class PlanetMarchingCube : Node3D
 
                 // Find McSpawner node and set Warmth
                 var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
-                if (mcSpawner != null)
+				if (mcSpawner != null)
+					mcSpawner.ThemeGenerator = _themeGenerator;
                     mcSpawner.Warmth = warmth;
             }
 		}

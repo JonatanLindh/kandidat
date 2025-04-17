@@ -56,6 +56,15 @@ public partial class McSpawner : Node
 	}
 
 	private PlanetThemeGenerator _themeGenerator = new PlanetThemeGenerator();
+	public PlanetThemeGenerator ThemeGenerator
+	{
+		get => _themeGenerator;
+		set
+		{
+			_themeGenerator = value;
+			GeneratePlanetShader();
+		}
+	}
 
 	private int _maxHeight = 16;
 	private int _size = 32;
