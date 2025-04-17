@@ -54,11 +54,6 @@ public partial class OctreePlanetSpawner : Node
 		//octree.Call("Init", _maxDepth, this);
 		//octree.Call("SetRootBoxSize", _radius * 2);
 		
-		
-		// This is just testing
-		//var depth = 2;
-		//var size = (1 /  Mathf.Pow(2, depth)) * (_radius * 2);
-		//SpawnChunk(new Vector3(_radius / 2, _radius / 2, _radius  / 2), size, depth);
 	}
 
 
