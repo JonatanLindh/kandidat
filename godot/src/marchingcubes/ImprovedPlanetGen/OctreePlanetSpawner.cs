@@ -47,13 +47,12 @@ public partial class OctreePlanetSpawner : Node
 	public override void _Ready()
 	{
 		Init();
-		/*
-		_marchingCube = new MarchingCube();
-		_baseVoxelSize = (_radius * 2) / (_resolution * Mathf.Pow(2, _maxDepth));
-		*/
-		
+
 		// Initialize the Octree with a max depth
-		// Ex: Octree octree = new Octree(max depth = 8)
+		// I assume I would call the octree by finding the octree node in the scene tree
+		//Node octree = GetNode("Octree");
+		//octree.Call("Init", _maxDepth, this);
+		//octree.Call("SetRootBoxSize", _radius * 2);
 		
 		
 		// This is just testing
@@ -77,7 +76,7 @@ public partial class OctreePlanetSpawner : Node
 		
 		var data = GenerateDataPoints(offset, depth);
 		var scaleFactor = GetVoxelSize(depth);
-		var mesh = _marchingCube.GenerateMesh(data, scale: scaleFactor);
+		var mesh = _marchingCube.GenerateMesh(data, scale: scaleFactor, offset: Vector3.One * (size / 2));
 		var instance = new MeshInstance3D();
 		instance.Mesh = mesh;
 		instance.MaterialOverride = new StandardMaterial3D()
@@ -165,10 +164,19 @@ public partial class OctreePlanetSpawner : Node
 	
 	private float[,,] GenerateDataPoints(Vector3 offset , int depth)
 	{
+		
 		var radius = _radius;
 		int size = _resolution + 1;
 		var dataPoints = new float[size, size, size];
 		float voxelSize = GetVoxelSize(depth);
+		
+		MultiMesh multiMesh = new MultiMesh();
+		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+		multiMesh.Mesh = new BoxMesh
+		{
+			Size = 0.1f * Vector3.One
+		};
+		multiMesh.SetInstanceCount(size * size * size);
 
 		for (int x = 0; x < size; x++)
 		{
@@ -181,9 +189,22 @@ public partial class OctreePlanetSpawner : Node
 					var value = -Sphere(worldPos, Vector3.Zero, radius);
 					value = Mathf.Clamp(value, -1.0f, 1.0f);
 					dataPoints[x, y, z] = value;
+					
+					// Set the instance transform
+					var instanceIndex = x * size * size + y * size + z;
+					var instanceTransform = new Transform3D
+					{
+						Origin = worldPos,
+						Basis = Basis.Identity
+					};
+					multiMesh.SetInstanceTransform(instanceIndex, instanceTransform);
 				}
 			}
 		}
+		// Add the MultiMesh to the scene
+		var multiMeshInstance = new MultiMeshInstance3D();
+		multiMeshInstance.Multimesh = multiMesh;
+		//_rootTest.AddChild(multiMeshInstance);
 		return dataPoints;
 	}
 	

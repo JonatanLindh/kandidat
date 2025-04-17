@@ -58,7 +58,7 @@ public class MarchingCube
     /// </summary>
     /// <param name="datapoints">3D array of float values representing the scalar field</param>
     /// <returns>A MeshInstance3D object representing the generated mesh</returns>
-    public Mesh GenerateMesh(float[,,] datapoints, float scale = 1)
+    public Mesh GenerateMesh(float[,,] datapoints, float scale = 1, Vector3 offset = default)
     {
         _scale = scale;
         var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
@@ -85,7 +85,7 @@ public class MarchingCube
         foreach (var vertex in vertices)
         {
             // Center the mesh using the actual geometric center
-            var newVertex = vertex - center;
+            var newVertex = vertex - offset;
             float height = newVertex.Length();
 			if (height > _maxHeight) _maxHeight = height;
 			if (height < _minHeight) _minHeight = height;

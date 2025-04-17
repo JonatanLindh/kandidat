@@ -3,6 +3,38 @@
 [ext_resource type="Script" uid="uid://dic13ujysaolo" path="res://src/marchingcubes/ImprovedPlanetGen/OctreePlanetSpawner.cs" id="1_j5x0m"]
 
 [node name="OctreeTest" type="Node3D"]
+
+[node name="Node3D" type="Node3D" parent="."]
 script = ExtResource("1_j5x0m")
 Center = Vector3(16, 16, 16)
-Depth = 1
+Depth = 2
+
+[node name="Node3D2" type="Node3D" parent="."]
+script = ExtResource("1_j5x0m")
+Center = Vector3(16, 0, 16)
+Depth = 2
+
+[node name="Node3D3" type="Node3D" parent="."]
+script = ExtResource("1_j5x0m")
+Center = Vector3(16, 0, 32)
+Depth = 2
+
+[node name="Node3D4" type="Node3D" parent="."]
+script = ExtResource("1_j5x0m")
+Center = Vector3(16, 16, 32)
+Depth = 2
+
+[node name="Node3D5" type="Node3D" parent="."]
+script = ExtResource("1_j5x0m")
+Center = Vector3(32, 0, 16)
+Depth = 2
+
+[node name="Node3D6" type="Node3D" parent="."]
+script = ExtResource("1_j5x0m")
+Center = Vector3(32, 16, 16)
+Depth = 2
+
+[node name="Node3D7" type="Node3D" parent="."]
+script = ExtResource("1_j5x0m")
+Center = Vector3(16, 32, 16)
+Depth = 2
