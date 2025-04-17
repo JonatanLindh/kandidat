@@ -11,9 +11,18 @@ public interface CelestialBodyNoise
     ///</summary>
     public float[,,] GetNoise();
 
+    ///<summary>
+    /// Returns the 3d noise of a celestial body to be used with marching cubes
+    /// <param name="offset">A Vector3 representing the positional offset</param>
+    ///</summary>
+    public float[,,] GetNoise(Vector3 offset);
+
     /// <summary>
     /// Get the current radius of the celestial body
     /// </summary>
     /// <returns>The radius</returns>
     int GetRadius();
+
+
+    float VoxelSize { get; set; }
 }

@@ -35,6 +35,18 @@ public partial class OctreePlanetSpawner : Node
 			}
 		}
 	}
+	
+	
+	private CelestialBodyNoise celestialBody;
+	private Node cb;
+	[Export] private Node CelestialBody
+	{
+		get => cb;
+		set
+		{
+			cb = value;
+		}
+	}
 
 	
 	
@@ -67,11 +79,13 @@ public partial class OctreePlanetSpawner : Node
 	public void SpawnChunk(Vector3 center, float size, int depth)
 	{
 		
-		// Give the bottom left corner of the chunk
+		// Give the bottom left (0,0,0) corner of the chunk
 		var offset = center - (Vector3.One * size / 2);
 		
-		var data = GenerateDataPoints(offset, depth);
+		//var data = GenerateDataPoints(offset, depth);
 		var scaleFactor = GetVoxelSize(depth);
+		celestialBody.VoxelSize = scaleFactor;
+		var data = celestialBody.GetNoise(offset);
 		var mesh = _marchingCube.GenerateMesh(data, scale: scaleFactor, offset: Vector3.One * (size / 2));
 		var instance = new MeshInstance3D();
 		instance.Mesh = mesh;
@@ -108,13 +122,20 @@ public partial class OctreePlanetSpawner : Node
 	// Testing functions
 	private void Init()
 	{
+		if (!IsInsideTree()) return;
+		
 		_rootTest?.QueueFree();
 		_marchingCube ??= new MarchingCube();
 		_baseVoxelSize = (_radius * 2) / (_resolution * Mathf.Pow(2, _maxDepth));
 		_rootTest = new Node3D();
 		var size = (1 /  Mathf.Pow(2, _depth)) * (_radius * 2);
+		celestialBody = CelestialBody as CelestialBodyNoise;
+		if(celestialBody == null)
+		{
+			GD.PrintErr("celestialBody is null");
+		}
 		AddChild(_rootTest);
-		SpawnChunk(_center, size, _depth);
+		CallDeferred(nameof(SpawnChunk), _center, size, _depth);
 		DrawBoundingBox(_center, size);
 	}
 	

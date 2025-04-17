@@ -117,8 +117,8 @@ public partial class McSpawner : Node
 		{
 			PlanetDataPoints = celestialBody,
 			Scale = 1,
-			Offset = Vector3.Zero,
-			Root = this,
+			Offset = Vector3.One * planetRadius,
+			Root = this,	
 			CustomMeshInstance = _meshInstance3D,
 			TempNode = _useTemp ? _temporaryMeshInstance : null,
 			GeneratePlanetShader = GeneratePlanetShader

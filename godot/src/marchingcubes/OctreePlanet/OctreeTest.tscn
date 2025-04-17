@@ -1,40 +1,62 @@
-[gd_scene load_steps=2 format=3 uid="uid://bue15j6sochwd"]
+[gd_scene load_steps=3 format=3 uid="uid://bue15j6sochwd"]
 
+[ext_resource type="Script" uid="uid://r87jfre8pihr" path="res://src/noise/CelestialBodyNoise/PlanetNoise/DeterministicRandomPlanet.cs" id="1_erx03"]
 [ext_resource type="Script" uid="uid://dic13ujysaolo" path="res://src/marchingcubes/OctreePlanet/OctreePlanetSpawner.cs" id="1_j5x0m"]
 
 [node name="OctreeTest" type="Node3D"]
+script = ExtResource("1_erx03")
+radius = 32
+seed = 7
 
-[node name="Node3D" type="Node3D" parent="."]
+[node name="Chunk" type="Node3D" parent="."]
+
+[node name="Node3D" type="Node3D" parent="Chunk" node_paths=PackedStringArray("CelestialBody")]
+visible = false
 script = ExtResource("1_j5x0m")
 Center = Vector3(16, 16, 16)
-Depth = 2
+Depth = 1
+CelestialBody = NodePath("../..")
 
-[node name="Node3D2" type="Node3D" parent="."]
+[node name="Chunk2" type="Node3D" parent="Chunk" node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("1_j5x0m")
-Center = Vector3(16, 0, 16)
-Depth = 2
+Center = Vector3(16, 16, -16)
+Depth = 1
+CelestialBody = NodePath("../..")
 
-[node name="Node3D3" type="Node3D" parent="."]
+[node name="Node3D2" type="Node3D" parent="Chunk" node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("1_j5x0m")
-Center = Vector3(16, 0, 32)
-Depth = 2
+Center = Vector3(-16, 16, 16)
+Depth = 1
+CelestialBody = NodePath("../..")
 
-[node name="Node3D4" type="Node3D" parent="."]
+[node name="Chunk3" type="Node3D" parent="Chunk" node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("1_j5x0m")
-Center = Vector3(16, 16, 32)
-Depth = 2
+Center = Vector3(-16, 16, -16)
+Depth = 1
+CelestialBody = NodePath("../..")
 
-[node name="Node3D5" type="Node3D" parent="."]
-script = ExtResource("1_j5x0m")
-Center = Vector3(32, 0, 16)
-Depth = 2
+[node name="Chunk2" type="Node3D" parent="."]
 
-[node name="Node3D6" type="Node3D" parent="."]
+[node name="Chunk3" type="Node3D" parent="Chunk2" node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("1_j5x0m")
-Center = Vector3(32, 16, 16)
+Center = Vector3(24, 24, 24)
 Depth = 2
+CelestialBody = NodePath("../..")
 
-[node name="Node3D7" type="Node3D" parent="."]
+[node name="Chunk4" type="Node3D" parent="Chunk2" node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("1_j5x0m")
-Center = Vector3(16, 32, 16)
+Center = Vector3(24, 24, 8)
 Depth = 2
+CelestialBody = NodePath("../..")
+
+[node name="Chunk5" type="Node3D" parent="Chunk2" node_paths=PackedStringArray("CelestialBody")]
+script = ExtResource("1_j5x0m")
+Center = Vector3(8, 24, 24)
+Depth = 2
+CelestialBody = NodePath("../..")
+
+[node name="Chunk6" type="Node3D" parent="Chunk2" node_paths=PackedStringArray("CelestialBody")]
+script = ExtResource("1_j5x0m")
+Center = Vector3(8, 24, 8)
+Depth = 2
+CelestialBody = NodePath("../..")
