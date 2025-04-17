@@ -13,7 +13,6 @@ extends MeshInstance3D
 	set(new_seed):
 		planet_seed = new_seed
 		rng.seed = planet_seed
-		print(rng.seed)
 		var random_index = rng.randf_range(0, wave_lenghts_array.size() - 1)
 		_update_atmopshere_color(random_index)
 
@@ -47,7 +46,6 @@ func _process(delta: float) -> void:
 
 func _update_atmopshere_color(index : int):
 	var atmosphere_color = wave_lenghts_array[index]
-	print(atmosphere_color)
 	mesh.material.set_shader_parameter("wavelengths", atmosphere_color)
 
 
