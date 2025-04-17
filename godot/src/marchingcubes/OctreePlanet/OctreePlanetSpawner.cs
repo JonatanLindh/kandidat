@@ -51,12 +51,13 @@ public partial class OctreePlanetSpawner : Node
 		// Initialize the Octree with a max depth
 		// I assume I would call the octree by finding the octree node in the scene tree
 		//Node octree = GetNode("Octree");
-		//octree.Call("Init", _maxDepth, this);
-		//octree.Call("SetRootBoxSize", _radius * 2);
+		// I assume I initialize the octree with the current instance of this class,
+		// the max depth,
+		// the base size of the octree
+		// and also with the center of the octree
+		//octree.Call("Init", this, _maxDepth, baseSize: (radius *2), center: Vector.Zero);
 		
 	}
-
-
 	
 	
 	// Called from the Octree whenever it subdivides a chunk
