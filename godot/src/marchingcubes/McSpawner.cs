@@ -99,14 +99,19 @@ public partial class McSpawner : Node3D
 			var grass = new NewGrass();
 			var meshSurface = _meshInstance3D.Mesh.SurfaceGetArrays(0);
 			AddChild(grass.PopulateMesh(meshSurface, 500000));
-
-			var scale = celestialBody.GetScale();
-			var genTree = new GenTree(10, 100f);
-			var aabb = _meshInstance3D.GetAabb();
-			var offset = GetGlobalPosition();
-			var trees = genTree.SpawnTrees(GenTree.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, aabb, offset, scale);
-			AddChild(trees);
+			
+			SpawnTrees();
 		}
+	}
+
+	private void SpawnTrees()
+	{
+		var scale = celestialBody.GetScale();
+		var genTree = new GenTree(10, 100f);
+		var aabb = _meshInstance3D.GetAabb();
+		var offset = GetGlobalPosition();
+		var trees = genTree.SpawnTrees(GenTree.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, aabb, offset, scale);
+		AddChild(trees);
 	}
 
 	// Old test method for generating datapoints
