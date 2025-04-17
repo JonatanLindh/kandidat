@@ -104,7 +104,7 @@ public partial class McSpawner : Node3D
 			var genTree = new GenTree(10, 100f);
 			var aabb = _meshInstance3D.GetAabb();
 			var offset = GetGlobalPosition();
-			var trees = genTree.SpawnTrees(GetWorld3D().DirectSpaceState, aabb, offset, scale);
+			var trees = genTree.SpawnTrees(GenTree.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, aabb, offset, scale);
 			AddChild(trees);
 		}
 	}

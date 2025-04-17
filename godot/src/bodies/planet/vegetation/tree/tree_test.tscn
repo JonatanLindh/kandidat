@@ -3,16 +3,15 @@
 [ext_resource type="Script" uid="uid://cjqcm631ihv7v" path="res://src/bodies/planet/vegetation/tree/TreeTest.cs" id="1_xseb6"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_qe3ky"]
-radius = 6.0
-height = 12.0
+radius = 32.0
+height = 64.0
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_qe3ky"]
-radius = 6.0
+radius = 32.0
 
 [node name="TreeTest" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-visible = false
 mesh = SubResource("SphereMesh_qe3ky")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D"]
@@ -24,4 +23,3 @@ shape = SubResource("SphereShape3D_qe3ky")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000193596, -0.143849, -0.0296535)
 script = ExtResource("1_xseb6")
 MeshInstance = NodePath("../MeshInstance3D")
-Scale = 30.0

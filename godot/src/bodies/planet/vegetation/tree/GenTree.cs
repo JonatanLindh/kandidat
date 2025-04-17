@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GenTree
 {
@@ -8,14 +9,33 @@ public class GenTree
 	private readonly Mesh _treeMesh;
 	private readonly float _scale = 1f;
 
+	public enum SamplingMethod
+	{
+		Uniform,
+		Poisson
+	} 
+
 	public GenTree(int amountPerSide, float scale)
 	{
 		_treeMesh = GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res");
 		_amountPerSide = amountPerSide;
 		_scale = scale;
 	}
+
+	public MultiMeshInstance3D SpawnTrees(SamplingMethod method ,PhysicsDirectSpaceState3D spaceState, 
+		Aabb aabb, Vector3 offset = default, Vector3 size = default)
+	{
+		MultiMeshInstance3D trees = method switch
+		{
+			SamplingMethod.Uniform => SpawnTreesUniform(spaceState, aabb, offset, size),
+			SamplingMethod.Poisson => SpawnTreesWithPoisson(spaceState, aabb, offset, size),
+			_ => throw new ArgumentOutOfRangeException(nameof(method), method, "Invalid sampling method")
+		};
+
+		return trees;
+	}
 	
-	public MultiMeshInstance3D SpawnTrees(PhysicsDirectSpaceState3D spaceState, Aabb aabb, Vector3 offset = default, Vector3 size = default)
+	private MultiMeshInstance3D SpawnTreesUniform(PhysicsDirectSpaceState3D spaceState, Aabb aabb, Vector3 offset = default, Vector3 size = default)
 	{
 		
 		
@@ -118,5 +138,97 @@ public class GenTree
 		randomPointInstance.Multimesh = multiMesh;
 		return randomPointInstance;
 	}
-	
+
+	private MultiMeshInstance3D SpawnTreesWithPoisson(PhysicsDirectSpaceState3D spaceState, Aabb aabb, Vector3 offset = default,
+		Vector3 size = default)
+	{
+		if (size == default)
+			size = Vector3.One;
+		
+		var scaledAabb = aabb.Size * size;
+		var faceNormals = new[]
+		{
+			new Vector3(0, 0, -1), // Front face
+			new Vector3(0, 0, 1),  // Back face
+			new Vector3(-1, 0, 0), // Left face
+			new Vector3(1, 0, 0),  // Right face
+			new Vector3(0, 1, 0),  // Top face
+			new Vector3(0, -1, 0)  // Bottom face
+		};
+
+
+		var sampleRadius = scaledAabb.X / 10f;
+		var sampleTries = 100;
+		var poissonPointsPerFace = new List<List<Vector3>>
+		{
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(scaledAabb.X, scaledAabb.Y , 0.5f), sampleTries)
+				.Select(point => point - new Vector3(scaledAabb.X, scaledAabb.Y, scaledAabb.Z) * 0.5f).ToList(),
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(scaledAabb.X, scaledAabb.Y , 0.5f), sampleTries)
+				.Select(point => point - new Vector3(scaledAabb.X, scaledAabb.Y, -scaledAabb.Z) * 0.5f).ToList(),
+			
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(0.5f, scaledAabb.Y , scaledAabb.Z), sampleTries)
+				.Select(point => point - new Vector3(scaledAabb.X, scaledAabb.Y, scaledAabb.Z) * 0.5f).ToList(),
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(0.5f, scaledAabb.Y , scaledAabb.Z), sampleTries)
+				.Select(point => point - new Vector3(-scaledAabb.X, scaledAabb.Y, scaledAabb.Z) * 0.5f).ToList(),
+			
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(scaledAabb.X, 0.5f , scaledAabb.Z), sampleTries)
+				.Select(point => point - new Vector3(scaledAabb.X, -scaledAabb.Y, scaledAabb.Z) * 0.5f).ToList(),
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(scaledAabb.X, 0.5f , scaledAabb.Z), sampleTries)
+				.Select(point => point - new Vector3(scaledAabb.X, scaledAabb.Y, scaledAabb.Z) * 0.5f).ToList()
+				
+		};
+
+		var totalCount = poissonPointsPerFace.Select(list => list.Count).ToList().Sum();
+		
+		MultiMesh multiMesh = new MultiMesh();
+		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+		multiMesh.InstanceCount = totalCount;
+		multiMesh.Mesh = _treeMesh;
+
+		var instanceCount = 0;
+		for (int i = 0; i < faceNormals.Length; i++)
+		{
+			var face = poissonPointsPerFace[i];
+			for (int j = 0; j < face.Count; j++)
+			{
+				var point = face[j] + offset;
+				
+				Vector3 faceNormal = faceNormals[i];
+				Vector3 rayVector = (point - faceNormal * 10f);
+				
+				var query = PhysicsRayQueryParameters3D.Create(point, rayVector);
+				var result = spaceState.IntersectRay(query);
+				if (result.Count > 0)
+				{
+					// If the ray hits something, log the collision point
+					// Set the instance transform to the hit points
+					var collisionPoint = result["position"].AsVector3();
+					var transform = new Transform3D();
+					
+					Vector3 upVector = result["normal"].AsVector3(); 
+					
+					// Find perpendicular vectors to create an orthogonal basis
+					Vector3 xVector;
+					if (Mathf.Abs(upVector.Y) < 0.99f)
+						xVector = new Vector3(0, 1, 0).Cross(upVector).Normalized();
+					else
+						xVector = new Vector3(1, 0, 0).Cross(upVector).Normalized();
+					// Get Z vector using cross product
+					Vector3 zVector = upVector.Cross(xVector).Normalized();
+					
+					// Set the basis with these orthogonal vectors
+					transform.Basis = new Basis(xVector, upVector, zVector);
+					transform.Origin = (collisionPoint - offset) / size;
+					
+					multiMesh.SetInstanceTransform(instanceCount, transform.ScaledLocal(Vector3.One * _scale));
+					instanceCount++;
+				}
+
+			}
+		}
+
+		var randomPointInstance = new MultiMeshInstance3D();
+		randomPointInstance.Multimesh = multiMesh;
+		return randomPointInstance;
+	}
 }

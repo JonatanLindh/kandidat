@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 [Tool]
 public partial class TreeTest : Node3D
@@ -8,7 +9,7 @@ public partial class TreeTest : Node3D
 	[Export]
 	public MeshInstance3D MeshInstance { get; set; }
 
-	[Export] public float Scale { get; set; } = 10f;
+	[Export] public float Scale { get; set; } = 100f;
 	
 	[Export] public int AmountPerSide { get; set; } = 50;
 	
@@ -25,11 +26,14 @@ public partial class TreeTest : Node3D
 		AddChild(_parentNode);
 		Aabb bounds = MeshInstance.GetAabb();
 		DrawBoundingBox(bounds);
-		DrawPossionPoints(bounds);
-		
+
+		var trees = genTree.SpawnTrees(GenTree.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, bounds);
+		_parentNode.AddChild(trees);
+		//DrawPoissonPoints(bounds);
+
 	}
 
-	private void DrawPossionPoints(Aabb aabb)
+	private void DrawPoissonPoints(Aabb aabb)
 	{
 		//var points = PoissonDiscSampling2D.GeneratePoints
 		//	(2f, new Vector2(10f, 10f), 30);
@@ -55,10 +59,25 @@ public partial class TreeTest : Node3D
 			new[] { corners[3], corners[2], corners[6], corners[7] }, // Top face
 			new[] { corners[0], corners[1], corners[5], corners[4] }  // Bottom face
 		};
-		
-		var poissonPointsPerFace = new List<List<Vector3>>();
-		//poissonPointsPerFace.Add(PoissonDiscSampling3D.GeneratePoints(1f, new Vector3(10f, 1f, 10f), 30));
-		var totalCount = 0;
+		var sampleRadius = 2f;
+		var sampleTries = 100;
+		var poissonPointsPerFace = new List<List<Vector3>>
+			{
+				PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(aabb.Size.X, aabb.Size.Y , 0.5f), sampleTries)
+					.Select(point => point - new Vector3(aabb.Size.X, aabb.Size.Y, aabb.Size.Z) * 0.5f).ToList(),
+				PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(aabb.Size.X, aabb.Size.Y , 0.5f), sampleTries)
+					.Select(point => point - new Vector3(aabb.Size.X, aabb.Size.Y, -aabb.Size.Z) * 0.5f).ToList(),
+				PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(0.5f, aabb.Size.Y , aabb.Size.Z), sampleTries)
+					.Select(point => point - new Vector3(aabb.Size.X, aabb.Size.Y, aabb.Size.Z) * 0.5f).ToList(),
+				PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(0.5f, aabb.Size.Y , aabb.Size.Z), sampleTries)
+					.Select(point => point - new Vector3(-aabb.Size.X, aabb.Size.Y, aabb.Size.Z) * 0.5f).ToList(),
+				PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(aabb.Size.X, 0.5f , aabb.Size.Z), sampleTries)
+					.Select(point => point - new Vector3(aabb.Size.X, aabb.Size.Y, aabb.Size.Z) * 0.5f).ToList(),
+				PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(aabb.Size.X, 0.5f , aabb.Size.Z), sampleTries)
+					.Select(point => point - new Vector3(aabb.Size.X, -aabb.Size.Y, aabb.Size.Z) * 0.5f).ToList()
+			};
+
+		var totalCount = poissonPointsPerFace.Select(list => list.Count).ToList().Sum();
 		
 		var faceNormals = new[]
 		{
@@ -70,20 +89,12 @@ public partial class TreeTest : Node3D
 			new Vector3(0, -1, 0)  // Bottom face
 		};
 		
+		// PoissonDiscSampling3D.GeneratePoints(1f, new Vector3(aabb.Size.X, aabb.Size.Y , 0.5f), 30) [1]
+		// PoissonDiscSampling3D.GeneratePoints(1f, new Vector3(0.5f, aabb.Size.Y, aabb.Size.Z), 30) [3]
 		
-		poissonPointsPerFace.Add(
-			PoissonDiscSampling3D.GeneratePoints(1f, new Vector3(aabb.Size.X, 1f, aabb.Size.Z), 30)
-			);
-		
-		poissonPointsPerFace[0].ForEach(delegate(Vector3 point)
-		{
-			point += faceNormals[0] * aabb.Size.Z;
-		});
-		
-		
-		
-
-
+		List<Vector3> points3d = 
+			PoissonDiscSampling3D.GeneratePoints(1f, new Vector3(aabb.Size.X, 0.5f , aabb.Size.Z), 30)
+				.Select(point => point - new Vector3(aabb.Size.X, 0, aabb.Size.Z) * 0.5f).ToList();
 		
 		
 		MultiMesh multiMesh = new MultiMesh();
@@ -94,31 +105,25 @@ public partial class TreeTest : Node3D
 			Size = 0.5f * Vector3.One
 		};
 		
-		int instanceIndex = 0;
-		for (int i = 0; i < aabbFaces.Count; i++)
+		var instanceCount = 0;
+		for (int i = 0; i < poissonPointsPerFace.Count; i++)
 		{
-			var points = poissonPointsPerFace[i];
-			
-			for (int j = 0; j < points.Count; j++)
+			var face = poissonPointsPerFace[i];
+			for (int j = 0; j < face.Count; j++)
 			{
-				Vector3 point = points[j];
-				// Offset the point to the correct side of the face
-				points[j] = new Vector3(
-					point.X,
-					point.Y,
-					point.Z
-				);
-				
+				var point = face[j];
 				Transform3D transform = new Transform3D(Basis.Identity, point);
-				multiMesh.SetInstanceTransform(instanceIndex, transform);
-				instanceIndex++;
+				multiMesh.SetInstanceTransform(instanceCount, transform);
+				instanceCount++;
 			}
 		}
-		
+
 		/*
-		for (int i = 0; i < points.Count; i++)
+		for (int i = 0; i < points3d.Count; i++)
 		{
-			Vector3 point = new Vector3(points[i].X, 0, points[i].Y);
+			Vector3 point = points3d[i];
+			var offset = faceNormals[4] * aabb.Size * 0.5f;
+			point += offset;
 			Transform3D transform = new Transform3D(Basis.Identity, point);
 			multiMesh.SetInstanceTransform(i, transform);
 		}
