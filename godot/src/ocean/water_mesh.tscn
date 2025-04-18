@@ -1,7 +1,7 @@
 [gd_scene load_steps=11 format=3 uid="uid://bofhg0a64o1ap"]
 
 [ext_resource type="Shader" uid="uid://dhdtae8rob82a" path="res://src/ocean/water.gdshader" id="1_hsljn"]
-[ext_resource type="Script" uid="uid://dkujr10uhcgp5" path="res://src/ocean/Water.cs" id="2_3yyav"]
+[ext_resource type="Script" uid="uid://hrx5utvt3c07" path="res://src/ocean/ocean.gd" id="2_3yyav"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_hsljn"]
 radius = 32.0
@@ -39,7 +39,7 @@ noise = SubResource("FastNoiseLite_ttfuv")
 render_priority = 0
 shader = ExtResource("1_hsljn")
 shader_parameter/deep_color = Color(0, 0.356863, 0.509804, 1)
-shader_parameter/shallow_color = Color(2.88785e-06, 0.558162, 0.785854, 1)
+shader_parameter/shallow_color = Color(0, 0.556863, 0.784314, 1)
 shader_parameter/shallow_size = 10.5
 shader_parameter/foam_color = Color(1, 1, 1, 1)
 shader_parameter/foam_size = 0.5
@@ -53,11 +53,17 @@ shader_parameter/texture_3d = SubResource("NoiseTexture3D_5qegk")
 shader_parameter/tex3d_bump_map_blend = 0.8
 shader_parameter/dir_bump_map1 = Vector2(1, 0)
 shader_parameter/dir_bump_map2 = Vector2(0.25, 0.75)
-shader_parameter/speed_bump_map1 = 0.005
-shader_parameter/speed_bump_map2 = 0.005
+shader_parameter/speed_bump_map1 = 0.001
+shader_parameter/speed_bump_map2 = 0.001
+shader_parameter/wave_speed = 0.001
+shader_parameter/time = 9.95403
+shader_parameter/delta_time = 0.0320548
 
 [node name="WaterMesh" type="MeshInstance3D"]
 cast_shadow = 0
 mesh = SubResource("SphereMesh_hsljn")
 surface_material_override/0 = SubResource("ShaderMaterial_na11i")
 script = ExtResource("2_3yyav")
+deep_color = Color(0, 0.356863, 0.509804, 1)
+shallow_color = Color(0, 0.556863, 0.784314, 1)
+foam_color = Color(1, 1, 1, 1)
