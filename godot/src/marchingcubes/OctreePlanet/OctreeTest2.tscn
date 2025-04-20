@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://clrm8ouxsspse"]
+
+[ext_resource type="Script" uid="uid://r87jfre8pihr" path="res://src/noise/CelestialBodyNoise/PlanetNoise/DeterministicRandomPlanet.cs" id="1_vs0qo"]
+[ext_resource type="Script" uid="uid://dic13ujysaolo" path="res://src/marchingcubes/OctreePlanet/OctreePlanetSpawner.cs" id="2_383cn"]
+
+[node name="OctreeTest2" type="Node3D"]
+script = ExtResource("1_vs0qo")
+radius = 32
+
+[node name="Node3D" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
+script = ExtResource("2_383cn")
+Center = Vector3(16, 16, -16)
+Depth = 2
+CelestialBody = NodePath("..")

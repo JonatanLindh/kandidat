@@ -120,10 +120,18 @@ public sealed partial class MarchingCubeDispatch : Node
 				{
 					lock (_generateMeshLock) // Ensure only one thread calls GenerateMesh at a time
 					{
+						var dataPointsOffset = request.Center - request.Offset;
+
 						// Either CelestialBodyNoise or a regular float[,,] array
-						var datapoints = request.DataPoints ?? request.PlanetDataPoints.GetNoise();
+						var datapoints = request.DataPoints ?? request.PlanetDataPoints.GetNoise(dataPointsOffset);
 						var mesh = _marchingCube.GenerateMesh(datapoints, request.Scale, request.Offset);
 
+						if (mesh == null)
+						{
+							GD.PrintErr("Generated mesh is null. Skipping this request.");
+							return;
+						}
+						
 						var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
 						meshInstance.Mesh = mesh;
 						meshInstance.CreateMultipleConvexCollisions();
@@ -192,6 +200,7 @@ public record MarchingCubeRequest
 	public CelestialBodyNoise PlanetDataPoints { get; init; }
 	public float Scale { get; init; }
 	public Vector3 Offset { get; init; }
+	public Vector3 Center { get; init; }
 	public Node Root { get; init; }
 	public Node TempNode { get; init; }
 	

@@ -56,6 +56,20 @@ public partial class OctreePlanetSpawner : Node
 	private int _resolution = 64;
 	private MarchingCube _marchingCube;
 	
+	
+	// Things from McSpawner
+	private PlanetThemeGenerator _themeGenerator = new PlanetThemeGenerator();
+	private ShaderMaterial _planetShader;
+	public ShaderMaterial PlanetShader
+	{
+		get => _planetShader;
+		set
+		{
+			_planetShader = value;
+		}
+	}
+
+	
 	public override void _Ready()
 	{
 		Init();
@@ -97,8 +111,24 @@ public partial class OctreePlanetSpawner : Node
 		transform3D.Origin = center;
 		transform3D.Basis = Basis.Identity;
 		instance.Transform = transform3D;
+
+		var requestInstance = new MeshInstance3D();
+		requestInstance.Transform = transform3D;
+
+		// Send the request to the MarchingCubeDispatch
+		MarchingCubeRequest cubeRequest = new MarchingCubeRequest
+		{
+			PlanetDataPoints = celestialBody,
+			Scale = scaleFactor,
+			Offset = Vector3.One * (size / 2),
+			Center = center,
+			Root = _rootTest,	
+			CustomMeshInstance = requestInstance,
+			GeneratePlanetShader = GeneratePlanetShader
+		};
+		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 		
-		_rootTest.AddChild(instance);
+		//_rootTest.AddChild(instance);
 		
 		// Maybe return the MeshInstance3D?
 		// return instance;
@@ -180,6 +210,29 @@ public partial class OctreePlanetSpawner : Node
 			DisableFog = true
 		};
 		_rootTest.AddChild(boundingBoxInstance);
+	}
+	
+	
+	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
+		// Load the shader correctly
+		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
+		ShaderMaterial shaderMaterial = new ShaderMaterial();
+		shaderMaterial.Shader = shader;
+		shaderMaterial.SetShaderParameter("min_height", minHeight);
+		shaderMaterial.SetShaderParameter("max_height", maxHeight);
+
+
+		// Access exported property (gradient)
+		Gradient gradient = _themeGenerator.Gradient;
+		GradientTexture1D gradientTexture = new GradientTexture1D();
+		gradientTexture.Gradient = gradient;
+		gradientTexture.Width = 256;
+
+		shaderMaterial.SetShaderParameter("height_color", gradientTexture);
+		shaderMaterial.SetShaderParameter("cliff_color", gradient.GetColor(3));
+
+		return shaderMaterial;
+
 	}
 	
 	private float[,,] GenerateDataPoints(Vector3 offset , int depth)
