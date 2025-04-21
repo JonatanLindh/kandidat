@@ -1,28 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://5e7ris75mkdi"]
+[gd_scene load_steps=3 format=3 uid="uid://5e7ris75mkdi"]
 
-[ext_resource type="Script" uid="uid://cnikwq6bgmy1k" path="res://src/noise/CelestialBodyNoise/PlanetNoise/CelestialBodyInput.cs" id="1_8t10l"]
 [ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="2_455go"]
-[ext_resource type="Script" uid="uid://nqgu7rpdrhhf" path="res://src/noise/CelestialBodyNoise/PlanetNoise/PlanetNoise.cs" id="3_455go"]
-[ext_resource type="Script" uid="uid://bbu2bvnkwq6r3" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomCelestialBodyNoise.cs" id="4_0h02l"]
+[ext_resource type="Script" uid="uid://b5gvbscgwukiu" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomPlanet.cs" id="3_8t10l"]
 
 [node name="RandomPlanet" type="Node3D"]
-script = ExtResource("1_8t10l")
-Width = 66
-Height = 66
-Depth = 66
-Octaves = 7
-Frequency = 1.28
-Amplitude = 5.0
-Lacunarity = 2.68
-Persistence = 0.25
-seed = 1798326958
+script = ExtResource("3_8t10l")
+radius = 32
 
 [node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("2_455go")]
-CelestialBody = NodePath("../Random")
-
-[node name="Random" type="Node" parent="." node_paths=PackedStringArray("CelestialBody")]
-script = ExtResource("4_0h02l")
-CelestialBody = NodePath("../Planet")
-
-[node name="Planet" type="Node" parent="."]
-script = ExtResource("3_455go")
+CelestialBody = NodePath("..")

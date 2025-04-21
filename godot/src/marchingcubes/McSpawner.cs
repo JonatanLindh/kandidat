@@ -8,17 +8,16 @@ using System;
 [Tool]
 public partial class McSpawner : Node3D
 {
-	private bool _reload;
-	[Export]
-	public bool reload
-	{
-		get => _reload;
-		set
-		{
-			_reload = !value;
-			//OnResourceSet();
-		}
-	}
+    private bool _reload;
+    [Export]
+    public bool reload
+    {
+        get => _reload;
+        set
+        {
+            _reload = !value;
+        }
+    }
 
 	private CelestialBodyNoise celestialBody;
 	private Node cb;
@@ -28,7 +27,6 @@ public partial class McSpawner : Node3D
 		set
 		{
 			cb = value;
-			// OnResourceSet(); TODO THIS MAKES THE SpawnMesh() FUNCTION RUN TWICE!
 		}
 	}
 
@@ -88,20 +86,22 @@ public partial class McSpawner : Node3D
 		_marchingCube ??= new MarchingCube();
 
 		celestialBody = CelestialBody as CelestialBodyNoise;
-		if(celestialBody != null)
+		if(celestialBody == null)
 		{
-			float[,,] dataPoints = celestialBody.GetNoise();
-			_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
-			_meshInstance3D.MaterialOverride = GeneratePlanetShader();
-
-			this.AddChild(_meshInstance3D);
-
-			var grass = new NewGrass();
-			var meshSurface = _meshInstance3D.Mesh.SurfaceGetArrays(0);
-			AddChild(grass.PopulateMesh(meshSurface, 500000));
-			
-			SpawnTrees();
+			GD.PrintErr("celestialBody is null");
 		}
+		float[,,] dataPoints = celestialBody.GetNoise();
+		_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
+		_meshInstance3D.MaterialOverride = GeneratePlanetShader();
+
+		this.AddChild(_meshInstance3D);
+
+		var grass = new NewGrass();
+		var meshSurface = _meshInstance3D.Mesh.SurfaceGetArrays(0);
+		AddChild(grass.PopulateMesh(meshSurface, 500000));
+		
+		SpawnTrees();
+		
 	}
 
 	private void SpawnTrees()
