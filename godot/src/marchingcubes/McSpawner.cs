@@ -106,7 +106,12 @@ public partial class McSpawner : Node3D
 
 	private void SpawnTrees()
 	{
-		var scale = celestialBody.GetScale();
+		if (celestialBody is not Node3D celestialBodyNode3D)
+		{
+			GD.PrintErr("celestialBodyNode3D is null");
+			return;
+		}
+		var scale = celestialBodyNode3D.GetScale();
 		var genTree = new GenTree(10, 100f);
 		var aabb = _meshInstance3D.GetAabb();
 		var offset = GetGlobalPosition();
