@@ -6,7 +6,7 @@
 [node name="OctreeTest" type="Node3D"]
 script = ExtResource("1_erx03")
 radius = 1000
-seed = 390735
+seed = 2984092
 
 [node name="Node3D" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("1_j5x0m")

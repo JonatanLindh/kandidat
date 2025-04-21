@@ -113,7 +113,7 @@ public partial class OctreePlanetSpawner : Node
 		
 		//var data = GenerateDataPoints(offset, depth);
 		var scaleFactor = GetVoxelSize(depth);
-		celestialBody.VoxelSize = scaleFactor;
+		//celestialBody.VoxelSize = scaleFactor;	
 		//var data = celestialBody.GetNoise(offset);
 		//var mesh = _marchingCube.GenerateMesh(data, scale: scaleFactor, offset: Vector3.One * (size / 2));
 		var instance = new MeshInstance3D();
@@ -199,6 +199,9 @@ public partial class OctreePlanetSpawner : Node
 		var center7 = new Vector3(centerSize, -centerSize, -centerSize);
 		var center8 = new Vector3(-centerSize, -centerSize, -centerSize);
 		
+		CallDeferred(nameof(SpawnChunk), Vector3.Zero, _radius * 2, 0);
+
+		
 		CallDeferred(nameof(SpawnChunk), center1, size, _depth);
 		
 		CallDeferred(nameof(SpawnChunk), center2, size, _depth);
@@ -209,6 +212,7 @@ public partial class OctreePlanetSpawner : Node
 		CallDeferred(nameof(SpawnChunk), center6, size, _depth);
 		CallDeferred(nameof(SpawnChunk), center7, size, _depth);
 		CallDeferred(nameof(SpawnChunk), center8, size, _depth);
+		
 		
 	}
 	
@@ -259,8 +263,11 @@ public partial class OctreePlanetSpawner : Node
 	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
 		if(_planetShader != null)
 		{
+			GD.Print($"Already Loaded shader");
 			return _planetShader;
 		}
+
+		GD.Print($"Loaded shader");
 		
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");

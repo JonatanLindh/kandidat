@@ -123,7 +123,16 @@ public sealed partial class MarchingCubeDispatch : Node
 						var dataPointsOffset = request.Center - request.Offset;
 
 						// Either CelestialBodyNoise or a regular float[,,] array
-						var datapoints = request.DataPoints ?? request.PlanetDataPoints.GetNoise(dataPointsOffset);
+						float[,,] datapoints;
+						if (request.PlanetDataPoints != null)
+						{
+							request.PlanetDataPoints.VoxelSize = request.Scale;
+							datapoints = request.PlanetDataPoints.GetNoise(dataPointsOffset);
+						}
+						else
+						{
+							datapoints = request.DataPoints;
+						}
 						var mesh = _marchingCube.GenerateMesh(datapoints, request.Scale, request.Offset);
 
 						if (mesh == null)
