@@ -6,6 +6,7 @@ render_mode cull_disabled, ensure_correct_normals;
 group_uniforms GrassColor;
 uniform vec3 base_color : source_color = vec3(0.05,0.2,0.01);
 uniform vec3 tip_color : source_color = vec3(0.5,0.5,0.1);
+uniform vec3 subsurface_scattering_color : source_color = vec3(1.0,0.75,0.1);
 uniform float grid_size = 50.0; // Size of the repeating grid
 
 // Source: https://www.shadertoy.com/view/Xt3cDn
@@ -43,14 +44,15 @@ float ease_out_quartic(float x) {
 void vertex() {
 	// Called for every vertex the material is visible on.
 	float height_percent = 1.0 - UV.y;
-	
-	
 	// Transform to mesh local space (this will be stable regardless of mesh movement)
 	vec3 local_pos = (inverse(MODEL_MATRIX) * vec4(NODE_POSITION_WORLD, 1.0)).xyz;
-	
     // Use INSTANCE_CUSTOM.x instead of hash based on position
     float hash0 = hash12(INSTANCE_CUSTOM.xz);
 	float hash1 = hash12(-INSTANCE_CUSTOM.xz);
+	
+	// --- GRASS BLADE HEIGHT/WIDTH ---
+	vec3 camera_offset = NODE_POSITION_WORLD - CAMERA_POSITION_WORLD;
+	float camera_distance = length(camera_offset);
 	
 	VERTEX.x *= mix(0.6, 1.0, hash1);
 	
@@ -64,18 +66,33 @@ void vertex() {
 	mat3 grass_bend = rotate_x(curve_amount);
 	
 	mat3 grass_mat = grass_rotate * grass_bend;
-	
 	VERTEX = grass_mat * VERTEX;
 	NORMAL = grass_mat * NORMAL;
+	
+	
+	// --- VIEW SPACE THICKENING ---
+	// Grass blades perpendicular to the camera will appear very thin. We stretch
+	// these blades horizontally in view space to make them appear more 'full'.
+	vec3 vertex_view = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	vec3 normal_world = (MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz;
+	float dot_nv = dot(normalize(normal_world), normalize(camera_offset));
 	
 }
 
 void fragment() {
 	// Called for every pixel the material is visible on.
+	float fog_factor = exp(-length(VERTEX)*0.017);
+	mat3 normal_offset = rotate_y(mix(-0.12, 0.12, UV.x)*PI);
+	NORMAL = normalize(normal_offset * NORMAL);
+	// Blend grass normal with terrain normal based on distance (assumes up is 0,1,0!)
+	NORMAL = mix(vec3(0,1,0), NORMAL, fog_factor);
+
 	
 	float height_factor = 1.0 - UV.y;
 	ALBEDO = mix(base_color, tip_color, ease_in_quartic(height_factor));
 	ALBEDO *= mix(0.1, 1.0, height_factor*height_factor);
+	
+	
 	ROUGHNESS = mix(1.0, 0.4, ease_out_quartic(height_factor));
 	ANISOTROPY = 0.85;
 	
@@ -84,7 +101,9 @@ void fragment() {
 	}
 }
 
-//void light() {
-//	// Called for every pixel for every light affecting the material.
-//	// Uncomment to replace the default light processing function with this one.
-//}
+void light() {
+	float diffuse_factor = pow(4.0, dot(NORMAL, LIGHT)) / 4.0; // Diffuse never drops to 0 to simulate ambient bounces
+	float sss_factor = max(-dot(VIEW, LIGHT), 0.0) * 0.5;
+	DIFFUSE_LIGHT += (diffuse_factor + sss_factor*subsurface_scattering_color) * ATTENUATION * LIGHT_COLOR;
+	SPECULAR_LIGHT *= diffuse_factor;
+}
