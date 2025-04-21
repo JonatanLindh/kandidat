@@ -68,5 +68,7 @@ public partial class BasicPlanet : Node, CelestialBodyNoise
         return param.Radius;
     }
 
+    public int Resolution { get; set; }
+
     public float VoxelSize { get; set; } = 1f;
 }

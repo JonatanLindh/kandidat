@@ -41,6 +41,8 @@ public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNo
         return radius;
     }
 
+    public int Resolution { get; set; }
+
     public float VoxelSize { get; set; } = 1f;
 
     public void SetRadius(int radius)

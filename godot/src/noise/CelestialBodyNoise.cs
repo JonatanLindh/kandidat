@@ -23,6 +23,8 @@ public interface CelestialBodyNoise
     /// <returns>The radius</returns>
     int GetRadius();
 
+    
+    int Resolution { get; set; }
 
     float VoxelSize { get; set; }
 }

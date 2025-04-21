@@ -53,7 +53,7 @@ public partial class OctreePlanetSpawner : Node
 	private int _maxDepth = 8;
 	private float _baseVoxelSize;
 	private float _radius = 32;
-	private int _resolution = 64;
+	private int _resolution = 32;
 	private MarchingCube _marchingCube;
 	
 	
@@ -66,6 +66,20 @@ public partial class OctreePlanetSpawner : Node
 		set
 		{
 			_planetShader = value;
+		}
+	}
+	private double _warmth;
+	public double Warmth
+	{
+		get => _warmth;
+		set
+		{
+			_warmth = value;
+
+			if (_themeGenerator != null)
+			{
+				_themeGenerator.Warmth = value; // Tell it to pick a new theme
+			}
 		}
 	}
 
@@ -92,6 +106,7 @@ public partial class OctreePlanetSpawner : Node
 	// If possible the center should be in local space
 	public void SpawnChunk(Vector3 center, float size, int depth)
 	{
+		DrawBoundingBox(center, size);
 		
 		// Give the bottom left (0,0,0) corner of the chunk
 		var offset = center - (Vector3.One * size / 2);
@@ -99,10 +114,10 @@ public partial class OctreePlanetSpawner : Node
 		//var data = GenerateDataPoints(offset, depth);
 		var scaleFactor = GetVoxelSize(depth);
 		celestialBody.VoxelSize = scaleFactor;
-		var data = celestialBody.GetNoise(offset);
-		var mesh = _marchingCube.GenerateMesh(data, scale: scaleFactor, offset: Vector3.One * (size / 2));
+		//var data = celestialBody.GetNoise(offset);
+		//var mesh = _marchingCube.GenerateMesh(data, scale: scaleFactor, offset: Vector3.One * (size / 2));
 		var instance = new MeshInstance3D();
-		instance.Mesh = mesh;
+		//instance.Mesh = mesh;
 		instance.MaterialOverride = new StandardMaterial3D()
 		{
 			CullMode = BaseMaterial3D.CullModeEnum.Disabled
@@ -156,17 +171,45 @@ public partial class OctreePlanetSpawner : Node
 		
 		_rootTest?.QueueFree();
 		_marchingCube ??= new MarchingCube();
-		_baseVoxelSize = (_radius * 2) / (_resolution * Mathf.Pow(2, _maxDepth));
 		_rootTest = new Node3D();
-		var size = (1 /  Mathf.Pow(2, _depth)) * (_radius * 2);
 		celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody == null)
 		{
 			GD.PrintErr("celestialBody is null");
 		}
+
+		if (celestialBody != null)
+		{
+			_radius = celestialBody.GetRadius();
+			celestialBody.Resolution = _resolution;
+		}
+		_baseVoxelSize = (_radius * 2) / (_resolution * Mathf.Pow(2, _maxDepth));
+		var size = (1 /  Mathf.Pow(2, _depth)) * (_radius * 2);
+
 		AddChild(_rootTest);
-		CallDeferred(nameof(SpawnChunk), _center, size, _depth);
-		DrawBoundingBox(_center, size);
+
+		var centerSize = _radius / 2;
+		var center1 = new Vector3(centerSize, centerSize, centerSize);
+		var center2 = new Vector3(-centerSize, centerSize, centerSize);
+		var center3 = new Vector3(centerSize, centerSize, -centerSize);
+		var center4 = new Vector3(-centerSize, centerSize, -centerSize);
+		
+		var center5 = new Vector3(centerSize, -centerSize, centerSize);
+		var center6 = new Vector3(-centerSize, -centerSize, centerSize);
+		var center7 = new Vector3(centerSize, -centerSize, -centerSize);
+		var center8 = new Vector3(-centerSize, -centerSize, -centerSize);
+		
+		CallDeferred(nameof(SpawnChunk), center1, size, _depth);
+		
+		CallDeferred(nameof(SpawnChunk), center2, size, _depth);
+		CallDeferred(nameof(SpawnChunk), center3, size, _depth);
+		CallDeferred(nameof(SpawnChunk), center4, size, _depth);
+		
+		CallDeferred(nameof(SpawnChunk), center5, size, _depth);
+		CallDeferred(nameof(SpawnChunk), center6, size, _depth);
+		CallDeferred(nameof(SpawnChunk), center7, size, _depth);
+		CallDeferred(nameof(SpawnChunk), center8, size, _depth);
+		
 	}
 	
 	private void DrawBoundingBox(Vector3 center, float size)
@@ -214,12 +257,18 @@ public partial class OctreePlanetSpawner : Node
 	
 	
 	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
+		if(_planetShader != null)
+		{
+			return _planetShader;
+		}
+		
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		ShaderMaterial shaderMaterial = new ShaderMaterial();
 		shaderMaterial.Shader = shader;
 		shaderMaterial.SetShaderParameter("min_height", minHeight);
 		shaderMaterial.SetShaderParameter("max_height", maxHeight);
+		_planetShader = shaderMaterial;
 
 
 		// Access exported property (gradient)

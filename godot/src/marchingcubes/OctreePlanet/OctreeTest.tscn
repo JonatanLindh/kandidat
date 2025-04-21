@@ -5,57 +5,11 @@
 
 [node name="OctreeTest" type="Node3D"]
 script = ExtResource("1_erx03")
-radius = 32
+radius = 1000
+seed = 390735
 
-[node name="Chunk" type="Node3D" parent="."]
-
-[node name="Node3D" type="Node3D" parent="Chunk" node_paths=PackedStringArray("CelestialBody")]
+[node name="Node3D" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("1_j5x0m")
 Center = Vector3(16, 16, 16)
 Depth = 1
-CelestialBody = NodePath("../..")
-
-[node name="Node3D2" type="Node3D" parent="Chunk" node_paths=PackedStringArray("CelestialBody")]
-script = ExtResource("1_j5x0m")
-Center = Vector3(16, 16, -16)
-Depth = 1
-CelestialBody = NodePath("../..")
-
-[node name="Node3D3" type="Node3D" parent="Chunk" node_paths=PackedStringArray("CelestialBody")]
-script = ExtResource("1_j5x0m")
-Center = Vector3(-16, 16, -16)
-Depth = 1
-CelestialBody = NodePath("../..")
-
-[node name="Node3D4" type="Node3D" parent="Chunk" node_paths=PackedStringArray("CelestialBody")]
-script = ExtResource("1_j5x0m")
-Center = Vector3(-16, 16, 16)
-Depth = 1
-CelestialBody = NodePath("../..")
-
-[node name="Chunk2" type="Node3D" parent="."]
-visible = false
-
-[node name="Chunk3" type="Node3D" parent="Chunk2" node_paths=PackedStringArray("CelestialBody")]
-script = ExtResource("1_j5x0m")
-Center = Vector3(24, 24, 24)
-Depth = 2
-CelestialBody = NodePath("../..")
-
-[node name="Chunk4" type="Node3D" parent="Chunk2" node_paths=PackedStringArray("CelestialBody")]
-script = ExtResource("1_j5x0m")
-Center = Vector3(24, 24, 8)
-Depth = 2
-CelestialBody = NodePath("../..")
-
-[node name="Chunk5" type="Node3D" parent="Chunk2" node_paths=PackedStringArray("CelestialBody")]
-script = ExtResource("1_j5x0m")
-Center = Vector3(8, 24, 24)
-Depth = 2
-CelestialBody = NodePath("../..")
-
-[node name="Chunk6" type="Node3D" parent="Chunk2" node_paths=PackedStringArray("CelestialBody")]
-script = ExtResource("1_j5x0m")
-Center = Vector3(8, 24, 8)
-Depth = 2
-CelestialBody = NodePath("../..")
+CelestialBody = NodePath("..")

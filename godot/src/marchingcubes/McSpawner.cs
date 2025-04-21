@@ -96,6 +96,7 @@ public partial class McSpawner : Node
 			GD.PrintErr("celestialBody is null");
 		}
 		var planetRadius = celestialBody.GetRadius();
+		celestialBody.Resolution = planetRadius * 2;
 
 		_meshInstance3D = new MeshInstance3D();
 			
