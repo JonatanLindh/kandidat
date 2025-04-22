@@ -10,7 +10,6 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_umdtg"]
 resource_local_to_scene = true
 render_priority = 0
-render_priority = 1
 shader = ExtResource("2_umdtg")
 shader_parameter/shadow_color = Color(0, 0, 0, 1)
 shader_parameter/planet_position = Vector3(0, 0, 0)
