@@ -1,14 +1,16 @@
-[gd_scene load_steps=9 format=3 uid="uid://du6jp713wv2h5"]
+[gd_scene load_steps=10 format=3 uid="uid://du6jp713wv2h5"]
 
 [ext_resource type="Script" uid="uid://be8xbyj5m5urc" path="res://src/bodies/planet/PlanetMarchingCube.cs" id="1_ha83e"]
 [ext_resource type="PackedScene" uid="uid://banvyfc3vuq6t" path="res://src/noise/CelestialBodyNoise/PlanetNoise/DeterministicRandomPlanet.tscn" id="2_736bg"]
 [ext_resource type="Shader" uid="uid://b2yi8ib46fc6k" path="res://src/bodies/planet/atmosphere/atmosphere.gdshader" id="2_umdtg"]
+[ext_resource type="PackedScene" uid="uid://bofhg0a64o1ap" path="res://src/ocean/water_mesh.tscn" id="3_b5ifj"]
 [ext_resource type="Script" uid="uid://1e7tm60t4h55" path="res://src/bodies/planet/atmosphere/atmosphere.gd" id="3_f3734"]
 [ext_resource type="Script" uid="uid://ba2chkln3f48f" path="res://src/bodies/planet/planet_gravity_field.gd" id="5_736bg"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_umdtg"]
 resource_local_to_scene = true
 render_priority = 0
+render_priority = 1
 shader = ExtResource("2_umdtg")
 shader_parameter/shadow_color = Color(0, 0, 0, 1)
 shader_parameter/planet_position = Vector3(0, 0, 0)
@@ -36,6 +38,10 @@ script = ExtResource("1_ha83e")
 Resolution = 32
 Planet = ExtResource("2_736bg")
 Warmth = 1.0
+
+[node name="Ocean" parent="." instance=ExtResource("3_b5ifj")]
+transform = Transform3D(0.03125, 0, 0, 0, 0.03125, 0, 0, 0, 0.03125, 0, 0, 0)
+skeleton = NodePath("../Atmosphere")
 
 [node name="Atmosphere" type="MeshInstance3D" parent="."]
 transform = Transform3D(16.7, 0, 0, 0, 16.7, 0, 0, 0, 16.7, 0, 0, 0)

@@ -75,6 +75,7 @@ public partial class PlanetMarchingCube : Node3D
 	private Vector3 _sunPosition;
 	private Node3D _planet;
 	private Node _atmosphere;
+	private MeshInstance3D _ocean;
 	private Area3D _planet_gravity_field;
 
 	public override void _Ready()
@@ -118,7 +119,12 @@ public partial class PlanetMarchingCube : Node3D
 				
 				_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
 
-				AddChild(_planet);
+				// Currently just sets the ocean to be at same radius as planet, and there will be ocean on all planets..
+				_ocean = GetNodeOrNull<MeshInstance3D>("Ocean");
+				_ocean.Set("radius", _resolution);
+                _ocean.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
+
+                AddChild(_planet);
 
                 // Find McSpawner node and set Warmth
                 var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
