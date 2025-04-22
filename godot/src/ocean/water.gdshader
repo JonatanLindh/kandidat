@@ -1,4 +1,6 @@
 shader_type spatial;
+render_mode blend_mix, depth_draw_opaque;
+
 
 uniform vec3 deep_color : source_color = vec3(0.0, 91.0, 130.0);
 uniform vec3 shallow_color : source_color = vec3(0.0, 142.0, 200.0);
