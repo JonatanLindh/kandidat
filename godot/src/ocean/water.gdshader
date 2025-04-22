@@ -15,6 +15,7 @@ uniform sampler2D bump_map1;
 uniform sampler2D bump_map2;
 uniform sampler3D texture_3d;
 uniform float tex3d_bump_map_blend : hint_range(0.0, 1.0, 0.01) = 0.8;
+uniform sampler2D wave_texture;
 
 uniform vec2 dir_bump_map1 = vec2(1,0);
 uniform vec2 dir_bump_map2 = vec2(0.25, 0.75);
@@ -32,10 +33,11 @@ varying vec3 world_position;
 
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	float height = texture(bump_map1, world_position.xz + time * wave_speed).r;
+	float height = texture(wave_texture, UV + time * wave_speed).r;
 //	float wave = sin(world_position.x + TIME * 0.01) * 1.0;
 	
-	VERTEX += NORMAL * height;
+	VERTEX += NORMAL * height*2.0;
+	// re-calculate world-position after moving vertex - will be passed to fragment shader
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
 
@@ -48,7 +50,7 @@ void fragment() {
 	
 	// https://docs.godotengine.org/en/latest/tutorials/shaders/advanced_postprocessing.html
 	// depth is non-linear so need to make it linear:
-	
+
 	// Vulkan (Forward+) uses [-1, 1] in xy but [0, 1] in z. 
 	// OpenGL (Compatability) uses [-1, 1] in xyz.
 	#if CURRENT_RENDERER == RENDERER_COMPATIBILITY
@@ -109,17 +111,11 @@ void fragment() {
 	vec3 interpolated_3d_texture_color = mix(texture_3d_color1, texture_3d_color2, 0.5);
 	
 	vec3 water_surface = mix(interpolated_3d_texture_color, interpolated_bump_color, tex3d_bump_map_blend);
-	
 	NORMAL_MAP = water_surface;
 
-	//ALPHA = smooth_shallow_depth;
+	//ALPHA = 0.5;
 	METALLIC = metal;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
 	
 }
-
-//void light() {
-//	// Called for every pixel for every light affecting the material.
-//	// Uncomment to replace the default light processing function with this one.
-//}

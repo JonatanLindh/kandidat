@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bofhg0a64o1ap"]
+[gd_scene load_steps=13 format=3 uid="uid://bofhg0a64o1ap"]
 
 [ext_resource type="Shader" uid="uid://dhdtae8rob82a" path="res://src/ocean/water.gdshader" id="1_hsljn"]
 [ext_resource type="Script" uid="uid://hrx5utvt3c07" path="res://src/ocean/ocean.gd" id="2_3yyav"]
@@ -13,6 +13,7 @@ fractal_type = 2
 fractal_octaves = 4
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3yyav"]
+in_3d_space = true
 seamless = true
 as_normal_map = true
 noise = SubResource("FastNoiseLite_hsljn")
@@ -23,6 +24,7 @@ fractal_type = 2
 fractal_octaves = 4
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ttfuv"]
+in_3d_space = true
 seamless = true
 as_normal_map = true
 noise = SubResource("FastNoiseLite_na11i")
@@ -34,6 +36,14 @@ fractal_type = 2
 [sub_resource type="NoiseTexture3D" id="NoiseTexture3D_5qegk"]
 seamless = true
 noise = SubResource("FastNoiseLite_ttfuv")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_3yyav"]
+noise_type = 0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_na11i"]
+in_3d_space = true
+seamless = true
+noise = SubResource("FastNoiseLite_3yyav")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_na11i"]
 render_priority = 0
@@ -51,13 +61,14 @@ shader_parameter/bump_map1 = SubResource("NoiseTexture2D_3yyav")
 shader_parameter/bump_map2 = SubResource("NoiseTexture2D_ttfuv")
 shader_parameter/texture_3d = SubResource("NoiseTexture3D_5qegk")
 shader_parameter/tex3d_bump_map_blend = 0.8
+shader_parameter/wave_texture = SubResource("NoiseTexture2D_na11i")
 shader_parameter/dir_bump_map1 = Vector2(1, 0)
-shader_parameter/dir_bump_map2 = Vector2(0.25, 0.75)
-shader_parameter/speed_bump_map1 = 0.001
-shader_parameter/speed_bump_map2 = 0.001
-shader_parameter/wave_speed = 0.001
-shader_parameter/time = 9.95403
-shader_parameter/delta_time = 0.0320548
+shader_parameter/dir_bump_map2 = Vector2(0, 1)
+shader_parameter/speed_bump_map1 = 0.005
+shader_parameter/speed_bump_map2 = 0.005
+shader_parameter/wave_speed = 0.003
+shader_parameter/time = 1027.36
+shader_parameter/delta_time = 0.0391997
 
 [node name="WaterMesh" type="MeshInstance3D"]
 cast_shadow = 0
