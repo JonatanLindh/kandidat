@@ -84,7 +84,6 @@ public partial class PlanetThemeGenerator : Resource
 
         if(switchToNeighbor)
         {
-            GD.Print("Switching to neighbour");
             if (closestIndex == 0)
             {
                 closestSet = ThemeSets[1];
