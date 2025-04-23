@@ -64,15 +64,6 @@ public partial class PlanetThemeGenerator : Resource
         int closestIndex = 0;
         float smallestDiff = Math.Abs(closestSet.Warmth - (float)_warmth);
 
-        //foreach (var set in ThemeSets)
-        //{
-        //    float diff = Math.Abs(set.Warmth - (float)_warmth);
-        //    if (diff < smallestDiff)
-        //    {
-        //        smallestDiff = diff;
-        //        closestSet = set;
-        //    }
-        //}
 
         for (int i = 0; i < ThemeSets.Count; i++)
         {
