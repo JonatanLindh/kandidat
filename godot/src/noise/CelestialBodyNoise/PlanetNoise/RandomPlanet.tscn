@@ -11,4 +11,4 @@ radius = 32
 [node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("2_455go")]
 CelestialBody = NodePath("..")
 
-[node name="WaterMesh" parent="." instance=ExtResource("3_455go")]
+[node name="Ocean" parent="." instance=ExtResource("3_455go")]
