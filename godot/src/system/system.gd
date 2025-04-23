@@ -131,6 +131,7 @@ func generateSystemFromSeed(s: int):
 	clearBodies();
 	var r = RandomNumberGenerator.new();
 	r.seed = s;
+	SUN.seed = s
 	generatePlanets(r)
 
 
