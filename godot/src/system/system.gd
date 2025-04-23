@@ -116,10 +116,8 @@ func generatePlanets(r):
 		for m in range(moons):
 			generateMoon(r, planetInstance, (m + 1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE)
 			
-	# Now we calculate the max radius after all planets are placed
 	var system_radius = getSystemRadius()
 	
-	# Assign warmth after all planets are added
 	for planetInstance in planet_instances:
 		var distance_to_sun = (planetInstance.position - SUN.position).length()
 		var warmth = calculate_planet_warmth(distance_to_sun, system_radius)
