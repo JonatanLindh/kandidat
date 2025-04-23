@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://t3drqb7n7qk5"]
+
+[ext_resource type="Script" uid="uid://dbmt0e25w6ev0" path="res://src/benchmark/scenes/scene_scripts/PlanetBenchmark.cs" id="1_4b5kf"]
+[ext_resource type="PackedScene" uid="uid://du6jp713wv2h5" path="res://src/bodies/planet/planet_marching_cube.tscn" id="2_v08pw"]
+[ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="3_vl1gc"]
+[ext_resource type="PackedScene" uid="uid://c4qg4a1uuvy8x" path="res://src/bodies/star/star.tscn" id="4_lfx4l"]
+
+[node name="PlanetBenchmark" type="Node3D" node_paths=PackedStringArray("orbitPivot", "planetPivot", "movePivot")]
+script = ExtResource("1_4b5kf")
+orbitPivot = NodePath("OrbitPivot")
+planetPivot = NodePath("OrbitPivot/PlanetPivot")
+movePivot = NodePath("OrbitPivot/PlanetPivot/MovePivot")
+
+[node name="Skybox" parent="." instance=ExtResource("3_vl1gc")]
+
+[node name="Star" parent="." instance=ExtResource("4_lfx4l")]
+
+[node name="OrbitPivot" type="Node3D" parent="."]
+
+[node name="PlanetPivot" type="Node3D" parent="OrbitPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 0, 0)
+
+[node name="PlanetMarchingCube" parent="OrbitPivot/PlanetPivot" instance=ExtResource("2_v08pw")]
+Seed = 89
+
+[node name="MovePivot" type="Node3D" parent="OrbitPivot/PlanetPivot"]
+transform = Transform3D(0.831819, 0, 0.555048, 0, 1, 0, -0.555048, 0, 0.831819, 0, 0.0886338, 0)
+
+[node name="Camera3D" type="Camera3D" parent="OrbitPivot/PlanetPivot/MovePivot"]
+transform = Transform3D(-5.96046e-08, 0, 1, 0, 1, 0, -1, 0, -5.96046e-08, 0.177174, 1.15316, 0.00887489)

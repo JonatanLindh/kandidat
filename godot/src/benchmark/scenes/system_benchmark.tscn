@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://cfiwmtxcjnlk3"]
+
+[ext_resource type="Script" uid="uid://bawja2eewhh3n" path="res://src/benchmark/scenes/scene_scripts/SystemBenchmark.cs" id="1_tb3rb"]
+[ext_resource type="PackedScene" uid="uid://dru1frs0nrf78" path="res://src/system/system.tscn" id="2_dqo4h"]
+
+[node name="SystemBenchmark" type="Node3D" node_paths=PackedStringArray("system", "pivot")]
+script = ExtResource("1_tb3rb")
+system = NodePath("System")
+pivot = NodePath("Pivot")
+
+[node name="System" parent="." instance=ExtResource("2_dqo4h")]
+
+[node name="Pivot" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="Pivot"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 20, 220)
