@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="2_455go"]
 [ext_resource type="Script" uid="uid://b5gvbscgwukiu" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomPlanet.cs" id="3_8t10l"]
-[ext_resource type="PackedScene" uid="uid://bofhg0a64o1ap" path="res://src/ocean/water_mesh.tscn" id="3_455go"]
+[ext_resource type="PackedScene" uid="uid://bofhg0a64o1ap" path="res://src/ocean/ocean.tscn" id="3_455go"]
 
 [node name="RandomPlanet" type="Node3D"]
 script = ExtResource("3_8t10l")
