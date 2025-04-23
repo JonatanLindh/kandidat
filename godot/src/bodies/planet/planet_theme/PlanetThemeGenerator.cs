@@ -61,20 +61,54 @@ public partial class PlanetThemeGenerator : Resource
         var rnd = new Random(seed);
 
         PlanetThemeSet closestSet = ThemeSets[0];
+        int closestIndex = 0;
         float smallestDiff = Math.Abs(closestSet.Warmth - (float)_warmth);
 
-        foreach (var set in ThemeSets)
+        //foreach (var set in ThemeSets)
+        //{
+        //    float diff = Math.Abs(set.Warmth - (float)_warmth);
+        //    if (diff < smallestDiff)
+        //    {
+        //        smallestDiff = diff;
+        //        closestSet = set;
+        //    }
+        //}
+
+        for (int i = 0; i < ThemeSets.Count; i++)
         {
-            float diff = Math.Abs(set.Warmth - (float)_warmth);
-            if (diff < smallestDiff)
+            float diff = Math.Abs(ThemeSets[i].Warmth - (float)_warmth);
+            if(diff < smallestDiff)
             {
                 smallestDiff = diff;
-                closestSet = set;
+                closestIndex = i;
             }
         }
 
+        closestSet = ThemeSets[closestIndex];
+
         if (closestSet.Themes.Count == 0)
             return;
+
+        bool switchToNeighbor = rnd.Next(2) == 0;
+
+        if(switchToNeighbor)
+        {
+            GD.Print("Switching to neighbour");
+            if (closestIndex == 0)
+            {
+                closestSet = ThemeSets[1];
+            }
+            else if (closestIndex == ThemeSets.Count - 1)
+            {
+                closestSet = ThemeSets[ThemeSets.Count - 2];
+            }
+            else
+            {
+                int randomInd = rnd.Next(2) == 0 ? -1 : 1;
+                closestSet = ThemeSets[closestIndex + randomInd];
+                GD.Print(closestIndex + randomInd);
+            }
+        }
 
         int randomIndex = rnd.Next(closestSet.Themes.Count);
         var selectedTheme = closestSet.Themes[randomIndex];
@@ -118,6 +152,7 @@ public partial class PlanetThemeGenerator : Resource
 
             if (themeSet != null)
             {
+                GD.Print($"Adding theme: {fileName}");
                 ThemeSets.Add(themeSet);
             }
             else
