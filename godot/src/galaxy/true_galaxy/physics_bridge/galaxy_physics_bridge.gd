@@ -30,10 +30,6 @@ func get_stars() -> Dictionary:
 		return {}
 	return stars
 
-## Get the current frame deltatime
-func get_delta() -> float:
-	return get_process_delta_time()
-
 ## Updates star velocities and applies them to the transforms
 func apply_velocities(new_velocites : PackedVector3Array):
 	if(!init):
