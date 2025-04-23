@@ -15,12 +15,12 @@ shader_parameter/planet_position = Vector3(0, 0, 0)
 shader_parameter/sun_direction = Vector3(1, 0, 0)
 shader_parameter/thickness_scale = 10.0
 shader_parameter/planet_radius = 150.0
-shader_parameter/density_falloff = 12.0
+shader_parameter/density_falloff = 6.9
 shader_parameter/num_in_scattering_points = 10
 shader_parameter/num_optical_depth_points = 10
-shader_parameter/wavelengths = Vector3(1000, 530, 800)
-shader_parameter/scattering_strenght = 14.88
-shader_parameter/atmosphere_scale = 1.4
+shader_parameter/wavelengths = Vector3(620, 800, 1000)
+shader_parameter/scattering_strenght = 2.38
+shader_parameter/atmosphere_scale = 1.3
 
 [sub_resource type="BoxMesh" id="BoxMesh_736bg"]
 resource_local_to_scene = true
@@ -35,13 +35,16 @@ resource_local_to_scene = true
 script = ExtResource("1_ha83e")
 Resolution = 32
 Radius = 150.0
+Seed = 1558686225
 Planet = ExtResource("2_736bg")
+Warmth = 0.5
 
 [node name="Atmosphere" type="MeshInstance3D" parent="."]
 transform = Transform3D(16.7, 0, 0, 0, 16.7, 0, 0, 0, 16.7, 0, 0, 0)
 mesh = SubResource("BoxMesh_736bg")
 script = ExtResource("3_f3734")
 radius = 150.0
+planet_seed = 1558686225
 
 [node name="PlanetGravityField" type="Area3D" parent="."]
 gravity_space_override = 3
