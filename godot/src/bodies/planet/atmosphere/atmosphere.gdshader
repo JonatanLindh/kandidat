@@ -23,9 +23,9 @@ varying vec3 sunDirView;
 varying vec3 scattering_coefficients;
 
 // FOR LOD
-const float CLOSE_THRESHOLD = 100.;
-const float MEDIUM_THRESHOLD = 200.;
-const float FAR_THRESHOLD = 300.;
+varying float CLOSE_THRESHOLD;
+varying float MEDIUM_THRESHOLD;
+varying float FAR_THRESHOLD;
 
 
 vec2 raySphere(vec3 sphereCenter, float sphereRadius, vec3 rayOrigin, vec3 rayDir, float maxDepth){
@@ -126,6 +126,10 @@ void vertex() {
 }
 
 void fragment() {
+	CLOSE_THRESHOLD = 100. * planet_radius;
+	MEDIUM_THRESHOLD = 200. * planet_radius;
+	FAR_THRESHOLD = 300. * planet_radius;
+	
 	scattering_coefficients = calculate_wavelengths();
 
 	// scale the atmosphere radius
