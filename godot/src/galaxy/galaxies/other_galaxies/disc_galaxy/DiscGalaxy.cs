@@ -4,25 +4,28 @@ using System;
 public partial class DiscGalaxy : Node3D
 {
 	[Export] FastNoiseLite noise;
+	[Export] StarMultiMesh starMultiMesh;
+	[Export] Mesh starMesh;
+
+	[Export] uint seed;
+
+	SeedGenerator seedGen = new SeedGenerator();
+
+	TrueStar[] stars;
 
 	int starCount = 10000;
-	[Export] PackedScene starScene;
-
-	float rotationSpeed = 0.05f;
 
 	float baseISOLevel = 0.5f;
 	float radius = 1000;
 
-	[Export] int seed;
-	Random random;
-
 	public override void _Ready()
 	{
 		// Sets a random seed if no seed is provided
-		if (seed == 0) seed = new Random().Next();
-		
-		random = new Random(seed);
-		noise.Seed = seed;
+		if (seed == 0) seed = (uint)new Random().Next();
+
+		GD.Seed(seed);
+
+		stars = new TrueStar[starCount];
 
 		Generate();
 	}
@@ -30,11 +33,6 @@ public partial class DiscGalaxy : Node3D
 	public override void _Process(double delta)
 	{
 
-	}
-
-	public override void _PhysicsProcess(double delta)
-	{
-		RotateY((float)delta * rotationSpeed);
 	}
 
 	private void Generate()
@@ -48,19 +46,33 @@ public partial class DiscGalaxy : Node3D
 
 			if (GetISOLevel(point) > noiseVal)
 			{
-				MeshInstance3D star = (MeshInstance3D)starScene.Instantiate();
-				star.Position = point;
-				AddChild(star);
+				TrueStar star = new TrueStar(
+					new Transform3D(Basis.Identity, point),
+					seedGen.GenerateSeed(seed, point),
+					10f,
+					Vector3.Zero,
+					"Star"
+				);
+
+				stars[starsGenerated] = star;
 				starsGenerated++;
 			}
 		}
+		
+		Vector3[] starPositions = new Vector3[starCount];
+		for (int i = 0; i < starCount; i++)
+		{
+			starPositions[i] = stars[i].transform.Origin;
+		}
+
+		starMultiMesh.DrawStars(starPositions, starMesh);
 	}
 
 	private Vector3 SamplePointInSphere()
 	{
-		double u = random.NextDouble();
-		double v = random.NextDouble();
-		double w = random.NextDouble();
+		double u = GD.RandRange(0f, 1f);
+		double v = GD.RandRange(0f, 1f);
+		double w = GD.RandRange(0f, 1f);
 
 		double theta = 2 * Math.PI * u;
 		double phi = Math.Acos(2 * v - 1);
@@ -79,5 +91,15 @@ public partial class DiscGalaxy : Node3D
 		float yDistFromCenter = Math.Abs(pos.Y);
 		float iso = baseISOLevel - yDistFromCenter * 0.005f;
 		return iso;
+	}
+
+	public TrueStar[] GetStars()
+	{
+		return stars;
+	}
+
+	public void RedrawStars(Transform3D[] stars)
+	{
+		starMultiMesh.RedrawStars(stars);
 	}
 }

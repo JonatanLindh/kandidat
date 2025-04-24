@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://tyi0p72dxh5l"]
+
+[ext_resource type="PackedScene" uid="uid://cnloj1c2nbq17" path="res://src/galaxy/true_galaxy/true_galaxy.tscn" id="1_jn13k"]
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="2_qvvoi"]
+
+[node name="TrueGalaxyTest" type="Node3D"]
+
+[node name="TrueGalaxy" parent="." instance=ExtResource("1_jn13k")]
+
+[node name="Player" parent="." instance=ExtResource("2_qvvoi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 179.587, 223.544)
