@@ -110,11 +110,11 @@ func generatePlanets(r):
 	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS);
 	for i in n:
 		var planetInstance = generatePlanet(r, 0, 0, SUN.radius + BASE_DISTANCE_FROM_SUN + i * DISTANCE_BETWEEN_PLANETS, 0);
-		var moons = max(2,i) - 2;
+		var moons = max(2, i) - 2;
 		for m in range(moons):
 			generateMoon(r, planetInstance, planetInstance.Radius + (m + 1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE)
 
-func generateSystemFromSeed(s: int):
+func generateSystemFromSeed_OLD(s: int):
 	print(s);
 	clearBodies();
 	var r = RandomNumberGenerator.new();
@@ -160,3 +160,95 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	planetInstance.owner = self
 	bodies.append(randomID);
 	return planetInstance;
+
+
+func generateSystemFromSeed(s: int):
+	print(s)
+	clearBodies()
+	var r = RandomNumberGenerator.new()
+	r.seed = s
+	SUN.seed = s
+
+	# Step 1: Generate system variables
+	var system_data = {
+		"planets": [],
+		"moons": []
+	}
+	generatePlanets_TESTING(r, system_data)
+
+	# Step 2: Instantiate objects from system variables
+	instantiateSystem_TESTING(system_data)
+
+
+func generatePlanets_TESTING(r, system_data):
+	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS)
+	for i in range(n):
+		var orbit_radius = SUN.radius + BASE_DISTANCE_FROM_SUN + i * DISTANCE_BETWEEN_PLANETS
+		var planet_data = generatePlanetData_TESTING(r, orbit_radius)
+		system_data["planets"].append(planet_data)
+
+		var moons_count = max(2, i) - 2
+		for m in range(moons_count):
+			var moon_orbit_radius = planet_data.radius + (m + 1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE
+			var moon_data = generateMoonData_TESTING(r, planet_data, moon_orbit_radius)
+			system_data["moons"].append(moon_data)
+
+
+func generatePlanetData_TESTING(r, orbit_radius):
+	var planet_radius = randomPlanetRadius(r)
+	var planet_mass = randomPlanetMass(r)
+	var orbit_angle = randomOrbitAngle(r)
+	var orbit_speed = orbitSpeedFromRadius(orbit_radius, SUN.mass)
+	var pos = Vector3(sin(orbit_angle) * orbit_radius, 0, cos(orbit_angle) * orbit_radius);
+	var vel = Vector3(cos(orbit_angle) * orbit_speed, 0, -sin(orbit_angle) * orbit_speed);
+	return {
+		"radius": planet_radius,
+		"mass": planet_mass,
+		"orbit_radius": orbit_radius,
+		"orbit_angle": orbit_angle,
+		"orbit_speed": orbit_speed,
+		"position": pos,
+		"velocity": vel
+	}
+
+
+func generateMoonData_TESTING(r, planet_data, orbit_radius):
+	var moon_radius = r.randf_range(planet_data.radius / 10, planet_data.radius / 5)
+	var orbit_angle = randomOrbitAngle(r)
+	var orbit_speed = orbitSpeedFromRadius(orbit_radius, planet_data.mass)
+	var moon_mass = planet_data.mass * 0.0001
+
+	return {
+		"radius": moon_radius,
+		"mass": moon_mass,
+		"orbit_radius": orbit_radius,
+		"orbit_angle": orbit_angle,
+		"orbit_speed": orbit_speed,
+		"primary_position": planet_data.position,
+		"primary_velocity": planet_data.velocity
+	}
+
+
+func instantiateSystem_TESTING(system_data):
+	# Instantiate planets
+	for planet_data in system_data["planets"]:
+		spawnPlanetMarchingCube(
+			planet_data.radius,
+			planet_data.mass,
+			planet_data.orbit_radius,
+			planet_data.orbit_speed,
+			planet_data.orbit_angle,
+			rand
+		)
+
+	# Instantiate moons
+	for moon_data in system_data["moons"]:
+		spawnMoon(
+			moon_data.radius,
+			moon_data.mass,
+			moon_data.orbit_radius,
+			moon_data.orbit_speed,
+			moon_data.orbit_angle,
+			moon_data.primary_position,
+			moon_data.primary_velocity
+		)
