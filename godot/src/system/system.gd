@@ -4,8 +4,6 @@ extends Node3D
 @export var MOON_ORBIT_RATIO_PLANET_DISTANCE: float = 50.0
 @export var MIN_NUMBER_OF_PLANETS: int = 3
 @export var MAX_NUMBER_OF_PLANETS: int = 8
-@export var MIN_ORBIT_RADIUS: float = 2.0
-@export var MAX_ORBIT_RADIUS: float = 80.0
 @export var MIN_ORBIT_ANGLE: float = 0.0
 @export var MAX_ORBIT_ANGLE: float = 2.0 * PI
 @export var MIN_PLANET_MASS: float = 5000.0
@@ -17,7 +15,7 @@ extends Node3D
 
 @export var generate: bool:
 	set(val):
-		generatePlanets(self.rand);
+		generateSystemFromSeed(0);
 		
 @export var clear: bool:
 	set(val):
@@ -53,8 +51,6 @@ func getSystemRadius():
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return ;
-	#clearBodies();
-	#generatePlanets(numberOfPlanets, rand)
 
 func orbitRadiusFromSpeed(v: float):
 	return SUN.mass * G / pow(v, 2)
@@ -62,9 +58,6 @@ func orbitRadiusFromSpeed(v: float):
 func orbitSpeedFromRadius(r: float, m: float):
 	return sqrt(m * G / r)
 
-func randomOrbitRadius(r):
-	return r.randf_range(MIN_ORBIT_RADIUS, MAX_ORBIT_RADIUS)
-	
 func randomOrbitAngle(r):
 	return r.randf_range(MIN_ORBIT_ANGLE, MAX_ORBIT_ANGLE)
 	
@@ -75,53 +68,9 @@ func randomPlanetRadius(r):
 	return r.randf_range(MIN_PLANET_RADIUS, MAX_PLANET_RADIUS)
 
 # Creates a unique seed for every planet in a system based on the seed for that solar system
-func generatePlanetSeed(systemSeed: int, position: Vector3):
+func generatePlanetSDataeed(systemSeed: int, position: Vector3):
 	var seedGen = SeedGenerator.new();
 	return seedGen.GenerateSeed(systemSeed, position);
-
-
-func generatePlanet(r, planetRadius = 0, planetMass = 0, orbitRadius = 0, orbitSpeed = 0):
-	#Planet stuff
-	if (planetRadius == 0):
-		planetRadius = randomPlanetRadius(r);
-	if (planetMass == 0):
-		planetMass = randomPlanetMass(r);
-	
-	#Orbit stuff
-	var orbitAngle = randomOrbitAngle(r);
-	if (orbitRadius == 0):
-		orbitRadius = randomOrbitRadius(r);
-	if (orbitSpeed == 0):
-		orbitSpeed = orbitSpeedFromRadius(orbitRadius, SUN.mass);
-		
-	var planetInstance = spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle, r)
-	return planetInstance
-
-func generateMoon(r, planetInstance, orbitRadius):
-	var moonRadius = r.randf_range(planetInstance.Radius / 10, planetInstance.Radius / 5)
-
-	var orbitAngle = randomOrbitAngle(r);
-	var orbitSpeed = orbitSpeedFromRadius(orbitRadius, planetInstance.mass);
-	var moonMass = planetInstance.mass * 0.0001;
-	
-	return spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planetInstance.position, planetInstance.velocity);
-
-func generatePlanets(r):
-	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS);
-	for i in n:
-		var planetInstance = generatePlanet(r, 0, 0, SUN.radius + BASE_DISTANCE_FROM_SUN + i * DISTANCE_BETWEEN_PLANETS, 0);
-		var moons = max(2, i) - 2;
-		for m in range(moons):
-			generateMoon(r, planetInstance, planetInstance.Radius + (m + 1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE)
-
-func generateSystemFromSeed_OLD(s: int):
-	print(s);
-	clearBodies();
-	var r = RandomNumberGenerator.new();
-	r.seed = s;
-	SUN.seed = s
-	generatePlanets(r)
-
 
 func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primaryPosition = Vector3.ZERO, primaryVelocity = Vector3.ZERO):
 	var randomID = rand.randi_range(100000, 999999);
@@ -154,7 +103,7 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
 	
 	# Create a new seed for each planet to be used when generating marching cubes planet
-	planetInstance._seed = generatePlanetSeed(r.seed, planetInstance.position);
+	planetInstance._seed = generatePlanetSDataeed(r.seed, planetInstance.position);
 	
 	$GravityController.add_child(planetInstance);
 	planetInstance.owner = self
@@ -162,39 +111,61 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	return planetInstance;
 
 
-func generateSystemFromSeed(s: int):
-	print(s)
-	clearBodies()
+func randomSunColor(s: int):
+	var colors := [
+		Color(1, 0.14, 0), # Red (Red dwarf or red giant)
+		Color(1, 0.5, 0), # Orange (Orange dwarf)
+		Color(1, 1, 1), # White (White star)
+		Color(0.5, 0.5, 1), # Light blue (A-type star)
+		Color(0.2, 0.2, 1), # Blue (Hot B-type star)
+		Color(0.1, 0.1, 1), # Very hot blue (O-type star)
+		Color(0.8, 0.8, 1), # Pale blue-white (F-type star)
+		Color(0.9, 0.8, 0), # Yellow-orange (K-type star)
+		Color(0.8, 0.6, 0.4) # Yellow-brownish (G-type star, slightly more red)
+	]
+	
+	return colors[s % colors.size()]
+	
+func generateSystemDataFromSeed(s: int):
 	var r = RandomNumberGenerator.new()
 	r.seed = s
-	SUN.seed = s
+	var sun_color = randomSunColor(s);
 
 	# Step 1: Generate system variables
 	var system_data = {
 		"planets": [],
-		"moons": []
+		"moons": [],
+		"sun": {"color": sun_color}
 	}
-	generatePlanets_TESTING(r, system_data)
+	
+	generatePlanetsData(r, system_data)
+	
+	return system_data;
+
+func generateSystemFromSeed(s: int):
+	print(s)
+	clearBodies()
+	var system_data = generateSystemDataFromSeed(s);
 
 	# Step 2: Instantiate objects from system variables
-	instantiateSystem_TESTING(system_data)
+	instantiateSystem(system_data)
 
 
-func generatePlanets_TESTING(r, system_data):
+func generatePlanetsData(r, system_data):
 	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS)
 	for i in range(n):
 		var orbit_radius = SUN.radius + BASE_DISTANCE_FROM_SUN + i * DISTANCE_BETWEEN_PLANETS
-		var planet_data = generatePlanetData_TESTING(r, orbit_radius)
+		var planet_data = generatePlanetData(r, orbit_radius)
 		system_data["planets"].append(planet_data)
 
 		var moons_count = max(2, i) - 2
 		for m in range(moons_count):
 			var moon_orbit_radius = planet_data.radius + (m + 1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE
-			var moon_data = generateMoonData_TESTING(r, planet_data, moon_orbit_radius)
+			var moon_data = generateMoonData(r, planet_data, moon_orbit_radius)
 			system_data["moons"].append(moon_data)
 
 
-func generatePlanetData_TESTING(r, orbit_radius):
+func generatePlanetData(r, orbit_radius):
 	var planet_radius = randomPlanetRadius(r)
 	var planet_mass = randomPlanetMass(r)
 	var orbit_angle = randomOrbitAngle(r)
@@ -212,7 +183,7 @@ func generatePlanetData_TESTING(r, orbit_radius):
 	}
 
 
-func generateMoonData_TESTING(r, planet_data, orbit_radius):
+func generateMoonData(r, planet_data, orbit_radius):
 	var moon_radius = r.randf_range(planet_data.radius / 10, planet_data.radius / 5)
 	var orbit_angle = randomOrbitAngle(r)
 	var orbit_speed = orbitSpeedFromRadius(orbit_radius, planet_data.mass)
@@ -229,7 +200,10 @@ func generateMoonData_TESTING(r, planet_data, orbit_radius):
 	}
 
 
-func instantiateSystem_TESTING(system_data):
+func instantiateSystem(system_data):
+	#Set star things
+	SUN.star_mesh.set_color(system_data.sun.color);
+	
 	# Instantiate planets
 	for planet_data in system_data["planets"]:
 		spawnPlanetMarchingCube(
