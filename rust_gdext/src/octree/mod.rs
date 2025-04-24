@@ -1,3 +1,4 @@
+pub mod lod_octree;
 pub mod morton_based;
 pub mod old_versions;
 pub mod visualize;
