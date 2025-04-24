@@ -9,6 +9,11 @@ public partial class GalaxyMap : Node3D
 	StarFinder starFinder;
 	StarFactory starFactory;
 
+	SystemHandler systemHandler;
+	float detectStarRadius = 10;
+	bool systemActive = false;
+	Node3D currentSystem;
+
 	Node3D player;
 
 	[ExportGroup("Debug")]
@@ -34,9 +39,34 @@ public partial class GalaxyMap : Node3D
 
 		starFinder = GetNode<StarFinder>("%StarFinder");
 		starFactory = new StarFactory();
+		systemHandler = GetNode<SystemHandler>("%SystemHandler");
 
 		uiSelectableStar = GetNode<UISelectableStar>("%UiSelectableStar");
 		AddToGroup("GalaxyMap");
+	}
+
+	public override void _Process(double delta)
+	{
+		FindProximityStars(detectStarRadius);
+	}
+
+	private void FindProximityStars(float radius)
+	{
+		IStarChunkData playerChunk = galaxy.GetPlayerChunk();
+		Vector3 starPos = starFinder.FindStarInSphere(player.Position, radius, playerChunk);
+
+		if(starPos != Vector3.Zero && !systemActive)
+		{
+			Star star = starFactory.CreateStar(starPos, galaxy.GetSeed());
+			currentSystem = systemHandler.GenerateSystem(star);
+			systemActive = true;
+		}
+
+		else if(starPos == Vector3.Zero && systemActive)
+		{
+			currentSystem.QueueFree();
+			systemActive = false;
+		}
 	}
 
 	public override void _Input(InputEvent @event)

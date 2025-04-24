@@ -81,6 +81,20 @@ public partial class StarFinder : Node
 		return Vector3.Zero;
 	}
 
+	public Vector3 FindStarInSphere(Vector3 at, float radius, IStarChunkData chunk)
+	{
+		foreach (Vector3 starPos in chunk.stars)
+		{
+			if ((starPos - at).Length() < radius)
+			{
+				if (debugPrint) GD.Print($"StarFinder: Found proximity star at {starPos}, {at.DistanceTo(starPos)} LY away from player");
+				return starPos;
+			}
+		}
+
+		return Vector3.Zero;
+	}
+
 	/// <summary>
 	/// Checks if the chunk at the given position is generated.
 	/// </summary>
