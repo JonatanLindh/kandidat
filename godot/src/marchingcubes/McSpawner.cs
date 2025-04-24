@@ -30,7 +30,7 @@ public partial class McSpawner : Node3D
 		}
 	}
 	
-	[Export] public SurfaceFeature[] SurfaceFeatures { get; set; } = [];
+	[Export] public SurfaceFeature[] SurfaceFeatures { get; set; }
 	[Export] public int SurfaceAmount { get; set; } = 10;
 
 	private double _warmth;
@@ -115,6 +115,17 @@ public partial class McSpawner : Node3D
 			GD.PrintErr("celestialBodyNode3D is null");
 			return;
 		}
+
+		// Validate that the meshes are loaded
+		foreach (var feature in SurfaceFeatures)
+		{
+			if (feature.FeatureMesh == null)
+			{
+				GD.PrintErr($"Failed to load mesh for feature with weight {feature.Weight}");
+				return;
+			}
+		}
+		
 		var scale = celestialBodyNode3D.GetScale();
 		var genTree = new GenerateFeatures(SurfaceAmount, SurfaceFeatures);
 		var aabb = _meshInstance3D.GetAabb();

@@ -20,7 +20,23 @@ public class GenerateFeatures
 	{
 		_treeMesh = GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res");
 		_amountPerSide = amountPerSide;
-		_features = features;
+		if (features == null || features.Length == 0)
+		{
+			_features = [
+				new SurfaceFeature(
+					GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res"), 
+					20f, 100f), 
+				new SurfaceFeature(
+					GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/stone/rock33.res"), 
+					1f, 10f)
+			];
+		}
+		else
+		{
+			_features = features;
+
+		}
+		
 		_aliasMethodVose = new AliasMethodVose(_features.Select(f => f.Weight).ToArray());
 	}
 
@@ -207,7 +223,10 @@ public class GenerateFeatures
 			//multiMeshes[i].InstanceCount = Mathf.RoundToInt(totalCount * (_features[i].Weight / _features.Sum(f => f.Weight)));
 			multiMeshes[i].InstanceCount = totalCount;
 			if (_features[i].FeatureMesh == null)
+			{
+				GD.Print("Feature mesh is null");
 				return null;
+			}
 			multiMeshes[i].Mesh = _features[i].FeatureMesh;
 		}
 		var instanceCount = 0;

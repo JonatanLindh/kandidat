@@ -84,7 +84,7 @@ public class AliasMethodVose
 	/// <returns>A random value from the underlying distribution</returns>
 	public int Next()
 	{
-		// Generate a random column from 0 to n-1
+		// Generate a random column from 0 to n
 		int column = _random.Next(_prob.Count); 
 		
 		// Generate a random coin toss
