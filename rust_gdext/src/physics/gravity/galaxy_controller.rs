@@ -19,7 +19,10 @@ pub struct GalaxyController {
     pub simulation_step_delta: f32,
 
     stars: Option<Vec<StarData>>,
-    bridge: Option<Gd<Node>>,
+
+    #[init(node = "../GalaxyPhysicsBridge")]
+    bridge: OnReady<Gd<Node>>,
+
     bridge_initialized: bool,
 }
 
@@ -46,15 +49,6 @@ impl Massive for StarData {
 
 #[godot_api]
 impl INode for GalaxyController {
-    fn ready(&mut self) {
-        self.bridge = self.base().get_node_or_null("../GalaxyPhysicsBridge");
-
-        if self.bridge.is_none() {
-            godot_error!("GalaxyPhysicsBridge node not found in the scene tree.");
-            self.base_mut().queue_free();
-        }
-    }
-
     fn physics_process(&mut self, delta: f64) {
         let stars = match &mut self.stars {
             Some(s) => s,
@@ -77,29 +71,19 @@ impl INode for GalaxyController {
             .map(|star| from_glam_vec3(star.velocity))
             .collect::<PackedVector3Array>();
 
-        self.get_bridge()
-            .call("apply_velocities", &[vels.to_variant()]);
+        self.bridge.call("apply_velocities", &[vels.to_variant()]);
     }
 }
 
 impl GalaxyController {
-    #[inline]
-    fn get_bridge(&self) -> Gd<Node> {
-        self.bridge
-            .as_ref()
-            .expect("Expected bridge to exist")
-            .clone()
-    }
-
     fn get_stars(&mut self) {
-        let bridge = self.get_bridge();
-
         if !self.bridge_initialized {
-            self.bridge_initialized = bridge.get("init").booleanize();
+            self.bridge_initialized = self.bridge.get("init").booleanize();
             return;
         }
 
-        match bridge
+        match self
+            .bridge
             .get("stars")
             .try_to::<Dictionary>()
             .ok()
