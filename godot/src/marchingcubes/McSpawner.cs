@@ -92,7 +92,7 @@ public partial class McSpawner : Node3D
 		}
 		float[,,] dataPoints = celestialBody.GetNoise();
 		_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
-		_meshInstance3D.MaterialOverride = GeneratePlanetShader();
+		//_meshInstance3D.MaterialOverride = GeneratePlanetShader();
 
 		this.AddChild(_meshInstance3D);
 
@@ -100,12 +100,13 @@ public partial class McSpawner : Node3D
 		var meshSurface = _meshInstance3D.Mesh.SurfaceGetArrays(0);
 		AddChild(grass.PopulateMesh(meshSurface, 500000));
 		
-		SpawnTrees();
+		//SpawnTrees();
 		
 	}
 
 	private void SpawnTrees()
 	{
+		/*
 		if (celestialBody is not Node3D celestialBodyNode3D)
 		{
 			GD.PrintErr("celestialBodyNode3D is null");
@@ -117,6 +118,7 @@ public partial class McSpawner : Node3D
 		var offset = GetGlobalPosition();
 		var trees = genTree.SpawnTrees(GenTree.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, aabb, offset, scale);
 		AddChild(trees);
+		*/
 	}
 
 	// Old test method for generating datapoints

@@ -8,19 +8,21 @@ public partial class TreeTest : Node3D
 {
 	[Export]
 	public MeshInstance3D MeshInstance { get; set; }
-
-	[Export] public float Scale { get; set; } = 100f;
 	
 	[Export] public int AmountPerSide { get; set; } = 50;
+	
+	[Export] public SurfaceFeature[] SurfaceFeatures { get; set; }
 	
 	
 	private Node3D _parentNode;
 
+	
+
 
 	public override void _Ready()
 	{
-		if (MeshInstance == null) return;
-		GenTree genTree = new GenTree(AmountPerSide, Scale);
+		if (MeshInstance == null || SurfaceFeatures.Length == 0) return;
+		GenTree genTree = new GenTree(AmountPerSide, SurfaceFeatures);
 		_parentNode?.QueueFree();
 		_parentNode = new Node3D();
 		AddChild(_parentNode);
@@ -28,7 +30,10 @@ public partial class TreeTest : Node3D
 		DrawBoundingBox(bounds);
 
 		var trees = genTree.SpawnTrees(GenTree.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, bounds);
-		_parentNode.AddChild(trees);
+		foreach (var tree in trees)
+		{
+			_parentNode.AddChild(tree);
+		}
 		//DrawPoissonPoints(bounds);
 
 	}
@@ -238,3 +243,4 @@ public partial class TreeTest : Node3D
 		//AddChild(multiMeshInstance);
 	}
 }
+
