@@ -1,19 +1,19 @@
 @tool
 extends Node3D
 
-@export var MOON_ORBIT_RATIO_PLANET_DISTANCE: float = 80.0
+@export var MOON_ORBIT_RATIO_PLANET_DISTANCE: float = 50.0
 @export var MIN_NUMBER_OF_PLANETS: int = 3
 @export var MAX_NUMBER_OF_PLANETS: int = 8
 @export var MIN_ORBIT_RADIUS: float = 2.0
 @export var MAX_ORBIT_RADIUS: float = 80.0
 @export var MIN_ORBIT_ANGLE: float = 0.0
 @export var MAX_ORBIT_ANGLE: float = 2.0 * PI
-@export var MIN_PLANET_MASS: float = 10.0
-@export var MAX_PLANET_MASS: float = 30.0
-@export var MIN_PLANET_RADIUS: float = 0.5
-@export var MAX_PLANET_RADIUS: float = 4.0
-@export var DISTANCE_BETWEEN_PLANETS: float = 400.0;
-@export var BASE_DISTANCE_FROM_SUN: float = 400.0;
+@export var MIN_PLANET_MASS: float = 5000.0
+@export var MAX_PLANET_MASS: float = 10000.0
+@export var MIN_PLANET_RADIUS: float = 1.0
+@export var MAX_PLANET_RADIUS: float = 2.0
+@export var DISTANCE_BETWEEN_PLANETS: float = 200.0;
+@export var BASE_DISTANCE_FROM_SUN: float = 300.0;
 
 @export var generate: bool:
 	set(val):
@@ -102,17 +102,17 @@ func generateMoon(r, planetInstance, orbitRadius):
 
 	var orbitAngle = randomOrbitAngle(r);
 	var orbitSpeed = orbitSpeedFromRadius(orbitRadius, planetInstance.mass);
-	var moonMass = 0.01
+	var moonMass = planetInstance.mass * 0.0001;
 	
 	return spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planetInstance.position, planetInstance.velocity);
 
 func generatePlanets(r):
 	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS);
 	for i in n:
-		var planetInstance = generatePlanet(r, 0, 0, BASE_DISTANCE_FROM_SUN + i * DISTANCE_BETWEEN_PLANETS, 0);
-		var moons = 1
+		var planetInstance = generatePlanet(r, 0, 0, SUN.radius + BASE_DISTANCE_FROM_SUN + i * DISTANCE_BETWEEN_PLANETS, 0);
+		var moons = max(2,i) - 2;
 		for m in range(moons):
-			generateMoon(r, planetInstance, (m + 1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE)
+			generateMoon(r, planetInstance, planetInstance.Radius + (m + 1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE)
 
 func generateSystemFromSeed(s: int):
 	print(s);
@@ -127,8 +127,11 @@ func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primar
 	var randomID = rand.randi_range(100000, 999999);
 	var bodyInstance = PLANET_SCENE.instantiate(); # Uses PLANET_SCENE for now since moon scene didn't quite work
 	bodyInstance.mass = moonMass;
-	bodyInstance.velocity = primaryVelocity + Vector3(cos(orbitAngle) * orbitSpeed, 0, -sin(orbitAngle) * orbitSpeed)
 	bodyInstance.position = primaryPosition + Vector3(sin(orbitAngle) * orbitRadius, 0, cos(orbitAngle) * orbitRadius)
+	var bodySpeedAroundSun = orbitSpeedFromRadius((bodyInstance.position - SUN.position).length(), SUN.mass)
+	var bodyAngleAroundSun = atan2(bodyInstance.position.x - SUN.position.x, bodyInstance.position.z - SUN.position.z)
+	var bodyVelocityAroundSun = Vector3(cos(bodyAngleAroundSun) * bodySpeedAroundSun, 0, -sin(bodyAngleAroundSun) * bodySpeedAroundSun)
+	bodyInstance.velocity = bodyVelocityAroundSun + Vector3(cos(orbitAngle) * orbitSpeed, 0, -sin(orbitAngle) * orbitSpeed)
 	bodyInstance.planet_data.radius = moonRadius
 	bodyInstance.name = "Body" + str(randomID);
 	bodyInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;

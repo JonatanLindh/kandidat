@@ -7,18 +7,20 @@
 
 [node name="System" type="Node3D"]
 script = ExtResource("1_7my1l")
-distanceBetweenPlanets = 800
-baseDistanceFromSun = 600
+MOON_ORBIT_RATIO_PLANET_DISTANCE = 10.0
+DISTANCE_BETWEEN_PLANETS = 500.0
+BASE_DISTANCE_FROM_SUN = 500.0
 
 [node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
 simulation_steps = 1000
-simulation_step_delta = 1.0
+simulation_step_delta = 0.1
 sim_center_body = NodePath("Star")
 script = ExtResource("6_wayc2")
 
 [node name="Star" parent="GravityController" groups=["gravity_body"] instance=ExtResource("5_5coes")]
-mass = 300000.0
+mass = 3e+06
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.625992, 0, 0.313004)
+seed = 0
 radius = 200.0
 
 [node name="CheckButton" type="CheckButton" parent="."]
@@ -33,7 +35,5 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "Toggle Trajectories"
 script = ExtResource("4_btp4s")
-
-[node name="OctreeVisualizer" type="OctreeVisualizer" parent="."]
 
 [connection signal="toggled" from="CheckButton" to="CheckButton" method="_on_toggled"]

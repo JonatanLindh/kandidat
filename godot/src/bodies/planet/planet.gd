@@ -3,7 +3,7 @@ extends GravityBody
 
 var atmosphere
 #var planet_gravity_field: PlanetGravityField
-@onready var planet_gravity_field: PlanetGravityField = $PlanetGravityField
+var planet_gravity_field: PlanetGravityField;
 
 
 @export var planet_data: PlanetData:
