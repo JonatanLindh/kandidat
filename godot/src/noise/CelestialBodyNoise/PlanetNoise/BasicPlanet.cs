@@ -31,7 +31,14 @@ public partial class BasicPlanet : Node, CelestialBodyNoise
     {
         GetParameters();
         UpdateNoise();
-        return planetNoise.CreateDataPoints(param, fastNoise);
+        return planetNoise.CreateDataPoints(param, fastNoise, voxelSize: VoxelSize);
+    }
+
+    public float[,,] GetNoise(Vector3 offset)
+    {
+        GetParameters();
+        UpdateNoise();
+        return planetNoise.CreateDataPoints(param, fastNoise, offset, VoxelSize);
     }
 
     private void GetParameters()
@@ -60,4 +67,8 @@ public partial class BasicPlanet : Node, CelestialBodyNoise
     {
         return param.Radius;
     }
+
+    public int Resolution { get; set; }
+
+    public float VoxelSize { get; set; } = 1f;
 }

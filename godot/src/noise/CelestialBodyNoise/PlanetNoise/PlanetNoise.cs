@@ -11,7 +11,7 @@ public partial class PlanetNoise
 
     public PlanetNoise() {}
 
-    public float[,,] CreateDataPoints(CelestialBodyParameters param, FastNoiseLite fastNoise)
+    public float[,,] CreateDataPoints(CelestialBodyParameters param, FastNoiseLite fastNoise, Vector3 offset = default, float voxelSize = 1)
     {
         int radius = param.Radius;
         int diameter = 2 * radius;
@@ -21,7 +21,10 @@ public partial class PlanetNoise
         int depth = param.Depth;
 
         float[,,] points = new float[width, height, depth];
-        Vector3 centerPoint = new Vector3I(radius, radius, radius);
+        Vector3 centerPoint = Vector3I.Zero;
+        
+        //if (offset == default)
+          //  offset = Vector3.One * -radius;
 
          // creates a cube of points
          for (int x = 0; x < width; x++)
@@ -31,14 +34,28 @@ public partial class PlanetNoise
                  for (int z = 0; z < depth; z++)
                  {
                     // Pad the boarders of the cube with empty space so marching cubes correctly generates the mesh at the edges
+                    /*
                     if (x == 0 || x == width - 1 || y == 0 || y == height - 1 || z == 0 || z == depth - 1)
                     {
                         points[x, y, z] = -1.0f;
                         continue;
                     }
+                    */
 
                     // Calculate distance from center of planet to the point (x,y,z)
-                    Vector3 currentPosition = new Vector3I(x, y, z);
+                    Vector3 currentPosition = new Vector3(x, y, z) * voxelSize;
+                    currentPosition += offset;
+
+                    // Pad the borers of the planet with empty space so marching cubes correctly generates the mesh at the edges
+                    if (currentPosition.X <= -radius || currentPosition.X >= radius ||
+                        currentPosition.Y <= -radius || currentPosition.Y >= radius ||
+                        currentPosition.Z <= -radius || currentPosition.Z >= radius)
+                    {
+                        points[x, y, z] = -1.0f;
+                        continue;
+                    }
+
+                    
                     float distanceToCenter = (centerPoint - currentPosition).Length();
                     float distanceAwayFromCenter = (float)radius - distanceToCenter;
 
