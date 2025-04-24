@@ -27,27 +27,32 @@ public class GenerateFeatures
 	public MultiMeshInstance3D[] SpawnTrees(SamplingMethod method ,PhysicsDirectSpaceState3D spaceState, 
 		Aabb aabb, Vector3 offset = default, Vector3 size = default)
 	{
-		/*
-		MultiMeshInstance3D trees = method switch
+
+		MultiMeshInstance3D[] trees = method switch
 		{
 			SamplingMethod.Uniform => SpawnTreesUniform(spaceState, aabb, offset, size),
 			SamplingMethod.Poisson => SpawnTreesWithPoisson(spaceState, aabb, offset, size),
 			_ => throw new ArgumentOutOfRangeException(nameof(method), method, "Invalid sampling method")
-		}
-		*/
+		};
+		
 
-		//return trees;
-		return SpawnTreesWithPoisson(spaceState, aabb, offset, size);
+		return trees;
+		//return SpawnTreesWithPoisson(spaceState, aabb, offset, size);
 	}
 	
-	private MultiMeshInstance3D SpawnTreesUniform(PhysicsDirectSpaceState3D spaceState, Aabb aabb, Vector3 offset = default, Vector3 size = default)
+	private MultiMeshInstance3D[] SpawnTreesUniform(PhysicsDirectSpaceState3D spaceState, Aabb aabb, Vector3 offset = default, Vector3 size = default)
 	{
-		
-		
-		MultiMesh multiMesh = new MultiMesh();
-		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
-		multiMesh.Mesh = _treeMesh;
-		multiMesh.InstanceCount = 6 * _amountPerSide;
+		MultiMesh[] multiMeshes = new MultiMesh[_features.Length];
+		for (int i = 0; i < _features.Length; i++)
+		{
+			multiMeshes[i] = new MultiMesh();
+			multiMeshes[i].TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+			//multiMeshes[i].InstanceCount = Mathf.RoundToInt(totalCount * (_features[i].Weight / _features.Sum(f => f.Weight)));
+			multiMeshes[i].InstanceCount = 6 * _amountPerSide;
+			if (_features[i].FeatureMesh == null)
+				throw new NullReferenceException("Feature mesh is null");
+			multiMeshes[i].Mesh = _features[i].FeatureMesh;
+		}
 
 		int amountHit = 0;
 
@@ -99,6 +104,9 @@ public class GenerateFeatures
 			
 			for (int k = 0; k < _amountPerSide; k++)
 			{
+				var selectedFeature = _aliasMethodVose.Next();
+				var feature = _features[selectedFeature];
+				
 				// Get a random point in the face
 				float u = (float)GD.RandRange(0.0, 1.0);
 				float v = (float)GD.RandRange(0.0, 1.0);
@@ -133,14 +141,19 @@ public class GenerateFeatures
 					transform.Basis = new Basis(xVector, upVector, zVector);
 					transform.Origin = (collisionPoint - offset) / size;
 					
-					multiMesh.SetInstanceTransform(j + k * 6, transform.ScaledLocal(Vector3.One * _features[0].Scale));
+					multiMeshes[selectedFeature]
+						.SetInstanceTransform(j + k * 6, transform.ScaledLocal(Vector3.One * feature.Scale));
 					amountHit++;
 				}
 			}
 			j++;
 		}
-		var randomPointInstance = new MultiMeshInstance3D();
-		randomPointInstance.Multimesh = multiMesh;
+		var randomPointInstance = new MultiMeshInstance3D[_features.Length];
+		for (int i = 0; i < _features.Length; i++)
+		{
+			randomPointInstance[i] = new MultiMeshInstance3D();
+			randomPointInstance[i].Multimesh = multiMeshes[i];
+		}
 		return randomPointInstance;
 	}
 
@@ -197,13 +210,6 @@ public class GenerateFeatures
 				return null;
 			multiMeshes[i].Mesh = _features[i].FeatureMesh;
 		}
-		MultiMesh multiMesh = new MultiMesh();
-		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
-		multiMesh.InstanceCount = totalCount;
-		if (_features[0].FeatureMesh == null)
-			return null;
-		multiMesh.Mesh = _features[0].FeatureMesh;
-
 		var instanceCount = 0;
 		for (int i = 0; i < faceNormals.Length; i++)
 		{
@@ -251,10 +257,6 @@ public class GenerateFeatures
 
 			}
 		} 
-		/*
-		var randomPointInstance = new MultiMeshInstance3D();
-		randomPointInstance.Multimesh = multiMesh;
-		*/
 		var randomPointInstance = new MultiMeshInstance3D[_features.Length];
 		for (int i = 0; i < _features.Length; i++)
 		{

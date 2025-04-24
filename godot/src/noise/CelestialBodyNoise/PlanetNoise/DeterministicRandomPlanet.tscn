@@ -1,7 +1,24 @@
-[gd_scene load_steps=3 format=3 uid="uid://banvyfc3vuq6t"]
+[gd_scene load_steps=8 format=3 uid="uid://banvyfc3vuq6t"]
 
 [ext_resource type="Script" uid="uid://r87jfre8pihr" path="res://src/noise/CelestialBodyNoise/PlanetNoise/DeterministicRandomPlanet.cs" id="1_71g84"]
 [ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="1_wi2un"]
+[ext_resource type="ArrayMesh" uid="uid://eiuag6kylsfk" path="res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res" id="3_aow8l"]
+[ext_resource type="Script" uid="uid://b26ac8qyoe4h7" path="res://src/bodies/planet/vegetation/tree/SurfaceFeature.cs" id="4_k8imx"]
+[ext_resource type="ArrayMesh" uid="uid://b2p4845p54c28" path="res://src/bodies/planet/vegetation/tree/assets/stone/rock33.res" id="5_2nh8p"]
+
+[sub_resource type="Resource" id="Resource_tl2is"]
+script = ExtResource("4_k8imx")
+FeatureMesh = ExtResource("3_aow8l")
+Weight = 1.0
+Scale = 100.0
+metadata/_custom_type_script = "uid://b26ac8qyoe4h7"
+
+[sub_resource type="Resource" id="Resource_fya64"]
+script = ExtResource("4_k8imx")
+FeatureMesh = ExtResource("5_2nh8p")
+Weight = 20.0
+Scale = 5.0
+metadata/_custom_type_script = "uid://b26ac8qyoe4h7"
 
 [node name="DeterministicRandomPlanet" type="Node3D"]
 script = ExtResource("1_71g84")
@@ -9,3 +26,5 @@ radius = 32
 
 [node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("1_wi2un")]
 CelestialBody = NodePath("..")
+SurfaceFeatures = [SubResource("Resource_tl2is"), SubResource("Resource_fya64")]
+SurfaceAmount = 50

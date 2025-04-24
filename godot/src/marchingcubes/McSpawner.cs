@@ -29,6 +29,9 @@ public partial class McSpawner : Node3D
 			cb = value;
 		}
 	}
+	
+	[Export] public SurfaceFeature[] SurfaceFeatures { get; set; } = [];
+	[Export] public int SurfaceAmount { get; set; } = 10;
 
 	private double _warmth;
     public double Warmth
@@ -100,25 +103,27 @@ public partial class McSpawner : Node3D
 		var meshSurface = _meshInstance3D.Mesh.SurfaceGetArrays(0);
 		AddChild(grass.PopulateMesh(meshSurface, 500000));
 		
-		//SpawnTrees();
+		SpawnTrees();
 		
 	}
 
 	private void SpawnTrees()
 	{
-		/*
+		
 		if (celestialBody is not Node3D celestialBodyNode3D)
 		{
 			GD.PrintErr("celestialBodyNode3D is null");
 			return;
 		}
 		var scale = celestialBodyNode3D.GetScale();
-		var genTree = new GenTree(10, 100f);
+		var genTree = new GenerateFeatures(SurfaceAmount, SurfaceFeatures);
 		var aabb = _meshInstance3D.GetAabb();
 		var offset = GetGlobalPosition();
-		var trees = genTree.SpawnTrees(GenTree.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, aabb, offset, scale);
-		AddChild(trees);
-		*/
+		var trees = genTree.SpawnTrees(GenerateFeatures.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, aabb, offset, scale);
+		foreach (var tree in trees)
+		{
+			AddChild(tree);
+		}
 	}
 
 	// Old test method for generating datapoints
