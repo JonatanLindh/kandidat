@@ -22,14 +22,14 @@ public partial class TreeTest : Node3D
 	public override void _Ready()
 	{
 		if (MeshInstance == null || SurfaceFeatures.Length == 0) return;
-		GenTree genTree = new GenTree(AmountPerSide, SurfaceFeatures);
+		GenerateFeatures generateFeatures = new GenerateFeatures(AmountPerSide, SurfaceFeatures);
 		_parentNode?.QueueFree();
 		_parentNode = new Node3D();
 		AddChild(_parentNode);
 		Aabb bounds = MeshInstance.GetAabb();
 		DrawBoundingBox(bounds);
 
-		var trees = genTree.SpawnTrees(GenTree.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, bounds);
+		var trees = generateFeatures.SpawnTrees(GenerateFeatures.SamplingMethod.Poisson, GetWorld3D().DirectSpaceState, bounds);
 		foreach (var tree in trees)
 		{
 			_parentNode.AddChild(tree);

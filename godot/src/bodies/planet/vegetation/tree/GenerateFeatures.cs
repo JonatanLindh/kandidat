@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class GenTree
+public class GenerateFeatures
 {
 	private readonly int _amountPerSide = 50;
 	private readonly Mesh _treeMesh;
@@ -16,7 +16,7 @@ public class GenTree
 		Poisson
 	} 
 
-	public GenTree(int amountPerSide, SurfaceFeature[] features)
+	public GenerateFeatures(int amountPerSide, SurfaceFeature[] features)
 	{
 		_treeMesh = GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res");
 		_amountPerSide = amountPerSide;
