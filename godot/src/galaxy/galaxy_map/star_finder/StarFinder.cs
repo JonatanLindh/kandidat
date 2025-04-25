@@ -83,6 +83,12 @@ public partial class StarFinder : Node
 
 	public Vector3 FindStarInSphere(Vector3 at, float radius, IStarChunkData chunk)
 	{
+		if (chunk == null)
+		{
+			GD.PrintErr("StarFinder: FindStarInSphere(). Chunk is null. Exiting.");
+			return Vector3.Zero;
+		}
+
 		foreach (Vector3 starPos in chunk.stars)
 		{
 			if ((starPos - at).Length() < radius)
