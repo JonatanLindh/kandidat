@@ -10,7 +10,7 @@ public partial class SystemHandler : Node
 
 	[Export] public float closeStarGenerateRadius { get; private set; } = 10;
 
-	// Must be greater than closeStarRadius. Will otherwise be clamped to closeStarRadius.
+	// Must be greater than closeStarGenerateRadius. Will otherwise be clamped to closeStarGenerateRadius.
 	[Export] public float closeStarCullRadius { get; private set; } = 100;
 
 	[ExportGroup("Debug")]
@@ -20,8 +20,8 @@ public partial class SystemHandler : Node
 	{
 		if(closeStarCullRadius < closeStarGenerateRadius)
 		{
+			GD.PrintErr($"SystemHandler: closeStarCullRadius must be greater than closeStarGenerateRadius. Setting closeStarCullRadius to {closeStarGenerateRadius} (closeStarGenerateRadius) instead.");
 			closeStarCullRadius = closeStarGenerateRadius;
-			if (debugPrint) GD.PrintErr($"SystemHandler: closeStarCullRadius must be greater than closeStarGenerateRadius. Setting closeStarCullRadius to {closeStarGenerateRadius} (closeStarGenerateRadius) instead.");
 		}
 	}
 
