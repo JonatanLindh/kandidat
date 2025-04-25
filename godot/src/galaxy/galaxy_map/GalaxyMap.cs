@@ -48,10 +48,12 @@ public partial class GalaxyMap : Node3D
 
 	private void CheckCloseStars()
 	{
-		Vector3 starPos = starFinder.FindStarInSphere(player.Position, systemHandler.closeStarRadius, galaxy.GetPlayerChunk());
+		Vector3 starPos = starFinder.FindStarInSphere(player.Position, systemHandler.closeStarGenerateRadius, galaxy.GetPlayerChunk());
 
 		if(starPos != Vector3.Zero)
 		{
+			if(systemHandler.SystemExists(starPos)) return;
+
 			Star star = starFactory.CreateStar(starPos, galaxy.GetSeed());
 			if (debugPrint) GD.Print($"GalaxyMap: Created close star: [Name: {star.name} | Position: {star.transform.Origin} | Seed: {star.seed}]");
 			systemHandler.GenerateSystem(star);

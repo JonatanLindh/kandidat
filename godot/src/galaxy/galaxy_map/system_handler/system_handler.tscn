@@ -5,4 +5,4 @@
 
 [node name="SystemHandler" type="Node"]
 script = ExtResource("1_16pwn")
-system = ExtResource("2_t7ykt")
+systemScene = ExtResource("2_t7ykt")

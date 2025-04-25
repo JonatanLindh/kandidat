@@ -8,6 +8,7 @@
 
 [node name="GalaxyMap" type="Node3D"]
 script = ExtResource("1_8ccs1")
+debugPrint = true
 
 [node name="InfiniteGalaxy" parent="." instance=ExtResource("2_3xdco")]
 unique_name_in_owner = true
