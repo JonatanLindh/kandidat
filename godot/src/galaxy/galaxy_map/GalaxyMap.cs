@@ -72,7 +72,7 @@ public partial class GalaxyMap : Node3D
 				Vector3 dir = camera.ProjectRayNormal(eventButton.Position);
 
 				IStarChunkData[] chunks = galaxy.GetGeneratedChunks();
-				Vector3 starPos = starFinder.FindStar(this.player.Position, dir, chunks);
+				Vector3 starPos = starFinder.FindStarInLine(this.player.Position, dir, chunks);
 
 				if (starPos != Vector3.Zero)
 				{

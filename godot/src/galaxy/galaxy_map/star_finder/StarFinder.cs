@@ -26,7 +26,7 @@ public partial class StarFinder : Node
 	/// Finds along a line from one point to another.
 	/// <c>range</c> is the maximum distance to check, 0 for infinite (until chunks run out)
 	/// </summary>
-	public Vector3 FindStar(Vector3 from, Vector3 dir, IStarChunkData[] chunks, float range = 0)
+	public Vector3 FindStarInLine(Vector3 from, Vector3 dir, IStarChunkData[] chunks, float range = 0)
 	{
 		if (debugDraw)
 		{
@@ -81,6 +81,13 @@ public partial class StarFinder : Node
 		return Vector3.Zero;
 	}
 
+	/// <summary>
+	/// Finds a star in a sphere around the given (player) position of the current chunk.
+	/// </summary>
+	/// <param name="at"></param>
+	/// <param name="radius"></param>
+	/// <param name="chunk"></param>
+	/// <returns></returns>
 	public Vector3 FindStarInSphere(Vector3 at, float radius, IStarChunkData chunk)
 	{
 		if (chunk == null)
