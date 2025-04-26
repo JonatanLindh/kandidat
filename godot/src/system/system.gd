@@ -1,16 +1,16 @@
 @tool
 extends Node3D
 
-@export var MOON_ORBIT_RATIO_PLANET_DISTANCE: float = 50.0
+@export var MOON_ORBIT_RATIO_PLANET_DISTANCE: float = 30.0
 @export var MIN_NUMBER_OF_PLANETS: int = 3
 @export var MAX_NUMBER_OF_PLANETS: int = 8
 @export var MIN_ORBIT_ANGLE: float = 0.0
 @export var MAX_ORBIT_ANGLE: float = 2.0 * PI
 @export var MIN_PLANET_MASS: float = 5000.0
 @export var MAX_PLANET_MASS: float = 10000.0
-@export var MIN_PLANET_RADIUS: float = 1.0
-@export var MAX_PLANET_RADIUS: float = 2.0
-@export var DISTANCE_BETWEEN_PLANETS: float = 200.0;
+@export var MIN_PLANET_RADIUS: float = 10.0
+@export var MAX_PLANET_RADIUS: float = 15.0
+@export var DISTANCE_BETWEEN_PLANETS: float = 300.0;
 @export var BASE_DISTANCE_FROM_SUN: float = 300.0;
 
 @export var generate: bool:
@@ -22,8 +22,9 @@ extends Node3D
 		clearBodies();
 		
 @onready var SUN = ($"./GravityController/Star")
+@onready var GC = ($"./GravityController")
 
-const G = 1.0;
+@onready var G = GC.grav_const;
 var PLANET_SCENE: PackedScene = load("res://src/bodies/planet/planet.tscn");
 var PLANET_MARCHING_CUBE_SCENE: PackedScene = load("res://src/bodies/planet/planet_marching_cube.tscn");
 var MOON_SCENE: PackedScene = load("res://src/bodies/moon/moon.tscn"); # DOESNT WORK THE MOON SCENE IS ONLY A TOOL?!??!
@@ -153,14 +154,16 @@ func generateSystemFromSeed(s: int):
 
 func generatePlanetsData(r, system_data):
 	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS)
+	var orbit_radius = SUN.radius + BASE_DISTANCE_FROM_SUN
 	for i in range(n):
-		var orbit_radius = SUN.radius + BASE_DISTANCE_FROM_SUN + i * DISTANCE_BETWEEN_PLANETS
+		var orbit_increase = log(i + 1) * DISTANCE_BETWEEN_PLANETS
+		orbit_radius += orbit_increase;
 		var planet_data = generatePlanetData(r, orbit_radius)
 		system_data["planets"].append(planet_data)
 
 		var moons_count = max(2, i) - 2
 		for m in range(moons_count):
-			var moon_orbit_radius = planet_data.radius + (m + 1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE
+			var moon_orbit_radius = planet_data.radius + (m + 1) * orbit_increase / MOON_ORBIT_RATIO_PLANET_DISTANCE
 			var moon_data = generateMoonData(r, planet_data, moon_orbit_radius)
 			system_data["moons"].append(moon_data)
 

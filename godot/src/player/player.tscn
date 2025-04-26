@@ -25,6 +25,7 @@ shape = SubResource("SphereShape3D_rxibo")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+far = 10000.0
 
 [node name="SpotLight3D" type="SpotLight3D" parent="Head"]
 light_energy = 5.0
