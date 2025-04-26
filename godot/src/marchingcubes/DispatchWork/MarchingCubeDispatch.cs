@@ -13,11 +13,9 @@ public sealed partial class MarchingCubeDispatch : Node
 	private static MarchingCubeDispatch _instance = null;
 	
 	private static readonly object Lock = new object();
-	private readonly object _generateMeshLock = new();
 	
 	private Thread _planetGenerator;
 	private readonly ConcurrentQueue<MarchingCubeRequest> _planetQueue = new();
-	private MarchingCube _marchingCube;
 	private bool _insideTree = false;
 	
 	private readonly ConcurrentBag<long> _workerThreads = new();
@@ -47,7 +45,6 @@ public sealed partial class MarchingCubeDispatch : Node
 		Cleanup();
 		_insideTree = true;
 		// Initialize the marching cube instance
-		_marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.CpuMultiThread);
 		
 		// Start the planet generator thread
 		if (_planetGenerator is { IsAlive: true }) return;
@@ -104,51 +101,45 @@ public sealed partial class MarchingCubeDispatch : Node
 		{
 			// Try to dequeue the first item
 			queue.TryPeek(out MarchingCubeRequest request);
-			
-			
-			if (request != null)
+			if (!queue.TryDequeue(out request)) return;
+
+			// If the request is null, continue to the next iteration
+			if (request == null) continue;
+
+
+			// Add the task to the worker thread pool
+			_workerThreads.Add(WorkerThreadPool.AddTask(Callable.From(() =>
 			{
-				// Try to dequeue the request
-				queue.TryDequeue(out request);
+				var marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.Cpu);
 				
-				// If the request is null, continue to the next iteration
-				if (request == null) continue;
-				
-				
-				// Add the task to the worker thread pool
-				_workerThreads.Add(WorkerThreadPool.AddTask(Callable.From(() =>
+				// Either CelestialBodyNoise or a regular float[,,] array
+				var datapoints = request.DataPoints ?? request.PlanetDataPoints.GetNoise();
+				var mesh = marchingCube.GenerateMesh(datapoints, request.Scale);
+
+				var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
+				meshInstance.Mesh = mesh;
+				meshInstance.CreateMultipleConvexCollisions();
+				meshInstance.Translate(request.Offset);
+
+				if (request.GeneratePlanetShader != null)
 				{
-					lock (_generateMeshLock) // Ensure only one thread calls GenerateMesh at a time
-					{
-						// Either CelestialBodyNoise or a regular float[,,] array
-						var datapoints = request.DataPoints ?? request.PlanetDataPoints.GetNoise();
-						var mesh = _marchingCube.GenerateMesh(datapoints, request.Scale);
+					var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight);
+					meshInstance.MaterialOverride = material;
+				}
 
-						var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
-						meshInstance.Mesh = mesh;
-						meshInstance.CreateMultipleConvexCollisions();
-						meshInstance.Translate(request.Offset); 
-						
-						if (request.GeneratePlanetShader != null)
-						{
-							var material = request.GeneratePlanetShader(_marchingCube.MinHeight, _marchingCube.MaxHeight);
-							meshInstance.MaterialOverride = material;
-						}
 
-						
-						if (IsInstanceValid(request.TempNode))
-						{
-							request.TempNode.CallDeferred(Node.MethodName.QueueFree);
-						}
+				if (IsInstanceValid(request.TempNode))
+				{
+					request.TempNode.CallDeferred(Node.MethodName.QueueFree);
+				}
 
-						if (IsInstanceValid(request.Root))
-						{
-							request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
-						}
-					}
-				})));
-				
-			}
+				if (IsInstanceValid(request.Root))
+				{
+					request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
+				}
+			})));
+
+
 		}
 	}
 
