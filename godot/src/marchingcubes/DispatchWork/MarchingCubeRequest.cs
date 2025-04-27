@@ -11,6 +11,7 @@ public record MarchingCubeRequest
 	public CelestialBodyNoise PlanetDataPoints { get; init; }
 	public float Scale { get; init; }
 	public Vector3 Offset { get; init; }
+	public Vector3 Center { get; init; }
 	public Node Root { get; init; }
 	public Node TempNode { get; init; }
 	
