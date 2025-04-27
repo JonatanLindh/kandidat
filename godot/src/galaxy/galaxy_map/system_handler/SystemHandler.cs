@@ -71,4 +71,22 @@ public partial class SystemHandler : Node
 
 		return false;
 	}
+
+	public Node3D GetClosestSystem(Vector3 position)
+	{
+		Node3D closestSystem = null;
+		float closestDistance = float.MaxValue;
+
+		foreach (Node3D system in activeSystems)
+		{
+			float distance = system.Position.DistanceTo(position);
+			if (distance < closestDistance)
+			{
+				closestDistance = distance;
+				closestSystem = system;
+			}
+		}
+
+		return closestSystem;
+	}
 }
