@@ -38,7 +38,6 @@ public partial class InfiniteGalaxy : Node3D
 		}
 
 		playerChunkCoord = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
-		UpdatePlayerChunk(playerChunkCoord);
 
 		for (int x = -viewDistance; x <= viewDistance; x++)
 		{
@@ -55,6 +54,7 @@ public partial class InfiniteGalaxy : Node3D
 			}
 		}
 
+		UpdatePlayerChunk(playerChunkCoord);
 		CullChunks(playerChunkCoord);
 	}
 
