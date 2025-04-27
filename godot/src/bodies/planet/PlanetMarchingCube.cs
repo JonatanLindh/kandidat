@@ -90,7 +90,7 @@ public partial class PlanetMarchingCube : Node3D
     /// Will regenerate the mesh of this planet.
     /// 
     /// Be careful when calling this method, it may result in planets generating multiple times depending on from where you call it. For instance, if called
-    /// from a setter of an exported variable, there is a high likelihood that it will result in this bug occuring. Be sure to check while running the main scene.
+    /// from a setter of an exported variable, there is a high likelihood that this bug willl occur. Be sure to check while running the main scene.
     /// </summary>
     private void RegenerateMesh()
 	{
