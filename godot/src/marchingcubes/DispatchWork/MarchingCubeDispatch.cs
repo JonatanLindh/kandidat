@@ -158,22 +158,6 @@ public sealed partial class MarchingCubeDispatch: Node
 		_planetQueue.Enqueue(request);
 	}
 	
-}
-
-/// <summary>
-/// Represents a request for generating a Marching Cube mesh, containing data points,
-/// scaling, offset, and references to nodes for mesh generation and scene management.
-/// </summary>
-public record MarchingCubeRequest
-{
-	public float[,,] DataPoints { get; init; }
-	public CelestialBodyNoise PlanetDataPoints { get; init; }
-	public float Scale { get; init; }
-	public Vector3 Offset { get; init; }
-	public Node Root { get; init; }
-	public Node TempNode { get; init; }
-	
-	public MeshInstance3D CustomMeshInstance { get; init; }
 	internal class CleanupModule
 	{
 		[System.Runtime.CompilerServices.ModuleInitializer]
@@ -187,6 +171,4 @@ public record MarchingCubeRequest
 		}
 	}
 	
-	public Func<float, float, ShaderMaterial> GeneratePlanetShader { get; init; }
-}
 }
