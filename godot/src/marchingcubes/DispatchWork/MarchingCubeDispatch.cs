@@ -1,5 +1,5 @@
-using Godot;
 using System;
+using Godot;
 using System.Collections.Concurrent;
 using System.Threading;
 
@@ -8,7 +8,7 @@ using System.Threading;
 /// A singleton class responsible for managing and dispatching Marching Cube mesh generation tasks.
 /// It handles task queuing, multithreaded processing, and mesh generation using the Marching Cube algorithm.
 /// </summary>
-public sealed partial class MarchingCubeDispatch : Node
+public sealed partial class MarchingCubeDispatch: Node
 {
 	private static MarchingCubeDispatch _instance = null;
 	
@@ -20,22 +20,9 @@ public sealed partial class MarchingCubeDispatch : Node
 	
 	private readonly ConcurrentBag<long> _workerThreads = new();
 	private const uint MaxThreads = 16;
-
-
-	public override void _Notification(int what)
-	{
-		if (what == NotificationPredelete || what == NotificationExitTree)
-		{
-			// Cleanup logic here
-			Instance.Cleanup();
-		}
-		if (what == NotificationReady)
-		{
-			// Initialization logic here
-			Instance.Initialize();
-		}
-	}
-
+	
+	
+	
 	/// <summary>
 	/// Initializes the <see cref="MarchingCubeDispatch"/> instance, setting up the necessary resources
 	/// such as the marching cube generator and the thread for processing mesh generation tasks.
@@ -44,7 +31,6 @@ public sealed partial class MarchingCubeDispatch : Node
 	{
 		Cleanup();
 		_insideTree = true;
-		// Initialize the marching cube instance
 		
 		// Start the planet generator thread
 		if (_planetGenerator is { IsAlive: true }) return;
@@ -67,6 +53,9 @@ public sealed partial class MarchingCubeDispatch : Node
 			WorkerThreadPool.WaitForTaskCompletion(threadId);
 		}
 		_workerThreads.Clear();
+		_planetGenerator?.Join();
+		_planetGenerator = null;
+		
 	}
 	
 	public static MarchingCubeDispatch Instance
@@ -100,46 +89,44 @@ public sealed partial class MarchingCubeDispatch : Node
 		while (!queue.IsEmpty)
 		{
 			// Try to dequeue the first item
-			queue.TryPeek(out MarchingCubeRequest request);
-			if (!queue.TryDequeue(out request)) return;
+			if (!queue.TryDequeue(out MarchingCubeRequest request)) return;
 
 			// If the request is null, continue to the next iteration
 			if (request == null) continue;
 
-
 			// Add the task to the worker thread pool
-			_workerThreads.Add(WorkerThreadPool.AddTask(Callable.From(() =>
-			{
-				var marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.Cpu);
+			_workerThreads.Add(WorkerThreadPool.AddTask(Callable.From(() => { GeneratePlanet(request); })));
+		}
+	}
+
+	private static void GeneratePlanet(MarchingCubeRequest request)
+	{
+		var marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.Cpu);
 				
-				// Either CelestialBodyNoise or a regular float[,,] array
-				var datapoints = request.DataPoints ?? request.PlanetDataPoints.GetNoise();
-				var mesh = marchingCube.GenerateMesh(datapoints, request.Scale);
+		// Either CelestialBodyNoise or a regular float[,,] array
+		var datapoints = request.DataPoints ?? request.PlanetDataPoints.GetNoise();
+		var mesh = marchingCube.GenerateMesh(datapoints, request.Scale);
 
-				var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
-				meshInstance.Mesh = mesh;
-				meshInstance.CreateMultipleConvexCollisions();
-				meshInstance.Translate(request.Offset);
+		var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
+		meshInstance.Mesh = mesh;
+		meshInstance.CreateMultipleConvexCollisions();
+		meshInstance.Translate(request.Offset);
 
-				if (request.GeneratePlanetShader != null)
-				{
-					var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight);
-					meshInstance.MaterialOverride = material;
-				}
-
-
-				if (IsInstanceValid(request.TempNode))
-				{
-					request.TempNode.CallDeferred(Node.MethodName.QueueFree);
-				}
-
-				if (IsInstanceValid(request.Root))
-				{
-					request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
-				}
-			})));
+		if (request.GeneratePlanetShader != null)
+		{
+			var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight);
+			meshInstance.MaterialOverride = material;
+		}
 
 
+		if (IsInstanceValid(request.TempNode))
+		{
+			request.TempNode.CallDeferred(Node.MethodName.QueueFree);
+		}
+
+		if (IsInstanceValid(request.Root))
+		{
+			request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
 		}
 	}
 
@@ -187,6 +174,19 @@ public record MarchingCubeRequest
 	public Node TempNode { get; init; }
 	
 	public MeshInstance3D CustomMeshInstance { get; init; }
+	internal class CleanupModule
+	{
+		[System.Runtime.CompilerServices.ModuleInitializer]
+		public static void Initialize()
+		{
+			System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(System.Reflection.Assembly.GetExecutingAssembly()).Unloading += alc =>
+			{
+				// Unload any unloadable references
+				_instance?.Cleanup();
+			};
+		}
+	}
 	
 	public Func<float, float, ShaderMaterial> GeneratePlanetShader { get; init; }
+}
 }
