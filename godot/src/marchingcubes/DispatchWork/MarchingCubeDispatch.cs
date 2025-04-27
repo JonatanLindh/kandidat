@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 
 
@@ -118,50 +119,71 @@ public sealed partial class MarchingCubeDispatch : Node
 				// Add the task to the worker thread pool
 				_workerThreads.Add(WorkerThreadPool.AddTask(Callable.From(() =>
 				{
-					lock (_generateMeshLock) // Ensure only one thread calls GenerateMesh at a time
+					MarchingCube marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.Cpu);
+					
+					var dataPointsOffset = request.Center - request.Offset;
+					// Either CelestialBodyNoise or a regular float[,,] array
+					float[,,] datapoints;
+					if (request.PlanetDataPoints != null)
 					{
-						var dataPointsOffset = request.Center - request.Offset;
-
-						// Either CelestialBodyNoise or a regular float[,,] array
-						float[,,] datapoints;
-						if (request.PlanetDataPoints != null)
+						lock (_generateMeshLock)
 						{
 							request.PlanetDataPoints.VoxelSize = request.Scale;
 							datapoints = request.PlanetDataPoints.GetNoise(dataPointsOffset);
 						}
+
+					}
+					else
+					{
+						datapoints = request.DataPoints;
+					}
+					
+					var mesh = marchingCube.GenerateMesh(datapoints, request.Scale, request.Offset);
+					
+					if (mesh == null || mesh.GetSurfaceCount() == 0)
+					{
+						return;
+					}
+					
+					var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
+					if (IsInstanceValid(meshInstance))
+					{
+						if (request.CustomMeshInstance != null)
+						{
+							meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
+							meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateMultipleConvexCollisions);
+						}
 						else
 						{
-							datapoints = request.DataPoints;
+							meshInstance.Mesh = mesh;
+							meshInstance.CreateMultipleConvexCollisions();
 						}
-						var mesh = _marchingCube.GenerateMesh(datapoints, request.Scale, request.Offset);
+					}
+					//meshInstance.Translate(request.Offset); 
+					
+					if (request.GeneratePlanetShader != null)
+					{
+						var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight);
+						if (IsInstanceValid(meshInstance))
+						{
+							//meshInstance.MaterialOverride = material;
+							meshInstance.MaterialOverride = new StandardMaterial3D()
+							{
+								CullMode = BaseMaterial3D.CullModeEnum.Disabled
+							};
+						}
+					}
 
-						if (mesh == null)
-						{
-							GD.PrintErr("Generated mesh is null. Skipping this request.");
-							return;
-						}
-						
-						var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
-						meshInstance.Mesh = mesh;
-						meshInstance.CreateMultipleConvexCollisions();
-						//meshInstance.Translate(request.Offset); 
-						
-						if (request.GeneratePlanetShader != null)
-						{
-							var material = request.GeneratePlanetShader(_marchingCube.MinHeight, _marchingCube.MaxHeight);
-							meshInstance.MaterialOverride = material;
-						}
 
-						
-						if (IsInstanceValid(request.TempNode))
-						{
-							request.TempNode.CallDeferred(Node.MethodName.QueueFree);
-						}
+					
+					if (IsInstanceValid(request.TempNode))
+					{
+						request.TempNode.CallDeferred(Node.MethodName.QueueFree);
+					}
 
-						if (IsInstanceValid(request.Root))
-						{
-							request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
-						}
+					if (IsInstanceValid(request.Root) && request.CustomMeshInstance == null)
+					{
+						request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
 					}
 				})));
 				
@@ -195,6 +217,19 @@ public sealed partial class MarchingCubeDispatch : Node
 	public void AddToQueue(MarchingCubeRequest request)
 	{
 		_planetQueue.Enqueue(request);
+	}
+	
+	internal class CleanupModule
+	{
+		[System.Runtime.CompilerServices.ModuleInitializer]
+		public static void Initialize()
+		{
+			System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(System.Reflection.Assembly.GetExecutingAssembly()).Unloading += alc =>
+			{
+				// Unload any unloadable references
+				_instance?.Cleanup();
+			};
+		}
 	}
 	
 }

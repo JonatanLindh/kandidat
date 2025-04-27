@@ -83,6 +83,8 @@ public partial class OctreePlanetSpawner : Node
 		}
 	}
 
+
+	private Octree _octree;
 	
 	public override void _Ready()
 	{
@@ -96,7 +98,7 @@ public partial class OctreePlanetSpawner : Node
 		// the base size of the octree
 		// and also with the center of the octree
 		//octree.Call("Init", this, _maxDepth, baseSize: (radius *2), center: Vector.Zero);
-		
+
 	}
 	
 	
@@ -104,9 +106,14 @@ public partial class OctreePlanetSpawner : Node
 	// Should give the center of the chunk, the size of the chunk and the current depth
 	// depth = 0 would represent the root chunk
 	// If possible the center should be in local space
-	public void SpawnChunk(Vector3 center, float size, int depth)
+	public MeshInstance3D SpawnChunk(Vector3 center, float size, int depth)
 	{
-		DrawBoundingBox(center, size);
+		if (celestialBody == null)
+		{
+			GD.Print("CELESTIAL BODY IS NULL");
+			return null;
+		}
+		//DrawBoundingBox(center, size);
 		
 		// Give the bottom left (0,0,0) corner of the chunk
 		var offset = center - (Vector3.One * size / 2);
@@ -129,6 +136,16 @@ public partial class OctreePlanetSpawner : Node
 
 		var requestInstance = new MeshInstance3D();
 		requestInstance.Transform = transform3D;
+		
+		// Check if the node already has a parent
+		if (requestInstance.GetParent() == null)
+		{
+			AddChild(requestInstance);
+		}
+		else
+		{
+			GD.PrintErr("The MeshInstance3D already has a parent.");
+		}
 
 		// Send the request to the MarchingCubeDispatch
 		MarchingCubeRequest cubeRequest = new MarchingCubeRequest
@@ -137,16 +154,16 @@ public partial class OctreePlanetSpawner : Node
 			Scale = scaleFactor,
 			Offset = Vector3.One * (size / 2),
 			Center = center,
-			Root = _rootTest,	
+			Root = this,	
 			CustomMeshInstance = requestInstance,
 			GeneratePlanetShader = GeneratePlanetShader
-		};
+		}; 
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 		
-		//_rootTest.AddChild(instance);
+		_rootTest.AddChild(instance);
+
 		
-		// Maybe return the MeshInstance3D?
-		// return instance;
+		return requestInstance;
 	}
 
 	// Either the octree handles mesh instances and remove them when we unload the chunk
@@ -199,9 +216,9 @@ public partial class OctreePlanetSpawner : Node
 		var center7 = new Vector3(centerSize, -centerSize, -centerSize);
 		var center8 = new Vector3(-centerSize, -centerSize, -centerSize);
 		
-		CallDeferred(nameof(SpawnChunk), Vector3.Zero, _radius * 2, 0);
+		//CallDeferred(nameof(SpawnChunk), _center, size, _depth);
 
-		
+		/*
 		CallDeferred(nameof(SpawnChunk), center1, size, _depth);
 		
 		CallDeferred(nameof(SpawnChunk), center2, size, _depth);
@@ -212,7 +229,7 @@ public partial class OctreePlanetSpawner : Node
 		CallDeferred(nameof(SpawnChunk), center6, size, _depth);
 		CallDeferred(nameof(SpawnChunk), center7, size, _depth);
 		CallDeferred(nameof(SpawnChunk), center8, size, _depth);
-		
+		*/
 		
 	}
 	
@@ -256,18 +273,18 @@ public partial class OctreePlanetSpawner : Node
 			VertexColorUseAsAlbedo = true,
 			DisableFog = true
 		};
-		_rootTest.AddChild(boundingBoxInstance);
+		AddChild(boundingBoxInstance);
 	}
 	
 	
 	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
 		if(_planetShader != null)
 		{
-			GD.Print($"Already Loaded shader");
+			//GD.Print($"Already Loaded shader");
 			return _planetShader;
 		}
 
-		GD.Print($"Loaded shader");
+		//GD.Print($"Loaded shader");
 		
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");

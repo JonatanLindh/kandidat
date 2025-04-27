@@ -62,7 +62,7 @@ public class MarchingCube
     {
         _scale = scale;
         var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
-        if (vertices.Count == 0) return new Mesh();
+        if (vertices.Count == 0) return null;
         // Calculate the actual geometric center of the vertices
         var center = Vector3.Zero;
         

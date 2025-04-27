@@ -5,11 +5,34 @@
 
 [node name="OctreeTest" type="Node3D"]
 script = ExtResource("1_erx03")
-radius = 1000
-seed = 2984092
+radius = 32
 
 [node name="Node3D" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("1_j5x0m")
-Center = Vector3(16, 16, 16)
-Depth = 1
+Center = Vector3(-8, 8, 8)
+Depth = 2
+CelestialBody = NodePath("..")
+
+[node name="Node3D2" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
+script = ExtResource("1_j5x0m")
+Center = Vector3(-8, 8, 24)
+Depth = 2
+CelestialBody = NodePath("..")
+
+[node name="Node3D3" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
+script = ExtResource("1_j5x0m")
+Center = Vector3(-8, 24, 24)
+Depth = 2
+CelestialBody = NodePath("..")
+
+[node name="Node3D4" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
+script = ExtResource("1_j5x0m")
+Center = Vector3(-12, 20, 12)
+Depth = 3
+CelestialBody = NodePath("..")
+
+[node name="Node3D5" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
+script = ExtResource("1_j5x0m")
+Center = Vector3(-4, 20, 12)
+Depth = 3
 CelestialBody = NodePath("..")
