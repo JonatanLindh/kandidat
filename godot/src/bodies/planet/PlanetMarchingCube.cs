@@ -6,8 +6,8 @@ using Godot.Collections;
 [Tool]
 public partial class PlanetMarchingCube : Node3D
 {
-	[ExportToolButton("Generate Mesh")]
-	public Callable ClickMeButton => Callable.From(SpawnMesh);
+	[ExportToolButton("Regenerate Mesh")]
+	public Callable ClickMeButton => Callable.From(RegenerateMesh);
 	
 	[Export]
 	public Vector3 SunPosition
@@ -27,7 +27,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_resolution = value;
-			OnResourceSet();
 		}
 	}
 	
@@ -38,7 +37,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_radius = value;
-			OnResourceSet();
 		}
 	}
 	[Export]
@@ -48,7 +46,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_seed = value;
-			OnResourceSet();
 		}
 	}
 
@@ -88,12 +85,19 @@ public partial class PlanetMarchingCube : Node3D
 	{
 		SetAtmosphereSunDir();
 	}
-	private void OnResourceSet()
+
+    /// <summary>
+    /// Will regenerate the mesh of this planet.
+    /// 
+    /// Be careful when calling this method, it may result in planets generating multiple times depending on from where you call it. For instance, if called
+    /// from a setter of an exported variable, there is a high likelihood that it will result in this bug occuring. Be sure to check while running the main scene.
+    /// </summary>
+    private void RegenerateMesh()
 	{
 		SpawnMesh();
 	}
 
-	private void SpawnMesh()
+    private void SpawnMesh()
 	{
 		// Check if there's already a planet instance and remove it
 		if (_planet != null && IsInstanceValid(_planet))
