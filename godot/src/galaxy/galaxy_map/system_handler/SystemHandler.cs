@@ -8,10 +8,10 @@ public partial class SystemHandler : Node
 
 	List<Node3D> activeSystems = new List<Node3D>();
 
-	[Export] public float closeStarGenerateRadius { get; private set; } = 10;
+	[Export] public float closeStarGenerateRadius { get; private set; } = 100;
 
 	// Must be greater than closeStarGenerateRadius. Will otherwise be clamped to closeStarGenerateRadius.
-	[Export] public float closeStarCullRadius { get; private set; } = 100;
+	[Export] public float closeStarCullRadius { get; private set; } = 1000;
 
 	[ExportGroup("Debug")]
 	[Export] bool debugPrint = false;
