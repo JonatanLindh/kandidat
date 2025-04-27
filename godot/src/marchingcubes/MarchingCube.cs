@@ -34,7 +34,7 @@ public class MarchingCube
     /// <param name="scale">The scale factor for the mesh generation.</param>
     /// <param name="method">The method used for generating the vertices, either on the cpu or on the gpu</param>
     /// <param name="threshold">The threshold value for determining the surface of the mesh.</param>
-    public MarchingCube(int scale = 1, float threshold = 0.1f, GenerationMethod method = GenerationMethod.Cpu)
+    public MarchingCube(float scale = 1, float threshold = 0.1f, GenerationMethod method = GenerationMethod.Cpu)
     {
         _scale = scale;
         _threshold = threshold;
@@ -57,24 +57,21 @@ public class MarchingCube
     /// Generates a mesh from a 3D array of float values with the Marching Cubes Algorithm
     /// </summary>
     /// <param name="datapoints">3D array of float values representing the scalar field</param>
+    /// <param name="scale">The scale factor to adjust the size of the generated mesh.</param>
     /// <returns>A MeshInstance3D object representing the generated mesh</returns>
     public Mesh GenerateMesh(float[,,] datapoints, float scale = 1, Vector3 offset = default)
     {
         _scale = scale;
+        
         var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
         if (vertices.Count == 0) return null;
         // Calculate the actual geometric center of the vertices
         var center = Vector3.Zero;
-        
-        
-        if (vertices.Count > 0)
+        foreach (var vertex in vertices)
         {
-            foreach (var vertex in vertices)
-            {
-                center += vertex;
-            }
-            center /= vertices.Count;
+            center += vertex;
         }
+        center /= vertices.Count;
         
         var surfaceTool = new SurfaceTool();
         surfaceTool.Begin(Mesh.PrimitiveType.Triangles);

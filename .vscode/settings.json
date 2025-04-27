@@ -1,5 +1,5 @@
 {
     "rust-analyzer.linkedProjects": [
-        "rust_gdext/Cargo.toml",
+        "rust_gdext/Cargo.toml"
     ]
 }
