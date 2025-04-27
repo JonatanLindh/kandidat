@@ -194,7 +194,10 @@ public partial class MoonMesh : Node
 		}
 		var dataPoints = GenerateDataPoints(_resolution);
 		_marchingCube ??= new MarchingCube();
-		_mesh = _marchingCube.GenerateMesh(dataPoints);
+		var mesh = _marchingCube.GenerateMesh(dataPoints);
+		_mesh = new MeshInstance3D();
+		_mesh.Mesh = mesh;
+		
 		_craters = GenerateCraterCenters(_amountOfCraters);
 		
 		if(MeshMaterial != null)

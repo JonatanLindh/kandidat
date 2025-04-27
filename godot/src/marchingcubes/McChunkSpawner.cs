@@ -172,7 +172,9 @@ public partial class McChunkSpawner : Node
 	{
 		var offset = new Vector3(x, 0, z) * (_chunkSize - 1);
 		var datapoints = GenerateDataPoints(new Vector3I(_chunkSize, _maxHeight, _chunkSize), offset);
-		var meshInstance3D = _marchingCube.GenerateMesh(datapoints);
+		var mesh = _marchingCube.GenerateMesh(datapoints);
+		var meshInstance3D = new MeshInstance3D();
+		meshInstance3D.Mesh = mesh;
 		
 		// Disable backface culling
 		meshInstance3D.MaterialOverride = new StandardMaterial3D();
