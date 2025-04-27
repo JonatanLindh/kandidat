@@ -89,7 +89,7 @@ public sealed partial class MarchingCubeDispatch: Node
 		while (!queue.IsEmpty)
 		{
 			// Try to dequeue the first item
-			if (!queue.TryDequeue(out MarchingCubeRequest request)) return;
+			if (!queue.TryDequeue(out MarchingCubeRequest request)) continue;
 
 			// If the request is null, continue to the next iteration
 			if (request == null) continue;
@@ -170,5 +170,4 @@ public sealed partial class MarchingCubeDispatch: Node
 			};
 		}
 	}
-	
 }
