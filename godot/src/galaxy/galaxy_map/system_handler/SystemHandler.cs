@@ -36,7 +36,6 @@ public partial class SystemHandler : Node
 		// Instantiate the system
 		Node3D newSystem = systemScene.Instantiate<Node3D>();
 		newSystem.Position = star.transform.Origin;
-		newSystem.Scale = new Vector3(1, 1, 1) * 0.05f;
 		AddChild(newSystem);
 
 		activeSystems.Add(newSystem);
@@ -88,5 +87,10 @@ public partial class SystemHandler : Node
 		}
 
 		return closestSystem;
+	}
+
+	public List<Node3D> GetActiveSystems()
+	{
+		return activeSystems;
 	}
 }

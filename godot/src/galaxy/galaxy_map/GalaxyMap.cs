@@ -9,6 +9,7 @@ public partial class GalaxyMap : Node3D
 	StarFinder starFinder;
 	StarFactory starFactory;
 	SystemHandler systemHandler;
+	ScaleHandler scaleHandler;
 
 	Node3D player;
 
@@ -19,25 +20,23 @@ public partial class GalaxyMap : Node3D
 	public override void _Ready()
 	{
 		galaxy = GetNode<InfiniteGalaxy>("%InfiniteGalaxy");
-
-		if(GetTree().CurrentScene.HasNode("Player"))
-		{
-			player = GetTree().CurrentScene.GetNode<Node3D>("Player");
-			galaxy.SetPlayer(player);
-		}
-
-		// Use the current node (galaxy center) as the player if no player is found
-		else
-		{
-			player = this;
-			galaxy.SetPlayer(player);
-		}
-
-		starFinder = GetNode<StarFinder>("%StarFinder");
-		starFactory = new StarFactory();
-		systemHandler = GetNode<SystemHandler>("%SystemHandler");
-
 		uiSelectableStar = GetNode<UISelectableStar>("%UiSelectableStar");
+		starFinder = GetNode<StarFinder>("%StarFinder");
+		systemHandler = GetNode<SystemHandler>("%SystemHandler");
+		scaleHandler = GetNode<ScaleHandler>("%ScaleHandler");
+		starFactory = new StarFactory();
+
+		Node3D initPlayer;
+		if (GetTree().CurrentScene.HasNode("Player")) initPlayer = GetTree().CurrentScene.GetNode<Node3D>("Player");
+		else initPlayer = this; // Use the current node (galaxy center) as the player if no player is found
+		player = initPlayer;
+
+		galaxy.SetPlayer(player);
+
+		scaleHandler.SetSystemHandler(systemHandler);
+		scaleHandler.SetPlayer(player);
+		scaleHandler.SetGalaxy(galaxy);
+
 		AddToGroup("GalaxyMap");
 	}
 
@@ -49,7 +48,7 @@ public partial class GalaxyMap : Node3D
 	private void CheckCloseStars()
 	{
 		IStarChunkData currentChunk = galaxy.GetPlayerChunk();
-		if(currentChunk == null) return;
+		if (currentChunk == null) return;
 
 		Vector3 starPos = starFinder.FindStarInSphere(player.Position, systemHandler.closeStarGenerateRadius, galaxy.GetPlayerChunk());
 
