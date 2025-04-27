@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3 uid="uid://cmufha122ahuk"]
+
+[ext_resource type="Shader" uid="uid://cvnqep0qocc4w" path="res://src/ocean/underwater_filter.gdshader" id="1_dxngh"]
+[ext_resource type="Script" uid="uid://c3gp54mj25jvs" path="res://src/ocean/underwater_filter.gd" id="2_shrf8"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_a5p0x"]
+size = Vector2(2, 2)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ecgka"]
+render_priority = 0
+shader = ExtResource("1_dxngh")
+shader_parameter/underwater_tint_color = Color(0, 0.169884, 0.999988, 1)
+shader_parameter/underwater_tint_strength = 0.5
+
+[node name="UnderwaterTint" type="MeshInstance3D"]
+mesh = SubResource("QuadMesh_a5p0x")
+surface_material_override/0 = SubResource("ShaderMaterial_ecgka")
+script = ExtResource("2_shrf8")

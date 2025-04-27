@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://c78s68trv7dj3"]
+[gd_scene load_steps=6 format=3 uid="uid://c78s68trv7dj3"]
 
 [ext_resource type="Script" uid="uid://bhsc7s0vmsm5m" path="res://src/player/player.gd" id="1_x5q4h"]
+[ext_resource type="PackedScene" uid="uid://cmufha122ahuk" path="res://src/ocean/underwater_filter.tscn" id="2_mf2ua"]
 [ext_resource type="PackedScene" uid="uid://dkx5f3mgc3mdq" path="res://src/player/hud.tscn" id="2_u6rmv"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_rxibo"]
@@ -23,6 +24,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.439417)
+
+[node name="UnderwaterFilter" parent="Head/Camera3D" instance=ExtResource("2_mf2ua")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+skeleton = NodePath("../../..")
 
 [node name="HUD" parent="." instance=ExtResource("2_u6rmv")]
 
