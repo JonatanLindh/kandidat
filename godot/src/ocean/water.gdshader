@@ -32,6 +32,7 @@ uniform float time;
 uniform float delta_time;
 
 varying vec3 world_position;
+varying vec3 camera_model_position;
 
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -41,6 +42,7 @@ void vertex() {
 	VERTEX += NORMAL * height*2.0;
 	// re-calculate world-position after moving vertex - will be passed to fragment shader
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	camera_model_position = (inverse(MODEL_MATRIX) * vec4(CAMERA_POSITION_WORLD,1)).xyz;
 }
 
 void fragment() {
@@ -119,5 +121,4 @@ void fragment() {
 	METALLIC = metal;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
-	
 }

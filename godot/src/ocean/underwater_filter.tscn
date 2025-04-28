@@ -13,6 +13,7 @@ shader_parameter/underwater_tint_color = Color(0, 0.169884, 0.999988, 1)
 shader_parameter/underwater_tint_strength = 0.5
 
 [node name="UnderwaterTint" type="MeshInstance3D"]
+visible = false
 mesh = SubResource("QuadMesh_a5p0x")
 surface_material_override/0 = SubResource("ShaderMaterial_ecgka")
 script = ExtResource("2_shrf8")

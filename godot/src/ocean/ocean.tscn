@@ -1,7 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://bofhg0a64o1ap"]
+[gd_scene load_steps=14 format=3 uid="uid://bofhg0a64o1ap"]
 
 [ext_resource type="Shader" uid="uid://dhdtae8rob82a" path="res://src/ocean/water.gdshader" id="1_iosg2"]
 [ext_resource type="Script" uid="uid://hrx5utvt3c07" path="res://src/ocean/ocean.gd" id="2_vku73"]
+[ext_resource type="Script" uid="uid://ksk14jqv2o7p" path="res://src/ocean/player_detector.gd" id="3_vku73"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_hsljn"]
 radius = 32.0
@@ -67,8 +68,8 @@ shader_parameter/dir_bump_map2 = Vector2(0, 1)
 shader_parameter/speed_bump_map1 = 0.005
 shader_parameter/speed_bump_map2 = 0.005
 shader_parameter/wave_speed = 0.003
-shader_parameter/time = 23.9185
-shader_parameter/delta_time = 0.0227273
+shader_parameter/time = 1903.94
+shader_parameter/delta_time = 0.0166667
 
 [node name="Ocean" type="MeshInstance3D"]
 cast_shadow = 0
@@ -78,3 +79,6 @@ script = ExtResource("2_vku73")
 deep_color = Color(0, 0.356863, 0.509804, 1)
 shallow_color = Color(0, 0.556863, 0.784314, 1)
 foam_color = Color(1, 1, 1, 1)
+
+[node name="Node3D" type="Node3D" parent="."]
+script = ExtResource("3_vku73")

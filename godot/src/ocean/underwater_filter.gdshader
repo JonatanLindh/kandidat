@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode unshaded, fog_disabled, depth_draw_always;
+render_mode unshaded, blend_mix;
 
 uniform vec3 underwater_tint_color : source_color; 
 uniform float underwater_tint_strength : hint_range(0.0, 1.0, 0.01) = 0.5;
