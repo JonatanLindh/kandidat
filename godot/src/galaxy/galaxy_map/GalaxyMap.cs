@@ -51,7 +51,7 @@ public partial class GalaxyMap : Node3D
 		IStarChunkData currentChunk = galaxy.GetPlayerChunk();
 		if (currentChunk == null) return;
 
-		List<Vector3> starPos = starFinder.FindAllStarsInSphere(player.Position, systemHandler.closeStarGenerateRadius, galaxy.GetPlayerChunk());
+		List<Vector3> starPos = starFinder.FindAllStarsInSphere(player.Position, systemHandler.closeStarEarlyGenerateRadius, galaxy.GetPlayerChunk());
 
 		if(starPos != null)
 		{

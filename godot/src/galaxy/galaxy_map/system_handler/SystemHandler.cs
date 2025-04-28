@@ -8,20 +8,29 @@ public partial class SystemHandler : Node
 
 	List<Node3D> activeSystems = new List<Node3D>();
 
-	[Export] public float closeStarGenerateRadius { get; private set; } = 100;
+	// Must be greater than closeStarLateGenerateRadius. Will otherwise be clamped to closeStarLateGenerateRadius.
+	[Export] public float closeStarEarlyGenerateRadius { get; private set; } = 200;
+
+	[Export] public float closeStarLateGenerateRadius { get; private set; } = 150;
 
 	// Must be greater than closeStarGenerateRadius. Will otherwise be clamped to closeStarGenerateRadius.
-	[Export] public float closeStarCullRadius { get; private set; } = 1000;
+	[Export] public float closeStarCullRadius { get; private set; } = 300;
 
 	[ExportGroup("Debug")]
 	[Export] bool debugPrint = false;
 
 	public override void _Ready()
 	{
-		if(closeStarCullRadius < closeStarGenerateRadius)
+		if(closeStarCullRadius < closeStarEarlyGenerateRadius)
 		{
-			GD.PrintErr($"SystemHandler: closeStarCullRadius must be greater than closeStarGenerateRadius. Setting closeStarCullRadius to {closeStarGenerateRadius} (closeStarGenerateRadius) instead.");
-			closeStarCullRadius = closeStarGenerateRadius;
+			GD.PrintErr($"SystemHandler: closeStarCullRadius must be greater than closeStarGenerateRadius. Setting closeStarCullRadius to {closeStarEarlyGenerateRadius} (closeStarEarlyGenerateRadius) instead.");
+			closeStarCullRadius = closeStarEarlyGenerateRadius;
+		}
+
+		if (closeStarEarlyGenerateRadius < closeStarLateGenerateRadius)
+		{
+			GD.PrintErr($"SystemHandler: closeStarEarlyGenerateRadius must be greater than closeStarLateGenerateRadius. Setting closeStarEarlyGenerateRadius to {closeStarLateGenerateRadius} (closeStarLateGenerateRadius) instead.");
+			closeStarEarlyGenerateRadius = closeStarLateGenerateRadius;
 		}
 	}
 
