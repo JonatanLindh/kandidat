@@ -61,7 +61,7 @@ public partial class Octree : Node
 		{
 			// Cast to OctreePlanetSpawner
 			case OctreePlanetSpawner spawner:
-				_planetMesh = spawner.SpawnChunk(_center, _size, _depth);
+				_planetMesh = spawner.SpawnChunk(_center, _size, _depth, _octId);
 				//AddChild(spawner.SpawnChunk(_center, Size, _depth));
 				break;
 			case null:
@@ -107,11 +107,6 @@ public partial class Octree : Node
 	public override void _PhysicsProcess(double delta)
 	{
 		if (PlayerPosition == null) return;
-
-		if (_planetMesh is { Mesh: null })
-		{
-			//GD.Print("Planet mesh is null");
-		}
 		
 		if (!CheckCollision(PlayerPosition.Position, _collisionSize))
 		{
@@ -128,12 +123,18 @@ public partial class Octree : Node
 				_planetMesh.Show();
 			else
 				SpawnPlanetChunk();
-
-
+			
 			return;
 		}
 		
+		
 		if (_subDivided || _depth >= maxDepth) return;
+		
+		if (_planetMesh is { Mesh: null } && !MarchingCubeDispatch.Instance.IsTaskBeingProcessed(_octId))
+		{
+			//GD.Print("Planet mesh is null");
+			return;
+		}
 		
 		var newSize = _size / 4;
 		

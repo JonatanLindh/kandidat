@@ -17,12 +17,13 @@ public sealed partial class MarchingCubeDispatch: Node
 	private readonly object _generateMeshLock = new();
 	
 	private Thread _planetGenerator;
-	private readonly ConcurrentQueue<MarchingCubeRequest> _planetQueue = new();
+	private readonly ConcurrentStack<MarchingCubeRequest> _planetQueue = new();
 	private bool _insideTree = false;
 	
 	private readonly ConcurrentBag<long> _workerThreads = new();
-	private const uint MaxThreads = 16;
+	private const uint MaxThreads = 32;
 	
+	private readonly ConcurrentDictionary<Guid, MarchingCubeRequest> _requests = new();
 	
 	
 	/// <summary>
@@ -75,7 +76,13 @@ public sealed partial class MarchingCubeDispatch: Node
 				return _instance;
 			}
 		}
-	}	
+	}
+
+	public bool IsTaskBeingProcessed(Guid id)
+	{
+		return _requests.TryGetValue(id, out var request);
+		//&& request.IsProcessing;
+	}
 
 
 	/// <summary>
@@ -85,24 +92,26 @@ public sealed partial class MarchingCubeDispatch: Node
 	/// </summary>
 	/// <param name="queue">The queue containing <see cref="MarchingCubeRequest"/> tasks to process.</param>
 	/// <seealso cref="MarchingCubeRequest"/>
-	private void HandleGeneratingTask(ConcurrentQueue<MarchingCubeRequest> queue)
+	private void HandleGeneratingTask(ConcurrentStack<MarchingCubeRequest> queue)
 	{
 		// Check if the queue is empty
 		while (!queue.IsEmpty)
 		{
-			// Try to dequeue the first item
-			if (!queue.TryDequeue(out MarchingCubeRequest request)) continue;
+			// Try to pop the first item
+			if (!queue.TryPop(out MarchingCubeRequest request)) continue;
 
-			// If the request is null, continue to the next iteration
+			// If the request is null or the request is already processing, continue to the next iteration
 			if (request == null) continue;
+			if(request.IsProcessing) continue;
 
 			// Add the task to the worker thread pool
 			_workerThreads.Add(WorkerThreadPool.AddTask(Callable.From(() => { GeneratePlanet(request); })));
 		}
 	}
 
-	private static void GeneratePlanet(MarchingCubeRequest request)
+	private void GeneratePlanet(MarchingCubeRequest request)
 	{
+		_requests[request.Id].IsProcessing = true;
 		MarchingCube marchingCube = new MarchingCube(method: MarchingCube.GenerationMethod.Cpu);
 					
 		var dataPointsOffset = request.Center - request.Offset;
@@ -110,11 +119,14 @@ public sealed partial class MarchingCubeDispatch: Node
 		float[,,] datapoints;
 		if (request.PlanetDataPoints != null)
 		{
+			
 			lock (_generateMeshLock)
 			{
 				request.PlanetDataPoints.VoxelSize = request.Scale;
 				datapoints = request.PlanetDataPoints.GetNoise(dataPointsOffset);
 			}
+			
+			//datapoints = GenerateDataPoints(dataPointsOffset, request.Scale);
 		}
 		else
 		{
@@ -167,6 +179,8 @@ public sealed partial class MarchingCubeDispatch: Node
 		{
 			request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
 		}
+		
+		_requests.TryRemove(request.Id, out _);
 	}
 
 	private void GenerateLoop()
@@ -194,7 +208,53 @@ public sealed partial class MarchingCubeDispatch: Node
 	
 	public void AddToQueue(MarchingCubeRequest request)
 	{
-		_planetQueue.Enqueue(request);
+		_requests.TryAdd(request.Id, request);
+		_planetQueue.Push(request);
+	}
+	public void AddToQueue(MarchingCubeRequest request, Guid id)
+	{
+		_requests.TryAdd(id, request);
+		_planetQueue.Push(request);
+	}
+
+	public void RemoveFromQueue(Guid requestId)
+	{
+		_requests.TryRemove(requestId, out var request);
+		if (request == null)
+		{
+			GD.PrintErr($"Request with ID {requestId} not found in the queue.");
+			return;
+		}
+		request.IsProcessing = true;
+		
+	}
+	
+	private static float[,,] GenerateDataPoints(Vector3 offset , float voxelSize)
+	{
+		
+		var radius = 32;
+		int size = 64 + 1;
+		var dataPoints = new float[size, size, size];
+		for (int x = 0; x < size; x++)
+		{
+			for (int y = 0; y < size; y++)
+			{
+				for (int z = 0; z < size; z++)
+				{
+					Vector3 worldPos = new Vector3(x, y, z) * voxelSize;
+					worldPos += offset;
+					var value = -Sphere(worldPos, Vector3.Zero, radius);
+					value = Mathf.Clamp(value, -1.0f, 1.0f);
+					dataPoints[x, y, z] = value;
+					
+
+				}
+			}
+		}
+		return dataPoints;
+	}
+	private static float Sphere(Vector3 worldPos, Vector3 origin, float radius) {
+		return (worldPos - origin).Length() - radius;
 	}
 	
 	internal class CleanupModule

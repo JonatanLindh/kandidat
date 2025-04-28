@@ -18,4 +18,8 @@ public record MarchingCubeRequest
 	public MeshInstance3D CustomMeshInstance { get; init; }
 	
 	public Func<float, float, ShaderMaterial> GeneratePlanetShader { get; init; }
+
+	public bool IsProcessing { get; set; } = false;
+	
+	public Guid Id { get; init; } = Guid.NewGuid();
 }

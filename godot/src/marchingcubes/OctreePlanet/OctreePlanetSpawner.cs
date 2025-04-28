@@ -50,6 +50,8 @@ public partial class OctreePlanetSpawner : Node
 		}
 	}
 
+	[Export] public int Resolution { get; set; } = 32;
+
 	
 	
 	private int _maxDepth = 8;
@@ -108,7 +110,7 @@ public partial class OctreePlanetSpawner : Node
 	// Should give the center of the chunk, the size of the chunk and the current depth
 	// depth = 0 would represent the root chunk
 	// If possible the center should be in local space
-	public MeshInstance3D SpawnChunk(Vector3 center, float size, int depth)
+	public MeshInstance3D SpawnChunk(Vector3 center, float size, int depth, Guid id = new Guid())
 	{
 		if (celestialBody == null)
 		{
@@ -158,9 +160,10 @@ public partial class OctreePlanetSpawner : Node
 			Center = center,
 			Root = this,	
 			CustomMeshInstance = requestInstance,
-			GeneratePlanetShader = GeneratePlanetShader
+			GeneratePlanetShader = GeneratePlanetShader,
+			Id = id
 		}; 
-		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
+		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest, id);
 		
 		_rootTest.AddChild(instance);
 
@@ -200,9 +203,9 @@ public partial class OctreePlanetSpawner : Node
 		if (celestialBody != null)
 		{
 			_radius = celestialBody.GetRadius();
-			celestialBody.Resolution = _resolution;
+			celestialBody.Resolution = Resolution;
 		}
-		_baseVoxelSize = (_radius * 2) / (_resolution * Mathf.Pow(2, _maxDepth));
+		_baseVoxelSize = (_radius * 2) / (Resolution * Mathf.Pow(2, _maxDepth));
 		var size = (1 /  Mathf.Pow(2, _depth)) * (_radius * 2);
 
 		AddChild(_rootTest);
@@ -314,7 +317,7 @@ public partial class OctreePlanetSpawner : Node
 	{
 		
 		var radius = _radius;
-		int size = _resolution + 1;
+		int size = Resolution + 1;
 		var dataPoints = new float[size, size, size];
 		float voxelSize = GetVoxelSize(depth);
 		
