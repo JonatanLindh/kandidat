@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class GalaxyMap : Node3D
 {
@@ -50,15 +51,18 @@ public partial class GalaxyMap : Node3D
 		IStarChunkData currentChunk = galaxy.GetPlayerChunk();
 		if (currentChunk == null) return;
 
-		Vector3 starPos = starFinder.FindStarInSphere(player.Position, systemHandler.closeStarGenerateRadius, galaxy.GetPlayerChunk());
+		List<Vector3> starPos = starFinder.FindAllStarsInSphere(player.Position, systemHandler.closeStarGenerateRadius, galaxy.GetPlayerChunk());
 
-		if(starPos != Vector3.Zero)
+		if(starPos != null)
 		{
-			if(systemHandler.SystemExists(starPos)) return;
+			foreach (Vector3 pos in starPos)
+			{
+				if (systemHandler.SystemExists(pos)) continue;
 
-			Star star = starFactory.CreateStar(starPos, galaxy.GetSeed());
-			if (debugPrint) GD.Print($"GalaxyMap: Created close star: [Name: {star.name} | Position: {star.transform.Origin} | Seed: {star.seed}]");
-			systemHandler.GenerateSystem(star);
+				Star star = starFactory.CreateStar(pos, galaxy.GetSeed());
+				if (debugPrint) GD.Print($"GalaxyMap: Created close star: [Name: {star.name} | Position: {star.transform.Origin} | Seed: {star.seed}]");
+				systemHandler.GenerateSystem(star);
+			}
 		}
 
 		systemHandler.CullFarSystems(player.Position);

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class StarFinder : Node
 {
@@ -106,6 +107,34 @@ public partial class StarFinder : Node
 		}
 
 		return Vector3.Zero;
+	}
+
+	/// <summary>
+	/// Finds all stars in a sphere around the given (player) position of the current chunk.
+	/// </summary>
+	/// <param name="at"></param>
+	/// <param name="radius"></param>
+	/// <param name="chunk"></param>
+	/// <returns></returns>
+	public List<Vector3> FindAllStarsInSphere(Vector3 at, float radius, IStarChunkData chunk)
+	{
+		if (chunk == null)
+		{
+			GD.PrintErr("StarFinder: FindAllStarsInSphere(). Chunk is null. Exiting.");
+			return null;
+		}
+
+		List<Vector3> foundStars = new List<Vector3>();
+		foreach (Vector3 starPos in chunk.stars)
+		{
+			if ((starPos - at).Length() < radius)
+			{
+				if (debugPrint) GD.Print($"StarFinder: Found proximity star at {starPos}, {at.DistanceTo(starPos)} LY away from player");
+				foundStars.Add(starPos);
+			}
+		}
+
+		return foundStars;
 	}
 
 	/// <summary>
