@@ -8,12 +8,12 @@ using Godot;
 public class CpuVerticesGenerator : IVerticesGenerationStrategy
 {
     private float _isoLevel = 0f;
-    private int _scale = 1;
+    private float _scale = 1;
     private float[,,] _datapoints;
     private readonly List<Vector3> _vertices = new();
 
 
-    public List<Vector3> GenerateVertices(float[,,] datapoints, float isoLevel = 0f, int scale = 1)
+    public List<Vector3> GenerateVertices(float[,,] datapoints, float isoLevel = 0f, float scale = 1)
     {
         _datapoints = datapoints;
         _isoLevel = isoLevel;

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://df1ff860m4sy4"]
+
+[ext_resource type="Script" uid="uid://cy4vrcdchfrp6" path="res://src/marchingcubes/DispatchWork/TestDispatch.cs" id="1_ryngc"]
+
+[node name="DispatchWorker" type="Node3D"]
+script = ExtResource("1_ryngc")
