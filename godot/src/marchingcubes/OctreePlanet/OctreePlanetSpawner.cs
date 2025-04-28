@@ -4,6 +4,8 @@ using System;
 [Tool]
 public partial class OctreePlanetSpawner : Node
 {
+	[Signal]
+	public delegate void SpawnedEventHandler(float radius);
 	
 	// Testing variables
 	private Node3D _rootTest;
@@ -39,7 +41,7 @@ public partial class OctreePlanetSpawner : Node
 	
 	private CelestialBodyNoise celestialBody;
 	private Node cb;
-	[Export] private Node CelestialBody
+	[Export] public Node CelestialBody
 	{
 		get => cb;
 		set
@@ -89,7 +91,7 @@ public partial class OctreePlanetSpawner : Node
 	public override void _Ready()
 	{
 		Init();
-
+		EmitSignal(SignalName.Spawned, _radius * 2f);
 		// Initialize the Octree with a max depth
 		// I assume I would call the octree by finding the octree node in the scene tree
 		//Node octree = GetNode("Octree");

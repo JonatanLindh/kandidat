@@ -10,7 +10,7 @@ public partial class Octree : Node
 	
 	public bool PlanetSpawnerInitialized = false;
 
-	public float Size = 64;
+	private float _size = 64;
 	private Vector3 _center = Vector3.Zero;
 
 	private Node3D _rootTest;
@@ -18,6 +18,11 @@ public partial class Octree : Node
 	private bool _subDivided  = false;
 
 	private int _depth = 0;
+
+	private float _collisionSize;
+	
+	
+	private Guid _octId = Guid.NewGuid();
 	
 	
 	//Octree topLeft = null;
@@ -56,7 +61,7 @@ public partial class Octree : Node
 		{
 			// Cast to OctreePlanetSpawner
 			case OctreePlanetSpawner spawner:
-				_planetMesh = spawner.SpawnChunk(_center, Size, _depth);
+				_planetMesh = spawner.SpawnChunk(_center, _size, _depth);
 				//AddChild(spawner.SpawnChunk(_center, Size, _depth));
 				break;
 			case null:
@@ -65,9 +70,22 @@ public partial class Octree : Node
 		}
 	}
 
-	public void OnPlanetSpawnerReady()
+	public void OnPlanetSpawnerReady(float size)
 	{
-		AddChild(DrawBoundingBox(_center, Size));
+		
+		// Hook into editor camera
+		if (Engine.IsEditorHint())
+		{
+			Node3D editorCamera = EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D();
+			PlayerPosition = editorCamera;
+		}
+		
+		
+		_size = size;
+		//AddChild(DrawBoundingBox(_center, _size, new Color(1, 0, 0)));
+		_collisionSize = _size + _size * 1f / Mathf.Pow(2, _depth);
+		//AddChild(DrawBoundingBox(_center, _collisionSize, new Color(0, 0, 1)));
+
 
 		SpawnPlanetChunk();
 	}
@@ -84,16 +102,18 @@ public partial class Octree : Node
 		}
 	}
 
-	public override void _Process(double delta)
+
+
+	public override void _PhysicsProcess(double delta)
 	{
 		if (PlayerPosition == null) return;
 
 		if (_planetMesh is { Mesh: null })
 		{
-			GD.Print("Planet mesh is null");
+			//GD.Print("Planet mesh is null");
 		}
 		
-		if (!CheckCollision(PlayerPosition.Position))
+		if (!CheckCollision(PlayerPosition.Position, _collisionSize))
 		{
 			// Remove all children
 			if (!_subDivided) return;
@@ -115,7 +135,7 @@ public partial class Octree : Node
 		
 		if (_subDivided || _depth >= maxDepth) return;
 		
-		var newSize = Size / 4;
+		var newSize = _size / 4;
 		
 		// Subdivide the octree into 8 children
 		for (int i = 0; i < 8; i++)
@@ -133,23 +153,23 @@ public partial class Octree : Node
 	{
 		_planetMesh.Hide();
 		newCell._center = newCenter;
-		newCell.Size = Size / 2;
+		//newCell.Size = Size / 2;
 		newCell._depth = _depth + 1;
 		newCell.maxDepth = maxDepth;
 		newCell._rootTest = _rootTest;
 		newCell.PlayerPosition = PlayerPosition;
 		newCell.OctreePlanetSpawner = OctreePlanetSpawner;
-		newCell.OnPlanetSpawnerReady();
+		newCell.OnPlanetSpawnerReady(_size / 2f);
 	}
 
-	private bool CheckCollision (Vector3 position)
+	private bool CheckCollision (Vector3 position, float size)
 	{
-		return position.X > _center.X - Size / 2 && position.X < _center.X + Size / 2 &&
-		       position.Y > _center.Y - Size / 2 && position.Y < _center.Y + Size / 2 &&
-		       position.Z > _center.Z - Size / 2 && position.Z < _center.Z + Size / 2;
+		return position.X > _center.X - size / 2 && position.X < _center.X + size / 2 &&
+		       position.Y > _center.Y - size / 2 && position.Y < _center.Y + size / 2 &&
+		       position.Z > _center.Z - size / 2 && position.Z < _center.Z + size / 2;
 	}
 	
-	private MeshInstance3D DrawBoundingBox(Vector3 center, float size)
+	private MeshInstance3D DrawBoundingBox(Vector3 center, float size, Color clr)
 	{
 		var edges = new[]
 		{
@@ -175,9 +195,9 @@ public partial class Octree : Node
 		
 		foreach (var edge in edges)
 		{
-			boundingBox.SurfaceSetColor(new Color(1, 0, 0));
+			boundingBox.SurfaceSetColor(clr);
 			boundingBox.SurfaceAddVertex(corners[edge[0]]);
-			boundingBox.SurfaceSetColor(new Color(1, 0, 0));
+			boundingBox.SurfaceSetColor(clr);
 			boundingBox.SurfaceAddVertex(corners[edge[1]]);
 		}
 		boundingBox.SurfaceEnd();
