@@ -7,6 +7,7 @@ pub mod barnes_hut;
 pub mod body;
 pub mod controller;
 pub mod direct_summation;
+pub mod galaxy_controller;
 pub mod trajectories;
 
 use glam::Vec3A;
