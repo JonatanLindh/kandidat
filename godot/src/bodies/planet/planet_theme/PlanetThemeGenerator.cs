@@ -80,7 +80,6 @@ public partial class PlanetThemeGenerator : Resource
 
 		bool switchToNeighbor = rnd.Next(2) == 0;
 
-		GD.Print(closestIndex);
 		if(switchToNeighbor)
 		{
 			if (closestIndex == 0)
