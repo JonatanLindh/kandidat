@@ -108,6 +108,7 @@ func generateMoon(r, planetInstance, orbitRadius):
 
 func generatePlanets(r):
 	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS);
+	print("number of planets ", n)
 	var planet_instances = []
 	for i in n:
 		var planetInstance = generatePlanet(r, 0, 0, BASE_DISTANCE_FROM_SUN + i * DISTANCE_BETWEEN_PLANETS, 0);
@@ -122,9 +123,9 @@ func generatePlanets(r):
 		var distance_to_sun = (planetInstance.position - SUN.position).length()
 		var warmth = calculate_planet_warmth(distance_to_sun, system_radius)
 		planetInstance.set("Warmth", warmth)
+		planetInstance.SpawnMesh()
 
 func generateSystemFromSeed(s: int):
-	print(s);
 	clearBodies();
 	var r = RandomNumberGenerator.new();
 	r.seed = s;

@@ -7,7 +7,8 @@ extends MeshInstance3D
 @export var sun_direction: Vector3:
 	set(new_dir):
 		sun_direction = new_dir
-		_update_runtime_shader_params()
+		#_update_runtime_shader_params()
+		mesh.material.set_shader_parameter("sun_direction", sun_direction.normalized())
 
 @export var planet_seed: int:
 	set(new_seed):
@@ -33,9 +34,9 @@ func _ready() -> void:
 		mesh.material = mesh.material.duplicate()
 	
 	_update_runtime_shader_params()
-	rng.seed = planet_seed
-	var random_index = rng.randf_range(0, wave_lenghts_array.size() - 1)
-	_update_atmopshere_color(random_index)
+	#rng.seed = planet_seed
+	#var random_index = rng.randf_range(0, wave_lenghts_array.size() - 1)
+	#_update_atmopshere_color(random_index)
 	
 	mesh.material.set_shader_parameter("planet_radius", radius)
 	mesh.size = Vector3(radius*0.2,radius*0.2,radius*0.2)

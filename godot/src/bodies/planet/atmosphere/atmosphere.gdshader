@@ -98,7 +98,7 @@ vec3 calculate_light(vec3 ray_origin, vec3 ray_dir, float ray_length, vec3 origi
 	step_size = min(step_size, 10.);
 	vec3 in_scattered_light = vec3(0.);
 	float view_ray_optical_depth = 0.;
-	
+
 	for(int i = 0; i < lod_num_in_scattering_points; i++){
 		float sun_ray_length = raySphere(planet_position, atmosphere_radius, in_scatter_point, -sunDirView, 10000.).y;
 		float sun_ray_optical_depth = optical_depth(in_scatter_point, -sunDirView, sun_ray_length, cam_dist);
@@ -129,7 +129,7 @@ void fragment() {
 	CLOSE_THRESHOLD = 100. * planet_radius;
 	MEDIUM_THRESHOLD = 200. * planet_radius;
 	FAR_THRESHOLD = 300. * planet_radius;
-	
+
 	scattering_coefficients = calculate_wavelengths();
 
 	// scale the atmosphere radius

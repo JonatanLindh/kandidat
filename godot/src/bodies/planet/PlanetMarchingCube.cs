@@ -27,7 +27,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_resolution = value;
-			OnResourceSet();
 		}
 	}
 	
@@ -38,7 +37,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_radius = value;
-			OnResourceSet();
 		}
 	}
 	[Export]
@@ -48,7 +46,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_seed = value;			
-			OnResourceSet();
 		}
 	}
 
@@ -61,7 +58,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			warmth = value;
-			OnResourceSet();
 		}
 	}
 	private double warmth;
@@ -81,8 +77,6 @@ public partial class PlanetMarchingCube : Node3D
 
 	public override void _Ready()
 	{
-        _themeGenerator = new PlanetThemeGenerator();
-        SpawnMesh();
 		_planet_gravity_field = GetNode<Area3D>("PlanetGravityField");
 		_planet_gravity_field.Set("radius", _radius);
 	}
@@ -96,22 +90,14 @@ public partial class PlanetMarchingCube : Node3D
 		SpawnMesh();
 	}
 
-	private void SpawnMesh()
+	public void SpawnMesh()
 	{
-		if(_themeGenerator == null)
-		{
-			_themeGenerator = new PlanetThemeGenerator();
-            _themeGenerator.Seed = _seed;
-			_themeGenerator.Warmth = warmth;
-        }
-		else
-		{
-			_themeGenerator.Seed = _seed;
-            _themeGenerator.Warmth = warmth;
-        }
+		_themeGenerator = new PlanetThemeGenerator();
+        _themeGenerator.Seed = _seed;
+        _themeGenerator.Warmth = warmth;
 
-        // Check if there's already a planet instance and remove it
-        if (_planet != null && IsInstanceValid(_planet))
+		// Check if there's already a planet instance and remove it
+		if (_planet != null && IsInstanceValid(_planet))
 		{
 			_planet.QueueFree();
 			_planet = null;
@@ -138,8 +124,11 @@ public partial class PlanetMarchingCube : Node3D
                 // Find McSpawner node and set Warmth
                 var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
 				if (mcSpawner != null)
+				{
 					mcSpawner.ThemeGenerator = _themeGenerator;
                     mcSpawner.Warmth = warmth;
+					mcSpawner.SpawnMesh();
+				}
             }
 		}
 		

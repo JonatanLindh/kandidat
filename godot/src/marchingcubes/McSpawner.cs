@@ -55,17 +55,13 @@ public partial class McSpawner : Node
 		}
 	}
 
-	private PlanetThemeGenerator _themeGenerator = new PlanetThemeGenerator();
+	private PlanetThemeGenerator _themeGenerator;
 	public PlanetThemeGenerator ThemeGenerator
 	{
 		get => _themeGenerator;
 		set
 		{
 			_themeGenerator = value;
-			if (_themeGenerator != null)
-			{
-				CallDeferred(nameof(GeneratePlanetShader));
-			}
 		}
 	}
 
@@ -81,7 +77,6 @@ public partial class McSpawner : Node
 	public override void _Ready()
 	{
 		_marchingCube = new MarchingCube();
-		CallDeferred(nameof(SpawnMesh));
 	}
 	
 	private void OnResourceSet()
@@ -94,7 +89,7 @@ public partial class McSpawner : Node
 		SpawnMesh();
 	}
 
-    private void SpawnMesh()
+    public void SpawnMesh()
 	{
 		// Remove old mesh instances
 		if(IsInstanceValid(_meshInstance3D))
@@ -166,7 +161,9 @@ public partial class McSpawner : Node
 		return dataPoints;
 	}
 
-	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
+	public ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
+
+		_themeGenerator.GenerateTheme();
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		ShaderMaterial shaderMaterial = new ShaderMaterial();
@@ -182,7 +179,14 @@ public partial class McSpawner : Node
 		gradientTexture.Width = 256;
 
 		shaderMaterial.SetShaderParameter("height_color", gradientTexture);
-		shaderMaterial.SetShaderParameter("cliff_color", gradient.GetColor(3));
+		if(gradient.GetPointCount() >= 3)
+		{
+			shaderMaterial.SetShaderParameter("cliff_color", gradient.GetColor(3));
+		}
+		else
+		{
+			GD.Print("NO cliff color for you!");
+		}
 
 		return shaderMaterial;
 

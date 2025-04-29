@@ -17,7 +17,6 @@ public partial class PlanetThemeGenerator : Resource
 		set
 		{
 			seed = value;
-			GenerateTheme();
 		} 
 	}
 
@@ -35,8 +34,7 @@ public partial class PlanetThemeGenerator : Resource
 		set
 		{
 			_warmth = value;
-			GenerateTheme(); // Automatically regenerate the theme
-		}
+        }
 	}
 
 	private Gradient gradient = new Gradient();
@@ -48,14 +46,14 @@ public partial class PlanetThemeGenerator : Resource
 	}
 	private void Initialize()
 	{
-		// Called when the resource is initialized
-		LoadThemeSets();
-		GenerateTheme();
+        // Called when the resource is initialized
+        LoadThemeSets();
 	}
 
-	private void GenerateTheme()
+	public void GenerateTheme()
 	{
-		if (ThemeSets == null || ThemeSets.Count == 0)
+        LoadThemeSets();
+        if (ThemeSets == null || ThemeSets.Count == 0)
 			return;
 
 		var rnd = new Random(seed);
@@ -82,6 +80,7 @@ public partial class PlanetThemeGenerator : Resource
 
 		bool switchToNeighbor = rnd.Next(2) == 0;
 
+		GD.Print(closestIndex);
 		if(switchToNeighbor)
 		{
 			if (closestIndex == 0)
@@ -96,7 +95,6 @@ public partial class PlanetThemeGenerator : Resource
 			{
 				int randomInd = rnd.Next(2) == 0 ? -1 : 1;
 				closestSet = ThemeSets[closestIndex + randomInd];
-				GD.Print(closestIndex + randomInd);
 			}
 		}
 
@@ -116,6 +114,7 @@ public partial class PlanetThemeGenerator : Resource
 		// remove default Godot-initialized points
 		Gradient.RemovePoint(0);
 		Gradient.RemovePoint(0);
+		
 
 	}
 
