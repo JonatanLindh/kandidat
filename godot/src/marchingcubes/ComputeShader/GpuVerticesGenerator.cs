@@ -12,7 +12,7 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 	private int _sizeX;
 	private int _sizeY;
 	private int _sizeZ;
-	private int _scale = 1;
+	private float _scale = 1;
 	private readonly List<Vector3> _vertices = new();
 	private float[,,] _dataPoints;
 	private readonly bool _customSize = false;
@@ -50,7 +50,7 @@ public class GpuVerticesGenerator : IVerticesGenerationStrategy
 		RenderingServer.Singleton.CallOnRenderThread(Callable.From(
 			CleanupGpu));
 	}
-    public List<Vector3> GenerateVertices(float[,,] datapoints, float isoLevel = 0f, int scale = 1)
+    public List<Vector3> GenerateVertices(float[,,] datapoints, float isoLevel = 0f, float scale = 1)
     {
 	    _dataPoints = datapoints;
 	    _isoLevel = isoLevel;

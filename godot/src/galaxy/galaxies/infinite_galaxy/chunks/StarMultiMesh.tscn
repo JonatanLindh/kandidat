@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cl48jm75yyftt"]
+
+[ext_resource type="Script" uid="uid://dvymm8ywk3fcb" path="res://src/galaxy/galaxies/infinite_galaxy/chunks/StarMultiMesh.cs" id="1_atm10"]
+
+[node name="StarMultiMesh" type="MultiMeshInstance3D"]
+script = ExtResource("1_atm10")
