@@ -73,6 +73,8 @@ public partial class McSpawner : Node
 	private int _size = 32;
 	private MarchingCube _marchingCube;
 	private MeshInstance3D _meshInstance3D;
+	private MeshInstance3D _temporaryMeshInstance;
+	private bool _useTemp = true;
 	
 	
 	// Called when the node enters the scene tree for the first time.
@@ -92,21 +94,48 @@ public partial class McSpawner : Node
 		SpawnMesh();
 	}
 
-	private void SpawnMesh()
+    private void SpawnMesh()
 	{
-		if(_meshInstance3D != null) RemoveChild(_meshInstance3D);
-		_marchingCube ??= new MarchingCube();
+		// Remove old mesh instances
+		if(IsInstanceValid(_meshInstance3D))
+			_meshInstance3D.QueueFree();
+		if(IsInstanceValid(_temporaryMeshInstance))
+			_temporaryMeshInstance.QueueFree();
 
 		celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody == null)
 		{
 			GD.PrintErr("celestialBody is null");
 		}
-		float[,,] dataPoints = celestialBody.GetNoise();
-		_meshInstance3D = _marchingCube.GenerateMesh(dataPoints);
-		_meshInstance3D.MaterialOverride = GeneratePlanetShader();
+		var planetRadius = celestialBody.GetRadius();
 
-		this.AddChild(_meshInstance3D);
+		_meshInstance3D = new MeshInstance3D();
+			
+			// Set up a temporary mesh instance that will disappear after the mesh is generated
+		if (_useTemp)
+		{
+			_temporaryMeshInstance = new MeshInstance3D();
+			_temporaryMeshInstance.Mesh = new SphereMesh
+			{
+				Radius = planetRadius,
+				Height = planetRadius * 2
+			};
+			_temporaryMeshInstance.MaterialOverride = GeneratePlanetShader(planetRadius, planetRadius);
+			AddChild(_temporaryMeshInstance);
+		}
+			
+		// Send the request to the MarchingCubeDispatch
+		MarchingCubeRequest cubeRequest = new MarchingCubeRequest
+		{
+			PlanetDataPoints = celestialBody,
+			Scale = 1,
+			Offset = Vector3.Zero,
+			Root = this,
+			CustomMeshInstance = _meshInstance3D,
+			TempNode = _useTemp ? _temporaryMeshInstance : null,
+			GeneratePlanetShader = GeneratePlanetShader
+		};
+		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 	}
 
 	// Old test method for generating datapoints
@@ -137,13 +166,13 @@ public partial class McSpawner : Node
 		return dataPoints;
 	}
 
-	private ShaderMaterial GeneratePlanetShader() {
+	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		ShaderMaterial shaderMaterial = new ShaderMaterial();
 		shaderMaterial.Shader = shader;
-		shaderMaterial.SetShaderParameter("min_height", _marchingCube.MinHeight);
-		shaderMaterial.SetShaderParameter("max_height", _marchingCube.MaxHeight);
+		shaderMaterial.SetShaderParameter("min_height", minHeight);
+		shaderMaterial.SetShaderParameter("max_height", maxHeight);
 
 
 		// Access exported property (gradient)
