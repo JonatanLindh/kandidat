@@ -56,12 +56,13 @@ public partial class SystemHandler : Node
 
 	public void CullFarSystems(Vector3 basePos)
 	{
-		foreach (Node3D system in activeSystems)
+		for(int i = activeSystems.Count - 1; i >= 0; i--)
 		{
+			Node3D system = activeSystems[i];
 			if (system.Position.DistanceTo(basePos) > closeStarCullRadius)
 			{
 				system.QueueFree();
-				activeSystems.Remove(system);
+				activeSystems.RemoveAt(i);
 				if (debugPrint) GD.Print($"SystemHandler: Culled system at {system.GlobalPosition}");
 			}
 		}
