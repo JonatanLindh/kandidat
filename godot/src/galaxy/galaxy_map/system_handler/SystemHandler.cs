@@ -23,8 +23,7 @@ public partial class SystemHandler : Node
 	{
 		if(closeStarCullRadius < closeStarEarlyGenerateRadius)
 		{
-			GD.PrintErr($"SystemHandler: closeStarCullRadius must be greater than closeStarGenerateRadius. Setting closeStarCullRadius to {closeStarEarlyGenerateRadius} (closeStarEarlyGenerateRadius) instead.");
-			closeStarCullRadius = closeStarEarlyGenerateRadius;
+			GD.PrintErr($"SystemHandler: closeStarCullRadius must be greater than closeStarEarlyGenerateRadius. Setting closeStarCullRadius to {closeStarEarlyGenerateRadius} (closeStarEarlyGenerateRadius) instead.");
 		}
 
 		if (closeStarEarlyGenerateRadius < closeStarLateGenerateRadius)
