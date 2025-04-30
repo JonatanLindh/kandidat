@@ -46,7 +46,6 @@ public partial class PlanetThemeGenerator : Resource
 
 	public void GenerateTheme()
 	{
-        LoadThemeSets();
         if (ThemeSets == null || ThemeSets.Count == 0)
 			return;
 

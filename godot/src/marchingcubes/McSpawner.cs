@@ -80,17 +80,12 @@ public partial class McSpawner : Node
         CallDeferred(nameof(SpawnMesh));
     }
 	
-	private void OnResourceSet()
-	{
-		SpawnMesh();
-	}
-
 	public void RegenerateMesh()
 	{
 		SpawnMesh();
 	}
 
-    public void SpawnMesh()
+    private void SpawnMesh()
 	{
 		// Remove old mesh instances
 		if(IsInstanceValid(_meshInstance3D))
