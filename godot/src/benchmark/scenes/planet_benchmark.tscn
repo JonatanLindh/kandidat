@@ -5,8 +5,9 @@
 [ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="3_vl1gc"]
 [ext_resource type="PackedScene" uid="uid://c4qg4a1uuvy8x" path="res://src/bodies/star/star.tscn" id="4_lfx4l"]
 
-[node name="PlanetBenchmark" type="Node3D" node_paths=PackedStringArray("orbitPivot", "planetPivot", "movePivot")]
+[node name="PlanetBenchmark" type="Node3D" node_paths=PackedStringArray("planet", "orbitPivot", "planetPivot", "movePivot")]
 script = ExtResource("1_4b5kf")
+planet = NodePath("OrbitPivot/PlanetPivot/PlanetMarchingCube")
 orbitPivot = NodePath("OrbitPivot")
 planetPivot = NodePath("OrbitPivot/PlanetPivot")
 movePivot = NodePath("OrbitPivot/PlanetPivot/MovePivot")
