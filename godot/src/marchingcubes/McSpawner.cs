@@ -77,7 +77,8 @@ public partial class McSpawner : Node
 	public override void _Ready()
 	{
 		_marchingCube = new MarchingCube();
-	}
+        CallDeferred(nameof(SpawnMesh));
+    }
 	
 	private void OnResourceSet()
 	{
@@ -161,8 +162,9 @@ public partial class McSpawner : Node
 		return dataPoints;
 	}
 
-	public ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
+	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
 
+		_themeGenerator.LoadThemeSets();
 		_themeGenerator.GenerateTheme();
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");

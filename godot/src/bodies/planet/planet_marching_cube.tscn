@@ -34,7 +34,6 @@ resource_local_to_scene = true
 [node name="PlanetMarchingCube" type="GravityBody"]
 script = ExtResource("1_ha83e")
 Resolution = 32
-Radius = 150.0
 Seed = 1558686225
 Planet = ExtResource("2_736bg")
 Warmth = 0.5

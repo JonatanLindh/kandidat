@@ -42,12 +42,6 @@ public partial class PlanetThemeGenerator : Resource
 
 	public PlanetThemeGenerator()
 	{
-		CallDeferred(nameof(Initialize));
-	}
-	private void Initialize()
-	{
-        // Called when the resource is initialized
-        LoadThemeSets();
 	}
 
 	public void GenerateTheme()
@@ -117,7 +111,7 @@ public partial class PlanetThemeGenerator : Resource
 
 	}
 
-	private void LoadThemeSets()
+	public void LoadThemeSets()
 	{
 		var dir = DirAccess.Open(ThemeDirectoryPath);
 

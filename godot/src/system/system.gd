@@ -123,7 +123,6 @@ func generatePlanets(r):
 		var distance_to_sun = (planetInstance.position - SUN.position).length()
 		var warmth = calculate_planet_warmth(distance_to_sun, system_radius)
 		planetInstance.set("Warmth", warmth)
-		planetInstance.SpawnMesh()
 
 func generateSystemFromSeed(s: int):
 	clearBodies();

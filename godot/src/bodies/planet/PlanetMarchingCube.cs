@@ -79,7 +79,8 @@ public partial class PlanetMarchingCube : Node3D
 	{
 		_planet_gravity_field = GetNode<Area3D>("PlanetGravityField");
 		_planet_gravity_field.Set("radius", _radius);
-	}
+		CallDeferred(nameof(SpawnMesh));
+    }
 
 	public override void _Process(double delta)
 	{
@@ -97,7 +98,7 @@ public partial class PlanetMarchingCube : Node3D
 		SpawnMesh();
 	}
 
-	public void SpawnMesh()
+	private void SpawnMesh()
 	{
 		_themeGenerator = new PlanetThemeGenerator();
         _themeGenerator.Seed = _seed;
@@ -134,7 +135,6 @@ public partial class PlanetMarchingCube : Node3D
 				{
 					mcSpawner.ThemeGenerator = _themeGenerator;
                     mcSpawner.Warmth = warmth;
-					mcSpawner.SpawnMesh();
 				}
             }
 		}
