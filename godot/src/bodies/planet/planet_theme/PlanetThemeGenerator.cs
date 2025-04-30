@@ -44,7 +44,13 @@ public partial class PlanetThemeGenerator : Resource
 	{
 	}
 
-	public void GenerateTheme()
+	public void LoadAndGenerateThemes()
+	{
+		LoadThemeSets();
+		GenerateTheme();
+	}
+
+    private void GenerateTheme()
 	{
         if (ThemeSets == null || ThemeSets.Count == 0)
 			return;
@@ -110,7 +116,7 @@ public partial class PlanetThemeGenerator : Resource
 
 	}
 
-	public void LoadThemeSets()
+	private void LoadThemeSets()
 	{
 		var dir = DirAccess.Open(ThemeDirectoryPath);
 

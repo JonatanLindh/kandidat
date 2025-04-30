@@ -159,10 +159,9 @@ public partial class McSpawner : Node
 
 	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
 
-		_themeGenerator.LoadThemeSets();
-		_themeGenerator.GenerateTheme();
-		// Load the shader correctly
-		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
+		_themeGenerator.LoadAndGenerateThemes();
+        // Load the shader correctly
+        Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		ShaderMaterial shaderMaterial = new ShaderMaterial();
 		shaderMaterial.Shader = shader;
 		shaderMaterial.SetShaderParameter("min_height", minHeight);
