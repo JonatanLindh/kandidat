@@ -6,7 +6,7 @@ uniform vec3 shadow_color : source_color = vec3(0.0);
 uniform vec3 planet_position;
 uniform vec3 sun_direction;
 // scales the thickness of the atmosphere (controls glow and haze appearance)
-uniform float thickness_scale : hint_range(0.0, 10.0, 0.001);
+uniform float thickness_scale : hint_range(0.0, 100.0, 0.001);
 uniform sampler2D depth_texture : hint_depth_texture;
 uniform float planet_radius;
 uniform float density_falloff : hint_range(-10.0, 20.0, 0.1);
