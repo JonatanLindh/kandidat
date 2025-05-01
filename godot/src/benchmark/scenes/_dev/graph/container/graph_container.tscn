@@ -1,0 +1,68 @@
+[gd_scene load_steps=4 format=3 uid="uid://msfulctl4nlw"]
+
+[ext_resource type="Script" uid="uid://dqwqhp7jrvjgc" path="res://src/benchmark/scenes/_dev/graph/container/GraphContainer.cs" id="1_5wiw0"]
+[ext_resource type="PackedScene" uid="uid://cduga7tfi8vwp" path="res://src/benchmark/scenes/_dev/graph/y_axis/y_axis_label.tscn" id="2_v7dxl"]
+[ext_resource type="PackedScene" uid="uid://d03u2rv32xad0" path="res://src/benchmark/scenes/_dev/graph/y_axis/y_axis_h_separator.tscn" id="3_53cmk"]
+
+[node name="GraphContainer" type="VBoxContainer"]
+offset_right = 400.0
+offset_bottom = 150.0
+size_flags_vertical = 3
+script = ExtResource("1_5wiw0")
+yAxisLabel = ExtResource("2_v7dxl")
+yAxisHSeparator = ExtResource("3_53cmk")
+
+[node name="Title" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Title"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="YAxis" type="VBoxContainer" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.07
+
+[node name="Panel" type="Panel" parent="HBoxContainer"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Line2D" type="Line2D" parent="HBoxContainer/Panel"]
+unique_name_in_owner = true
+width = 2.0
+
+[node name="Label" type="Label" parent="HBoxContainer/Panel"]
+unique_name_in_owner = true
+z_index = 1
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Current"
+horizontal_alignment = 2
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/Panel/Label"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.470588, 0.470588, 0.470588, 0.705882)
+
+[connection signal="resized" from="HBoxContainer/Panel" to="." method="OnPanelResized"]

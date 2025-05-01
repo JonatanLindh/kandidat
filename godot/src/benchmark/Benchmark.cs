@@ -8,9 +8,18 @@ public partial class Benchmark : Node3D
 	[Export] PackedScene[] scenes;
 	[Export] bool saveResults = true;
 	[Export] bool saveFullResults = false;
+	[Export] bool showCurrentValues = true;
 
-	[ExportCategory("Graph (Impacts performance)")]
+	[ExportGroup("Graph (Impacts performance)")]
 	[Export] bool plotGraph = false;
+
+	[ExportSubgroup("Graph settings")]
+	[Export] bool hideFPS = false;
+	[Export] bool hideFrameTime = false;
+	[Export] bool hideMemoryUsage = false;
+
+	bool showingCurrentValues = false;
+	bool showingGraphs = false;
 
 	GraphPlotter plot;
 
@@ -36,7 +45,30 @@ public partial class Benchmark : Node3D
 	public override void _Ready()
 	{
 		this.plot = GetNode<GraphPlotter>("GraphPlotter");
-		if(!plotGraph) plot.Visible = false;
+
+		if (plotGraph)
+		{
+			plot.HideAllGraphs(false);
+			plot.HideCurrentValues(true);
+			showingGraphs = true;
+		}
+
+		else if (showCurrentValues)
+		{
+			plot.HideAllGraphs(true);
+			plot.HideCurrentValues(false);
+			showingCurrentValues = true;
+		}
+
+		else
+		{
+			plot.HideAllGraphs(true);
+			plot.HideCurrentValues(true);
+		}
+
+		if(hideFPS) plot.HideGraphType(BenchmarkDatapointEnum.FPS, true);
+		if (hideFrameTime) plot.HideGraphType(BenchmarkDatapointEnum.FrameTime, true);
+		if (hideMemoryUsage) plot.HideGraphType(BenchmarkDatapointEnum.MemoryUsage, true);
 
 		string absResultPath = ProjectSettings.GlobalizePath(_resultPath);
 		filePath = absResultPath + $"/{time}.txt";
@@ -57,8 +89,7 @@ public partial class Benchmark : Node3D
 		{
 			currentTime = 0;
 
-			double fps = Engine.GetFramesPerSecond();
-			double frameTime = Math.Round(delta, 6);
+			double frameTime = delta;
 			ulong memoryUsage = OS.GetStaticMemoryUsage();
 			string measurementTime = DateTime.Now.ToString("HH:mm:ss.fff");
 
@@ -69,14 +100,15 @@ public partial class Benchmark : Node3D
 
 			BenchmarkDatapoint benchmarkDatapoint = new BenchmarkDatapoint
 			{
-				fps = (float)fps,
+				fps = (float)(1f / frameTime),
 				frameTime = (float)frameTime,
 				memoryUsage = memoryUsage,
 				time = measurementTime
 			};
 
 			result[currentSceneIndex].Add(benchmarkDatapoint);
-			if(plotGraph) plot.AddDataPoint(benchmarkDatapoint);
+			if(showingGraphs) plot.AddDataPoint(benchmarkDatapoint);
+			if(showingCurrentValues) plot.UpdateCurrentData(benchmarkDatapoint);
 		}
 
 		if(currentTime > downtime && !benchmarkSetupDone)

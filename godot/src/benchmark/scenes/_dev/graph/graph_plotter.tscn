@@ -1,15 +1,29 @@
 [gd_scene load_steps=4 format=3 uid="uid://bn03e1m8twjh0"]
 
 [ext_resource type="Script" uid="uid://bopwc70j3myag" path="res://src/benchmark/scenes/_dev/graph/GraphPlotter.cs" id="1_vtf27"]
-[ext_resource type="PackedScene" uid="uid://cduga7tfi8vwp" path="res://src/benchmark/scenes/_dev/graph/y_axis/y_axis_label.tscn" id="2_2h617"]
-[ext_resource type="PackedScene" uid="uid://d03u2rv32xad0" path="res://src/benchmark/scenes/_dev/graph/y_axis/y_axis_h_separator.tscn" id="3_fem5t"]
+[ext_resource type="PackedScene" uid="uid://bh4078ciy4bsr" path="res://src/benchmark/scenes/_dev/graph/current_container/current_container.tscn" id="3_fem5t"]
+[ext_resource type="PackedScene" uid="uid://msfulctl4nlw" path="res://src/benchmark/scenes/_dev/graph/container/graph_container.tscn" id="4_3n881"]
 
 [node name="GraphPlotter" type="Control"]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_vtf27")
-yAxisLabel = ExtResource("2_2h617")
-yAxisHSeparator = ExtResource("3_fem5t")
+
+[node name="CurrentContainer" parent="." instance=ExtResource("3_fem5t")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_right = 0.0
+anchor_bottom = 0.5
+offset_top = -38.5
+offset_right = 140.0
+offset_bottom = 38.5
+grow_horizontal = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -17,157 +31,13 @@ offset_right = 400.0
 offset_bottom = 400.0
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="VBoxContainer"]
+[node name="FPSGraph" parent="VBoxContainer" instance=ExtResource("4_3n881")]
 layout_mode = 2
-text = "Frames per second (FPS)"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="FrametimeGraph" parent="VBoxContainer" instance=ExtResource("4_3n881")]
 layout_mode = 2
-size_flags_vertical = 3
+dataType = 1
 
-[node name="FPSYAxis" type="VBoxContainer" parent="VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
+[node name="MemoryGraph" parent="VBoxContainer" instance=ExtResource("4_3n881")]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.05
-
-[node name="FPSPanel" type="Panel" parent="VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="FPSLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer/FPSPanel"]
-unique_name_in_owner = true
-width = 2.0
-
-[node name="FPSLabel" type="Label" parent="VBoxContainer/HBoxContainer/FPSPanel"]
-unique_name_in_owner = true
-z_index = 1
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -23.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "Current"
-horizontal_alignment = 2
-
-[node name="ColorRect" type="ColorRect" parent="VBoxContainer/HBoxContainer/FPSPanel/FPSLabel"]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.470588, 0.470588, 0.470588, 0.705882)
-
-[node name="Label2" type="Label" parent="VBoxContainer"]
-layout_mode = 2
-text = "Frametime (ms)"
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="FrametimeYAxis" type="VBoxContainer" parent="VBoxContainer/HBoxContainer2"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.05
-
-[node name="FrametimePanel" type="Panel" parent="VBoxContainer/HBoxContainer2"]
-unique_name_in_owner = true
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="FrametimeLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
-unique_name_in_owner = true
-width = 2.0
-
-[node name="FrametimeLabel" type="Label" parent="VBoxContainer/HBoxContainer2/FrametimePanel"]
-unique_name_in_owner = true
-z_index = 1
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -23.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "Current"
-horizontal_alignment = 2
-
-[node name="ColorRect" type="ColorRect" parent="VBoxContainer/HBoxContainer2/FrametimePanel/FrametimeLabel"]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.470588, 0.470588, 0.470588, 0.705882)
-
-[node name="Label3" type="Label" parent="VBoxContainer"]
-layout_mode = 2
-text = "Memory usage (MB)"
-
-[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="MemoryYAxis" type="VBoxContainer" parent="VBoxContainer/HBoxContainer3"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.05
-
-[node name="MemoryPanel" type="Panel" parent="VBoxContainer/HBoxContainer3"]
-unique_name_in_owner = true
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="MemoryLine2D" type="Line2D" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
-unique_name_in_owner = true
-width = 2.0
-
-[node name="MemoryLabel" type="Label" parent="VBoxContainer/HBoxContainer3/MemoryPanel"]
-unique_name_in_owner = true
-z_index = 1
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -23.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "Current"
-horizontal_alignment = 2
-
-[node name="ColorRect" type="ColorRect" parent="VBoxContainer/HBoxContainer3/MemoryPanel/MemoryLabel"]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.470588, 0.470588, 0.470588, 0.705882)
-
-[connection signal="resized" from="VBoxContainer/HBoxContainer/FPSPanel" to="." method="OnFpsPanelResized"]
+dataType = 2

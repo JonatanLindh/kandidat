@@ -6,7 +6,7 @@ uniform vec3 shadow_color : source_color = vec3(0.0);
 uniform vec3 planet_position;
 uniform vec3 sun_direction;
 // scales the thickness of the atmosphere (controls glow and haze appearance)
-uniform float thickness_scale : hint_range(0.0, 0.5, 0.001);
+uniform float thickness_scale : hint_range(0.0, 100.0, 0.001);
 uniform sampler2D depth_texture : hint_depth_texture;
 uniform float planet_radius;
 uniform float density_falloff : hint_range(-10.0, 20.0, 0.1);
@@ -15,6 +15,7 @@ uniform int num_optical_depth_points : hint_range(0, 100, 1);
 uniform vec3 wavelengths;
 uniform float scattering_strenght: hint_range(0.0, 100.0, 0.01);
 uniform float atmosphere_scale: hint_range(1.0, 2.0, 0.05);
+uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 
 varying vec3 cam_pos;
 varying float atmosphere_radius;
@@ -22,9 +23,9 @@ varying vec3 sunDirView;
 varying vec3 scattering_coefficients;
 
 // FOR LOD
-const float CLOSE_THRESHOLD = 100.;
-const float MEDIUM_THRESHOLD = 200.;
-const float FAR_THRESHOLD = 300.;
+varying float CLOSE_THRESHOLD;
+varying float MEDIUM_THRESHOLD;
+varying float FAR_THRESHOLD;
 
 
 vec2 raySphere(vec3 sphereCenter, float sphereRadius, vec3 rayOrigin, vec3 rayDir, float maxDepth){
@@ -43,7 +44,7 @@ vec2 raySphere(vec3 sphereCenter, float sphereRadius, vec3 rayOrigin, vec3 rayDi
 			return vec2(dstToSphereNear, min(dstToSphereFar,maxDepth));
 		}
 	}
-	return vec2(100000., 0.);
+	return vec2(1e20, 0.);
 }
 
 float calculate_dist_to_camera(){
@@ -91,10 +92,10 @@ float optical_depth(vec3 ray_origin, vec3 ray_dir, float ray_length, float cam_d
 
 vec3 calculate_light(vec3 ray_origin, vec3 ray_dir, float ray_length, vec3 original_col){
 	float cam_dist = calculate_dist_to_camera();
-	int lod_num_in_scattering_points = get_LOD_value(cam_dist, num_optical_depth_points);
+	int lod_num_in_scattering_points = get_LOD_value(cam_dist, num_in_scattering_points);
 	vec3 in_scatter_point = ray_origin;
-	float step_size = ray_length / max(float(lod_num_in_scattering_points) - 1.0, 1.0);
-	step_size = min(step_size, 1.0);
+	float step_size = ray_length / float(num_in_scattering_points);
+	step_size = min(step_size, 10.);
 	vec3 in_scattered_light = vec3(0.);
 	float view_ray_optical_depth = 0.;
 
@@ -112,6 +113,7 @@ vec3 calculate_light(vec3 ray_origin, vec3 ray_dir, float ray_length, vec3 origi
 	return original_col * original_col_transmittance + in_scattered_light;
 }
 
+
 vec3 calculate_wavelengths() {
 	float scatterR = pow(400. / wavelengths.x, 4) * scattering_strenght;
 	float scatterG = pow(400. / wavelengths.y, 4) * scattering_strenght;
@@ -124,6 +126,10 @@ void vertex() {
 }
 
 void fragment() {
+	CLOSE_THRESHOLD = 100. * planet_radius;
+	MEDIUM_THRESHOLD = 200. * planet_radius;
+	FAR_THRESHOLD = 300. * planet_radius;
+
 	scattering_coefficients = calculate_wavelengths();
 
 	// scale the atmosphere radius
@@ -139,24 +145,27 @@ void fragment() {
 
 	// get the view depth, see https://docs.godotengine.org/en/stable/tutorials/shaders/advanced_postprocessing.html#depth-texture
 	float depth = texture(depth_texture, SCREEN_UV).x;
-	vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth);
-	vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
-	view.xyz /= view.w;
-	float max_depth = length(view.xyz);
+    vec3 ndc = vec3(SCREEN_UV * 2.0 - 1.0, depth);
+    vec4 view = INV_PROJECTION_MATRIX * vec4(ndc, 1.0);
+    view.xyz /= view.w;
+    float max_depth = length(view.xyz);
 
 	// calculate raysphere intersection
 	vec2 rsi = raySphere(planet_position, atmosphere_radius, cam_pos, cam_dir, max_depth);
 
 	float dist_through_atmosphere = min(rsi.y, max_depth - rsi.x);
 	// if ray misses atmosphere, dont colour it
-	if(dist_through_atmosphere >= 0.) {
+	if(dist_through_atmosphere > 0.) {
+		vec3 scene_col = texture(SCREEN_TEXTURE, SCREEN_UV).rgb;
 		const float epsilon = 0.0001;
-		vec3 point_in_atmosphere = cam_pos + cam_dir * rsi.x - epsilon;
-		vec3 light = calculate_light(point_in_atmosphere, cam_dir, dist_through_atmosphere - epsilon * 2., shadow_color);
+		vec3 point_in_atmosphere = cam_pos + cam_dir * (rsi.x + epsilon);
+		vec3 light = calculate_light(point_in_atmosphere, cam_dir, dist_through_atmosphere - epsilon * 2., scene_col);
 		ALBEDO = light;
 	}
 
 	ALPHA = clamp((rsi.y-rsi.x)*thickness_scale, 0.0, 1.0);
+	float fog_factor = 1.0 - exp(-0.001 * (rsi.y - rsi.x) * thickness_scale);
+	ALPHA = clamp(fog_factor, 0.0, 1.0);
 }
 
 //void light() {

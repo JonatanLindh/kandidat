@@ -40,13 +40,11 @@ func clearBodies():
 			pnode.queue_free()
 	bodies.clear();
 
-func getSystemRadius():
+func getSystemRadius(system_data):
 	var maxR = 0;
-	for p in bodies:
-		var nodeName = "./GravityController/Body" + str(p);
-		var pnode = get_node(nodeName)
+	for p in system_data["planets"]:
 		if (is_instance_valid(pnode)):
-			maxR = max(maxR, pnode.position.distance_to(Vector3.ZERO));
+			maxR = max(maxR, p.orbit_radius);
 	return maxR;
 
 func _ready() -> void:
@@ -69,7 +67,7 @@ func randomPlanetRadius(r):
 	return r.randf_range(MIN_PLANET_RADIUS, MAX_PLANET_RADIUS)
 
 # Creates a unique seed for every planet in a system based on the seed for that solar system
-func generatePlanetSDataeed(systemSeed: int, position: Vector3):
+func generatePlanetDataSeed(systemSeed: int, position: Vector3):
 	var seedGen = SeedGenerator.new();
 	return seedGen.GenerateSeed(systemSeed, position);
 
@@ -90,7 +88,6 @@ func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primar
 	bodies.append(randomID);
 	return bodyInstance;
 
-
 func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle, r):
 	var randomID = rand.randi_range(100000, 999999);
 	var planetInstance = PLANET_MARCHING_CUBE_SCENE.instantiate();
@@ -98,15 +95,16 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	planetInstance.mass = planetMass;
 	planetInstance.velocity = Vector3(cos(orbitAngle) * orbitSpeed, 0, -sin(orbitAngle) * orbitSpeed)
 	planetInstance.position = Vector3(sin(orbitAngle) * orbitRadius, 0, cos(orbitAngle) * orbitRadius)
-	planetInstance.Radius = planetRadius
+	planetInstance.set("Radius", planetRadius)
 	planetInstance.SunPosition = Vector3.ZERO;
 	planetInstance.name = "Body" + str(randomID);
 	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
 	
 	# Create a new seed for each planet to be used when generating marching cubes planet
-	planetInstance._seed = generatePlanetSDataeed(r.seed, planetInstance.position);
+	planetInstance._seed = generatePlanetDataSeed(r.seed, planetInstance.position);
 	
 	$GravityController.add_child(planetInstance);
+	
 	planetInstance.owner = self
 	bodies.append(randomID);
 	return planetInstance;
@@ -207,6 +205,9 @@ func instantiateSystem(system_data):
 	#Set star things
 	SUN.star_mesh.set_color(system_data.sun.color);
 	
+	
+	var system_radius = getSystemRadius(system_data);
+
 	# Instantiate planets
 	for planet_data in system_data["planets"]:
 		spawnPlanetMarchingCube(
@@ -217,6 +218,9 @@ func instantiateSystem(system_data):
 			planet_data.orbit_angle,
 			rand
 		)
+		var distance_to_sun = (planetInstance.position - SUN.position).length()
+		var warmth = calculate_planet_warmth(distance_to_sun, system_radius)
+		planetInstance.set("Warmth", warmth)
 
 	# Instantiate moons
 	for moon_data in system_data["moons"]:
@@ -229,3 +233,16 @@ func instantiateSystem(system_data):
 			moon_data.primary_position,
 			moon_data.primary_velocity
 		)
+func calculate_planet_warmth(distance_to_sun: float, system_radius: float) -> float:
+	var min_distance = BASE_DISTANCE_FROM_SUN
+	if system_radius == 0:
+		return 1.0
+	
+	# calculate warmth using invere squared law, convert to logarithmic scale to get more even distribution for aesthetics.
+	var warmth = log(1.0 / pow(distance_to_sun, 2))
+	var max_warmth = log(1.0 / pow(min_distance, 2))
+	var min_warmth = log(1.0 / pow(system_radius, 2))
+	
+	# normalize warmth
+	var normalized = (warmth - min_warmth) / (max_warmth - min_warmth)
+	return clamp(normalized, 0.0, 1.0)
