@@ -35,28 +35,40 @@ public class BenchmarkDataProcessor
 
 	public float GetAverage(int scene, List<List<BenchmarkDatapoint>> data, BenchmarkDatapointEnum dataType)
 	{
-		List<float> dataSeparated = null;
-		switch (dataType)
+		// Special handling for FPS calculation
+		if (dataType == BenchmarkDatapointEnum.FPS)
 		{
-			case BenchmarkDatapointEnum.FPS:
-				dataSeparated = GetDataSeparated(scene, data[scene], BenchmarkDatapointEnum.FPS);
-				break;
-			case BenchmarkDatapointEnum.FrameTime:
-				dataSeparated = GetDataSeparated(scene, data[scene], BenchmarkDatapointEnum.FrameTime);
-				break;
-			case BenchmarkDatapointEnum.MemoryUsage:
-				dataSeparated = GetDataSeparated(scene, data[scene], BenchmarkDatapointEnum.MemoryUsage);
-				break;
-		}
+			// Get all frame times
+			List<float> frameTimes = GetDataSeparated(scene, data[scene], BenchmarkDatapointEnum.FrameTime);
+			
+			// Calculate average frame time
+			float sum = 0;
+			foreach (var frameTime in frameTimes)
+			{
+				sum += frameTime;
+			}
 
-		float sum = 0;
-		foreach (var value in dataSeparated)
+			if (frameTimes.Count != 0) // To avoid division by zero
+			{
+				float avgFrameTime = sum / frameTimes.Count;
+				return 1.0f / avgFrameTime;
+			}
+
+			return 0.0f;
+		}
+		else
 		{
-			sum += value;
+			List<float> dataSeparated = GetDataSeparated(scene, data[scene], dataType);
+			
+			float sum = 0;
+			foreach (var value in dataSeparated)
+			{
+				sum += value;
+			}
+			
+			float average = sum / dataSeparated.Count;
+			return average;
 		}
-
-		float average = sum / dataSeparated.Count;
-		return average;
 	}
 
 	/// <summary>
@@ -69,40 +81,61 @@ public class BenchmarkDataProcessor
 	/// <returns></returns>
 	public float GetPercentageLowOrHigh(int scene, List<List<BenchmarkDatapoint>> data, BenchmarkDatapointEnum dataType, bool low, float percentage)
 	{
-		List<float> dataSorted = null;
-		switch (dataType)
+		// Special handling for FPS calculation
+		if (dataType == BenchmarkDatapointEnum.FPS)
 		{
-			case BenchmarkDatapointEnum.FPS:
-				dataSorted = GetDataSorted(scene, data[scene], BenchmarkDatapointEnum.FPS);
-				break;
-			case BenchmarkDatapointEnum.FrameTime:
-				dataSorted = GetDataSorted(scene, data[scene], BenchmarkDatapointEnum.FrameTime);
-				break;
-			case BenchmarkDatapointEnum.MemoryUsage:
-				dataSorted = GetDataSorted(scene, data[scene], BenchmarkDatapointEnum.MemoryUsage);
-				break;
-		}
+			// Get the frame times
+			List<float> frameTimes = GetDataSorted(scene, data[scene], BenchmarkDatapointEnum.FrameTime);
+			int percentCount = (int)Math.Ceiling(frameTimes.Count * percentage);
+			float sum = 0;
 
-		int percentCount = (int)Math.Ceiling(dataSorted.Count * percentage);
-		float sum = 0;
-
-		if(low)
-		{
-			for (int i = 0; i < percentCount; i++)
+			// Calculate frame time averages
+			if (!low) // FPS is highest when frame times are lowest
 			{
-				sum += dataSorted[i];
+				for (int i = 0; i < percentCount; i++)
+				{
+					sum += frameTimes[i];
+				}
 			}
-		}
+			else
+			{
+				for (int i = frameTimes.Count - 1; i >= frameTimes.Count - percentCount; i--)
+				{
+					sum += frameTimes[i];
+				}
+			}
 
+			if(percentCount > 0) // To avoid division by zero
+			{
+				float avgFrameTime = sum / percentCount;
+				return 1.0f / avgFrameTime;
+			}
+
+			return 0.0f;
+		}
 		else
 		{
-			for (int i = dataSorted.Count - 1; i >= dataSorted.Count - percentCount; i--)
-			{
-				sum += dataSorted[i];
-			}
-		}
+			List<float> dataSorted = GetDataSorted(scene, data[scene], dataType);
+			int percentCount = (int)Math.Ceiling(dataSorted.Count * percentage);
+			float sum = 0;
 
-		float average = sum / percentCount;
-		return average;
+			if(low)
+			{
+				for (int i = 0; i < percentCount; i++)
+				{
+					sum += dataSorted[i];
+				}
+			}
+			else
+			{
+				for (int i = dataSorted.Count - 1; i >= dataSorted.Count - percentCount; i--)
+				{
+					sum += dataSorted[i];
+				}
+			}
+
+			float average = sum / percentCount;
+			return average;
+		}
 	}
 }

@@ -1,0 +1,142 @@
+[gd_scene load_steps=2 format=3 uid="uid://bh4078ciy4bsr"]
+
+[ext_resource type="Script" uid="uid://crqe6gqp1t3x1" path="res://src/benchmark/scenes/_dev/graph/current_container/CurrentContainer.cs" id="1_kgifs"]
+
+[node name="CurrentContainer" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1012.0
+offset_bottom = -571.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_kgifs")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="FPS" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="FPSLabel" type="Label" parent="VBoxContainer/FPS"]
+unique_name_in_owner = true
+z_index = 1
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+size_flags_stretch_ratio = 0.8
+text = "Current"
+horizontal_alignment = 2
+clip_text = true
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/FPS/FPSLabel"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.470588, 0.470588, 0.470588, 0.705882)
+
+[node name="Label" type="Label" parent="VBoxContainer/FPS"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+text = "FPS"
+horizontal_alignment = 1
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/FPS/Label"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.470588, 0.470588, 0.470588, 0.705882)
+
+[node name="Frametime" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="FrametimeLabel" type="Label" parent="VBoxContainer/Frametime"]
+unique_name_in_owner = true
+z_index = 1
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+size_flags_stretch_ratio = 0.8
+text = "Current"
+horizontal_alignment = 2
+clip_text = true
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/Frametime/FrametimeLabel"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.470588, 0.470588, 0.470588, 0.705882)
+
+[node name="Label" type="Label" parent="VBoxContainer/Frametime"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+text = "ms"
+horizontal_alignment = 1
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/Frametime/Label"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.470588, 0.470588, 0.470588, 0.705882)
+
+[node name="Memory" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MemoryLabel" type="Label" parent="VBoxContainer/Memory"]
+unique_name_in_owner = true
+z_index = 1
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+size_flags_stretch_ratio = 0.8
+text = "Current"
+horizontal_alignment = 2
+clip_text = true
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/Memory/MemoryLabel"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.470588, 0.470588, 0.470588, 0.705882)
+
+[node name="Label" type="Label" parent="VBoxContainer/Memory"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+text = "MB"
+horizontal_alignment = 1
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/Memory/Label"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.470588, 0.470588, 0.470588, 0.705882)
