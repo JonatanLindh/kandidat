@@ -108,14 +108,23 @@ func generateMoon(r, planetInstance, orbitRadius):
 
 func generatePlanets(r):
 	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS);
+	print("number of planets ", n)
+	var planet_instances = []
 	for i in n:
 		var planetInstance = generatePlanet(r, 0, 0, BASE_DISTANCE_FROM_SUN + i * DISTANCE_BETWEEN_PLANETS, 0);
+		planet_instances.append(planetInstance)
 		var moons = 1
 		for m in range(moons):
 			generateMoon(r, planetInstance, (m + 1) * DISTANCE_BETWEEN_PLANETS / MOON_ORBIT_RATIO_PLANET_DISTANCE)
+			
+	var system_radius = getSystemRadius()
+	
+	for planetInstance in planet_instances:
+		var distance_to_sun = (planetInstance.position - SUN.position).length()
+		var warmth = calculate_planet_warmth(distance_to_sun, system_radius)
+		planetInstance.set("Warmth", warmth)
 
 func generateSystemFromSeed(s: int):
-	print(s);
 	clearBodies();
 	var r = RandomNumberGenerator.new();
 	r.seed = s;
@@ -137,7 +146,6 @@ func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primar
 	bodies.append(randomID);
 	return bodyInstance;
 
-
 func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, orbitAngle, r):
 	var randomID = rand.randi_range(100000, 999999);
 	var planetInstance = PLANET_MARCHING_CUBE_SCENE.instantiate();
@@ -145,7 +153,7 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	planetInstance.mass = planetMass;
 	planetInstance.velocity = Vector3(cos(orbitAngle) * orbitSpeed, 0, -sin(orbitAngle) * orbitSpeed)
 	planetInstance.position = Vector3(sin(orbitAngle) * orbitRadius, 0, cos(orbitAngle) * orbitRadius)
-	planetInstance.Radius = planetRadius
+	planetInstance.set("Radius", planetRadius)
 	planetInstance.SunPosition = Vector3.ZERO;
 	planetInstance.name = "Body" + str(randomID);
 	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
@@ -154,6 +162,21 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	planetInstance._seed = generatePlanetSeed(r.seed, planetInstance.position);
 	
 	$GravityController.add_child(planetInstance);
+	
 	planetInstance.owner = self
 	bodies.append(randomID);
 	return planetInstance;
+
+func calculate_planet_warmth(distance_to_sun: float, system_radius : float) -> float:
+	var min_distance = BASE_DISTANCE_FROM_SUN
+	if system_radius == 0:
+		return 1.0
+	
+	# calculate warmth using invere squared law, convert to logarithmic scale to get more even distribution for aesthetics.
+	var warmth = log(1.0 / pow(distance_to_sun, 2))
+	var max_warmth = log(1.0 / pow(min_distance, 2))
+	var min_warmth = log(1.0 / pow(system_radius, 2))
+	
+	# normalize warmth
+	var normalized = (warmth - min_warmth) / (max_warmth - min_warmth)
+	return clamp(normalized, 0.0, 1.0)

@@ -2,9 +2,6 @@
 extends GravityBody
 
 var atmosphere
-#var planet_gravity_field: PlanetGravityField
-@onready var planet_gravity_field: PlanetGravityField = $PlanetGravityField
-
 
 @export var planet_data: PlanetData:
 	set(val):
@@ -16,10 +13,6 @@ var atmosphere
 func _ready() -> void:
 	planet_data = planet_data.duplicate()
 	generate()
-	
-	#Create gravity field
-	planet_gravity_field = PlanetGravityField.new()
-	planet_gravity_field.radius = planet_data.radius
 	
 func _process(delta: float) -> void:
 	set_atmosphere_sun_dir()

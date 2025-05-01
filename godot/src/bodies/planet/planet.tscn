@@ -131,14 +131,14 @@ shader = ExtResource("6_qycik")
 shader_parameter/shadow_color = Color(0, 0, 0, 1)
 shader_parameter/planet_position = Vector3(0, 0, 0)
 shader_parameter/sun_direction = Vector3(1, 0, 1)
-shader_parameter/thickness_scale = 0.042
+shader_parameter/thickness_scale = 100.0
 shader_parameter/planet_radius = 4.2151
 shader_parameter/density_falloff = 4.0
-shader_parameter/num_in_scattering_points = 20
-shader_parameter/num_optical_depth_points = 20
+shader_parameter/num_in_scattering_points = 5
+shader_parameter/num_optical_depth_points = 5
 shader_parameter/wavelengths = Vector3(700, 530, 440)
-shader_parameter/scattering_strenght = 8.55
-shader_parameter/atmosphere_scale = 1.3
+shader_parameter/scattering_strenght = 6.13
+shader_parameter/atmosphere_scale = 1.2
 
 [sub_resource type="BoxMesh" id="BoxMesh_n1sh7"]
 resource_local_to_scene = true
