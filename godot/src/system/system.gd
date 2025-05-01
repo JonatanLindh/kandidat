@@ -40,11 +40,19 @@ func clearBodies():
 			pnode.queue_free()
 	bodies.clear();
 
-func getSystemRadius(system_data):
+func getSystemRadius():
+	var maxR = 0;
+	for p in bodies:
+		var nodeName = "./GravityController/Body" + str(p);
+		var pnode = get_node(nodeName)
+		if (is_instance_valid(pnode)):
+			maxR = max(maxR, pnode.position.distance_to(Vector3.ZERO));
+	return maxR;
+	
+func getSystemRadiusFromData(system_data):
 	var maxR = 0;
 	for p in system_data["planets"]:
-		if (is_instance_valid(pnode)):
-			maxR = max(maxR, p.orbit_radius);
+		maxR = max(maxR, p.orbit_radius);
 	return maxR;
 
 func _ready() -> void:
@@ -206,11 +214,11 @@ func instantiateSystem(system_data):
 	SUN.star_mesh.set_color(system_data.sun.color);
 	
 	
-	var system_radius = getSystemRadius(system_data);
+	var system_radius = getSystemRadiusFromData(system_data);
 
 	# Instantiate planets
 	for planet_data in system_data["planets"]:
-		spawnPlanetMarchingCube(
+		var planetInstance = spawnPlanetMarchingCube(
 			planet_data.radius,
 			planet_data.mass,
 			planet_data.orbit_radius,
@@ -218,9 +226,8 @@ func instantiateSystem(system_data):
 			planet_data.orbit_angle,
 			rand
 		)
-		var distance_to_sun = (planetInstance.position - SUN.position).length()
-		var warmth = calculate_planet_warmth(distance_to_sun, system_radius)
-		planetInstance.set("Warmth", warmth)
+		var warmth = calculate_planet_warmth(planet_data.orbit_radius, system_radius)
+		planetInstance.set("Warmth", warmth);
 
 	# Instantiate moons
 	for moon_data in system_data["moons"]:
