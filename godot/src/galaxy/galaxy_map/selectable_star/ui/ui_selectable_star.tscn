@@ -14,54 +14,80 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -288.0
-offset_top = -158.0
+offset_left = -411.0
+offset_top = -298.0
 grow_horizontal = 0
 grow_vertical = 0
+
+[node name="StarColor" type="ColorRect" parent="StarInfoPanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 98.0
+offset_top = 75.0
+offset_right = 138.0
+offset_bottom = 115.0
+color = Color(0.849616, 0.577324, 0.181751, 1)
+
+[node name="SystemInformation" type="Label" parent="StarInfoPanel"]
+unique_name_in_owner = true
+offset_left = 10.0
+offset_top = 153.0
+offset_right = 374.0
+offset_bottom = 220.0
+text = "Here is some information, bla bla bla"
+clip_text = true
+
+[node name="StarColorTitle" type="Label" parent="StarInfoPanel"]
+offset_left = 8.0
+offset_top = 80.0
+offset_right = 108.0
+offset_bottom = 105.0
+text = "Star Color:"
+clip_text = true
+
+[node name="SystemInformationTitle" type="Label" parent="StarInfoPanel"]
+offset_left = 11.0
+offset_top = 123.0
+offset_right = 375.0
+offset_bottom = 148.0
+text = "General Information About The System"
+clip_text = true
 
 [node name="StarPos" type="Label" parent="StarInfoPanel"]
 unique_name_in_owner = true
 layout_mode = 1
-offset_left = 3.0
-offset_top = 30.0
-offset_right = 249.0
-offset_bottom = 55.0
+offset_left = 110.0
+offset_top = 3.0
+offset_right = 356.0
+offset_bottom = 28.0
 text = "Position"
 clip_text = true
 
 [node name="StarPosTitle" type="Label" parent="StarInfoPanel"]
 layout_mode = 1
-offset_left = 3.0
-offset_top = 5.0
-offset_right = 249.0
-offset_bottom = 30.0
+offset_left = 9.0
+offset_top = 3.0
+offset_right = 112.0
+offset_bottom = 28.0
 text = "Coordinates:"
 clip_text = true
 
 [node name="StarSeed" type="Label" parent="StarInfoPanel"]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 3.0
-offset_top = 6.0
-offset_right = 249.0
-offset_bottom = 31.0
-grow_vertical = 2
+offset_left = 105.0
+offset_top = 40.0
+offset_right = 351.0
+offset_bottom = 65.0
 text = "Seed"
 clip_text = true
 
 [node name="StarSeedTitle" type="Label" parent="StarInfoPanel"]
 layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 3.0
-offset_top = -18.0
-offset_right = 249.0
-offset_bottom = 7.0
-grow_vertical = 2
+offset_left = 9.0
+offset_top = 40.0
+offset_right = 89.0
+offset_bottom = 65.0
 text = "Star Seed:"
 clip_text = true
 

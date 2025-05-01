@@ -73,13 +73,14 @@ public partial class PlanetMarchingCube : Node3D
 	private Node3D _planet;
 	private Node _atmosphere;
 	private Area3D _planet_gravity_field;
+	private PlanetThemeGenerator _themeGenerator;
 
 	public override void _Ready()
 	{
-		SpawnMesh();
 		_planet_gravity_field = GetNode<Area3D>("PlanetGravityField");
 		_planet_gravity_field.Set("radius", _radius);
-	}
+		CallDeferred(nameof(SpawnMesh));
+    }
 
 	public override void _Process(double delta)
 	{
@@ -97,8 +98,12 @@ public partial class PlanetMarchingCube : Node3D
 		SpawnMesh();
 	}
 
-    private void SpawnMesh()
+	private void SpawnMesh()
 	{
+		_themeGenerator = new PlanetThemeGenerator();
+        _themeGenerator.Seed = _seed;
+        _themeGenerator.Warmth = warmth;
+
 		// Check if there's already a planet instance and remove it
 		if (_planet != null && IsInstanceValid(_planet))
 		{
@@ -126,14 +131,18 @@ public partial class PlanetMarchingCube : Node3D
 
                 // Find McSpawner node and set Warmth
                 var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
-                if (mcSpawner != null)
+				if (mcSpawner != null)
+				{
+					mcSpawner.ThemeGenerator = _themeGenerator;
                     mcSpawner.Warmth = warmth;
+				}
             }
 		}
 		
 		_atmosphere = GetNodeOrNull("Atmosphere");
 		_atmosphere?.Set("radius", _radius);
-		CallDeferred(nameof(SetAtmosphereSunDir));
+        _atmosphere?.Set("planet_seed", _seed);
+        CallDeferred(nameof(SetAtmosphereSunDir));
 	}
 
 	private void SetAtmosphereSunDir()

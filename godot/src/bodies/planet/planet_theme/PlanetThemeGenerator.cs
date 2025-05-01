@@ -6,120 +6,148 @@ using System.Collections.Generic;
 [GlobalClass]
 public partial class PlanetThemeGenerator : Resource
 {
-    [Export]
-    public Godot.Collections.Array<PlanetThemeSet> ThemeSets { get; set; } = new Godot.Collections.Array<PlanetThemeSet>();
-    private const string ThemeDirectoryPath = "res://src/bodies/planet/planet_theme/theme_sets/";
+	[Export]
+	public Godot.Collections.Array<PlanetThemeSet> ThemeSets { get; set; } = new Godot.Collections.Array<PlanetThemeSet>();
+	private const string ThemeDirectoryPath = "res://src/bodies/planet/planet_theme/theme_sets/";
 
-    [Export]
-    public int Seed { get; set; } = 1;
+	private int seed = 0;
+	[Export]
+	public int Seed { 
+		get => seed; 
+		set
+		{
+			seed = value;
+		} 
+	}
 
-    [Export]
-    public Gradient Gradient
-    {
-        get => gradient;
-        set => gradient = value;
-    }
+	[Export]
+	public Gradient Gradient
+	{
+		get => gradient;
+		set => gradient = value;
+	}
 
-    private double _warmth = 0.5;
-    public double Warmth
-    {
-        get => _warmth;
-        set
-        {
-            _warmth = value;
-            GenerateTheme(); // Automatically regenerate the theme
+	private double _warmth = 0.5;
+	public double Warmth
+	{
+		get => _warmth;
+		set
+		{
+			_warmth = value;
         }
-    }
+	}
 
-    private Gradient gradient = new Gradient();
-    private Vector3 atmosphereWavelengths;
+	private Gradient gradient = new Gradient();
+	private Vector3 atmosphereWavelengths;
 
-    public PlanetThemeGenerator()
-    {
-        CallDeferred(nameof(Initialize));
-    }
-    private void Initialize()
-    {
-        // Called when the resource is initialized
-        LoadThemeSets();
-        GenerateTheme();
-    }
+	public PlanetThemeGenerator()
+	{
+	}
+
+	public void LoadAndGenerateThemes()
+	{
+		LoadThemeSets();
+		GenerateTheme();
+	}
 
     private void GenerateTheme()
-    {
+	{
         if (ThemeSets == null || ThemeSets.Count == 0)
-            return;
+			return;
 
-        // TODO: add seed here, not here currently to avoid the same planet theme being selected all the time
-        var rnd = new Random();
+		var rnd = new Random(seed);
 
-        PlanetThemeSet closestSet = ThemeSets[0];
-        float smallestDiff = Math.Abs(closestSet.Warmth - (float)_warmth);
+		PlanetThemeSet closestSet = ThemeSets[0];
+		int closestIndex = 0;
+		float smallestDiff = Math.Abs(closestSet.Warmth - (float)_warmth);
 
-        foreach (var set in ThemeSets)
-        {
-            float diff = Math.Abs(set.Warmth - (float)_warmth);
-            if (diff < smallestDiff)
-            {
-                smallestDiff = diff;
-                closestSet = set;
-            }
-        }
 
-        if (closestSet.Themes.Count == 0)
-            return;
+		for (int i = 0; i < ThemeSets.Count; i++)
+		{
+			float diff = Math.Abs(ThemeSets[i].Warmth - (float)_warmth);
+			if(diff < smallestDiff)
+			{
+				smallestDiff = diff;
+				closestIndex = i;
+			}
+		}
 
-        int randomIndex = rnd.Next(closestSet.Themes.Count);
-        var selectedTheme = closestSet.Themes[randomIndex];
+		closestSet = ThemeSets[closestIndex];
 
-        var planetColors = selectedTheme.Colors;
-        // positions in the gradient
-        float[] positions = { 0.0f, 0.2f, 0.5f, 0.7f, 1.0f };
+		if (closestSet.Themes.Count == 0)
+			return;
 
-        Gradient = new Gradient();
-        for (int i = 0; i < Math.Min(planetColors.Count, positions.Length); i++)
-        {
-            Gradient.AddPoint(positions[i], planetColors[i]);
-        }
+		bool switchToNeighbor = rnd.Next(2) == 0;
 
-        // remove default Godot-initialized points
-        Gradient.RemovePoint(0);
-        Gradient.RemovePoint(0);
+		if(switchToNeighbor)
+		{
+			if (closestIndex == 0)
+			{
+				closestSet = ThemeSets[1];
+			}
+			else if (closestIndex == ThemeSets.Count - 1)
+			{
+				closestSet = ThemeSets[ThemeSets.Count - 2];
+			}
+			else
+			{
+				int randomInd = rnd.Next(2) == 0 ? -1 : 1;
+				closestSet = ThemeSets[closestIndex + randomInd];
+			}
+		}
 
-    }
+		int randomIndex = rnd.Next(closestSet.Themes.Count);
+		var selectedTheme = closestSet.Themes[randomIndex];
 
-    private void LoadThemeSets()
-    {
-        var dir = DirAccess.Open(ThemeDirectoryPath);
+		var planetColors = selectedTheme.Colors;
+		// positions in the gradient
+		float[] positions = { 0.0f, 0.2f, 0.5f, 0.7f, 1.0f };
 
-        if (dir == null)
-        {
-            GD.PrintErr($"Could not open theme directory at {ThemeDirectoryPath}");
-            return;
-        }
+		Gradient = new Gradient();
+		for (int i = 0; i < Math.Min(planetColors.Count, positions.Length); i++)
+		{
+			Gradient.AddPoint(positions[i], planetColors[i]);
+		}
 
-        dir.ListDirBegin();
+		// remove default Godot-initialized points
+		Gradient.RemovePoint(0);
+		Gradient.RemovePoint(0);
+		
 
-        string fileName;
-        while ((fileName = dir.GetNext()) != "")
-        {
-            if (dir.CurrentIsDir()) continue;
-            if (!fileName.EndsWith(".tres")) continue;
+	}
 
-            string fullPath = ThemeDirectoryPath + fileName;
-            var themeSet = ResourceLoader.Load<PlanetThemeSet>(fullPath);
+	private void LoadThemeSets()
+	{
+		var dir = DirAccess.Open(ThemeDirectoryPath);
 
-            if (themeSet != null)
-            {
-                ThemeSets.Add(themeSet);
-            }
-            else
-            {
-                GD.PrintErr($"Failed to load theme set at {fullPath}");
-            }
-        }
+		if (dir == null)
+		{
+			GD.PrintErr($"Could not open theme directory at {ThemeDirectoryPath}");
+			return;
+		}
 
-        dir.ListDirEnd();
-    }
+		dir.ListDirBegin();
+
+		string fileName;
+		while ((fileName = dir.GetNext()) != "")
+		{
+			if (dir.CurrentIsDir()) continue;
+			if (!fileName.EndsWith(".tres")) continue;
+
+			string fullPath = ThemeDirectoryPath + fileName;
+			var themeSet = ResourceLoader.Load<PlanetThemeSet>(fullPath);
+
+			if (themeSet != null)
+			{
+				ThemeSets.Add(themeSet);
+			}
+			else
+			{
+				GD.PrintErr($"Failed to load theme set at {fullPath}");
+			}
+		}
+
+		dir.ListDirEnd();
+	}
 
 }

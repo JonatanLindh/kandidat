@@ -8,16 +8,16 @@ using System;
 [Tool]
 public partial class McSpawner : Node
 {
-    private bool _reload;
-    [Export]
-    public bool reload
-    {
-        get => _reload;
-        set
-        {
-            _reload = !value;
-        }
-    }
+	private bool _reload;
+	[Export]
+	public bool reload
+	{
+		get => _reload;
+		set
+		{
+			_reload = !value;
+		}
+	}
 
 	private CelestialBodyNoise celestialBody;
 	private Node cb;
@@ -31,21 +31,21 @@ public partial class McSpawner : Node
 	}
 
 	private double _warmth;
-    public double Warmth
-    {
-        get => _warmth;
-        set
-        {
-            _warmth = value;
+	public double Warmth
+	{
+		get => _warmth;
+		set
+		{
+			_warmth = value;
 
-            if (_themeGenerator != null)
-            {
-                _themeGenerator.Warmth = value; // Tell it to pick a new theme
-            }
-        }
-    }
+			if (_themeGenerator != null)
+			{
+				_themeGenerator.Warmth = value; // Tell it to pick a new theme
+			}
+		}
+	}
 
-    private ShaderMaterial _planetShader;
+	private ShaderMaterial _planetShader;
 	public ShaderMaterial PlanetShader
 	{
 		get => _planetShader;
@@ -55,7 +55,15 @@ public partial class McSpawner : Node
 		}
 	}
 
-	private PlanetThemeGenerator _themeGenerator = new PlanetThemeGenerator();
+	private PlanetThemeGenerator _themeGenerator;
+	public PlanetThemeGenerator ThemeGenerator
+	{
+		get => _themeGenerator;
+		set
+		{
+			_themeGenerator = value;
+		}
+	}
 
 	private int _maxHeight = 16;
 	private int _size = 32;
@@ -69,14 +77,9 @@ public partial class McSpawner : Node
 	public override void _Ready()
 	{
 		_marchingCube = new MarchingCube();
-		CallDeferred(nameof(SpawnMesh));
-	}
+        CallDeferred(nameof(SpawnMesh));
+    }
 	
-	private void OnResourceSet()
-	{
-		SpawnMesh();
-	}
-
 	public void RegenerateMesh()
 	{
 		SpawnMesh();
@@ -155,8 +158,10 @@ public partial class McSpawner : Node
 	}
 
 	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
-		// Load the shader correctly
-		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
+
+		_themeGenerator.LoadAndGenerateThemes();
+        // Load the shader correctly
+        Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		ShaderMaterial shaderMaterial = new ShaderMaterial();
 		shaderMaterial.Shader = shader;
 		shaderMaterial.SetShaderParameter("min_height", minHeight);
@@ -170,7 +175,14 @@ public partial class McSpawner : Node
 		gradientTexture.Width = 256;
 
 		shaderMaterial.SetShaderParameter("height_color", gradientTexture);
-		shaderMaterial.SetShaderParameter("cliff_color", gradient.GetColor(3));
+		if(gradient.GetPointCount() >= 3)
+		{
+			shaderMaterial.SetShaderParameter("cliff_color", gradient.GetColor(3));
+		}
+		else
+		{
+			GD.Print("NO cliff color for you!");
+		}
 
 		return shaderMaterial;
 
