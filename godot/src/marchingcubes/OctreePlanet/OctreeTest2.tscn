@@ -10,21 +10,22 @@
 
 [node name="OctreeTest2" type="Node3D"]
 script = ExtResource("1_383cn")
-radius = 1000
+radius = 1
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(2.84, 0, 0, 0, 2.83296, -0.19979, 0, 0.19979, 2.83296, -6.40057, 1189.37, 16.9738)
 mesh = SubResource("BoxMesh_vs0qo")
 
-[node name="Octree" type="Node3D" parent="." node_paths=PackedStringArray("PlayerPosition", "OctreePlanetSpawner")]
+[node name="Octree" type="Node3D" parent="." node_paths=PackedStringArray("OctreePlanetSpawner")]
 script = ExtResource("2_sfnq5")
-PlayerPosition = NodePath("../../../../../../../../../@Node3DEditor@12336/@HSplitContainer@11535/@HSplitContainer@11537/@VSplitContainer@11539/@Node3DEditorViewportContainer@11540/@Node3DEditorViewport@11587/@SubViewportContainer@11541/@SubViewport@11542/@Camera3D@11544")
-maxDepth = 8
+maxDepth = 6
 OctreePlanetSpawner = NodePath("../PlanetSpawner")
+ShowOctree = true
 
 [node name="PlanetSpawner" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("1_vs0qo")
 CelestialBody = NodePath("..")
+Resolution = 8
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 8, 8)

@@ -13,7 +13,8 @@ public partial class PlanetNoise
 
     public float[,,] CreateDataPoints(CelestialBodyParameters param, FastNoiseLite fastNoise, Vector3 offset = default, float voxelSize = 1)
     {
-        int radius = Math.Max(1 ,param.Radius - Mathf.CeilToInt(param.Radius * 0.2));
+        //int radius = Math.Max(1 ,param.Radius - Mathf.CeilToInt(param.Radius * 0.2));
+        int radius = param.Radius;
         int diameter = 2 * radius;
 
         int width = param.Width;  
@@ -45,8 +46,8 @@ public partial class PlanetNoise
                     // Calculate distance from center of planet to the point (x,y,z)
                     Vector3 currentPosition = new Vector3(x, y, z) * voxelSize;
                     currentPosition += offset;
-/*
-                    // Pad the borers of the planet with empty space so marching cubes correctly generates the mesh at the edges
+
+                    // Pad the borders of the planet with empty space so marching cubes correctly generates the mesh at the edges
                     if (currentPosition.X <= -radius || currentPosition.X >= radius ||
                         currentPosition.Y <= -radius || currentPosition.Y >= radius ||
                         currentPosition.Z <= -radius || currentPosition.Z >= radius)
@@ -54,7 +55,7 @@ public partial class PlanetNoise
                         points[x, y, z] = -1.0f;
                         continue;
                     }
-                    */
+                    
 
                     
                     float distanceToCenter = (centerPoint - currentPosition).Length();

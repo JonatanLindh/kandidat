@@ -141,15 +141,8 @@ public partial class OctreePlanetSpawner : Node
 		var requestInstance = new MeshInstance3D();
 		requestInstance.Transform = transform3D;
 		
-		// Check if the node already has a parent
-		if (requestInstance.GetParent() == null)
-		{
-			AddChild(requestInstance);
-		}
-		else
-		{
-			GD.PrintErr("The MeshInstance3D already has a parent.");
-		}
+		AddChild(requestInstance);
+
 
 		// Send the request to the MarchingCubeDispatch
 		MarchingCubeRequest cubeRequest = new MarchingCubeRequest

@@ -51,6 +51,7 @@ public sealed partial class MarchingCubeDispatch: Node
 	{
 		_insideTree = false;
 		_planetQueue.Clear();
+		_requests.Clear();
 		foreach (var threadId in _workerThreads)
 		{
 			WorkerThreadPool.WaitForTaskCompletion(threadId);
@@ -80,7 +81,7 @@ public sealed partial class MarchingCubeDispatch: Node
 
 	public bool IsTaskBeingProcessed(Guid id)
 	{
-		return _requests.TryGetValue(id, out var request);
+		return _requests.TryGetValue(id, out _);
 		//&& request.IsProcessing;
 	}
 
@@ -119,7 +120,6 @@ public sealed partial class MarchingCubeDispatch: Node
 		float[,,] datapoints;
 		if (request.PlanetDataPoints != null)
 		{
-			
 			lock (_generateMeshLock)
 			{
 				request.PlanetDataPoints.VoxelSize = request.Scale;
@@ -179,8 +179,11 @@ public sealed partial class MarchingCubeDispatch: Node
 		{
 			request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
 		}
-		
-		_requests.TryRemove(request.Id, out _);
+
+		if (!_requests.TryRemove(request.Id, out _))
+		{
+			GD.Print($"Unable to remove request with ID {request.Id} from the queue.");
+		}
 	}
 
 	private void GenerateLoop()
