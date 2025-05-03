@@ -27,7 +27,7 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_resolution = value;
-			OnResourceSet();
+			//OnResourceSet();
 		}
 	}
 	
@@ -38,7 +38,7 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_radius = value;
-			OnResourceSet();
+			//OnResourceSet();
 		}
 	}
 	[Export]
@@ -48,7 +48,7 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_seed = value;
-			OnResourceSet();
+			//OnResourceSet();
 		}
 	}
 
@@ -113,17 +113,19 @@ public partial class PlanetMarchingCube : Node3D
 			
 			if (_planet != null)
 			{
-				_planet.Set("radius", _resolution);
+				_planet.Set("radius", _radius);
 				_planet.Set("seed", _seed);
 				
-				_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
+				//_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
 
 				AddChild(_planet);
 
                 // Find McSpawner node and set Warmth
+                /*
                 var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
                 if (mcSpawner != null)
                     mcSpawner.Warmth = warmth;
+                    */
             }
 		}
 		

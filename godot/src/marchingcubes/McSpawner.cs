@@ -112,6 +112,8 @@ public partial class McSpawner : Node
 			_temporaryMeshInstance.MaterialOverride = GeneratePlanetShader(planetRadius, planetRadius);
 			AddChild(_temporaryMeshInstance);
 		}
+		
+		AddChild(_meshInstance3D);
 			
 		// Send the request to the MarchingCubeDispatch
 		MarchingCubeRequest cubeRequest = new MarchingCubeRequest
@@ -119,6 +121,7 @@ public partial class McSpawner : Node
 			PlanetDataPoints = celestialBody,
 			Scale = 1,
 			Offset = Vector3.One * planetRadius,
+			Center = Vector3.Zero,
 			Root = this,	
 			CustomMeshInstance = _meshInstance3D,
 			TempNode = _useTemp ? _temporaryMeshInstance : null,
