@@ -120,11 +120,13 @@ public sealed partial class MarchingCubeDispatch: Node
 		float[,,] datapoints;
 		if (request.PlanetDataPoints != null)
 		{
+			
 			lock (_generateMeshLock)
 			{
 				request.PlanetDataPoints.VoxelSize = request.Scale;
 				datapoints = request.PlanetDataPoints.GetNoise(dataPointsOffset);
 			}
+			
 			
 			//datapoints = GenerateDataPoints(dataPointsOffset, request.Scale);
 		}
@@ -147,19 +149,21 @@ public sealed partial class MarchingCubeDispatch: Node
 			if (request.CustomMeshInstance != null)
 			{
 				meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
-				meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateMultipleConvexCollisions);
+				//meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateMultipleConvexCollisions);
+				meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateTrimeshCollision);
 			}
 			else
 			{
 				meshInstance.Mesh = mesh;
-				meshInstance.CreateMultipleConvexCollisions();
+				//meshInstance.CreateMultipleConvexCollisions();
+				meshInstance.CreateTrimeshCollision();
 			}
 		}
 		//meshInstance.Translate(request.Offset); 
 					
 		if (request.GeneratePlanetShader != null)
 		{
-			var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight);
+			//var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight);
 			if (IsInstanceValid(meshInstance))
 			{
 				//meshInstance.MaterialOverride = material;
@@ -235,8 +239,8 @@ public sealed partial class MarchingCubeDispatch: Node
 	private static float[,,] GenerateDataPoints(Vector3 offset , float voxelSize)
 	{
 		
-		var radius = 32;
-		int size = 64 + 1;
+		var radius = 100;
+		int size = 16 + 1;
 		var dataPoints = new float[size, size, size];
 		for (int x = 0; x < size; x++)
 		{
