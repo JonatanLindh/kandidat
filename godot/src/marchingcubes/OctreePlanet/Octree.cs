@@ -159,7 +159,7 @@ public partial class Octree : Node3D
 			}
 			else
 			{
-				GD.PrintErr("Invalid Octree instance in subdivision queue.");
+				//GD.PrintErr("Invalid Octree instance in subdivision queue.");
 			}
 		}
 		
@@ -214,9 +214,21 @@ public partial class Octree : Node3D
 					child.QueueFree();
 			}
 			_subDivided = false;
-			
+
 			if (IsInstanceValid(_planetMesh))
-				_planetMesh.Show();
+			{
+				_planetMesh.CallDeferred(Node3D.MethodName.Show);
+				// Re-enable collision
+				foreach (var child in _planetMesh.GetChildren())
+				{
+					if (child is StaticBody3D staticBody)
+					{
+						staticBody.ProcessMode = Node.ProcessModeEnum.Inherit;
+						// Or reset collision layers: staticBody.CollisionLayer = yourOriginalValue;
+					}
+				}
+			}
+				//_planetMesh.Show();
 			else
 				SpawnPlanetChunk();
 			
@@ -241,7 +253,16 @@ public partial class Octree : Node3D
 		
 		
 		var newSize = _size / 4;
-		_planetMesh.Hide();
+		_planetMesh.CallDeferred(Node3D.MethodName.Hide);
+		// Find and disable the collision
+		foreach (var child in _planetMesh.GetChildren())
+		{
+			if (child is StaticBody3D staticBody)
+			{
+				staticBody.ProcessMode = Node.ProcessModeEnum.Disabled;
+				// Or use: staticBody.CollisionLayer = 0;
+			}
+		}
 		// Subdivide the octree into 8 children
 		for (int i = 0; i < 8; i++)
 		{

@@ -126,7 +126,12 @@ public partial class PlanetMarchingCube : Node3D
                 if (mcSpawner != null)
                     mcSpawner.Warmth = warmth;
                     */
-            }
+                
+                // Find the Octree node and set Warmth
+                var octree = _planet.GetNodeOrNull<OctreePlanetSpawner>("PlanetSpawner");
+                if (octree != null)
+	                octree.Warmth = warmth;
+			}
 		}
 		
 		_atmosphere = GetNodeOrNull("Atmosphere");
