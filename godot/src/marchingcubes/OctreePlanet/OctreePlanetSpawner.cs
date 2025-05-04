@@ -158,7 +158,7 @@ public partial class OctreePlanetSpawner : Node
 		}; 
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest, id);
 		
-		_rootTest.AddChild(instance);
+		//_rootTest.AddChild(instance);
 
 		
 		return requestInstance;
@@ -201,7 +201,7 @@ public partial class OctreePlanetSpawner : Node
 		_baseVoxelSize = (_radius * 2) / (Resolution * Mathf.Pow(2, _maxDepth));
 		var size = (1 /  Mathf.Pow(2, _depth)) * (_radius * 2);
 
-		AddChild(_rootTest);
+		//AddChild(_rootTest);
 
 		var centerSize = _radius / 2;
 		var center1 = new Vector3(centerSize, centerSize, centerSize);
