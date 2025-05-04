@@ -13,20 +13,20 @@ shader = ExtResource("2_umdtg")
 shader_parameter/shadow_color = Color(0, 0, 0, 1)
 shader_parameter/planet_position = Vector3(0, 0, 0)
 shader_parameter/sun_direction = Vector3(1, 0, 0)
-shader_parameter/thickness_scale = 0.042
-shader_parameter/planet_radius = 1.0
-shader_parameter/density_falloff = 4.0
+shader_parameter/thickness_scale = 100.0
+shader_parameter/planet_radius = 150.0
+shader_parameter/density_falloff = 6.9
 shader_parameter/num_in_scattering_points = 10
 shader_parameter/num_optical_depth_points = 10
-shader_parameter/wavelengths = Vector3(1000, 530, 800)
-shader_parameter/scattering_strenght = 8.55
+shader_parameter/wavelengths = Vector3(620, 800, 1000)
+shader_parameter/scattering_strenght = 2.38
 shader_parameter/atmosphere_scale = 1.3
 
 [sub_resource type="BoxMesh" id="BoxMesh_736bg"]
 resource_local_to_scene = true
 material = SubResource("ShaderMaterial_umdtg")
 flip_faces = true
-size = Vector3(3, 3, 3)
+size = Vector3(20, 20, 20)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_b5ifj"]
 resource_local_to_scene = true
@@ -34,14 +34,17 @@ resource_local_to_scene = true
 [node name="PlanetMarchingCube" type="GravityBody"]
 script = ExtResource("1_ha83e")
 Resolution = 32
+Seed = 1558686225
 Planet = ExtResource("2_736bg")
+Warmth = 0.5
 
 [node name="Atmosphere" type="MeshInstance3D" parent="."]
 transform = Transform3D(16.7, 0, 0, 0, 16.7, 0, 0, 0, 16.7, 0, 0, 0)
 visible = false
 mesh = SubResource("BoxMesh_736bg")
 script = ExtResource("3_f3734")
-radius = 1.0
+radius = 150.0
+planet_seed = 1558686225
 
 [node name="PlanetGravityField" type="Area3D" parent="."]
 gravity_space_override = 3
@@ -49,7 +52,7 @@ gravity_point = true
 gravity_point_center = Vector3(0, 0, 0)
 gravity_direction = Vector3(0, 0, 0)
 script = ExtResource("5_736bg")
-radius = 1.0
+radius = 150.0
 metadata/_custom_type_script = "uid://ba2chkln3f48f"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlanetGravityField"]

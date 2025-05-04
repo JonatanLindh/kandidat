@@ -12,11 +12,10 @@ public partial class PlanetBenchmark : BenchmarkScene
 	[Export] float orbitSpeed = 3.0f;
 	[Export] float planetSpeed = 10.0f;
 	[Export] float moveSpeed = 30.0f;
-	[Export] uint seed = 89;
 
 	public override void BenchmarkReady()
 	{
-		planet.Seed = (int)seed;
+
 	}
 
 	public override void BenchmarkProcess(double delta)
