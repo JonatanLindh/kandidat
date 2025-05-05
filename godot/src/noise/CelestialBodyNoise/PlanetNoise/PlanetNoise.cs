@@ -81,7 +81,7 @@ public partial class PlanetNoise
             // TODO Add offset before or after *frequency?
             valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
             amplitude *= param.Persistence;
-            frequency *= param.Frequency;
+            frequency *= param.Lacunarity;
             offset += new Vector3(random.Next(param.Octaves), random.Next(param.Octaves), random.Next(param.Octaves));
         }
 
