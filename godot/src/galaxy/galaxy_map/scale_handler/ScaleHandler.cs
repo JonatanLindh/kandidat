@@ -28,8 +28,18 @@ public partial class ScaleHandler : Node
 		{
 			float distance = player.Position.DistanceTo(system.Position);
 
-			if(scalingType == ScalingType.Linear) system.Scale = LinearScaling(distance);
-			else if (scalingType == ScalingType.Early) system.Scale = EarlyScaling(distance);
+			Vector3 newScale = Vector3.One;
+			if (scalingType == ScalingType.Linear) newScale = LinearScaling(distance);
+			else if (scalingType == ScalingType.Early) newScale = EarlyScaling(distance);
+
+			// Clamps to avoid det==0 errors
+			newScale = new Vector3(
+				Mathf.Max(newScale.X, Mathf.Epsilon), 
+				Mathf.Max(newScale.Y, Mathf.Epsilon), 
+				Mathf.Max(newScale.Z, Mathf.Epsilon)
+			);
+
+			system.Scale = newScale;
 		}
 	}
 
