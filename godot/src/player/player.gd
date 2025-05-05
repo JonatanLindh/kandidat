@@ -160,7 +160,7 @@ func on_planet_movement(delta : float):
 		flying = not flying
 
 	if is_falling():
-		velocity += (gravity_vector + planet_velocity.normalized()) * delta
+		velocity += (gravity_vector) * delta
 
 	# Get the input direction and handle the movement/deceleration.
 	var input_dir := Input.get_vector("left", "right", "forward", "backward")
@@ -184,9 +184,9 @@ func on_planet_movement(delta : float):
 			camera_3d.fov = base_fov
 	else:
 		if not is_falling():
-			velocity.y = move_toward(velocity.y, planet_velocity.y, current_speed)
-			velocity.x = move_toward(velocity.x, planet_velocity.x, current_speed)
-			velocity.z = move_toward(velocity.z, planet_velocity.z, current_speed)
+			velocity.y = planet_velocity.y
+			velocity.x = planet_velocity.x
+			velocity.z = planet_velocity.z
 	
 	if Input.is_action_just_pressed("ui_accept") and not is_falling():
 		velocity += -gravity_vector.normalized() * JUMP_VELOCITY
@@ -196,7 +196,11 @@ func on_planet_movement(delta : float):
 	move_and_slide()
 
 func is_falling() -> bool:
-	return not flying and not floating_flag and in_gravity_field and not is_on_floor() and not ray_cast_3d.is_colliding()
+	return not flying and not floating_flag and in_gravity_field and not is_on_floor() and not is_grounded()
+
+func is_grounded() -> bool:
+	ray_cast_3d.force_raycast_update()
+	return ray_cast_3d.is_colliding() and ray_cast_3d.get_collision_normal().dot(-gravity_vector.normalized()) > 0.7
 
 func on_gravity_field_entered(gravity : float, gravity_direction : Vector3, planet_velocity : Vector3):
 	in_gravity_field = true
@@ -211,6 +215,7 @@ func on_gravity_field_exited():
 	velocity = Vector3.ZERO
 	gravity_strength = 0
 	flying = true
+	print("exited")
 
 func apply_velocity(dir : Vector3, speed_multiplier):
 	velocity.x = dir.x * current_speed * speed_multiplier

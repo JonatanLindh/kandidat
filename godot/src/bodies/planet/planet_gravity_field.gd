@@ -32,7 +32,7 @@ func _physics_process(delta: float) -> void:
 	var relative_velocity = planet.velocity - get_player_velocity()
 	if _player_inside_field:
 		PlayerVariables.planet_velocity = planet.velocity
-		PlayerVariables.planet_position = planet.global_transform.origin
+		PlayerVariables.planet_position = planet.global_position
 
 	
 func _ready() -> void:
