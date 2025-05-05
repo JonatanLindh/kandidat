@@ -128,7 +128,7 @@ public partial class McSpawner : Node
 			Root = this,	
 			CustomMeshInstance = _meshInstance3D,
 			TempNode = _useTemp ? _temporaryMeshInstance : null,
-			GeneratePlanetShader = GeneratePlanetShader
+			//GeneratePlanetShader = GeneratePlanetShader
 		};
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 	}

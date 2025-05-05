@@ -229,8 +229,7 @@ public partial class Octree : Node3D
 				}
 			}
 				//_planetMesh.Show();
-			else
-				SpawnPlanetChunk();
+
 			
 			return;
 		}

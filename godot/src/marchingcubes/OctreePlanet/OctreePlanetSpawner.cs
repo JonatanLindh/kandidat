@@ -62,7 +62,15 @@ public partial class OctreePlanetSpawner : Node
 	
 	
 	// Things from McSpawner
-	private PlanetThemeGenerator _themeGenerator = new PlanetThemeGenerator();
+	private PlanetThemeGenerator _themeGenerator;
+	public PlanetThemeGenerator ThemeGenerator
+	{
+		get => _themeGenerator;
+		set
+		{
+			_themeGenerator = value;
+		}
+	}
 	private ShaderMaterial _planetShader;
 	public ShaderMaterial PlanetShader
 	{
@@ -86,9 +94,12 @@ public partial class OctreePlanetSpawner : Node
 			}
 		}
 	}
+	
 
 
 	private Octree _octree;
+	private float _minHeight = 0;
+	private float _maxHeight = 0;
 	
 	public override void _Ready()
 	{
@@ -275,14 +286,25 @@ public partial class OctreePlanetSpawner : Node
 	}
 	
 	
-	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
+	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight, Vector3 chunkCenter) {
+		
+		if(_themeGenerator == null)
+		{
+			return null;
+		}
 
+		_minHeight = Mathf.Min(_minHeight, minHeight);
+		_maxHeight = Mathf.Max(_maxHeight, maxHeight);
+		
+		
+		_themeGenerator.LoadAndGenerateThemes();
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		ShaderMaterial shaderMaterial = new ShaderMaterial();
 		shaderMaterial.Shader = shader;
-		shaderMaterial.SetShaderParameter("min_height", minHeight);
-		shaderMaterial.SetShaderParameter("max_height", maxHeight);
+		shaderMaterial.SetShaderParameter("min_height", _minHeight);
+		shaderMaterial.SetShaderParameter("max_height", _maxHeight);
+		shaderMaterial.SetShaderParameter("chunk_center", chunkCenter);
 
 
 		// Access exported property (gradient)
@@ -292,8 +314,15 @@ public partial class OctreePlanetSpawner : Node
 		gradientTexture.Width = 256;
 
 		shaderMaterial.SetShaderParameter("height_color", gradientTexture);
-		shaderMaterial.SetShaderParameter("cliff_color", gradient.GetColor(3));
-
+		if(gradient.GetPointCount() >= 3)
+		{
+			shaderMaterial.SetShaderParameter("cliff_color", gradient.GetColor(3));
+		}
+		else
+		{
+			GD.Print("NO cliff color for you!");
+		}
+		
 		return shaderMaterial;
 
 	}

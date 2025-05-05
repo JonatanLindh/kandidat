@@ -163,7 +163,7 @@ public sealed partial class MarchingCubeDispatch: Node
 					
 		if (request.GeneratePlanetShader != null)
 		{
-			var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight);
+			var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight, request.Center);
 			if (IsInstanceValid(meshInstance))
 			{
 				meshInstance.MaterialOverride = material;
