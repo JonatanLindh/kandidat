@@ -44,6 +44,7 @@ public partial class SystemHandler : Node
 		// Instantiate the system
 		Node3D newSystem = systemScene.Instantiate<Node3D>();
 		newSystem.Position = star.transform.Origin;
+		newSystem.Scale = Vector3.One * Mathf.Epsilon;
 		AddChild(newSystem);
 
 		activeSystems.Add(newSystem);
