@@ -22,6 +22,9 @@ fastTravelDistanceOffset = 1000.0
 
 [node name="StarFinder" parent="." instance=ExtResource("4_c4q7o")]
 unique_name_in_owner = true
+maxRadius = 200.0
+intervalSizeRatio = 1.8
+debugDraw = true
 
 [node name="SystemHandler" parent="." instance=ExtResource("5_pb70j")]
 unique_name_in_owner = true
