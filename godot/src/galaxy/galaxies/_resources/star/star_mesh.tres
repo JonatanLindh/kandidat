@@ -4,5 +4,5 @@
 
 [resource]
 material = ExtResource("1_r62ga")
-radius = 1.0
-height = 2.0
+radius = 30.0
+height = 60.0
