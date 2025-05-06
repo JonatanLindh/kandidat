@@ -6,49 +6,28 @@ using System.Collections.Generic;
 public partial class Octree : Node3D
 {
 	[Export] public Node PlayerPosition { get; set; }
-	[Export] public int maxDepth { get; set; } = 2;
+	[Export] public int MaxDepth { get; set; } = 2;
 	[Export] public Node OctreePlanetSpawner { get; set; }
-
-	[Export]
-	public bool ShowOctree
-	{
-		get;
-		set;
-	}
+	[Export] public bool ShowOctree { get; set; }
 	
 	public bool PlanetSpawnerInitialized = false;
 
 	private float _size = 64;
 	private Vector3 _center = Vector3.Zero;
-
-	private Node3D _rootTest;
-
 	private bool _subDivided  = false;
-	private bool _allChildrenProcessed = false;
-
 	private int _depth = 0;
-
 	private float _collisionSize;
-	
-	
-	private Guid _octId = Guid.NewGuid();
-	
-	
-	//Octree topLeft = null;
-	//Octree topRight = null;
-	
-	private Octree[] _children = new Octree[8];
-
-	private MeshInstance3D _planetMesh;
-	
-	//public OctreePlanetSpawner OctreePlanetSpawner;
-
-	private Node3D debugNode;
-	
+	private readonly Guid _octId = Guid.NewGuid();
 	private Vector3 _playerPosition;
-	
+
+	private Octree[] _children = new Octree[8];
+	private Octree[] _neighbours;
 	private Queue<Octree> _subdivisionQueue = new Queue<Octree>();
+	private MeshInstance3D _planetMesh;
+	private Node3D _debugNode;
+
 	
+	private Node3D _rootTest;
 	private readonly Vector3[] _octant =
 	[
 		new (1, 1, 1),
@@ -61,13 +40,9 @@ public partial class Octree : Node3D
 		new (-1, -1, 1),
 		new (1, -1, -1)
 	];
-
+	
 	public override void _Ready()
 	{
-		//playerPosition ??= new Node3D();
-
-		//if (OctreePlanetSpawner != null) 
-		//CallDeferred(Node.MethodName.AddChild, OctreePlanetSpawner.SpawnChunk(_center, Size, _depth));
 	}
 
 	private void SpawnPlanetChunk()
@@ -77,7 +52,6 @@ public partial class Octree : Node3D
 			// Cast to OctreePlanetSpawner
 			case OctreePlanetSpawner spawner:
 				_planetMesh = spawner.SpawnChunk(_center, _size, _depth, _octId);
-				//AddChild(spawner.SpawnChunk(_center, Size, _depth));
 				break;
 			case null:
 				GD.PrintErr("OctreePlanetSpawner is null");
@@ -103,15 +77,15 @@ public partial class Octree : Node3D
 
 		
 		_size = size;
-		debugNode = DrawBoundingBox(_center, _size, new Color(1, 0, 0));
-		AddChild(debugNode);
+		_debugNode = DrawBoundingBox(_center, _size, new Color(1, 0, 0));
+		AddChild(_debugNode);
 		if (ShowOctree)
 		{
-			debugNode.Show();
+			_debugNode.Show();
 		}
 		else
 		{
-			debugNode.Hide();
+			_debugNode.Hide();
 		}
 		_collisionSize = _size + _size * 1f / Mathf.Pow(2, _depth);
 		//AddChild(DrawBoundingBox(_center, _collisionSize, new Color(0, 0, 1)));
@@ -125,46 +99,32 @@ public partial class Octree : Node3D
 	{
 		if (what == NotificationPredelete)
 		{
-			if (IsInstanceValid(_planetMesh))
-			{
-				_planetMesh.QueueFree();
-			}
-			_planetMesh = null; // Clear the reference to avoid further access
-			_children = null;
-			_subdivisionQueue.Clear();
-			
+			CleanupResources();
 		}
 	}
-
+	
+	private void CleanupResources()
+	{
+		if (IsInstanceValid(_planetMesh))
+		{
+			_planetMesh.QueueFree();
+		}
+		_planetMesh = null;
+    
+		// Clean up children
+		for (int i = 0; i < _children.Length; i++)
+		{
+			_children[i] = null;
+		}
+    
+		_subdivisionQueue.Clear();
+	}
 
 
 	// TODO: Change the subdividing to occur based on the distance to the player/camera instead
 
 	public override void _PhysicsProcess(double delta)
 	{
-		
-		// Process one subdivision per frame
-		if (_subdivisionQueue.Count > 0)
-		{
-			var cell = _subdivisionQueue.Dequeue();
-			// Ensure the cell is valid before adding it to the scene tree
-			if (IsInstanceValid(cell))
-			{
-				CallDeferred(Node.MethodName.AddChild, cell);
-				cell.CallDeferred(nameof(OnPlanetSpawnerReady), _size / 2f);
-				/*
-				AddChild(cell);
-				cell.OnPlanetSpawnerReady(_size / 2f);
-				*/
-			}
-			else
-			{
-				//GD.PrintErr("Invalid Octree instance in subdivision queue.");
-			}
-		}
-		
-		
-		
 		if (PlayerPosition == null) return;
 		
 		// If subdivided then wait until all children are processed
@@ -187,69 +147,94 @@ public partial class Octree : Node3D
 			return;
 		}
 		*/
-		
-		
-		
-		var newPlayerPosition = !Engine.IsEditorHint() ? PlayerPosition.Get("player_position").AsVector3() :
-			EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D().Position;
-		
-		// If the change in player position has not been large enough, do not check for collision
-		if (_playerPosition.DistanceSquaredTo(newPlayerPosition) < 10) return;
-		_playerPosition = newPlayerPosition;
-		
-		
+		ProcessSubdivisionQueue();
+		UpdatePlayerPosition();
+		CheckAndHandleSubdivision();
+	}	
+	
+	private void ProcessSubdivisionQueue()
+	{
+		if (_subdivisionQueue.Count > 0)
+		{
+			var cell = _subdivisionQueue.Dequeue();
+			if (IsInstanceValid(cell))
+			{
+				CallDeferred(Node.MethodName.AddChild, cell);
+				cell.CallDeferred(nameof(OnPlanetSpawnerReady), _size / 2f);
+			}
+		}
+	}
+	private void UpdatePlayerPosition()
+	{
+		var newPlayerPosition = !Engine.IsEditorHint() 
+			? PlayerPosition.Get("player_position").AsVector3()
+			: EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D().Position;
+
+		// Only update if significant movement occurred
+		if (_playerPosition.DistanceSquaredTo(newPlayerPosition) >= 10)
+		{
+			_playerPosition = newPlayerPosition;
+		}
+	}
+
+	private void CheckAndHandleSubdivision()
+	{
 		// Don't subdivide until the planet mesh has been processed
 		// if the mesh is still null after it has been processed, then
 		// we do not need to subdivide
-
-		if (MarchingCubeDispatch.Instance.IsTaskBeingProcessed(_octId)) return;
 		
+		// Early return conditions
+		if (MarchingCubeDispatch.Instance.IsTaskBeingProcessed(_octId)) return;
+    
 		if (!CheckCollision(_playerPosition, _collisionSize))
 		{
-			// Remove all children
-			if (!_subDivided) return;
-			foreach (var child in _children)
-			{
-				if(IsInstanceValid(child))
-					child.QueueFree();
-			}
-			_subDivided = false;
+			MergeSubdivision();
+			return;
+		}
 
-			if (IsInstanceValid(_planetMesh))
+		if (!_subDivided && _depth < MaxDepth && IsValidForSubdivision())
+		{
+			SubDivide();
+		}
+	}
+	
+	private bool IsValidForSubdivision()
+	{
+		return _planetMesh != null && _planetMesh.Mesh != null;
+	}
+
+	private void MergeSubdivision() 
+	{
+		// Implementation for merging when out of collision range
+		
+		// Remove all Octree children
+		if (!_subDivided) return;
+		foreach (var child in _children)
+		{
+			if(IsInstanceValid(child))
+				child.QueueFree();
+		}
+		_subDivided = false;
+
+		if (IsInstanceValid(_planetMesh))
+		{
+			_planetMesh.CallDeferred(Node3D.MethodName.Show);
+			// Re-enable collision
+			foreach (var child in _planetMesh.GetChildren())
 			{
-				_planetMesh.CallDeferred(Node3D.MethodName.Show);
-				// Re-enable collision
-				foreach (var child in _planetMesh.GetChildren())
+				if (child is StaticBody3D staticBody)
 				{
-					if (child is StaticBody3D staticBody)
-					{
-						staticBody.ProcessMode = Node.ProcessModeEnum.Inherit;
-						// Or reset collision layers: staticBody.CollisionLayer = yourOriginalValue;
-					}
+					staticBody.ProcessMode = Node.ProcessModeEnum.Inherit;
+					// Or reset collision layers: staticBody.CollisionLayer = yourOriginalValue;
 				}
 			}
-				//_planetMesh.Show();
-
-			
-			return;
 		}
 		
-		// Collision has occurred, so we need to subdivide
-		
-		
-		// If the max depth has been reached, do not subdivide anymore
-		if (_subDivided || _depth >= maxDepth) return;
-		
-		
-		// The planet mesh is null, so no need to subdivide
-		if (_planetMesh is { Mesh: null })
-		{
-			//GD.Print("Planet mesh is null");
-			return;
-		}
-		
+	}
 
-		
+	private void SubDivide()
+	{
+		// Implementation for subdivision
 		
 		var newSize = _size / 4;
 		_planetMesh.CallDeferred(Node3D.MethodName.Hide);
@@ -266,7 +251,7 @@ public partial class Octree : Node3D
 		for (int i = 0; i < 8; i++)
 		{
 			_children[i] = new Octree();
-			SubDivideAsync(_children[i], _center + newSize * _octant[i]);
+			CreateNewChildrenAsync(_children[i], _center + newSize * _octant[i]);
 			/*
 			SubDivide(_children[i], _center + newSize * _octant[i]);
 			AddChild(_children[i]);
@@ -293,18 +278,17 @@ public partial class Octree : Node3D
 		*/
 		
 		_subDivided = true;
+	}
+	
 
-
-	}	
-
-	private void SubDivide(Octree newCell, Vector3 newCenter)
+	private void CreateNewChildren(Octree newCell, Vector3 newCenter)
 	{
 		//_planetMesh.CallDeferred(Node3D.MethodName.Hide);
 		_planetMesh.Hide();
 		newCell._center = newCenter;
 		//newCell.Size = Size / 2;
 		newCell._depth = _depth + 1;
-		newCell.maxDepth = maxDepth;
+		newCell.MaxDepth = MaxDepth;
 		newCell._rootTest = _rootTest;
 		newCell.PlayerPosition = PlayerPosition;
 		newCell.OctreePlanetSpawner = OctreePlanetSpawner;
@@ -312,11 +296,11 @@ public partial class Octree : Node3D
 		//newCell.OnPlanetSpawnerReady(_size / 2f);
 	}
 	
-	private void SubDivideAsync(Octree newCell, Vector3 newCenter)
+	private void CreateNewChildrenAsync(Octree newCell, Vector3 newCenter)
 	{
 		newCell._center = newCenter;
 		newCell._depth = _depth + 1;
-		newCell.maxDepth = maxDepth;
+		newCell.MaxDepth = MaxDepth;
 		newCell._rootTest = _rootTest;
 		newCell.PlayerPosition = PlayerPosition;
 		newCell.OctreePlanetSpawner = OctreePlanetSpawner;
@@ -384,9 +368,4 @@ public partial class Octree : Node3D
 		};
 		return (boundingBoxInstance);
 	}
-
-
-
-
-
 }
