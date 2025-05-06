@@ -26,12 +26,11 @@ public partial class PlanetNoise
         float[,,] points = new float[width, height, depth];
         Vector3 centerPoint = new Vector3I(radius, radius, radius);
 
-        // Pad the boarders of the cube with empty space so marching cubes correctly generates the mesh at the edges
+        // Pad the boarders of the points-array with empty space so marching cubes correctly generates the mesh at the edges
         PadBoardersWithAir(points, width, height, depth);
 
-        Stopwatch watch = new Stopwatch();
         // boarders are already padded, so only need to iterate from [1, size-1)
-        for (int x = 1; x < width - 1; x++)
+        Parallel.For(1, width - 1, x =>
         {
             for (int y = 1; y < height - 1; y++)
             {
@@ -49,7 +48,7 @@ public partial class PlanetNoise
                     points[x, y, z] = value;
                 }
             }
-        }
+        });
 
         return points;
     }
@@ -67,11 +66,14 @@ public partial class PlanetNoise
     {
         float valueAfterFbm = value;
 
-        // Get parameters from editor which will change locally in the loop
+        // Get parameters from editor which will change locally in the loop.
+        // param's parameters should not change at this point as each planet has its own CelestialBodyParameters instance, so it's thread-safe
         float amplitude = param.Amplitude;
         float frequency = param.Frequency;
         float persistence = param.Persistence;
         float lacunarity = param.Lacunarity;
+
+        float h = Mathf.Pow(2, -persistence);
 
         // Used to slightly offset the position when getting noise-value for each octave
         Vector3 offset = Vector3.Zero;
@@ -80,7 +82,7 @@ public partial class PlanetNoise
         // FBM - Fractal Brownian Motion 
         for (int i = 0; i < param.Octaves; i++)
         {
-            // TODO Add offset before or after *frequency?
+            // FastNoiseLite.GetNoise3DV should be thread-safe if you don't change any of its parameters while executing the Parallel.For-loop
             valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
             amplitude *= persistence;
             frequency *= lacunarity;
@@ -91,7 +93,7 @@ public partial class PlanetNoise
     }
 
     /// <summary>
-    /// Pads the array with "air" (-1.0) at the edges of the array, i.e. x,y,z = 0 & x,y,z = size-1
+    /// Pads the array with "air" (-1.0) at the edges of the array, i.e. x,y,z = 0 & x,y,z = size-1. Directly modifies the given array.
     /// </summary>
     /// <param name="arrayToPadWithAir"></param>
     /// <param name="size"></param>
