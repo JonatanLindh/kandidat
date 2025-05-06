@@ -70,6 +70,8 @@ public partial class PlanetNoise
         // Get parameters from editor which will change locally in the loop
         float amplitude = param.Amplitude;
         float frequency = param.Frequency;
+        float persistence = param.Persistence;
+        float lacunarity = param.Lacunarity;
 
         // Used to slightly offset the position when getting noise-value for each octave
         Vector3 offset = Vector3.Zero;
@@ -80,8 +82,8 @@ public partial class PlanetNoise
         {
             // TODO Add offset before or after *frequency?
             valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
-            amplitude *= param.Persistence;
-            frequency *= param.Lacunarity;
+            amplitude *= persistence;
+            frequency *= lacunarity;
             offset += new Vector3(random.Next(param.Octaves), random.Next(param.Octaves), random.Next(param.Octaves));
         }
 
