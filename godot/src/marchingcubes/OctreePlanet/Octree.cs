@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 [Tool]
 public partial class Octree : Node3D
@@ -52,6 +53,7 @@ public partial class Octree : Node3D
 			// Cast to OctreePlanetSpawner
 			case OctreePlanetSpawner spawner:
 				_planetMesh = spawner.SpawnChunk(_center, _size, _depth, _octId);
+				_planetMesh.SortingOffset = _depth * -1;
 				break;
 			case null:
 				GD.PrintErr("OctreePlanetSpawner is null");
@@ -64,8 +66,8 @@ public partial class Octree : Node3D
 		// Hook into editor camera
 		if (Engine.IsEditorHint())
 		{
-			Node3D editorCamera = EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D();
-			PlayerPosition = editorCamera;
+			//Node3D editorCamera = EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D();
+			//PlayerPosition = editorCamera;
 		}
 		else
 		{
@@ -89,6 +91,7 @@ public partial class Octree : Node3D
 		}
 		_collisionSize = _size + _size * 1f / Mathf.Pow(2, _depth);
 		//AddChild(DrawBoundingBox(_center, _collisionSize, new Color(0, 0, 1)));
+		
 
 		
 
@@ -148,7 +151,8 @@ public partial class Octree : Node3D
 		}
 		*/
 		ProcessSubdivisionQueue();
-		UpdatePlayerPosition();
+		if (!UpdatePlayerPosition())
+			return;
 		CheckAndHandleSubdivision();
 	}	
 	
@@ -164,17 +168,18 @@ public partial class Octree : Node3D
 			}
 		}
 	}
-	private void UpdatePlayerPosition()
+	private bool UpdatePlayerPosition()
 	{
 		var newPlayerPosition = !Engine.IsEditorHint() 
 			? PlayerPosition.Get("player_position").AsVector3()
-			: EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D().Position;
+			: PlayerPosition.Get("position").AsVector3();
+			//: EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D().Position;
 
 		// Only update if significant movement occurred
-		if (_playerPosition.DistanceSquaredTo(newPlayerPosition) >= 10)
-		{
-			_playerPosition = newPlayerPosition;
-		}
+		if (_playerPosition.DistanceSquaredTo(newPlayerPosition) < 10) return false;
+		_playerPosition = newPlayerPosition;
+		return true;
+
 	}
 
 	private void CheckAndHandleSubdivision()
@@ -209,6 +214,7 @@ public partial class Octree : Node3D
 		
 		// Remove all Octree children
 		if (!_subDivided) return;
+		GD.Print("Left the node in octree");
 		foreach (var child in _children)
 		{
 			if(IsInstanceValid(child))
@@ -307,6 +313,20 @@ public partial class Octree : Node3D
 		newCell.ShowOctree = ShowOctree;
 
 		_subdivisionQueue.Enqueue(newCell);
+
+	}
+	
+	private void SetNeighbours()
+	{
+		// Set the neighbors for the first child
+		
+		var neighbours = new List<Octree>();
+		var firstChild = _children[0];
+		neighbours.Add(_children[1]);
+		neighbours.Add(_children[2]);
+		
+		
+		firstChild._neighbours = neighbours.ToArray();
 
 	}
 
