@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PlanetThemeSet" load_steps=7 format=3 uid="uid://ojihguerjsqf"]
+
+[ext_resource type="Script" uid="uid://ccka61wu76x4n" path="res://src/bodies/planet/planet_theme/PlanetTheme.cs" id="1_twomd"]
+[ext_resource type="Resource" uid="uid://bmap62vkv22l6" path="res://src/bodies/planet/planet_theme/themes/earth.tres" id="2_mua6d"]
+[ext_resource type="Resource" uid="uid://ynwi6f3rjgau" path="res://src/bodies/planet/planet_theme/themes/jungle.tres" id="3_s5t7w"]
+[ext_resource type="Resource" uid="uid://duhpf38qhw5af" path="res://src/bodies/planet/planet_theme/themes/toxic.tres" id="4_1rarn"]
+[ext_resource type="Resource" uid="uid://dv30f3o1yjqqw" path="res://src/bodies/planet/planet_theme/themes/tangerine.tres" id="5_j853u"]
+[ext_resource type="Script" uid="uid://csscujj5yg1co" path="res://src/bodies/planet/planet_theme/PlanetThemeSet.cs" id="6_spuek"]
+
+[resource]
+script = ExtResource("6_spuek")
+Warmth = 0.5
+Themes = Array[ExtResource("1_twomd")]([ExtResource("2_mua6d"), ExtResource("3_s5t7w"), ExtResource("4_1rarn"), ExtResource("5_j853u")])
+metadata/_custom_type_script = "uid://csscujj5yg1co"

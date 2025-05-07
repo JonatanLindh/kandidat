@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c5pjt4x5iosr"]
+
+[ext_resource type="Script" uid="uid://qxwue1m0afyh" path="res://src/galaxy/true_galaxy/physics_bridge/galaxy_physics_bridge.gd" id="1_goi02"]
+
+[node name="GalaxyPhysicsBridge" type="Node"]
+script = ExtResource("1_goi02")

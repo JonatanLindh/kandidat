@@ -7,7 +7,7 @@ public partial class StarChunk : Node3D, IStarChunkData
 	public FastNoiseLite galaxyNoise { private get; set; }
 	public Mesh starMesh { private get; set; }
 
-	[Export] StarChunkMultiMesh chunkMultiMesh;
+	[Export] StarMultiMesh starMultiMesh;
 
 	public Vector3[] stars { get; private set; }
 	Vector3[] localStars;
@@ -56,7 +56,7 @@ public partial class StarChunk : Node3D, IStarChunkData
 		stars = new Vector3[localStars.Length];
 		stars = localStars;
 
-		chunkMultiMesh.DrawStars(stars, starMesh);
+		starMultiMesh.DrawStars(stars, starMesh);
 	}
 
 	private Vector3 ChunkPositionOffset()

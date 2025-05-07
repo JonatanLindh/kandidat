@@ -4,8 +4,11 @@
 [ext_resource type="PackedScene" uid="uid://dkx5f3mgc3mdq" path="res://src/player/hud.tscn" id="2_u6rmv"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_rxibo"]
+radius = 0.005
+height = 0.02
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_rxibo"]
+radius = 0.05
 
 [node name="Player" type="CharacterBody3D"]
 floor_block_on_wall = false
@@ -19,13 +22,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("SphereShape3D_rxibo")
 
 [node name="Head" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.005, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.439417)
+far = 10000.0
+
+[node name="SpotLight3D" type="SpotLight3D" parent="Head"]
+light_energy = 5.0
+spot_range = 10.0
 
 [node name="HUD" parent="." instance=ExtResource("2_u6rmv")]
 
 [node name="RayCast3D" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.304541, 0)
-target_position = Vector3(0, -0.755, 0)
+target_position = Vector3(0, -0.076, 0)

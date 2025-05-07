@@ -15,10 +15,10 @@ public partial class DeterministicRandomPlanet : RandomCelestialBodyNoise
         // Set seed of Random to system-seed to make deterministic
         random = new Random(param.Seed);
 
-        param.Width = GetRadius() * 2 + 2;
-        param.Height = GetRadius() * 2 + 2;
-        param.Depth = GetRadius() * 2 + 2;
-        param.Size = GetRadius() * 2 + 2;
+        param.Width = Resolution + 2;
+        param.Height = Resolution + 2;
+        param.Depth = Resolution + 2;
+        param.Size = Resolution + 2;
 
         param.Octaves = random.Next(4, MAX_OCTAVES);
 

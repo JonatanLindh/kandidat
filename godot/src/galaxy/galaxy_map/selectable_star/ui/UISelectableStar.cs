@@ -26,6 +26,11 @@ public partial class UISelectableStar : CanvasLayer
 	// Star Info UI
 	Label starPosLabel;
 	Label starSeed;
+	ColorRect starColor;
+	Label systemInformation;
+	
+	// System Scene To Be Used For Seed Evaluation
+	Node3D systemScene;
 
 	public override void _Ready()
 	{
@@ -35,7 +40,10 @@ public partial class UISelectableStar : CanvasLayer
 
 		starPosLabel = GetNode<Label>("%StarPos");
 		starSeed = GetNode<Label>("%StarSeed");
+		starColor = GetNode<ColorRect>("%StarColor");
+		systemInformation = GetNode<Label>("%SystemInformation");
 
+		systemScene = GetNode<Node3D>("../../System");
 		Hide();
 	}
 
@@ -61,19 +69,19 @@ public partial class UISelectableStar : CanvasLayer
 
 			// Offset based on the distance to the star
 			float distance = player.Position.DistanceTo(targetPosition);
-            float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * distanceOffsetStrength;
-            Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
+			float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * distanceOffsetStrength;
+			Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
 
 			// Proposed new UI position
-            Vector2 newPos = screenPosition + (distanceOffset + posOffset);
+			Vector2 newPos = screenPosition + (distanceOffset + posOffset);
 			starSelect.Position = newPos;
 
 			// Make sure that the new position ensures that the entire panel is within screen bounds
 			newPos = GetClampedPositionIfOutside(newPos);
 
 			starSelect.Position = newPos;
-            starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " LY";
-        }
+			starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " LY";
+		}
 	}
 
 	/// <summary>
@@ -221,7 +229,15 @@ public partial class UISelectableStar : CanvasLayer
 		starNameLabel.Text = star.name;
 		starPosLabel.Text = star.transform.Origin.ToString("F2");
 		starSeed.Text = star.seed.ToString();
-
+		
+		
+		var systemData = (Godot.Collections.Dictionary)systemScene.Call("generateSystemDataFromSeed", star.seed);
+		var numberOfPlanets = ((Godot.Collections.Array) systemData["planets"]).Count;
+		//var moons = systemData["moons"] as Godot.Collections.Array;
+		var sun = (Godot.Collections.Dictionary)systemData["sun"];
+		var sunColor = (Color)sun["color"];
+		starColor.Color = sunColor;
+		systemInformation.Text = "Number of planets: " + numberOfPlanets.ToString();
 		Show();
 	}
 

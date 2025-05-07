@@ -21,8 +21,4 @@ var _dt := 0.
 func _process(delta: float) -> void:
 	if show_trajectories_ingame:
 		self.poll_trajectory_results()
-		
-		_dt += delta
-		if _dt > 2.:
-			_dt = 0.;
-			self.queue_simulate_trajectories()
+		self.queue_simulate_trajectories()
