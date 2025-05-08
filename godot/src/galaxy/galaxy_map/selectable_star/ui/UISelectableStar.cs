@@ -27,10 +27,13 @@ public partial class UISelectableStar : CanvasLayer
 	Label starDistanceLabel;
 
 	// Star Info UI
-	Label starPosLabel;
+	Label starPosXLabel;
+	Label starPosYLabel;
+	Label starPosZLabel;
+
 	Label starSeed;
 	ColorRect starColor;
-	Label systemInformation;
+	Label planetCountLabel;
 	CheckButton visibleOrbitsCheckButton;
 	
 	// System Scene To Be Used For Seed Evaluation
@@ -42,10 +45,13 @@ public partial class UISelectableStar : CanvasLayer
 		starNameLabel = GetNode<Label>("%StarName");
 		starDistanceLabel = GetNode<Label>("%StarDistance");
 
-		starPosLabel = GetNode<Label>("%StarPos");
+		starPosXLabel = GetNode<Label>("%XLabel");
+		starPosYLabel = GetNode<Label>("%YLabel");
+		starPosZLabel = GetNode<Label>("%ZLabel");
+
 		starSeed = GetNode<Label>("%StarSeed");
 		starColor = GetNode<ColorRect>("%StarColor");
-		systemInformation = GetNode<Label>("%SystemInformation");
+		planetCountLabel = GetNode<Label>("%PlanetCount");
 
 		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
 
@@ -86,7 +92,7 @@ public partial class UISelectableStar : CanvasLayer
 			newPos = GetClampedPositionIfOutside(newPos);
 
 			starSelect.Position = newPos;
-			starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " LY";
+			starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " AU";
 		}
 	}
 
@@ -233,8 +239,12 @@ public partial class UISelectableStar : CanvasLayer
 		this.targetPosition = star.transform.Origin;
 
 		starNameLabel.Text = star.name;
-		starPosLabel.Text = star.transform.Origin.ToString("F2");
-		starSeed.Text = star.seed.ToString();
+		starSeed.Text = "#" + star.seed.ToString();
+
+		Vector3 starPos = star.transform.Origin;
+		starPosXLabel.Text = starPos.X.ToString("F2");
+		starPosYLabel.Text = starPos.Y.ToString("F2");
+		starPosZLabel.Text = starPos.Z.ToString("F2");
 
 		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
 
@@ -244,7 +254,7 @@ public partial class UISelectableStar : CanvasLayer
 		var sun = (Godot.Collections.Dictionary)systemData["sun"];
 		var sunColor = (Color)sun["color"];
 		starColor.Color = sunColor;
-		systemInformation.Text = "Number of planets: " + numberOfPlanets.ToString();
+		planetCountLabel.Text = numberOfPlanets.ToString() + " Detected";
 		Show();
 	}
 
