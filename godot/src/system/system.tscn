@@ -1,7 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://dru1frs0nrf78"]
+[gd_scene load_steps=4 format=3 uid="uid://dru1frs0nrf78"]
 
 [ext_resource type="Script" uid="uid://lhs4nlp0k7cu" path="res://src/system/system.gd" id="1_7my1l"]
-[ext_resource type="Script" uid="uid://du3uaw4xgg6e5" path="res://src/system/toggle_trajectories.gd" id="4_btp4s"]
 [ext_resource type="PackedScene" uid="uid://c4qg4a1uuvy8x" path="res://src/bodies/star/star.tscn" id="5_5coes"]
 [ext_resource type="Script" uid="uid://d2i7ndffatk1s" path="res://src/physics/gravity_controller.gd" id="6_wayc2"]
 
@@ -18,18 +17,3 @@ script = ExtResource("6_wayc2")
 mass = 3e+06
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.625992, 0, 0.313004)
 radius = 200.0
-
-[node name="CheckButton" type="CheckButton" parent="."]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -44.0
-offset_top = -24.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "Toggle Trajectories"
-script = ExtResource("4_btp4s")
-
-[connection signal="toggled" from="CheckButton" to="CheckButton" method="_on_toggled"]

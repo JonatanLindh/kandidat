@@ -18,6 +18,9 @@ public partial class UISelectableStar : CanvasLayer
 	[Export] float distanceOffsetStrength = 800;
 	Vector3 targetPosition;
 
+	Node hudSignalBus;
+	bool orbits_visibility = false;
+
 	// Star Select UI
 	Panel starSelect;
 	Label starNameLabel;
@@ -28,6 +31,7 @@ public partial class UISelectableStar : CanvasLayer
 	Label starSeed;
 	ColorRect starColor;
 	Label systemInformation;
+	CheckButton visibleOrbitsCheckButton;
 	
 	// System Scene To Be Used For Seed Evaluation
 	Node3D systemScene;
@@ -42,6 +46,8 @@ public partial class UISelectableStar : CanvasLayer
 		starSeed = GetNode<Label>("%StarSeed");
 		starColor = GetNode<ColorRect>("%StarColor");
 		systemInformation = GetNode<Label>("%SystemInformation");
+
+		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
 
 		systemScene = GetNode<Node3D>("../../System");
 		Hide();
@@ -229,8 +235,9 @@ public partial class UISelectableStar : CanvasLayer
 		starNameLabel.Text = star.name;
 		starPosLabel.Text = star.transform.Origin.ToString("F2");
 		starSeed.Text = star.seed.ToString();
-		
-		
+
+		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
+
 		var systemData = (Godot.Collections.Dictionary)systemScene.Call("generateSystemDataFromSeed", star.seed);
 		var numberOfPlanets = ((Godot.Collections.Array) systemData["planets"]).Count;
 		//var moons = systemData["moons"] as Godot.Collections.Array;
@@ -279,5 +286,24 @@ public partial class UISelectableStar : CanvasLayer
 		{
 			isFastTraveling = true;
 		}
+	}
+
+	/// <summary>
+	/// Signal Gravity Controllers that the visible orbits check button has changed.
+	/// </summary>
+	/// <param name="visible"></param>
+	private void OnOrbitsVisibilityChanged(bool visible)
+	{
+		orbits_visibility = visible;
+		hudSignalBus.EmitSignal("orbits_visibility", orbits_visibility);
+	}
+
+	/// <summary>
+	/// Re-emits the orbits visibility signal upon query.
+	/// (E.g. done when new stars are instantiated)
+	/// </summary>
+	private void OnOrbitsVisibilityQuery()
+	{
+		hudSignalBus.EmitSignal("orbits_visibility", orbits_visibility);
 	}
 }

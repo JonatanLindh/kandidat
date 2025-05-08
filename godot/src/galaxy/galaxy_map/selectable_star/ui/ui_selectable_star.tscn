@@ -30,6 +30,7 @@ color = Color(0.849616, 0.577324, 0.181751, 1)
 
 [node name="SystemInformation" type="Label" parent="StarInfoPanel"]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 10.0
 offset_top = 153.0
 offset_right = 374.0
@@ -38,6 +39,7 @@ text = "Here is some information, bla bla bla"
 clip_text = true
 
 [node name="StarColorTitle" type="Label" parent="StarInfoPanel"]
+layout_mode = 0
 offset_left = 8.0
 offset_top = 80.0
 offset_right = 108.0
@@ -46,6 +48,7 @@ text = "Star Color:"
 clip_text = true
 
 [node name="SystemInformationTitle" type="Label" parent="StarInfoPanel"]
+layout_mode = 0
 offset_left = 11.0
 offset_top = 123.0
 offset_right = 375.0
@@ -133,6 +136,16 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "->"
 
+[node name="OrbitsCheckButton" type="CheckButton" parent="StarInfoPanel"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+offset_right = 44.0
+grow_vertical = 0
+text = "Enable orbits"
+
 [node name="StarSelectPanel" type="Panel" parent="."]
 unique_name_in_owner = true
 offset_right = 160.0
@@ -171,3 +184,4 @@ text = "Distance"
 [connection signal="pressed" from="StarInfoPanel/CloseButton" to="." method="OnCloseButtonPressed"]
 [connection signal="pressed" from="StarInfoPanel/VisitButton" to="." method="OnVisitButtonPressed"]
 [connection signal="pressed" from="StarInfoPanel/TravelButton" to="." method="OnTravelButtonPressed"]
+[connection signal="toggled" from="StarInfoPanel/OrbitsCheckButton" to="." method="OnOrbitsVisibilityChanged"]

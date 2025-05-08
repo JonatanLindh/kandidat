@@ -1,6 +1,13 @@
 @tool
 extends GravityController
 
+func _ready():
+	HudSignalBus.connect("orbits_visibility", _on_orbit_visibility_change)
+	HudSignalBus.emit_signal("query_orbits_visibility")
+
+func _on_orbit_visibility_change(visible):
+	show_trajectories_ingame = visible
+
 @export var run_simulation: bool:
 	set(val):
 		self.simulate_trajectories()
