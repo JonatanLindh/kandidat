@@ -1,8 +1,11 @@
 extends CanvasLayer
-@onready var position_label: Label = $Control/PositionLabel
-@onready var speed_label: Label = $Control/SpeedLabel
-@onready var fps_label: Label = $Control/FpsLabel
-@onready var help_label: Label = $Control/HelpLabel
+@onready var pos_x_label: Label = %PosXLabel
+@onready var pos_y_label: Label = %PosYLabel
+@onready var pos_z_label: Label = %PosZLabel
+
+@onready var speed_label: Label = %SpeedLabel
+@onready var fps_label: Label = %FpsLabel
+@onready var help_label: Label = %HelpLabel
 
 var show_help := false
 var controls_text := "-WASD for directional movement 
@@ -22,7 +25,7 @@ func _ready():
 		player.updated_status.connect(_on_player_updated_status)
 
 func _process(_delta: float) -> void:
-	fps_label.text = "FPS: " + str(Engine.get_frames_per_second())
+	fps_label.text = "FPS: %.0f" % Engine.get_frames_per_second()
 	if Input.is_action_just_pressed("ui_filedialog_show_hidden"):
 		show_help = not show_help
 		help_label.text = controls_text if show_help else "Press h for help"
@@ -30,6 +33,9 @@ func _process(_delta: float) -> void:
 		
 
 func _on_player_updated_status(position, speed):
-	position_label.text = "x: %.2f\ny: %.2f\nz: %.2f" % [position.x, position.y, position.z]
-	speed_label.text = "current speed: " + str(ceil(speed))
+	pos_x_label.text = "%.2f /" % position.x
+	pos_y_label.text = "%.2f /" % position.y
+	pos_z_label.text = "%.2f" % position.z
+	
+	speed_label.text = "Speed: %.0f AU/s" % ceil(speed)
 	
