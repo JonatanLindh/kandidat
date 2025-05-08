@@ -104,7 +104,7 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	planetInstance.velocity = Vector3(cos(orbitAngle) * orbitSpeed, 0, -sin(orbitAngle) * orbitSpeed)
 	planetInstance.position = Vector3(sin(orbitAngle) * orbitRadius, 0, cos(orbitAngle) * orbitRadius)
 	planetInstance.set("Radius", planetRadius)
-	planetInstance.SunPosition = Vector3.ZERO;
+	planetInstance.SunPosition = SUN.global_position;
 	planetInstance.name = "Body" + str(randomID);
 	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
 	
