@@ -172,8 +172,8 @@ public partial class Octree : Node3D
 	{
 		var newPlayerPosition = !Engine.IsEditorHint() 
 			? PlayerPosition.Get("player_position").AsVector3()
-			: PlayerPosition.Get("position").AsVector3();
-			//: EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D().Position;
+			//: PlayerPosition.Get("position").AsVector3();
+			: EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D().Position;
 
 		// Only update if significant movement occurred
 		if (_playerPosition.DistanceSquaredTo(newPlayerPosition) < 10) return false;

@@ -186,6 +186,20 @@ public sealed partial class MarchingCubeDispatch: Node
 			request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
 		}
 
+		if (request.GenerateGrass)
+		{
+			NewGrass grass = new NewGrass();
+			var meshSurface = mesh.SurfaceGetArrays(0);
+			if (meshSurface != null)
+			{
+				var grassInstance = grass.PopulateMesh(meshSurface, 50000);
+				if (grassInstance != null && IsInstanceValid(meshInstance))
+				{
+					meshInstance.CallDeferred(Node.MethodName.AddChild, grassInstance);
+				}
+			}
+		}
+
 		if (!_requests.TryRemove(request.Id, out _))
 		{
 			GD.Print($"Unable to remove request with ID {request.Id} from the queue.");

@@ -131,6 +131,7 @@ public partial class McSpawner : Node3D
 			Root = this,	
 			CustomMeshInstance = _meshInstance3D,
 			TempNode = _useTemp ? _temporaryMeshInstance : null,
+			GenerateGrass = true
 			//GeneratePlanetShader = GeneratePlanetShader
 		};
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
@@ -194,8 +195,11 @@ public partial class McSpawner : Node3D
 		return dataPoints;
 	}
 
-	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight) {
+	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight)
+	{
 
+		if (_themeGenerator == null)
+			return null;
 		_themeGenerator.LoadAndGenerateThemes();
         // Load the shader correctly
         Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");

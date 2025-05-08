@@ -22,4 +22,6 @@ public record MarchingCubeRequest
 	public bool IsProcessing { get; set; } = false;
 	
 	public Guid Id { get; init; } = Guid.NewGuid();
+	
+	public bool GenerateGrass { get; init; } = false;
 }

@@ -54,7 +54,7 @@ public partial class OctreePlanetSpawner : Node
 
 	
 	
-	private int _maxDepth = 8;
+	[Export] public int MaxDepth { get; set; } = 8;
 	private float _baseVoxelSize;
 	private float _radius = 32;
 	private int _resolution = 32;
@@ -165,7 +165,8 @@ public partial class OctreePlanetSpawner : Node
 			Root = this,	
 			CustomMeshInstance = requestInstance,
 			GeneratePlanetShader = GeneratePlanetShader,
-			Id = id
+			Id = id,
+			GenerateGrass = depth == MaxDepth
 		}; 
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest, id);
 		
@@ -184,7 +185,7 @@ public partial class OctreePlanetSpawner : Node
 	
 	
 	private float GetVoxelSize(int depth) {
-		int maxDepth = _maxDepth;
+		int maxDepth = MaxDepth;
 		float baseVoxelSize = _baseVoxelSize;
 		return Mathf.Pow(2, (maxDepth - depth)) * baseVoxelSize;
 	}
@@ -209,7 +210,7 @@ public partial class OctreePlanetSpawner : Node
 			_radius = celestialBody.GetRadius();
 			celestialBody.Resolution = Resolution;
 		}
-		_baseVoxelSize = (_radius * 2) / (Resolution * Mathf.Pow(2, _maxDepth));
+		_baseVoxelSize = (_radius * 2) / (Resolution * Mathf.Pow(2, MaxDepth));
 		var size = (1 /  Mathf.Pow(2, _depth)) * (_radius * 2);
 
 		//AddChild(_rootTest);
