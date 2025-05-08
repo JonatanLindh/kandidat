@@ -159,6 +159,8 @@ func on_planet_movement(delta : float):
 		on_sufarce_movement = false
 		flying = not flying
 
+	apply_floor_snap()
+	
 	if is_falling():
 		velocity += (gravity_vector) * delta
 
@@ -190,7 +192,7 @@ func on_planet_movement(delta : float):
 	
 	if Input.is_action_just_pressed("ui_accept") and not is_falling():
 		velocity += -gravity_vector.normalized() * JUMP_VELOCITY
-		
+	
 	align_with_vector(gravity_vector, 1)
 	emit_player_status_changed()
 	move_and_slide()
