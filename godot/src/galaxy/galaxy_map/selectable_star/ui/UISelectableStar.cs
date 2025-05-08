@@ -239,7 +239,7 @@ public partial class UISelectableStar : CanvasLayer
 		this.targetPosition = star.transform.Origin;
 
 		starNameLabel.Text = star.name;
-		starSeed.Text = "#" + star.seed.ToString();
+		starSeed.Text = star.name;
 
 		Vector3 starPos = star.transform.Origin;
 		starPosXLabel.Text = starPos.X.ToString("F2");

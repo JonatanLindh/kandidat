@@ -42,7 +42,7 @@ size_flags_stretch_ratio = 0.55
 [node name="StarSeedTitle" type="Label" parent="PanelContainer/TabContainer/Info/HBoxContainer3/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Star Chart"
+text = "Star Designation"
 clip_text = true
 
 [node name="StarPosTitle" type="Label" parent="PanelContainer/TabContainer/Info/HBoxContainer3/VBoxContainer"]
