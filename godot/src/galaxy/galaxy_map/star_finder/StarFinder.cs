@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public partial class StarFinder : Node
 {
-	[Export(PropertyHint.Range, "1, 200, 1")] float maxRadius = 15;
+	[Export(PropertyHint.Range, "1, 500, 1")] float maxRadius = 15;
 	[Export(PropertyHint.Range, "0.1, 10, 0.1")] float initialRadius = 1.0f;
 	[Export(PropertyHint.Range, "1.0, 2.0, 0.05")] float radiusGrowthRate = 1.1f;
 	[Export(PropertyHint.Range, "0.1, 5.0, 0.1")] float intervalSizeRatio = 1.7f;

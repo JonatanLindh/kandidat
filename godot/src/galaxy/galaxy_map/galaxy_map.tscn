@@ -14,6 +14,7 @@ debugPrint = true
 [node name="InfiniteGalaxy" parent="." instance=ExtResource("2_3xdco")]
 unique_name_in_owner = true
 chunkSize = 10000
+chunkSize = 30000
 starCount = 100
 
 [node name="UiSelectableStar" parent="." instance=ExtResource("3_51kxb")]
@@ -22,14 +23,14 @@ fastTravelDistanceOffset = 1000.0
 
 [node name="StarFinder" parent="." instance=ExtResource("4_c4q7o")]
 unique_name_in_owner = true
-maxRadius = 200.0
+maxRadius = 400.0
 intervalSizeRatio = 1.8
 
 [node name="SystemHandler" parent="." instance=ExtResource("5_pb70j")]
 unique_name_in_owner = true
-closeStarEarlyGenerateRadius = 3000.0
-closeStarLateGenerateRadius = 2500.0
-closeStarCullRadius = 3500.0
+closeStarEarlyGenerateRadius = 5500.0
+closeStarLateGenerateRadius = 3500.0
+closeStarCullRadius = 7000.0
 debugPrint = true
 
 [node name="ScaleHandler" parent="." instance=ExtResource("6_ov8lt")]
