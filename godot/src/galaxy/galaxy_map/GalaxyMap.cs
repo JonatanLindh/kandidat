@@ -49,7 +49,7 @@ public partial class GalaxyMap : Node3D
 	private void CheckCloseStars()
 	{
 		IStarChunkData[] chunks = galaxy.GetGeneratedChunks();
-		if (chunks == null) return;
+		if (chunks == null || chunks.Length == 0) return;
 
 		List<Vector3> starPos = starFinder.FindAllStarsInSphere(player.Position, systemHandler.closeStarEarlyGenerateRadius, chunks);
 
