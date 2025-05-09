@@ -83,33 +83,6 @@ public partial class StarFinder : Node
 	}
 
 	/// <summary>
-	/// Finds a star in a sphere around the given (player) position of the current chunk.
-	/// </summary>
-	/// <param name="at"></param>
-	/// <param name="radius"></param>
-	/// <param name="chunk"></param>
-	/// <returns></returns>
-	public Vector3 FindStarInSphere(Vector3 at, float radius, IStarChunkData chunk)
-	{
-		if (chunk == null)
-		{
-			GD.PrintErr("StarFinder: FindStarInSphere(). Chunk is null. Exiting.");
-			return Vector3.Zero;
-		}
-
-		foreach (Vector3 starPos in chunk.stars)
-		{
-			if ((starPos - at).Length() < radius)
-			{
-				if (debugPrint) GD.Print($"StarFinder: Found proximity star at {starPos}, {at.DistanceTo(starPos)} LY away from player");
-				return starPos;
-			}
-		}
-
-		return Vector3.Zero;
-	}
-
-	/// <summary>
 	/// Finds all stars in a sphere around the given (player) position of the current chunk.
 	/// </summary>
 	/// <param name="at"></param>
