@@ -15,6 +15,7 @@ debugPrint = true
 unique_name_in_owner = true
 chunkSize = 30000
 starCount = 100
+minimumDistance = 10000.0
 
 [node name="UiSelectableStar" parent="." instance=ExtResource("3_51kxb")]
 unique_name_in_owner = true

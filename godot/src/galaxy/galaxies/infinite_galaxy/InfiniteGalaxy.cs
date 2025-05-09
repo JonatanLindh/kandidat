@@ -20,6 +20,7 @@ public partial class InfiniteGalaxy : Node3D
 	[Export(PropertyHint.Range, "-1, 1, 0.01")] float IsoLevel = 0.3f;
 	[Export] int chunkSize = 1000;
 	[Export] int starCount = 1000;
+	[Export] float minimumDistance = 5000f;
 
 	public override void _Ready()
 	{
@@ -66,7 +67,7 @@ public partial class InfiniteGalaxy : Node3D
 		chunk.starMesh = starMesh;
 		chunk.galaxyNoise = noise;
 
-		chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos);
+		chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos, minimumDistance);
 
 		starChunks.Add(chunk);
 		AddChild(chunk);

@@ -167,7 +167,7 @@ public partial class StarFinder : Node
 			(sphereCenter.Z - closestZ) * (sphereCenter.Z - closestZ);
 
 		// If the distance is less than or equal to the sphere's radius squared, they intersect
-		bool intersects = (distanceSquared <= (sphereRadius * sphereRadius));
+		bool intersects = distanceSquared <= (sphereRadius * sphereRadius);
 		return intersects;
 	}
 }
