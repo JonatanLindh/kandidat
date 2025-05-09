@@ -54,6 +54,7 @@ public partial class UISelectableStar : CanvasLayer
 		planetCountLabel = GetNode<Label>("%PlanetCount");
 
 		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
+		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
 
 		systemScene = GetNode<Node3D>("../../System");
 		Hide();
@@ -245,8 +246,6 @@ public partial class UISelectableStar : CanvasLayer
 		starPosXLabel.Text = starPos.X.ToString("F2");
 		starPosYLabel.Text = starPos.Y.ToString("F2");
 		starPosZLabel.Text = starPos.Z.ToString("F2");
-
-		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
 
 		var systemData = (Godot.Collections.Dictionary)systemScene.Call("generateSystemDataFromSeed", star.seed);
 		var numberOfPlanets = ((Godot.Collections.Array) systemData["planets"]).Count;
