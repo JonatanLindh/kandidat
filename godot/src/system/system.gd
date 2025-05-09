@@ -118,7 +118,7 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	return planetInstance;
 
 
-func randomSunColor(s: int):
+func randomSunType(s: int):
 	var colors := [
 		Color(1, 0.14, 0), # Red (Red dwarf or red giant)
 		Color(1, 0.5, 0), # Orange (Orange dwarf)
@@ -131,18 +131,37 @@ func randomSunColor(s: int):
 		Color(0.8, 0.6, 0.4) # Yellow-brownish (G-type star, slightly more red)
 	]
 	
-	return colors[s % colors.size()]
+	var types := [
+		"M", # Red (Red dwarf or red giant)
+		"K", # Orange (Orange dwarf)
+		"A", # White (White star)
+		"A", # Light blue (A-type star)
+		"B", # Blue (Hot B-type star)
+		"O", # Very hot blue (O-type star)
+		"F", # Pale blue-white (F-type star)
+		"K", # Yellow-orange (K-type star)
+		"G" # Yellow-brownish (G-type star, slightly more red)
+	]
+	
+	var index = s % colors.size()
+	
+	var sun_data = {
+		"type": types[index],
+		"color": colors[index]
+	}
+	
+	return sun_data
 	
 func generateSystemDataFromSeed(s: int):
 	var r = RandomNumberGenerator.new()
 	r.seed = s
-	var sun_color = randomSunColor(s);
+	var sun_data = randomSunType(s);
 
 	# Step 1: Generate system variables
 	var system_data = {
 		"planets": [],
 		"moons": [],
-		"sun": {"color": sun_color}
+		"sun": {"type": sun_data["type"], "color": sun_data["color"]}
 	}
 	
 	generatePlanetsData(r, system_data)

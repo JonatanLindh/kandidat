@@ -32,6 +32,7 @@ public partial class UISelectableStar : CanvasLayer
 	Label starPosZLabel;
 
 	Label starSeed;
+	Label starTypeLabel;
 	ColorRect starColor;
 	Label planetCountLabel;
 	CheckButton visibleOrbitsCheckButton;
@@ -50,6 +51,7 @@ public partial class UISelectableStar : CanvasLayer
 		starPosZLabel = GetNode<Label>("%ZLabel");
 
 		starSeed = GetNode<Label>("%StarSeed");
+		starTypeLabel = GetNode<Label>("%StarTypeLabel");
 		starColor = GetNode<ColorRect>("%StarColor");
 		planetCountLabel = GetNode<Label>("%PlanetCount");
 
@@ -251,7 +253,9 @@ public partial class UISelectableStar : CanvasLayer
 		var numberOfPlanets = ((Godot.Collections.Array) systemData["planets"]).Count;
 		//var moons = systemData["moons"] as Godot.Collections.Array;
 		var sun = (Godot.Collections.Dictionary)systemData["sun"];
+		var sunType = (string)sun["type"];
 		var sunColor = (Color)sun["color"];
+		starTypeLabel.Text = sunType;
 		starColor.Color = sunColor;
 		planetCountLabel.Text = numberOfPlanets.ToString() + " Detected";
 		Show();

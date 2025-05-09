@@ -152,6 +152,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="StarTypeLabel" type="Label" parent="PanelContainer/TabContainer/Info/HBoxContainer3/VBoxContainer2"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Type"
