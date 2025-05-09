@@ -32,9 +32,10 @@ size = Vector3(20, 20, 20)
 resource_local_to_scene = true
 
 [node name="PlanetMarchingCube" type="GravityBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 script = ExtResource("1_ha83e")
 Resolution = 32
-Seed = 1558686225
+Radius = 2.0
 Planet = ExtResource("2_736bg")
 Warmth = 0.5
 
@@ -42,8 +43,7 @@ Warmth = 0.5
 transform = Transform3D(16.7, 0, 0, 0, 16.7, 0, 0, 0, 16.7, 0, 0, 0)
 mesh = SubResource("BoxMesh_736bg")
 script = ExtResource("3_f3734")
-radius = 1.0
-planet_seed = 1558686225
+radius = 2.0
 
 [node name="PlanetGravityField" type="Area3D" parent="."]
 gravity_space_override = 3
