@@ -8,6 +8,7 @@ public partial class StarChunk : Node3D, IStarChunkData
 	public Mesh starMesh { private get; set; }
 
 	[Export] StarMultiMesh starMultiMesh;
+	StarFactory starFactory;
 
 	public Vector3[] stars { get; private set; }
 	Vector3[] localStars;
@@ -19,6 +20,19 @@ public partial class StarChunk : Node3D, IStarChunkData
 
 	SeedGenerator seedGen = new SeedGenerator();
 
+	Color[] colors = new Color[]
+	{
+		new Color(1, 0.14f, 0),   // Red (Red dwarf or red giant)
+		new Color(1, 0.5f, 0),    // Orange (Orange dwarf)
+		new Color(1, 1, 1),       // White (White star)
+		new Color(0.5f, 0.5f, 1), // Light blue (A-type star)
+		new Color(0.2f, 0.2f, 1), // Blue (Hot B-type star)
+		new Color(0.1f, 0.1f, 1), // Very hot blue (O-type star)
+		new Color(0.8f, 0.8f, 1), // Pale blue-white (F-type star)
+		new Color(0.9f, 0.8f, 0), // Yellow-orange (K-type star)
+		new Color(0.8f, 0.6f, 0.4f) // Yellow-brownish (G-type star, slightly more red
+	};
+
 	public void Generate(uint galaxySeed, int chunkSize, int starCount, float ISOlevel, ChunkCoord pos, float minimumDistance = 0)
 	{
 		galaxyNoise.Seed = (int)galaxySeed;
@@ -26,6 +40,8 @@ public partial class StarChunk : Node3D, IStarChunkData
 		this.starCount = starCount;
 		this.ISOlevel = ISOlevel;
 		this.pos = pos;
+
+		starFactory = new StarFactory();
 
 		localStars = new Vector3[starCount];
 
@@ -68,6 +84,18 @@ public partial class StarChunk : Node3D, IStarChunkData
 		stars = localStars;
 
 		starMultiMesh.DrawStars(stars, starMesh);
+
+		// Color the stars
+		Color[] newColors = new Color[stars.Length];
+		for (int i = 0; i < stars.Length; i++)
+		{
+			Vector3 starPos = stars[i];
+			Star star = starFactory.CreateStar(starPos, galaxySeed);
+
+			int colIndex = (int)(star.seed % (uint)colors.Length);
+			newColors[i] = colors[colIndex];
+		}
+		starMultiMesh.ColorStar(newColors);
 	}
 
 	private Vector3 ChunkPositionOffset()
