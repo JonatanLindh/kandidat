@@ -3,6 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using Microsoft.Win32.SafeHandles;
 
 /// <summary>
 /// A class for creating different types of noise to be used when generating planets
@@ -29,7 +30,19 @@ public partial class PlanetNoise
         // Pad the boarders of the points-array with empty space so marching cubes correctly generates the mesh at the edges
         PadBoardersWithAir(points, width, height, depth);
 
-        // boarders are already padded, so only need to iterate from [1, size-1)
+        // Calculates the maximum value that a datapoint can have after fBm has been applied to it.
+        // Used for fading the datapoint value based on its distance from the planet's center.
+        // The range is symmetrical so [-maxRange, maxRange]
+        float maxRange = (centerPoint - (new Vector3(width, height, depth))).Length();
+        float amplitude = param.Amplitude;
+        float persistence = param.Persistence;
+        for (int i = 0; i < param.Octaves; i++)
+        {
+            maxRange += amplitude;
+            amplitude *= persistence;
+        }
+
+        // Boarders are already padded, so only need to iterate from [1, size-1)
         Parallel.For(1, width - 1, x =>
         {
             for (int y = 1; y < height - 1; y++)
@@ -41,11 +54,19 @@ public partial class PlanetNoise
                     float distanceToCenter = (centerPoint - currentPoint).Length();
                     float distanceAwayFromCenter = (float)radius - distanceToCenter;
 
+                    // if > 1   --> the point is outside the planet
+                    // if <= 1  --> the point is inside the planet
+                    // Used for increasing the amount of fade-out applied to the point
+                    float fadeOutmultiplier = distanceToCenter / (float)radius;
+
                     // Apply fbm to layer noise
                     float value = Fbm(distanceAwayFromCenter, currentPoint, param, fastNoise);
 
+                    float valueNormalized = Mathf.Pow(1.0f - (Mathf.Abs(value) / (maxRange)), fadeOutmultiplier);
+                    float fadeoutStrength = 8.0f;
+                    float fadeout = valueNormalized * fadeoutStrength;
                     // Update point (x,y,z) with value from fbm
-                    points[x, y, z] = value;
+                    points[x, y, z] = value - fadeout;
                 }
             }
         });
@@ -73,7 +94,7 @@ public partial class PlanetNoise
         float persistence = param.Persistence;
         float lacunarity = param.Lacunarity;
 
-        float h = Mathf.Pow(2, -persistence);
+        float h = Mathf.Pow(2, persistence);
 
         // Used to slightly offset the position when getting noise-value for each octave
         Vector3 offset = Vector3.Zero;
