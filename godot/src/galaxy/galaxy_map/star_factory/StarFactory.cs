@@ -42,8 +42,10 @@ public class StarFactory
 	}
 
 	/// <summary>
-	/// 
+	/// Generates a name for the star based on its seed, 
+	/// and a randomly selected catalog acronym.
 	/// </summary>
+	/// <param name="seed"></param>
 	/// <returns></returns>
 	private string GenerateName(uint seed)
 	{
