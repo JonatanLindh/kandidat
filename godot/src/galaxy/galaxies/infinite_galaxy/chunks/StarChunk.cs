@@ -63,8 +63,6 @@ public partial class StarChunk : Node3D, IStarChunkData
 			}
 		}
 
-		GD.Print("Starcount is " + starIndex);
-
 		Array.Resize(ref localStars, starIndex);
 		stars = new Vector3[localStars.Length];
 		stars = localStars;

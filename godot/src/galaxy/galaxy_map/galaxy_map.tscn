@@ -9,7 +9,6 @@
 
 [node name="GalaxyMap" type="Node3D"]
 script = ExtResource("1_8ccs1")
-debugPrint = true
 
 [node name="InfiniteGalaxy" parent="." instance=ExtResource("2_3xdco")]
 unique_name_in_owner = true
@@ -31,7 +30,6 @@ unique_name_in_owner = true
 closeStarEarlyGenerateRadius = 5500.0
 closeStarLateGenerateRadius = 3500.0
 closeStarCullRadius = 7000.0
-debugPrint = true
 
 [node name="ScaleHandler" parent="." instance=ExtResource("6_ov8lt")]
 unique_name_in_owner = true
