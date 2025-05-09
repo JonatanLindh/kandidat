@@ -27,7 +27,13 @@ public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNo
     public float[,,] GetNoise()
     {
         RandomizeParameters(param);
+        UpdateNoise();
         return planetNoise.CreateDataPoints(param, fastNoise);
+    }
+    private void UpdateNoise()
+    {
+        fastNoise.Seed = param.Seed;
+        fastNoise.NoiseType = param.NoiseType;
     }
 
     public int GetRadius()
