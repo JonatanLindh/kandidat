@@ -13,7 +13,6 @@ debugPrint = true
 
 [node name="InfiniteGalaxy" parent="." instance=ExtResource("2_3xdco")]
 unique_name_in_owner = true
-chunkSize = 10000
 chunkSize = 30000
 starCount = 100
 
