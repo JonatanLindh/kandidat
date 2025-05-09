@@ -116,23 +116,40 @@ public partial class StarFinder : Node
 	/// <param name="radius"></param>
 	/// <param name="chunk"></param>
 	/// <returns></returns>
-	public List<Vector3> FindAllStarsInSphere(Vector3 at, float radius, IStarChunkData chunk)
+	public List<Vector3> FindAllStarsInSphere(Vector3 at, float radius, IStarChunkData[] chunks)
 	{
-		if (chunk == null)
+		if (chunks == null || chunks.Length == 0)
 		{
-			GD.PrintErr("StarFinder: FindAllStarsInSphere(). Chunk is null. Exiting.");
+			GD.PrintErr("StarFinder: FindAllStarsInSphere(). Chunks array is null or empty. Exiting.");
 			return null;
 		}
 
 		List<Vector3> foundStars = new List<Vector3>();
-		foreach (Vector3 starPos in chunk.stars)
+
+		foreach (IStarChunkData chunk in chunks)
 		{
-			if ((starPos - at).Length() < radius)
+			Vector3 chunkMin = new Vector3(
+				chunk.pos.x * chunk.size,
+				chunk.pos.y * chunk.size,
+				chunk.pos.z * chunk.size
+			);
+
+			Vector3 chunkMax = chunkMin + new Vector3(chunk.size, chunk.size, chunk.size);
+
+			if (SphereIntersectsCube(at, radius, chunkMin, chunkMax))
 			{
-				if (debugPrint) GD.Print($"StarFinder: Found proximity star at {starPos}, {at.DistanceTo(starPos)} LY away from player");
-				foundStars.Add(starPos);
+				foreach (Vector3 starPos in chunk.stars)
+				{
+					if ((starPos - at).Length() < radius)
+					{
+						if (debugPrint) GD.Print($"StarFinder: Found proximity star at {starPos}, {at.DistanceTo(starPos)} LY away from player");
+						foundStars.Add(starPos);
+					}
+				}
 			}
 		}
+
+		GD.Print($"StarFinder: Found {foundStars.Count} stars");
 
 		return foundStars;
 	}
@@ -155,5 +172,31 @@ public partial class StarFinder : Node
 		}
 
 		return null;
+	}
+
+	/// <summary>
+	/// Checks if a sphere intersects a cube defined by its min and max corners.
+	/// </summary>
+	/// <param name="sphereCenter"></param>
+	/// <param name="sphereRadius"></param>
+	/// <param name="cubeMin"></param>
+	/// <param name="cubeMax"></param>
+	/// <returns></returns>
+	private bool SphereIntersectsCube(Vector3 sphereCenter, float sphereRadius, Vector3 cubeMin, Vector3 cubeMax)
+	{
+		// Closest point, from sphere center to the cube
+		float closestX = Mathf.Clamp(sphereCenter.X, cubeMin.X, cubeMax.X);
+		float closestY = Mathf.Clamp(sphereCenter.Y, cubeMin.Y, cubeMax.Y);
+		float closestZ = Mathf.Clamp(sphereCenter.Z, cubeMin.Z, cubeMax.Z);
+
+		// Distance from cloest point to sphere center
+		float distanceSquared = 
+			(sphereCenter.X - closestX) * (sphereCenter.X - closestX) +
+			(sphereCenter.Y - closestY) * (sphereCenter.Y - closestY) +
+			(sphereCenter.Z - closestZ) * (sphereCenter.Z - closestZ);
+
+		// If the distance is less than or equal to the sphere's radius squared, they intersect
+		bool intersects = (distanceSquared <= (sphereRadius * sphereRadius));
+		return intersects;
 	}
 }
