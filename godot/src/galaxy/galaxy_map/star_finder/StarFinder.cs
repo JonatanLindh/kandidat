@@ -122,8 +122,6 @@ public partial class StarFinder : Node
 			}
 		}
 
-		GD.Print($"StarFinder: Found {foundStars.Count} stars");
-
 		return foundStars;
 	}
 
