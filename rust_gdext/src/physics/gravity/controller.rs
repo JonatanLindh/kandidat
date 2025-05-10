@@ -138,13 +138,7 @@ impl From<&Gd<GravityBody>> for SimulatedBody {
             mass: b.mass,
             vel: to_glam_vec3(b.velocity),
             pos: to_glam_vec3(body.get_position()),
-            acc: b.acc.unwrap_or_else(|| {
-                godot_warn!(
-                    "GravityBody {} has no acceleration set, defaulting to zero",
-                    body.instance_id()
-                );
-                Vec3A::ZERO
-            }),
+            acc: b.acc.unwrap_or_default(),
         }
     }
 }
