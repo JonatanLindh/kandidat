@@ -1,8 +1,9 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 [Tool]
-public partial class OctreePlanetSpawner : Node
+public partial class OctreePlanetSpawner : Node3D
 {
 	[Signal]
 	public delegate void SpawnedEventHandler(float radius);
@@ -182,7 +183,20 @@ public partial class OctreePlanetSpawner : Node
 	{
 		
 	}
-	
+
+	public void GenFeatures(SurfaceFeature[] features, Node chunk, List<List<(Vector3, int)>> rayPositions, Vector3 chunkPosition, Vector3 center, float size)
+	{
+		GenerateFeatures generateFeatures = new GenerateFeatures(20, null);
+		Aabb aabb = new Aabb(center - Vector3.One * (size / 2) + chunkPosition, Vector3.One * size);
+		var raycastHits =
+			GenerateFeatures.PerformRayCastsWithBounds(rayPositions, GetWorld3D().DirectSpaceState, aabb, GlobalPosition);
+		var multiMeshes = generateFeatures.GenFeatures
+			(raycastHits, features, offset: - GlobalPosition - Vector3.One * center, seed: celestialBody.Seed);
+		foreach (var multiMesh in multiMeshes)
+		{
+			chunk.AddChild(multiMesh);
+		}
+	}
 	
 	private float GetVoxelSize(int depth) {
 		int maxDepth = MaxDepth;

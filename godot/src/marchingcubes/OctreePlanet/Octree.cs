@@ -41,6 +41,10 @@ public partial class Octree : Node3D
 		new (-1, -1, 1),
 		new (1, -1, -1)
 	];
+
+	private bool _hasSpawnedFeatures = false;
+	private List<List<(Vector3, int)>> _planetFeaturePositions;
+	private SurfaceFeature[] _features;
 	
 	public override void _Ready()
 	{
@@ -92,10 +96,99 @@ public partial class Octree : Node3D
 		_collisionSize = _size + _size * 1f / Mathf.Pow(2, _depth);
 		//AddChild(DrawBoundingBox(_center, _collisionSize, new Color(0, 0, 1)));
 		
-
+		_features ??= [
+			new SurfaceFeature(GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res"),
+				1f, 100f),
+			new SurfaceFeature(GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/stone/rock33.res"),
+				0.5f, 10f)
+		];
+		_planetFeaturePositions ??= GenerateFeatures.GenerateRayPoints(Vector3.One * _size, 50, _features);
 		
 
 		SpawnPlanetChunk();
+		//if (_depth == 0)
+			//GeneratePlanetFeatures();
+	}
+
+	private void GeneratePlanetFeatures()
+	{
+		var totalCount = _planetFeaturePositions.Select(list => list.Count).ToList().Sum();
+
+		/*
+		MultiMesh multimesh = new MultiMesh();
+		multimesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+		multimesh.InstanceCount = totalCount;
+		multimesh.Mesh = new SphereMesh()
+		{
+			Radius = 5,
+			Height = 10
+		};
+		int i = 0;
+		foreach (var planetFeaturePosition in _planetFeaturePositions)
+		{
+			foreach (var position in planetFeaturePosition)
+			{
+				Transform3D transform = new Transform3D(Basis.Identity, position.Item1);
+				multimesh.SetInstanceTransform(i, transform);
+				i++;
+			}
+		}	
+		*/
+		// Spawn a planet feature
+		// if the feature position is not within the bounds of the octree node
+		// then discard it
+			/*
+		SurfaceFeature[] features = [
+			new (GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res"),
+				1f, 100f),
+			new (GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/stone/rock33.res"),
+				0.5f, 10f)
+		];
+		GenerateFeatures generateFeatures = new GenerateFeatures(20, null);
+		Aabb aabb = new Aabb(_center - Vector3.One * (_size / 2) + GlobalPosition, Vector3.One * _size);
+		var raycastHits =
+			GenerateFeatures.PerformRayCastsWithBounds(_planetFeaturePositions, GetWorld3D().DirectSpaceState, aabb, GlobalPosition);
+		var multiMeshes = generateFeatures.GenFeatures(raycastHits, features, offset: - GlobalPosition - Vector3.One * _center);
+
+		foreach (var multiMesh in multiMeshes)
+		{
+			_planetMesh.AddChild(multiMesh);
+		}
+		*/
+		
+		//_planetMesh.AddChild(multiMeshes);
+		_hasSpawnedFeatures = true;
+
+		//AddChild(DrawBoundingBox(aabb.Position - _center, aabb.Size.X, Colors.Green));
+		/*
+		
+		MultiMesh multimesh = new MultiMesh();
+		multimesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+		multimesh.InstanceCount = raycastHits.Count;
+		multimesh.Mesh = new SphereMesh()
+		{
+			Radius = 0.5f,
+			Height = 1
+		};
+		
+		
+		int i = 0;
+		foreach (var hits in raycastHits)
+		{
+			var position = hits["position"].AsVector3();
+			Transform3D transform = new Transform3D(Basis.Identity, position - GlobalPosition - Vector3.One * _center);
+			multimesh.SetInstanceTransform(i, transform);
+			i++;
+
+		}
+
+		MultiMeshInstance3D meshInstance = new MultiMeshInstance3D();
+		meshInstance.Multimesh = multimesh;
+		_planetMesh.AddChild(meshInstance);
+*/
+
+		//_planetMesh.AddChild(multiMesh);
+
 	}
 
 	public override void _Notification(int what)
@@ -121,6 +214,28 @@ public partial class Octree : Node3D
 		}
     
 		_subdivisionQueue.Clear();
+	}
+
+	public override void _Process(double delta)
+	{
+
+		// spawn planet features if the octree mesh has processed
+		if (_planetMesh != null && !_hasSpawnedFeatures && _planetMesh.Mesh != null)
+		{
+			switch (OctreePlanetSpawner)
+			{
+				// Cast to OctreePlanetSpawner
+				case OctreePlanetSpawner spawner:
+					spawner.GenFeatures(_features, _planetMesh, _planetFeaturePositions, GlobalPosition, _center, _size);
+					break;
+				case null:
+					GD.PrintErr("OctreePlanetSpawner is null");
+					return;
+			}
+			_hasSpawnedFeatures = true;
+			
+			//GeneratePlanetFeatures();
+		}
 	}
 
 
@@ -214,7 +329,6 @@ public partial class Octree : Node3D
 		
 		// Remove all Octree children
 		if (!_subDivided) return;
-		GD.Print("Left the node in octree");
 		foreach (var child in _children)
 		{
 			if(IsInstanceValid(child))
@@ -299,6 +413,10 @@ public partial class Octree : Node3D
 		newCell.PlayerPosition = PlayerPosition;
 		newCell.OctreePlanetSpawner = OctreePlanetSpawner;
 		newCell.ShowOctree = ShowOctree;
+		if(_planetFeaturePositions != null)
+			newCell._planetFeaturePositions = _planetFeaturePositions;
+		if (_features != null)
+			newCell._features = _features;
 		//newCell.OnPlanetSpawnerReady(_size / 2f);
 	}
 	
@@ -311,7 +429,10 @@ public partial class Octree : Node3D
 		newCell.PlayerPosition = PlayerPosition;
 		newCell.OctreePlanetSpawner = OctreePlanetSpawner;
 		newCell.ShowOctree = ShowOctree;
-
+		if(_planetFeaturePositions != null)
+			newCell._planetFeaturePositions = _planetFeaturePositions;
+		if (_features != null)
+			newCell._features = _features;
 		_subdivisionQueue.Enqueue(newCell);
 
 	}

@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot.Collections;
 
 public class GenerateFeatures
 {
@@ -38,6 +39,193 @@ public class GenerateFeatures
 		}
 		
 		_aliasMethodVose = new AliasMethodVose(_features.Select(f => f.Weight).ToArray());
+	}
+
+	// TODO: When generating points, assign them a specific feature so it always spawns the same feature
+	public static List<List<(Vector3, int)>> GenerateRayPoints(Vector3 size, float amount, SurfaceFeature[] features)
+	{
+		AliasMethodVose alias = new AliasMethodVose(features.Select(f => f.Weight).ToArray());
+		
+		// Calculate the surface area of one face (approximating the desired density)
+		float faceArea = size.X * size.Y;
+		
+		// Use square root relationship between area and point count
+		// The constant 2.0f is a tuning parameter you might need to adjust
+		var sampleRadius = Mathf.Sqrt(faceArea / (amount * 2.0f));
+		
+		// Ensure a minimum radius to prevent too many points
+		sampleRadius = Mathf.Max(sampleRadius, size.X / 50f);
+		
+		//var sampleRadius = size.X / 2f;
+		var sampleTries = 1000;
+		/*
+		var poissonPointsPerFace = new List<List<(Vector3, int)>>
+		{
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(size.X, size.Y , 1f), sampleTries)
+				.Select(point => point - new Vector3(size.X, size.Y, size.Z) * 0.5f).ToList(),
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(size.X, size.Y , 1f), sampleTries)
+				.Select(point => point - new Vector3(size.X, size.Y, -size.Z) * 0.5f).ToList(),
+			
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(1f, size.Y , size.Z), sampleTries)
+				.Select(point => point - new Vector3(size.X, size.Y, size.Z) * 0.5f).ToList(),
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(1f, size.Y , size.Z), sampleTries)
+				.Select(point => point - new Vector3(-size.X, size.Y, size.Z) * 0.5f).ToList(),
+			
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(size.X, 1f , size.Z), sampleTries)
+				.Select(point => point - new Vector3(size.X, -size.Y, size.Z) * 0.5f).ToList(),
+			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(size.X, 1f , size.Z), sampleTries)
+				.Select(point => point - new Vector3(size.X, size.Y, size.Z) * 0.5f).ToList()
+				
+				
+		};
+		*/
+		var poissonPointsPerFace = new List<List<(Vector3, int)>>
+		{
+			PoissonDiscSampling3D.GeneratePointsWithAlias(alias, sampleRadius, new Vector3(size.X, size.Y , 1f), sampleTries)
+				.Select(tuple => (tuple.Item1 - new Vector3(size.X, size.Y, size.Z) * 0.5f, tuple.Item2)).ToList(),
+			PoissonDiscSampling3D.GeneratePointsWithAlias(alias, sampleRadius, new Vector3(size.X, size.Y , 1f), sampleTries)
+				.Select(tuple => (tuple.Item1 - new Vector3(size.X, size.Y, -size.Z) * 0.5f, tuple.Item2)).ToList(),
+			
+			PoissonDiscSampling3D.GeneratePointsWithAlias(alias, sampleRadius, new Vector3(1f, size.Y , size.Z), sampleTries)
+				.Select(tuple => (tuple.Item1 - new Vector3(size.X, size.Y, size.Z) * 0.5f, tuple.Item2)).ToList(),
+			PoissonDiscSampling3D.GeneratePointsWithAlias(alias, sampleRadius, new Vector3(1f, size.Y , size.Z), sampleTries)
+				.Select(tuple => (tuple.Item1 - new Vector3(-size.X, size.Y, size.Z) * 0.5f, tuple.Item2)).ToList(),
+			
+			PoissonDiscSampling3D.GeneratePointsWithAlias(alias, sampleRadius, new Vector3(size.X, 1f , size.Z), sampleTries)
+				.Select(tuple => (tuple.Item1 - new Vector3(size.X, -size.Y, size.Z) * 0.5f, tuple.Item2)).ToList(),
+			PoissonDiscSampling3D.GeneratePointsWithAlias(alias, sampleRadius, new Vector3(size.X, 1f , size.Z), sampleTries)
+				.Select(tuple => (tuple.Item1 - new Vector3(size.X, size.Y, size.Z) * 0.5f, tuple.Item2)).ToList(),
+				
+				
+		};
+
+		return poissonPointsPerFace;
+	}
+
+	// TODO: Maybe move feature generation to a separate function and instead cache the result of the raycasts 
+	// TODO: and reuse it for future generations
+	// nvm, do not cache the result of the raycasts, there is different LODS
+	public static List<(Dictionary, int)> PerformRayCastsWithBounds(List<List<(Vector3, int)>> rayCasts, PhysicsDirectSpaceState3D spaceState, 
+		Aabb aabb, Vector3 offset = default)
+	{
+		var results = new List<(Dictionary, int)>();
+		var faceNormals = new[]
+		{
+			new Vector3(0, 0, -1), // Front face
+			new Vector3(0, 0, 1),  // Back face
+			new Vector3(-1, 0, 0), // Left face
+			new Vector3(1, 0, 0),  // Right face
+			new Vector3(0, 1, 0),  // Top face
+			new Vector3(0, -1, 0)  // Bottom face
+		};
+		
+		for (int i = 0; i < faceNormals.Length; i++)
+		{
+			var face = rayCasts[i];
+			for (int j = 0; j < face.Count; j++)
+			{
+				var point = face[j].Item1 + offset;
+				
+				Vector3 faceNormal = faceNormals[i];
+				Vector3 rayVector = (point - faceNormal * 500f);
+
+				var query = PhysicsRayQueryParameters3D.Create(point, rayVector);
+				var result = spaceState.IntersectRay(query);
+				if (result.Count > 0)
+				{
+					// if the point is outside the AABB, skip it
+					if (!aabb.HasPoint(result["position"].AsVector3()))
+					{
+						continue;
+					}
+					results.Add((result, face[j].Item2));
+				}
+			}
+		}
+
+		return results;
+	}
+	
+	public MultiMeshInstance3D[] GenFeatures(List<(Dictionary, int)> rayCastHits,SurfaceFeature[] features,  Vector3 offset = default, int seed = 0)
+	{
+		MultiMesh multiMesh = new MultiMesh();
+		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+		multiMesh.InstanceCount = rayCastHits.Count;
+		multiMesh.Mesh = _treeMesh;
+		
+		List<Transform3D>[] transforms = new List<Transform3D>[features.Length];
+		for (int i = 0; i < features.Length; i++)
+		{
+			transforms[i] = new List<Transform3D>();
+		}
+		Random random = new Random(seed);
+		var alias = new AliasMethodVose(features.Select(f => f.Weight).ToArray(), random);
+		
+		for (int i = 0; i < rayCastHits.Count; i++)
+		{
+			var result = rayCastHits[i];
+			var collisionPoint = result.Item1["position"].AsVector3();
+			var transform = new Transform3D();
+			
+			Vector3 upVector = result.Item1["normal"].AsVector3(); 
+			
+			// Find perpendicular vectors to create an orthogonal basis
+			Vector3 xVector;
+			if (Mathf.Abs(upVector.Y) < 0.99f)
+				xVector = new Vector3(0, 1, 0).Cross(upVector).Normalized();
+			else
+				xVector = new Vector3(1, 0, 0).Cross(upVector).Normalized();
+			// Get Z vector using cross product
+			Vector3 zVector = upVector.Cross(xVector).Normalized();
+			
+			// Add the transform to the corresponding feature's list
+			var selectedFeature = result.Item2;
+			
+			// Set the basis with these orthogonal vectors
+			transform.Basis = new Basis(xVector, upVector, zVector);
+			transform.Origin = collisionPoint + offset;
+			transform = transform.ScaledLocal(Vector3.One * features[selectedFeature].Scale);
+			
+			transforms[selectedFeature].Add(transform);
+			//multiMesh.SetInstanceTransform(i, transform.ScaledLocal(Vector3.One * 100f));
+		}
+		
+		// Create MultiMesh objects for each feature
+		MultiMesh[] multiMeshes = new MultiMesh[features.Length];
+		for (int i = 0; i < features.Length; i++)
+		{
+			multiMeshes[i] = new MultiMesh();
+			multiMeshes[i].TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+			multiMeshes[i].InstanceCount = transforms[i].Count;
+			if (features[i].FeatureMesh == null)
+				throw new NullReferenceException("Feature mesh is null");
+			multiMeshes[i].Mesh = features[i].FeatureMesh;
+		}
+		
+		// Apply the transforms to the MultiMesh
+		for (int i = 0; i < features.Length; i++)
+		{
+			for (int j = 0; j < transforms[i].Count; j++)
+			{
+				multiMeshes[i].SetInstanceTransform(j, transforms[i][j]);
+			}
+		}
+		
+		// Create MultiMeshInstance3D objects with the MultiMeshes
+		MultiMeshInstance3D[] multiMeshInstances = new MultiMeshInstance3D[features.Length];
+		for (int i = 0; i < features.Length; i++)
+		{
+			multiMeshInstances[i] = new MultiMeshInstance3D();
+			multiMeshInstances[i].Multimesh = multiMeshes[i];
+		}
+		
+		
+		MultiMeshInstance3D meshInstance3D = new MultiMeshInstance3D();
+		meshInstance3D.Multimesh = multiMesh;
+
+		return multiMeshInstances;
+
+
 	}
 
 	public MultiMeshInstance3D[] SpawnTrees(SamplingMethod method ,PhysicsDirectSpaceState3D spaceState, 

@@ -9,7 +9,7 @@ using System.Threading;
 /// A singleton class responsible for managing and dispatching Marching Cube mesh generation tasks.
 /// It handles task queuing, multithreaded processing, and mesh generation using the Marching Cube algorithm.
 /// </summary>
-public sealed partial class MarchingCubeDispatch: Node
+public sealed partial class MarchingCubeDispatch: Node3D
 {
 	private static MarchingCubeDispatch _instance = null;
 	
@@ -24,7 +24,6 @@ public sealed partial class MarchingCubeDispatch: Node
 	private const uint MaxThreads = 32;
 	
 	private readonly ConcurrentDictionary<Guid, MarchingCubeRequest> _requests = new();
-	
 	
 	/// <summary>
 	/// Initializes the <see cref="MarchingCubeDispatch"/> instance, setting up the necessary resources
@@ -187,7 +186,7 @@ public sealed partial class MarchingCubeDispatch: Node
 		}
 
 		if (request.GenerateGrass)
-		{
+		{	
 			NewGrass grass = new NewGrass();
 			var meshSurface = mesh.SurfaceGetArrays(0);
 			if (meshSurface != null)

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public static class PoissonDiscSampling2D
 {
@@ -195,4 +196,65 @@ public static class PoissonDiscSampling3D
         }
         return false;
     }
+
+    public static List<(Vector3, int)> GeneratePointsWithAlias(AliasMethodVose alias, float radius,
+	    Vector3 sampleRegionSize, int numSamplesBeforeRejection = 30)
+    {
+	    float cellSize = radius / Mathf.Sqrt(3);
+
+	    int[,,] grid = new int[
+		    Mathf.CeilToInt(sampleRegionSize.X / cellSize),
+		    Mathf.CeilToInt(sampleRegionSize.Y / cellSize),
+		    Mathf.CeilToInt(sampleRegionSize.Z / cellSize)
+	    ];
+
+	    List<(Vector3, int)> points = new List<(Vector3, int)>();
+	    List<Vector3> spawnPoints = new List<Vector3>();
+
+	    Vector3 firstPoint = new Vector3(
+		    GD.Randf() * sampleRegionSize.X,
+		    GD.Randf() * sampleRegionSize.Y,
+		    GD.Randf() * sampleRegionSize.Z
+	    );
+	    spawnPoints.Add(firstPoint);
+	    
+
+	    while (spawnPoints.Count > 0)
+	    {
+		    int spawnIndex = GD.RandRange(0, spawnPoints.Count - 1);
+		    Vector3 spawnCenter = spawnPoints[spawnIndex];
+		    bool pointFound = false;
+
+		    for (int i = 0; i < numSamplesBeforeRejection; i++)
+		    {
+			    float angle1 = Mathf.Acos(2 * GD.Randf() - 1); 
+			    float angle2 = GD.Randf() * Mathf.Pi * 2; 
+			    Vector3 dir = new Vector3(
+				    Mathf.Sin(angle1) * Mathf.Cos(angle2),
+				    Mathf.Sin(angle1) * Mathf.Sin(angle2),
+				    Mathf.Cos(angle1)
+			    );
+			    Vector3 newPoint = spawnCenter + dir * (float)GD.RandRange(radius, 2 * radius);
+			    if (IsValidPoint(newPoint, sampleRegionSize, cellSize, radius, points.Select(tuple => tuple.Item1).ToList(), grid))
+			    {
+				    var aliasIndex = alias.Next();
+				    points.Add((newPoint, aliasIndex));
+				    spawnPoints.Add(newPoint);
+				    grid[
+					    Mathf.FloorToInt(newPoint.X / cellSize),
+					    Mathf.FloorToInt(newPoint.Y / cellSize),
+					    Mathf.FloorToInt(newPoint.Z / cellSize)
+				    ] = points.Count;
+				    pointFound = true;
+				    break;
+			    }
+		    }
+		    if (!pointFound)
+		    {
+			    spawnPoints.RemoveAt(spawnIndex);
+		    }
+	    }
+	    return points;
+    }
+    
 }
