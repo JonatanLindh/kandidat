@@ -15,7 +15,9 @@ public partial class SurfaceFeature: Resource
 	
 	public SurfaceFeature(Mesh featureMesh, float weight, float scale)
 	{
-		CallDeferred(nameof(Init), featureMesh, weight, scale);
+		FeatureMesh = featureMesh;
+		Weight = weight;
+		Scale = scale;
 	}
 
 	private void Init(Mesh featureMesh, float weight, float scale)
