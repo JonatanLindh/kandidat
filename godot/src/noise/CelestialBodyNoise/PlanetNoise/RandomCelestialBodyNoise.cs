@@ -54,4 +54,10 @@ public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNo
     {
         this.seed = seed;
     }
+    
+    public int Seed
+    {
+        get => seed;
+        set => seed = value;
+    }
 }

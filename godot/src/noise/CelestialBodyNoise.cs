@@ -28,4 +28,7 @@ public interface CelestialBodyNoise
     int Resolution { get; set; }
 
     float VoxelSize { get; set; }
+    
+    int Seed { get; set; }
+    
 }

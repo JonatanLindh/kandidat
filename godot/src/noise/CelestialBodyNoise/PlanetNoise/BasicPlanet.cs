@@ -71,4 +71,10 @@ public partial class BasicPlanet : Node, CelestialBodyNoise
     public int Resolution { get; set; }
 
     public float VoxelSize { get; set; } = 1f;
+    
+    public int Seed
+    {
+        get => param.Seed;
+        set => param.Seed = value;
+    }
 }
