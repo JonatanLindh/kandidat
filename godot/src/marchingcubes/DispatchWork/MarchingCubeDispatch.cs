@@ -24,6 +24,7 @@ public sealed partial class MarchingCubeDispatch: Node
 	private const uint MaxThreads = 32;
 	
 	private readonly ConcurrentDictionary<Guid, MarchingCubeRequest> _requests = new();
+	public ConcurrentDictionary<Guid, MarchingCubeRequest> Requests => _requests;
 	
 	
 	/// <summary>
@@ -81,6 +82,7 @@ public sealed partial class MarchingCubeDispatch: Node
 
 	public bool IsTaskBeingProcessed(Guid id)
 	{
+		//_requests.TryGetValue(id, out var request);
 		return _requests.TryGetValue(id, out _);
 		//&& request.IsProcessing;
 	}
@@ -139,6 +141,10 @@ public sealed partial class MarchingCubeDispatch: Node
 					
 		if (mesh == null || mesh.GetSurfaceCount() == 0)
 		{
+			if (!_requests.TryRemove(request.Id, out _))
+			{
+				GD.Print($"Unable to remove request with ID {request.Id} from the queue.");
+			}
 			return;
 		}
 

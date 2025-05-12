@@ -100,6 +100,7 @@ public partial class OctreePlanetSpawner : Node
 	private Octree _octree;
 	private float _minHeight = 0;
 	private float _maxHeight = 0;
+	private bool _heightsInitialized = false;
 	
 	public override void _Ready()
 	{
@@ -121,7 +122,7 @@ public partial class OctreePlanetSpawner : Node
 	// Should give the center of the chunk, the size of the chunk and the current depth
 	// depth = 0 would represent the root chunk
 	// If possible the center should be in local space
-	public MeshInstance3D SpawnChunk(Vector3 center, float size, int depth, Guid id = new Guid())
+	public MeshInstance3D SpawnChunk(Node chunk, Vector3 center, float size, int depth, Guid id = new Guid())
 	{
 		if (celestialBody == null)
 		{
@@ -152,7 +153,7 @@ public partial class OctreePlanetSpawner : Node
 		var requestInstance = new MeshInstance3D();
 		requestInstance.Transform = transform3D;
 		
-		AddChild(requestInstance);
+		chunk.AddChild(requestInstance);
 
 
 		// Send the request to the MarchingCubeDispatch
@@ -198,6 +199,7 @@ public partial class OctreePlanetSpawner : Node
 		_rootTest?.QueueFree();
 		_marchingCube ??= new MarchingCube();
 		_rootTest = new Node3D();
+		_heightsInitialized = false; // Reset this flag
 		celestialBody = CelestialBody as CelestialBodyNoise;
 		if(celestialBody == null)
 		{
@@ -293,9 +295,29 @@ public partial class OctreePlanetSpawner : Node
 			return null;
 		}
 
-		_minHeight = Mathf.Min(_minHeight, minHeight);
-		_maxHeight = Mathf.Max(_maxHeight, maxHeight);
+		// Reset min/max height values when generating a new planet
+		if (!_heightsInitialized) {
+			_minHeight = minHeight; 
+			_maxHeight = maxHeight;
+			_heightsInitialized = true;
+		}
 		
+		//_minHeight = Mathf.Min(_minHeight, minHeight);
+		//_maxHeight = Mathf.Max(_maxHeight, maxHeight);
+
+		
+		//GD.Print($"Height range: {_minHeight} to {_maxHeight}");
+		//GD.Print($"Chunk center: {chunkCenter}");
+		/*
+		// Ensure minimum contrast between heights
+		float minContrast = _radius * 0.05f;  // 5% of radius as minimum contrast
+		if (_maxHeight - _minHeight < minContrast) {
+			// Expand the range if too small
+			float midPoint = (_minHeight + _maxHeight) / 2f;
+			_minHeight = midPoint - minContrast/2;
+			_maxHeight = midPoint + minContrast/2;
+		}
+		*/
 		
 		_themeGenerator.LoadAndGenerateThemes();
 		// Load the shader correctly

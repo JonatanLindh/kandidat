@@ -12,7 +12,7 @@ varying vec3 dir_to_center;
 varying vec3 normal;
 
 void vertex() {
-    // Calculate position relative to planet center (which is 0,0,0)
+    // Calculate position relative to planet center (which is 0,0,0 in local space)
     vec3 relative_pos = VERTEX + chunk_center;
     
     // Calculate height as distance from planet center

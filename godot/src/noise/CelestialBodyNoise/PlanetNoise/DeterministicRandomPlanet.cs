@@ -10,15 +10,15 @@ public partial class DeterministicRandomPlanet : RandomCelestialBodyNoise
 
     protected override void RandomizeParameters(CelestialBodyParameters param)
     {
-        GD.Print("Planet seed: " + param.Seed);
+        //GD.Print("Planet seed: " + param.Seed);
 
         // Set seed of Random to system-seed to make deterministic
         random = new Random(param.Seed);
 
-        param.Width = Resolution + 2;
-        param.Height = Resolution + 2;
-        param.Depth = Resolution + 2;
-        param.Size = Resolution + 2;
+        param.Width = Resolution + 1;
+        param.Height = Resolution + 1;
+        param.Depth = Resolution + 1;
+        param.Size = Resolution + 1;
 
         param.Octaves = random.Next(4, MAX_OCTAVES);
 
