@@ -106,6 +106,9 @@ public sealed partial class MarchingCubeDispatch: Node
 			// If the request is null or the request is already processing, continue to the next iteration
 			if (request == null) continue;
 			if(request.IsProcessing) continue;
+			
+			// Skip if the request has been cancelled (no longer in the dictionary)
+			if (!_requests.ContainsKey(request.Id)) continue;
 
 			// Add the task to the worker thread pool
 			_workerThreads.Add(WorkerThreadPool.AddTask(Callable.From(() => { GeneratePlanet(request); })));
@@ -232,16 +235,12 @@ public sealed partial class MarchingCubeDispatch: Node
 		_planetQueue.Push(request);
 	}
 
-	public void RemoveFromQueue(Guid requestId)
+	public void CancelRequest(Guid requestId)
 	{
-		_requests.TryRemove(requestId, out var request);
-		if (request == null)
+		if (_requests.TryRemove(requestId, out _))
 		{
-			GD.PrintErr($"Request with ID {requestId} not found in the queue.");
-			return;
+			// Successfully removed the request
 		}
-		request.IsProcessing = true;
-		
 	}
 	
 	private static float[,,] GenerateDataPoints(Vector3 offset , float voxelSize)

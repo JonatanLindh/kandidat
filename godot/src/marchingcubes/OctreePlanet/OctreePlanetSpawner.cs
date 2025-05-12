@@ -1,68 +1,39 @@
 using Godot;
 using System;
 
+/// <summary>
+/// Manages the procedural generation of planetary terrain using octree-based level of detail (LOD).
+/// </summary>
+/// <remarks>
+/// This class is responsible for:
+/// <list type="bullet">
+///   <item>Dynamically spawning and managing planet chunks based on octree subdivision</item>
+///   <item>Coordinating with the marching cubes algorithm for mesh generation</item>
+///   <item>Generating appropriate shader materials for planetary surfaces</item>
+///   <item>Managing planet theme and appearance via the theme generator</item>
+/// </list>
+/// The spawner uses a resolution and depth parameter to control the detail level of the generated planet,
+/// and works with a CelestialBodyNoise component to generate the actual planetary terrain data.
+/// </remarks>
 [Tool]
 public partial class OctreePlanetSpawner : Node
 {
+	
 	[Signal]
 	public delegate void SpawnedEventHandler(float radius);
+    
+	private const int DefaultResolution = 32;
+	private const int DefaultMaxDepth = 8;
 	
-	// Testing variables
-	private Node3D _rootTest;
-	private Vector3 _center = Vector3.Zero;
-	private int _depth = 0;
-	[Export]
-	public Vector3 Center
-	{
-		get => _center;
-		set
-		{
-			if (value != _center)
-			{
-				_center = value;
-				Init();
-			}
-		}
-	}
-	[Export]
-	public int Depth
-	{
-		get => _depth;
-		set
-		{
-			if (value != _depth)
-			{
-				_depth = value;
-				Init();
-			}
-		}
-	}
-	
-	
-	private CelestialBodyNoise celestialBody;
-	private Node cb;
 	[Export] public Node CelestialBody
 	{
-		get => cb;
+		get => _celestialBodyNode;
 		set
 		{
-			cb = value;
+			_celestialBodyNode = value;
 		}
 	}
-
-	[Export] public int Resolution { get; set; } = 32;
-
 	
-	
-	private int _maxDepth = 8;
-	private float _baseVoxelSize;
-	private float _radius = 32;
-	private int _resolution = 32;
-	private MarchingCube _marchingCube;
-	
-	
-	// Things from McSpawner
-	private PlanetThemeGenerator _themeGenerator;
 	public PlanetThemeGenerator ThemeGenerator
 	{
 		get => _themeGenerator;
@@ -71,7 +42,7 @@ public partial class OctreePlanetSpawner : Node
 			_themeGenerator = value;
 		}
 	}
-	private ShaderMaterial _planetShader;
+	
 	public ShaderMaterial PlanetShader
 	{
 		get => _planetShader;
@@ -80,7 +51,7 @@ public partial class OctreePlanetSpawner : Node
 			_planetShader = value;
 		}
 	}
-	private double _warmth;
+	
 	public double Warmth
 	{
 		get => _warmth;
@@ -94,72 +65,70 @@ public partial class OctreePlanetSpawner : Node
 			}
 		}
 	}
+
+	[Export] public int Resolution { get; set; } = DefaultResolution;
 	
-
-
-	private Octree _octree;
+	
+	private Vector3 _center = Vector3.Zero;
+	private int _depth = 0;
+	private CelestialBodyNoise _celestialBody;
+	private Node _celestialBodyNode;
+	
+	// Planet generation parameters
+	private float _baseVoxelSize;
+	private float _radius = 32;
+	private int _maxDepth = DefaultMaxDepth;
+	private int _resolution = 32;
 	private float _minHeight = 0;
 	private float _maxHeight = 0;
 	private bool _heightsInitialized = false;
+	
+	// Theme generation
+	private PlanetThemeGenerator _themeGenerator;
+	private ShaderMaterial _planetShader;
+	private double _warmth;
+	
 	
 	public override void _Ready()
 	{
 		Init();
 		EmitSignal(SignalName.Spawned, _radius * 2f);
-		// Initialize the Octree with a max depth
-		// I assume I would call the octree by finding the octree node in the scene tree
-		//Node octree = GetNode("Octree");
-		// I assume I initialize the octree with the current instance of this class,
-		// the max depth,
-		// the base size of the octree
-		// and also with the center of the octree
-		//octree.Call("Init", this, _maxDepth, baseSize: (radius *2), center: Vector.Zero);
-
 	}
 	
-	
-	// Called from the Octree whenever it subdivides a chunk
-	// Should give the center of the chunk, the size of the chunk and the current depth
-	// depth = 0 would represent the root chunk
-	// If possible the center should be in local space
+	/// <summary>
+	/// Spawns a new planetary chunk at the specified location.
+	/// </summary>
+	/// <param name="chunk">The parent node to attach the chunk to</param>
+	/// <param name="center">The center position of the chunk</param>
+	/// <param name="size">The size of the chunk</param>
+	/// <param name="depth">The depth level in the octree</param>
+	/// <param name="id">Unique identifier for the chunk request (optional)</param>
+	/// <returns>A MeshInstance3D representing the chunk, or null if generation fails</returns>
 	public MeshInstance3D SpawnChunk(Node chunk, Vector3 center, float size, int depth, Guid id = new Guid())
 	{
-		if (celestialBody == null)
+		if (_celestialBody == null)
 		{
 			GD.Print("CELESTIAL BODY IS NULL");
 			return null;
 		}
-		//DrawBoundingBox(center, size);
 		
-		// Give the bottom left (0,0,0) corner of the chunk
-		var offset = center - (Vector3.One * size / 2);
-		
-		//var data = GenerateDataPoints(offset, depth);
 		var scaleFactor = GetVoxelSize(depth);
-		//celestialBody.VoxelSize = scaleFactor;	
-		//var data = celestialBody.GetNoise(offset);
-		//var mesh = _marchingCube.GenerateMesh(data, scale: scaleFactor, offset: Vector3.One * (size / 2));
-		var instance = new MeshInstance3D();
-		//instance.Mesh = mesh;
-		instance.MaterialOverride = new StandardMaterial3D()
-		{
-			CullMode = BaseMaterial3D.CullModeEnum.Disabled
-		};
-		Transform3D transform3D = new Transform3D();
-		transform3D.Origin = center;
-		transform3D.Basis = Basis.Identity;
-		instance.Transform = transform3D;
-
+		
 		var requestInstance = new MeshInstance3D();
-		requestInstance.Transform = transform3D;
+		Transform3D transform = new Transform3D
+		{
+			Origin = center,
+			Basis = Basis.Identity
+		};
+		requestInstance.Transform = transform;	
+		
 		
 		chunk.AddChild(requestInstance);
-
-
+		
 		// Send the request to the MarchingCubeDispatch
 		MarchingCubeRequest cubeRequest = new MarchingCubeRequest
 		{
-			PlanetDataPoints = celestialBody,
+			PlanetDataPoints = _celestialBody,
 			Scale = scaleFactor,
 			Offset = Vector3.One * (size / 2),
 			Center = center,
@@ -170,123 +139,8 @@ public partial class OctreePlanetSpawner : Node
 		}; 
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest, id);
 		
-		//_rootTest.AddChild(instance);
-
-		
 		return requestInstance;
 	}
-
-	// Either the octree handles mesh instances and remove them when we unload the chunk
-	// Or this class can handle the mesh instances and remove them when we unload the chunk
-	public void UnloadChunk()
-	{
-		
-	}
-	
-	
-	private float GetVoxelSize(int depth) {
-		int maxDepth = _maxDepth;
-		float baseVoxelSize = _baseVoxelSize;
-		return Mathf.Pow(2, (maxDepth - depth)) * baseVoxelSize;
-	}
-	
-	
-	// Testing functions
-	private void Init()
-	{
-		if (!IsInsideTree()) return;
-		
-		_rootTest?.QueueFree();
-		_marchingCube ??= new MarchingCube();
-		_rootTest = new Node3D();
-		_heightsInitialized = false; // Reset this flag
-		celestialBody = CelestialBody as CelestialBodyNoise;
-		if(celestialBody == null)
-		{
-			GD.PrintErr("celestialBody is null");
-		}
-
-		if (celestialBody != null)
-		{
-			_radius = celestialBody.GetRadius();
-			celestialBody.Resolution = Resolution;
-		}
-		_baseVoxelSize = (_radius * 2) / (Resolution * Mathf.Pow(2, _maxDepth));
-		var size = (1 /  Mathf.Pow(2, _depth)) * (_radius * 2);
-
-		//AddChild(_rootTest);
-
-		var centerSize = _radius / 2;
-		var center1 = new Vector3(centerSize, centerSize, centerSize);
-		var center2 = new Vector3(-centerSize, centerSize, centerSize);
-		var center3 = new Vector3(centerSize, centerSize, -centerSize);
-		var center4 = new Vector3(-centerSize, centerSize, -centerSize);
-		
-		var center5 = new Vector3(centerSize, -centerSize, centerSize);
-		var center6 = new Vector3(-centerSize, -centerSize, centerSize);
-		var center7 = new Vector3(centerSize, -centerSize, -centerSize);
-		var center8 = new Vector3(-centerSize, -centerSize, -centerSize);
-		
-		//CallDeferred(nameof(SpawnChunk), _center, size, _depth);
-
-		/*
-		CallDeferred(nameof(SpawnChunk), center1, size, _depth);
-		
-		CallDeferred(nameof(SpawnChunk), center2, size, _depth);
-		CallDeferred(nameof(SpawnChunk), center3, size, _depth);
-		CallDeferred(nameof(SpawnChunk), center4, size, _depth);
-		
-		CallDeferred(nameof(SpawnChunk), center5, size, _depth);
-		CallDeferred(nameof(SpawnChunk), center6, size, _depth);
-		CallDeferred(nameof(SpawnChunk), center7, size, _depth);
-		CallDeferred(nameof(SpawnChunk), center8, size, _depth);
-		*/
-		
-	}
-	
-	private void DrawBoundingBox(Vector3 center, float size)
-	{
-		var edges = new[]
-		{
-			new[] { 0, 1 }, new[] { 1, 2 }, new[] { 2, 3 }, new[] { 3, 0 },
-			new[] { 4, 5 }, new[] { 5, 6 }, new[] { 6, 7 }, new[] { 7, 4 },
-			new[] { 0, 4 }, new[] { 1, 5 }, new[] { 2, 6 }, new[] { 3, 7 }
-		};
-		var corners = new[]
-		{
-			new Vector3(center.X - size / 2, center.Y - size / 2, center.Z - size / 2),
-			new Vector3(center.X + size / 2, center.Y - size / 2, center.Z - size / 2),
-			new Vector3(center.X + size / 2, center.Y + size / 2, center.Z - size / 2),
-			new Vector3(center.X - size / 2, center.Y + size / 2, center.Z - size / 2),
-			new Vector3(center.X - size / 2, center.Y - size / 2, center.Z + size / 2),
-			new Vector3(center.X + size / 2, center.Y - size / 2, center.Z + size / 2),
-			new Vector3(center.X + size / 2, center.Y + size / 2, center.Z + size / 2),
-			new Vector3(center.X - size / 2, center.Y + size / 2, center.Z + size / 2)
-		};
-		
-		
-		ImmediateMesh boundingBox = new ImmediateMesh();
-		boundingBox.SurfaceBegin(Mesh.PrimitiveType.Lines);
-		
-		foreach (var edge in edges)
-		{
-			boundingBox.SurfaceSetColor(new Color(1, 0, 0));
-			boundingBox.SurfaceAddVertex(corners[edge[0]]);
-			boundingBox.SurfaceSetColor(new Color(1, 0, 0));
-			boundingBox.SurfaceAddVertex(corners[edge[1]]);
-		}
-		boundingBox.SurfaceEnd();
-		MeshInstance3D boundingBoxInstance = new MeshInstance3D();
-		boundingBoxInstance.Mesh = boundingBox;
-		boundingBoxInstance.MaterialOverride = new StandardMaterial3D()
-		{
-			ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-			VertexColorUseAsAlbedo = true,
-			DisableFog = true
-		};
-		AddChild(boundingBoxInstance);
-	}
-	
 	
 	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight, Vector3 chunkCenter) {
 		
@@ -302,24 +156,8 @@ public partial class OctreePlanetSpawner : Node
 			_heightsInitialized = true;
 		}
 		
-		//_minHeight = Mathf.Min(_minHeight, minHeight);
-		//_maxHeight = Mathf.Max(_maxHeight, maxHeight);
-
-		
-		//GD.Print($"Height range: {_minHeight} to {_maxHeight}");
-		//GD.Print($"Chunk center: {chunkCenter}");
-		/*
-		// Ensure minimum contrast between heights
-		float minContrast = _radius * 0.05f;  // 5% of radius as minimum contrast
-		if (_maxHeight - _minHeight < minContrast) {
-			// Expand the range if too small
-			float midPoint = (_minHeight + _maxHeight) / 2f;
-			_minHeight = midPoint - minContrast/2;
-			_maxHeight = midPoint + minContrast/2;
-		}
-		*/
-		
 		_themeGenerator.LoadAndGenerateThemes();
+		
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		ShaderMaterial shaderMaterial = new ShaderMaterial();
@@ -349,55 +187,31 @@ public partial class OctreePlanetSpawner : Node
 
 	}
 	
-	private float[,,] GenerateDataPoints(Vector3 offset , int depth)
+	private void Init()
 	{
+		if (!IsInsideTree()) return;
 		
-		var radius = _radius;
-		int size = Resolution + 1;
-		var dataPoints = new float[size, size, size];
-		float voxelSize = GetVoxelSize(depth);
+		_heightsInitialized = false; // Reset this flag
 		
-		MultiMesh multiMesh = new MultiMesh();
-		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
-		multiMesh.Mesh = new BoxMesh
+		_celestialBody = CelestialBody as CelestialBodyNoise;
+		if(_celestialBody == null)
 		{
-			Size = 0.1f * Vector3.One
-		};
-		multiMesh.SetInstanceCount(size * size * size);
-
-		for (int x = 0; x < size; x++)
-		{
-			for (int y = 0; y < size; y++)
-			{
-				for (int z = 0; z < size; z++)
-				{
-					Vector3 worldPos = new Vector3(x, y, z) * voxelSize;
-					worldPos += offset;
-					var value = -Sphere(worldPos, Vector3.Zero, radius);
-					value = Mathf.Clamp(value, -1.0f, 1.0f);
-					dataPoints[x, y, z] = value;
-					
-					// Set the instance transform
-					var instanceIndex = x * size * size + y * size + z;
-					var instanceTransform = new Transform3D
-					{
-						Origin = worldPos,
-						Basis = Basis.Identity
-					};
-					multiMesh.SetInstanceTransform(instanceIndex, instanceTransform);
-				}
-			}
+			GD.PrintErr("celestialBody is null");
 		}
-		// Add the MultiMesh to the scene
-		var multiMeshInstance = new MultiMeshInstance3D();
-		multiMeshInstance.Multimesh = multiMesh;
-		//_rootTest.AddChild(multiMeshInstance);
-		return dataPoints;
+
+		if (_celestialBody != null)
+		{
+			_radius = _celestialBody.GetRadius();
+			_celestialBody.Resolution = Resolution;
+		}
+		_baseVoxelSize = (_radius * 2) / (Resolution * Mathf.Pow(2, _maxDepth));
+
 	}
 	
-	private static float Sphere(Vector3 worldPos, Vector3 origin, float radius) {
-		return (worldPos - origin).Length() - radius;
+	private float GetVoxelSize(int depth) {
+		int maxDepth = _maxDepth;
+		float baseVoxelSize = _baseVoxelSize;
+		return Mathf.Pow(2, (maxDepth - depth)) * baseVoxelSize;
 	}
-	
 	
 }
