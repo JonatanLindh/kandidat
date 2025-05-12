@@ -61,6 +61,12 @@ public partial class Octree : Node3D
 	/// </summary>
 	private void SpawnPlanetChunk()
 	{
+		// First check if the spawner is valid
+		if (OctreePlanetSpawner == null || !IsInstanceValid(OctreePlanetSpawner))
+		{
+			return;
+		}
+		
 		switch (OctreePlanetSpawner)
 		{
 			// Cast to OctreePlanetSpawner
@@ -135,10 +141,12 @@ public partial class Octree : Node3D
 		}
 		
 		_subdivisionQueue.Clear();
+		
+		// Clear the OctreePlanetSpawner reference
+		OctreePlanetSpawner = null;
 	}
 
 	
-
 	public override void _PhysicsProcess(double delta)
 	{
 		if (PlayerPosition == null) return;

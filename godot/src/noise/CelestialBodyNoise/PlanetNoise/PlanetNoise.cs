@@ -13,7 +13,7 @@ public partial class PlanetNoise
 
     public float[,,] CreateDataPoints(CelestialBodyParameters param, FastNoiseLite fastNoise, Vector3 offset = default, float voxelSize = 1)
     {
-        int radius = param.Radius - 1;
+        int radius = param.Radius;
         int diameter = 2 * radius;
 
         int width = param.Width;  
