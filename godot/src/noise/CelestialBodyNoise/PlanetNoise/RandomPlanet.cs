@@ -4,10 +4,10 @@ using System;
 public partial class RandomPlanet : RandomCelestialBodyNoise
 {
     private const int RADIUS = 64;
-    private const int WIDTH = 2 * RADIUS + 2;
-    private const int HEIGHT = 2 * RADIUS + 2;
-    private const int DEPTH = 2 * RADIUS + 2;
-    private const int SIZE = 2 * RADIUS + 2;
+    private const int WIDTH = 2 * RADIUS + 1;
+    private const int HEIGHT = 2 * RADIUS + 1;
+    private const int DEPTH = 2 * RADIUS + 1;
+    private const int SIZE = 2 * RADIUS + 1;
 
     private const int MAX_OCTAVES = 8;
     private const float MAX_AMPLITUDE = 20.0f;
