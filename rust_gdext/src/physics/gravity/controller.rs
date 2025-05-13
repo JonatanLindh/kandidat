@@ -78,7 +78,7 @@ pub struct GravityController {
 
     /// Whether to use leapfrog integration for trajectory calculations
     #[export]
-    #[init(val = false)]
+    #[init(val = true)]
     pub leapfrog_integration: bool,
 }
 
