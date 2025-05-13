@@ -6,6 +6,8 @@ class_name player_detector
 @onready var _underwater_filter: underwater_filter;
 @onready var _ocean;
 
+@export var useUnderwaterFilter: bool = false;
+
 var _ocean_radius: int;
 var _ocean_center: Vector3;
 
@@ -16,12 +18,13 @@ var _exit: bool;
 var _last_position: Vector3;
 
 func _ready() -> void:
-	_camera = get_tree().current_scene.find_child("Camera3D", true);
-	_underwater_filter = get_tree().current_scene.find_child("UnderwaterFilter", true);
-	_ocean = get_parent();
-	_ocean_radius = _ocean.radius
-	_ocean_center = Vector3.ZERO;
-	_last_position = (_camera.global_position);
+	if(useUnderwaterFilter and not Engine.is_editor_hint()):
+		_camera = get_tree().current_scene.find_child("Camera3D", true);
+		_underwater_filter = get_tree().current_scene.find_child("UnderwaterFilter", true);
+		_ocean = get_parent();
+		_ocean_radius = _ocean.radius
+		_ocean_center = Vector3.ZERO;
+		_last_position = (_camera.global_position);
 
 func get_ocean_center() -> Vector3:
 	return _ocean.transform.origin + Vector3(_ocean_radius, _ocean_radius, _ocean_radius);
@@ -50,7 +53,7 @@ func _exit_water():
 	_ocean.mesh.flip_faces = false;
 
 func _process(delta: float) -> void:
-	if(_camera != null and _ocean != null):
+	if(_camera != null and _ocean != null and useUnderwaterFilter):
 		var current_position: Vector3 = _camera.global_position;
 		if(_entered_ocean(current_position)):
 			_enter_water();
