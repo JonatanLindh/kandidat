@@ -1,9 +1,6 @@
 using Godot;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using Microsoft.Win32.SafeHandles;
 
 /// <summary>
 /// A class for creating different types of noise to be used when generating planets
@@ -27,20 +24,10 @@ public partial class PlanetNoise
         float[,,] points = new float[width, height, depth];
         Vector3 centerPoint = new Vector3I(radius, radius, radius);
 
+        float falloffStrength = param.FalloffStrength;
+
         // Pad the boarders of the points-array with empty space so marching cubes correctly generates the mesh at the edges
         PadBoardersWithAir(points, width, height, depth);
-
-        // Calculates the maximum value that a datapoint can have after fBm has been applied to it.
-        // Used for fading the datapoint value based on its distance from the planet's center.
-        // The range is symmetrical so [-maxRange, maxRange]
-        float maxRange = (centerPoint - (new Vector3(width, height, depth))).Length();
-        float amplitude = param.Amplitude;
-        float persistence = param.Persistence;
-        for (int i = 0; i < param.Octaves; i++)
-        {
-            maxRange += amplitude;
-            amplitude *= persistence;
-        }
 
         // Boarders are already padded, so only need to iterate from [1, size-1)
         Parallel.For(1, width - 1, x =>
@@ -54,19 +41,20 @@ public partial class PlanetNoise
                     float distanceToCenter = (centerPoint - currentPoint).Length();
                     float distanceAwayFromCenter = (float)radius - distanceToCenter;
 
-                    // if > 1   --> the point is outside the planet
-                    // if <= 1  --> the point is inside the planet
-                    // Used for increasing the amount of fade-out applied to the point
-                    float fadeOutmultiplier = distanceToCenter / (float)radius;
-
                     // Apply fbm to layer noise
                     float value = Fbm(distanceAwayFromCenter, currentPoint, param, fastNoise);
 
-                    float valueNormalized = Mathf.Pow(1.0f - (Mathf.Abs(value) / (maxRange)), fadeOutmultiplier);
-                    float fadeoutStrength = 8.0f;
-                    float fadeout = valueNormalized * fadeoutStrength;
-                    // Update point (x,y,z) with value from fbm
-                    points[x, y, z] = value - fadeout;
+                    // if > 1   --> the point is outside the planet
+                    // if <= 1  --> the point is inside the planet
+                    // Used for calculating the amount of falloff applied to the value
+                    float falloffRatio = distanceToCenter / (float)radius;
+
+                    // Exponential falloff based on the ratio between the radius and the distance from the centerPoint
+                    // Values outside the planet gets larger (falloffRatio > 1) and
+                    // values within the planet gets smaller (falloffRatio <= 1)
+                    float falloff = falloffRatio * falloffRatio * falloffStrength;
+
+                    points[x, y, z] = value - falloff;
                 }
             }
         });
@@ -103,7 +91,7 @@ public partial class PlanetNoise
         // FBM - Fractal Brownian Motion 
         for (int i = 0; i < param.Octaves; i++)
         {
-            // FastNoiseLite.GetNoise3DV should be thread-safe if you don't change any of its parameters while executing the Parallel.For-loop
+            // FastNoiseLite.GetNoise3DV should be thread-safe if not changed while executing the Parallel.For-loop
             valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
             amplitude *= persistence;
             frequency *= lacunarity;
