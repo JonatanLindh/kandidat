@@ -1,9 +1,10 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class StarFinder : Node
 {
-	[Export(PropertyHint.Range, "1, 100, 1")] float maxRadius = 15;
+	[Export(PropertyHint.Range, "1, 500, 1")] float maxRadius = 15;
 	[Export(PropertyHint.Range, "0.1, 10, 0.1")] float initialRadius = 1.0f;
 	[Export(PropertyHint.Range, "1.0, 2.0, 0.05")] float radiusGrowthRate = 1.1f;
 	[Export(PropertyHint.Range, "0.1, 5.0, 0.1")] float intervalSizeRatio = 1.7f;
@@ -26,7 +27,7 @@ public partial class StarFinder : Node
 	/// Finds along a line from one point to another.
 	/// <c>range</c> is the maximum distance to check, 0 for infinite (until chunks run out)
 	/// </summary>
-	public Vector3 FindStar(Vector3 from, Vector3 dir, IStarChunkData[] chunks, float range = 0)
+	public Vector3 FindStarInLine(Vector3 from, Vector3 dir, IStarChunkData[] chunks, float range = 0)
 	{
 		if (debugDraw)
 		{
@@ -82,6 +83,49 @@ public partial class StarFinder : Node
 	}
 
 	/// <summary>
+	/// Finds all stars in a sphere around the given (player) position of the current chunk.
+	/// </summary>
+	/// <param name="at"></param>
+	/// <param name="radius"></param>
+	/// <param name="chunk"></param>
+	/// <returns></returns>
+	public List<Vector3> FindAllStarsInSphere(Vector3 at, float radius, IStarChunkData[] chunks)
+	{
+		if (chunks == null || chunks.Length == 0)
+		{
+			GD.PrintErr("StarFinder: FindAllStarsInSphere(). Chunks array is null or empty. Exiting.");
+			return null;
+		}
+
+		List<Vector3> foundStars = new List<Vector3>();
+
+		foreach (IStarChunkData chunk in chunks)
+		{
+			Vector3 chunkMin = new Vector3(
+				chunk.pos.x * chunk.size,
+				chunk.pos.y * chunk.size,
+				chunk.pos.z * chunk.size
+			);
+
+			Vector3 chunkMax = chunkMin + new Vector3(chunk.size, chunk.size, chunk.size);
+
+			if (SphereIntersectsCube(at, radius, chunkMin, chunkMax))
+			{
+				foreach (Vector3 starPos in chunk.stars)
+				{
+					if ((starPos - at).Length() < radius)
+					{
+						if (debugPrint) GD.Print($"StarFinder: Found proximity star at {starPos}, {at.DistanceTo(starPos)} LY away from player");
+						foundStars.Add(starPos);
+					}
+				}
+			}
+		}
+
+		return foundStars;
+	}
+
+	/// <summary>
 	/// Checks if the chunk at the given position is generated.
 	/// </summary>
 	/// <param name="position"></param>
@@ -99,5 +143,31 @@ public partial class StarFinder : Node
 		}
 
 		return null;
+	}
+
+	/// <summary>
+	/// Checks if a sphere intersects a cube defined by its min and max corners.
+	/// </summary>
+	/// <param name="sphereCenter"></param>
+	/// <param name="sphereRadius"></param>
+	/// <param name="cubeMin"></param>
+	/// <param name="cubeMax"></param>
+	/// <returns></returns>
+	private bool SphereIntersectsCube(Vector3 sphereCenter, float sphereRadius, Vector3 cubeMin, Vector3 cubeMax)
+	{
+		// Closest point, from sphere center to the cube
+		float closestX = Mathf.Clamp(sphereCenter.X, cubeMin.X, cubeMax.X);
+		float closestY = Mathf.Clamp(sphereCenter.Y, cubeMin.Y, cubeMax.Y);
+		float closestZ = Mathf.Clamp(sphereCenter.Z, cubeMin.Z, cubeMax.Z);
+
+		// Distance from cloest point to sphere center
+		float distanceSquared = 
+			(sphereCenter.X - closestX) * (sphereCenter.X - closestX) +
+			(sphereCenter.Y - closestY) * (sphereCenter.Y - closestY) +
+			(sphereCenter.Z - closestZ) * (sphereCenter.Z - closestZ);
+
+		// If the distance is less than or equal to the sphere's radius squared, they intersect
+		bool intersects = distanceSquared <= (sphereRadius * sphereRadius);
+		return intersects;
 	}
 }

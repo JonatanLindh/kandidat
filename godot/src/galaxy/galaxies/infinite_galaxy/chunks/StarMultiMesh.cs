@@ -10,6 +10,8 @@ public partial class StarMultiMesh : MultiMeshInstance3D
 	{
 		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
 		multiMesh.Mesh = mesh;
+		multiMesh.UseColors = true;
+
 		multiMesh.InstanceCount = positions.Length;
 		SetMultimesh(multiMesh);
 
@@ -31,6 +33,20 @@ public partial class StarMultiMesh : MultiMeshInstance3D
 		for (int i = 0; i < stars.Length; i++)
 		{
 			multiMesh.SetInstanceTransform(i, stars[i]);
+		}
+	}
+
+	public void ColorStar(Color[] colors)
+	{
+		if (multiMesh == null)
+		{
+			GD.PrintErr("MultiMesh is not initialized.");
+			return;
+		}
+
+		for (int i = 0; i < colors.Length; i++)
+		{
+			multiMesh.SetInstanceColor(i, colors[i]);
 		}
 	}
 }
