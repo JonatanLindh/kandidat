@@ -39,10 +39,10 @@ public partial class PlanetNoise
                     // Calculate distance from center of planet to the point (x,y,z)
                     Vector3 currentPoint = new Vector3I(x, y, z);
                     float distanceToCenter = (centerPoint - currentPoint).Length();
-                    float distanceAwayFromCenter = (float)radius - distanceToCenter;
+                    float distanceToBorder = (float)radius - distanceToCenter;
 
                     // Apply fbm to layer noise
-                    float value = Fbm(distanceAwayFromCenter, currentPoint, param, fastNoise);
+                    float value = Fbm(distanceToBorder, currentPoint, param, fastNoise);
 
                     // if > 1   --> the point is outside the planet
                     // if <= 1  --> the point is inside the planet
