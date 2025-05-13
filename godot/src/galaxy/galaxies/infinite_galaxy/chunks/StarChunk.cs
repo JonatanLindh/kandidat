@@ -19,7 +19,7 @@ public partial class StarChunk : Node3D, IStarChunkData
 
 	SeedGenerator seedGen = new SeedGenerator();
 
-	public void Generate(uint galaxySeed, int chunkSize, int starCount, float ISOlevel, ChunkCoord pos)
+	public void Generate(uint galaxySeed, int chunkSize, int starCount, float ISOlevel, ChunkCoord pos, float minimumDistance = 0)
 	{
 		galaxyNoise.Seed = (int)galaxySeed;
 		this.size = chunkSize;
@@ -46,8 +46,19 @@ public partial class StarChunk : Node3D, IStarChunkData
 
 			if (ISOlevel < noiseVal)
 			{
-				Vector3 starPos = localPoint + ChunkPositionOffset();
-				localStars[starIndex] = starPos;
+				bool isTooClose = false;
+				for (int j = 0; j < starIndex; j++)
+				{
+					if (localStars[j].DistanceSquaredTo(globalPoint) < minimumDistance * minimumDistance)
+					{
+						isTooClose = true;
+						break;
+					}
+				}
+
+				if (isTooClose) continue;
+
+				localStars[starIndex] = globalPoint;
 				starIndex++;
 			}
 		}

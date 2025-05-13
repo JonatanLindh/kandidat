@@ -18,16 +18,24 @@ public partial class UISelectableStar : CanvasLayer
 	[Export] float distanceOffsetStrength = 800;
 	Vector3 targetPosition;
 
+	Node hudSignalBus;
+	bool orbits_visibility = false;
+
 	// Star Select UI
 	Panel starSelect;
 	Label starNameLabel;
 	Label starDistanceLabel;
 
 	// Star Info UI
-	Label starPosLabel;
+	Label starPosXLabel;
+	Label starPosYLabel;
+	Label starPosZLabel;
+
 	Label starSeed;
+	Label starTypeLabel;
 	ColorRect starColor;
-	Label systemInformation;
+	Label planetCountLabel;
+	CheckButton visibleOrbitsCheckButton;
 	
 	// System Scene To Be Used For Seed Evaluation
 	Node3D systemScene;
@@ -38,10 +46,17 @@ public partial class UISelectableStar : CanvasLayer
 		starNameLabel = GetNode<Label>("%StarName");
 		starDistanceLabel = GetNode<Label>("%StarDistance");
 
-		starPosLabel = GetNode<Label>("%StarPos");
+		starPosXLabel = GetNode<Label>("%XLabel");
+		starPosYLabel = GetNode<Label>("%YLabel");
+		starPosZLabel = GetNode<Label>("%ZLabel");
+
 		starSeed = GetNode<Label>("%StarSeed");
+		starTypeLabel = GetNode<Label>("%StarTypeLabel");
 		starColor = GetNode<ColorRect>("%StarColor");
-		systemInformation = GetNode<Label>("%SystemInformation");
+		planetCountLabel = GetNode<Label>("%PlanetCount");
+
+		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
+		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
 
 		systemScene = GetNode<Node3D>("../../System");
 		Hide();
@@ -80,7 +95,7 @@ public partial class UISelectableStar : CanvasLayer
 			newPos = GetClampedPositionIfOutside(newPos);
 
 			starSelect.Position = newPos;
-			starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " LY";
+			starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " AU";
 		}
 	}
 
@@ -227,17 +242,22 @@ public partial class UISelectableStar : CanvasLayer
 		this.targetPosition = star.transform.Origin;
 
 		starNameLabel.Text = star.name;
-		starPosLabel.Text = star.transform.Origin.ToString("F2");
-		starSeed.Text = star.seed.ToString();
-		
-		
+		starSeed.Text = star.name;
+
+		Vector3 starPos = star.transform.Origin;
+		starPosXLabel.Text = starPos.X.ToString("F2");
+		starPosYLabel.Text = starPos.Y.ToString("F2");
+		starPosZLabel.Text = starPos.Z.ToString("F2");
+
 		var systemData = (Godot.Collections.Dictionary)systemScene.Call("generateSystemDataFromSeed", star.seed);
 		var numberOfPlanets = ((Godot.Collections.Array) systemData["planets"]).Count;
 		//var moons = systemData["moons"] as Godot.Collections.Array;
 		var sun = (Godot.Collections.Dictionary)systemData["sun"];
+		var sunType = (string)sun["type"];
 		var sunColor = (Color)sun["color"];
+		starTypeLabel.Text = sunType;
 		starColor.Color = sunColor;
-		systemInformation.Text = "Number of planets: " + numberOfPlanets.ToString();
+		planetCountLabel.Text = numberOfPlanets.ToString() + " Detected";
 		Show();
 	}
 
@@ -279,5 +299,24 @@ public partial class UISelectableStar : CanvasLayer
 		{
 			isFastTraveling = true;
 		}
+	}
+
+	/// <summary>
+	/// Signal Gravity Controllers that the visible orbits check button has changed.
+	/// </summary>
+	/// <param name="visible"></param>
+	private void OnOrbitsVisibilityChanged(bool visible)
+	{
+		orbits_visibility = visible;
+		hudSignalBus.EmitSignal("orbits_visibility", orbits_visibility);
+	}
+
+	/// <summary>
+	/// Re-emits the orbits visibility signal upon query.
+	/// (E.g. done when new stars are instantiated)
+	/// </summary>
+	private void OnOrbitsVisibilityQuery()
+	{
+		hudSignalBus.EmitSignal("orbits_visibility", orbits_visibility);
 	}
 }
