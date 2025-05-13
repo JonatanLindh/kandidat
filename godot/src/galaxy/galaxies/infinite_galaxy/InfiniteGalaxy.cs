@@ -22,6 +22,9 @@ public partial class InfiniteGalaxy : Node3D
 	[Export] int starCount = 1000;
 	[Export] float minimumDistance = 5000f;
 
+	[ExportCategory("Color")]
+	[Export] bool colorStars = true;
+
 	public override void _Ready()
 	{
 		// Sets a random seed if no seed is provided
@@ -67,7 +70,7 @@ public partial class InfiniteGalaxy : Node3D
 		chunk.starMesh = starMesh;
 		chunk.galaxyNoise = noise;
 
-		chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos, minimumDistance);
+		chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos, colorStars, minimumDistance);
 
 		starChunks.Add(chunk);
 		AddChild(chunk);
