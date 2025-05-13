@@ -10,6 +10,8 @@ public partial class StarChunk : Node3D, IStarChunkData
 	[Export] StarMultiMesh starMultiMesh;
 	StarFactory starFactory;
 
+	[Export] Color baseStarColor = new Color(1, 1, 1);
+
 	public Vector3[] stars { get; private set; }
 	Vector3[] localStars;
 
@@ -33,7 +35,7 @@ public partial class StarChunk : Node3D, IStarChunkData
 		new Color(0.8f, 0.6f, 0.4f) // Yellow-brownish (G-type star, slightly more red
 	};
 
-	public void Generate(uint galaxySeed, int chunkSize, int starCount, float ISOlevel, ChunkCoord pos, float minimumDistance = 0)
+	public void Generate(uint galaxySeed, int chunkSize, int starCount, float ISOlevel, ChunkCoord pos, bool colorStars, float minimumDistance = 0)
 	{
 		galaxyNoise.Seed = (int)galaxySeed;
 		this.size = chunkSize;
@@ -85,17 +87,26 @@ public partial class StarChunk : Node3D, IStarChunkData
 
 		starMultiMesh.DrawStars(stars, starMesh);
 
-		// Color the stars
-		Color[] newColors = new Color[stars.Length];
-		for (int i = 0; i < stars.Length; i++)
+		if(colorStars) // Use actual system star color
 		{
-			Vector3 starPos = stars[i];
-			Star star = starFactory.CreateStar(starPos, galaxySeed);
+			Color[] newColors = new Color[stars.Length];
+			for (int i = 0; i < stars.Length; i++)
+			{
+				Vector3 starPos = stars[i];
+				Star star = starFactory.CreateStar(starPos, galaxySeed);
 
-			int colIndex = (int)(star.seed % (uint)colors.Length);
-			newColors[i] = colors[colIndex];
+				int colIndex = (int)(star.seed % (uint)colors.Length);
+				newColors[i] = colors[colIndex];
+			}
+			starMultiMesh.ColorStar(newColors);
 		}
-		starMultiMesh.ColorStar(newColors);
+
+		else // Use base color  
+		{
+			Color[] colors = new Color[stars.Length];
+			Array.Fill(colors, baseStarColor);
+			starMultiMesh.ColorStar(colors);
+		}
 	}
 
 	private Vector3 ChunkPositionOffset()
