@@ -14,6 +14,9 @@ public partial class GalaxyMap : Node3D
 
 	Node3D player;
 
+	[ExportCategory("Seamless Galaxy")]
+	[Export] bool useSeamlessGalaxy = true;
+
 	[ExportGroup("Debug")]
 	[Export] bool debugPrint = false;
 
@@ -43,10 +46,10 @@ public partial class GalaxyMap : Node3D
 
 	public override void _Process(double delta)
 	{
-		CheckCloseStars();
+		if(useSeamlessGalaxy) InstantiateCloseStars();
 	}
 
-	private void CheckCloseStars()
+	private void InstantiateCloseStars()
 	{
 		IStarChunkData[] chunks = galaxy.GetGeneratedChunks();
 		if (chunks == null || chunks.Length == 0) return;
