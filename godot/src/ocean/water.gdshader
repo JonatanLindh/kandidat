@@ -29,7 +29,6 @@ uniform sampler2D depth_texture : hint_depth_texture;
 uniform sampler2D screen_texture: hint_screen_texture;
 
 uniform float time;
-uniform float delta_time;
 
 varying vec3 world_position;
 varying vec3 camera_model_position;
