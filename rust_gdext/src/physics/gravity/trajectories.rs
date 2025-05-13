@@ -67,6 +67,9 @@ pub struct SimulationInfo {
     /// Number of steps to simulate
     n_steps: usize,
 
+    /// Whether to use the leapfrog integration method for the simulation.
+    /// The leapfrog method is a symplectic integrator commonly used in physics
+    /// simulations for its stability and accuracy over long time periods.
     leapfrog: bool,
 }
 
