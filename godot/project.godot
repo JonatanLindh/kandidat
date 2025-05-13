@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 PlayerVariables="*res://src/player/player_variables.gd"
 MarchingCubeDispatch="*res://src/marchingcubes/DispatchWork/MarchingCubeDispatch.cs"
+HudSignalBus="*res://src/player/hud_signal_bus.gd"
 
 [dotnet]
 

@@ -6,8 +6,8 @@ using Godot.Collections;
 [Tool]
 public partial class PlanetMarchingCube : Node3D
 {
-	[ExportToolButton("Generate Mesh")]
-	public Callable ClickMeButton => Callable.From(SpawnMesh);
+	[ExportToolButton("Regenerate Mesh")]
+	public Callable ClickMeButton => Callable.From(RegenerateMesh);
 	
 	[Export]
 	public Vector3 SunPosition
@@ -27,7 +27,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_resolution = value;
-			OnResourceSet();
 		}
 	}
 	
@@ -38,7 +37,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_radius = value;
-			OnResourceSet();
 		}
 	}
 	[Export]
@@ -48,7 +46,6 @@ public partial class PlanetMarchingCube : Node3D
 		set
 		{
 			_seed = value;
-			OnResourceSet();
 		}
 	}
 
@@ -81,25 +78,37 @@ public partial class PlanetMarchingCube : Node3D
 	private Node3D _oceanSpawner;
 	private OceanSpawner oceanSpawner;
 	private Area3D _planet_gravity_field;
+	private PlanetThemeGenerator _themeGenerator;
 
 	public override void _Ready()
 	{
-		SpawnMesh();
 		_planet_gravity_field = GetNode<Area3D>("PlanetGravityField");
 		_planet_gravity_field.Set("radius", _radius);
-	}
+		CallDeferred(nameof(SpawnMesh));
+    }
 
 	public override void _Process(double delta)
 	{
 		SetAtmosphereSunDir();
 	}
-	private void OnResourceSet()
+
+    /// <summary>
+    /// Will regenerate the mesh of this planet.
+    /// 
+    /// Be careful when calling this method, it may result in planets generating multiple times depending on from where you call it. For instance, if called
+    /// from a setter of an exported variable, there is a high likelihood that this bug willl occur. Be sure to check while running the main scene.
+    /// </summary>
+    private void RegenerateMesh()
 	{
 		SpawnMesh();
 	}
 
 	private void SpawnMesh()
 	{
+		_themeGenerator = new PlanetThemeGenerator();
+        _themeGenerator.Seed = _seed;
+        _themeGenerator.Warmth = warmth;
+
 		// Check if there's already a planet instance and remove it
 		if (_planet != null && IsInstanceValid(_planet))
 		{
@@ -128,8 +137,12 @@ public partial class PlanetMarchingCube : Node3D
 
                 // Find McSpawner node and set Warmth
                 var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
-                if (mcSpawner != null)
+				if (mcSpawner != null)
+				{
+					mcSpawner.ThemeGenerator = _themeGenerator;
                     mcSpawner.Warmth = warmth;
+				}
+
 
                 // Spawn ocean - uses OceanSpawner-node for instantiation and creation of ocean
                 _oceanSpawner = GetNode<Node3D>("%OceanSpawner");
@@ -143,8 +156,9 @@ public partial class PlanetMarchingCube : Node3D
         }
 		
 		_atmosphere = GetNodeOrNull("Atmosphere");
-		_atmosphere?.Set("radius", _radius * 2);
-		CallDeferred(nameof(SetAtmosphereSunDir));
+		_atmosphere?.Set("radius", _radius);
+        _atmosphere?.Set("planet_seed", _seed);
+        CallDeferred(nameof(SetAtmosphereSunDir));
 	}
 
 	private void SetAtmosphereSunDir()

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class GalaxyMap : Node3D
 {
@@ -8,8 +9,13 @@ public partial class GalaxyMap : Node3D
 
 	StarFinder starFinder;
 	StarFactory starFactory;
+	SystemHandler systemHandler;
+	ScaleHandler scaleHandler;
 
 	Node3D player;
+
+	[ExportCategory("Seamless Galaxy")]
+	[Export] bool useSeamlessGalaxy = true;
 
 	[ExportGroup("Debug")]
 	[Export] bool debugPrint = false;
@@ -18,25 +24,51 @@ public partial class GalaxyMap : Node3D
 	public override void _Ready()
 	{
 		galaxy = GetNode<InfiniteGalaxy>("%InfiniteGalaxy");
-
-		if(GetTree().CurrentScene.HasNode("Player"))
-		{
-			player = GetTree().CurrentScene.GetNode<Node3D>("Player");
-			galaxy.SetPlayer(player);
-		}
-
-		// Use the current node (galaxy center) as the player if no player is found
-		else
-		{
-			player = this;
-			galaxy.SetPlayer(player);
-		}
-
+		uiSelectableStar = GetNode<UISelectableStar>("%UiSelectableStar");
 		starFinder = GetNode<StarFinder>("%StarFinder");
+		systemHandler = GetNode<SystemHandler>("%SystemHandler");
+		scaleHandler = GetNode<ScaleHandler>("%ScaleHandler");
 		starFactory = new StarFactory();
 
-		uiSelectableStar = GetNode<UISelectableStar>("%UiSelectableStar");
+		Node3D initPlayer;
+		if (GetTree().CurrentScene.HasNode("Player")) initPlayer = GetTree().CurrentScene.GetNode<Node3D>("Player");
+		else initPlayer = this; // Use the current node (galaxy center) as the player if no player is found
+		player = initPlayer;
+
+		galaxy.SetPlayer(player);
+
+		scaleHandler.SetSystemHandler(systemHandler);
+		scaleHandler.SetPlayer(player);
+		scaleHandler.SetGalaxy(galaxy);
+
 		AddToGroup("GalaxyMap");
+	}
+
+	public override void _Process(double delta)
+	{
+		if(useSeamlessGalaxy) InstantiateCloseStars();
+	}
+
+	private void InstantiateCloseStars()
+	{
+		IStarChunkData[] chunks = galaxy.GetGeneratedChunks();
+		if (chunks == null || chunks.Length == 0) return;
+
+		List<Vector3> starPos = starFinder.FindAllStarsInSphere(player.Position, systemHandler.closeStarEarlyGenerateRadius, chunks);
+
+		if(starPos != null)
+		{
+			foreach (Vector3 pos in starPos)
+			{
+				if (systemHandler.SystemExists(pos)) continue;
+
+				Star star = starFactory.CreateStar(pos, galaxy.GetSeed());
+				if (debugPrint) GD.Print($"GalaxyMap: Created close star: [Name: {star.name} | Position: {star.transform.Origin} | Seed: {star.seed}]");
+				systemHandler.GenerateSystem(star);
+			}
+		}
+
+		systemHandler.CullFarSystems(player.Position);
 	}
 
 	public override void _Input(InputEvent @event)
@@ -49,7 +81,7 @@ public partial class GalaxyMap : Node3D
 				Vector3 dir = camera.ProjectRayNormal(eventButton.Position);
 
 				IStarChunkData[] chunks = galaxy.GetGeneratedChunks();
-				Vector3 starPos = starFinder.FindStar(this.player.Position, dir, chunks);
+				Vector3 starPos = starFinder.FindStarInLine(this.player.Position, dir, chunks);
 
 				if (starPos != Vector3.Zero)
 				{

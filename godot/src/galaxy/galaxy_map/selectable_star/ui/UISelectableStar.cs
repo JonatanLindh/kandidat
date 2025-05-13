@@ -18,14 +18,27 @@ public partial class UISelectableStar : CanvasLayer
 	[Export] float distanceOffsetStrength = 800;
 	Vector3 targetPosition;
 
+	Node hudSignalBus;
+	bool orbits_visibility = false;
+
 	// Star Select UI
 	Panel starSelect;
 	Label starNameLabel;
 	Label starDistanceLabel;
 
 	// Star Info UI
-	Label starPosLabel;
+	Label starPosXLabel;
+	Label starPosYLabel;
+	Label starPosZLabel;
+
 	Label starSeed;
+	Label starTypeLabel;
+	ColorRect starColor;
+	Label planetCountLabel;
+	CheckButton visibleOrbitsCheckButton;
+	
+	// System Scene To Be Used For Seed Evaluation
+	Node3D systemScene;
 
 	public override void _Ready()
 	{
@@ -33,9 +46,19 @@ public partial class UISelectableStar : CanvasLayer
 		starNameLabel = GetNode<Label>("%StarName");
 		starDistanceLabel = GetNode<Label>("%StarDistance");
 
-		starPosLabel = GetNode<Label>("%StarPos");
-		starSeed = GetNode<Label>("%StarSeed");
+		starPosXLabel = GetNode<Label>("%XLabel");
+		starPosYLabel = GetNode<Label>("%YLabel");
+		starPosZLabel = GetNode<Label>("%ZLabel");
 
+		starSeed = GetNode<Label>("%StarSeed");
+		starTypeLabel = GetNode<Label>("%StarTypeLabel");
+		starColor = GetNode<ColorRect>("%StarColor");
+		planetCountLabel = GetNode<Label>("%PlanetCount");
+
+		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
+		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
+
+		systemScene = GetNode<Node3D>("../../System");
 		Hide();
 	}
 
@@ -61,19 +84,19 @@ public partial class UISelectableStar : CanvasLayer
 
 			// Offset based on the distance to the star
 			float distance = player.Position.DistanceTo(targetPosition);
-            float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * distanceOffsetStrength;
-            Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
+			float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * distanceOffsetStrength;
+			Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
 
 			// Proposed new UI position
-            Vector2 newPos = screenPosition + (distanceOffset + posOffset);
+			Vector2 newPos = screenPosition + (distanceOffset + posOffset);
 			starSelect.Position = newPos;
 
 			// Make sure that the new position ensures that the entire panel is within screen bounds
 			newPos = GetClampedPositionIfOutside(newPos);
 
 			starSelect.Position = newPos;
-            starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " LY";
-        }
+			starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " AU";
+		}
 	}
 
 	/// <summary>
@@ -219,9 +242,22 @@ public partial class UISelectableStar : CanvasLayer
 		this.targetPosition = star.transform.Origin;
 
 		starNameLabel.Text = star.name;
-		starPosLabel.Text = star.transform.Origin.ToString("F2");
-		starSeed.Text = star.seed.ToString();
+		starSeed.Text = star.name;
 
+		Vector3 starPos = star.transform.Origin;
+		starPosXLabel.Text = starPos.X.ToString("F2");
+		starPosYLabel.Text = starPos.Y.ToString("F2");
+		starPosZLabel.Text = starPos.Z.ToString("F2");
+
+		var systemData = (Godot.Collections.Dictionary)systemScene.Call("generateSystemDataFromSeed", star.seed);
+		var numberOfPlanets = ((Godot.Collections.Array) systemData["planets"]).Count;
+		//var moons = systemData["moons"] as Godot.Collections.Array;
+		var sun = (Godot.Collections.Dictionary)systemData["sun"];
+		var sunType = (string)sun["type"];
+		var sunColor = (Color)sun["color"];
+		starTypeLabel.Text = sunType;
+		starColor.Color = sunColor;
+		planetCountLabel.Text = numberOfPlanets.ToString() + " Detected";
 		Show();
 	}
 
@@ -263,5 +299,24 @@ public partial class UISelectableStar : CanvasLayer
 		{
 			isFastTraveling = true;
 		}
+	}
+
+	/// <summary>
+	/// Signal Gravity Controllers that the visible orbits check button has changed.
+	/// </summary>
+	/// <param name="visible"></param>
+	private void OnOrbitsVisibilityChanged(bool visible)
+	{
+		orbits_visibility = visible;
+		hudSignalBus.EmitSignal("orbits_visibility", orbits_visibility);
+	}
+
+	/// <summary>
+	/// Re-emits the orbits visibility signal upon query.
+	/// (E.g. done when new stars are instantiated)
+	/// </summary>
+	private void OnOrbitsVisibilityQuery()
+	{
+		hudSignalBus.EmitSignal("orbits_visibility", orbits_visibility);
 	}
 }
