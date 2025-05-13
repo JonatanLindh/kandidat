@@ -27,7 +27,7 @@ public partial class PlanetNoise
         float falloffStrength = param.FalloffStrength;
 
         // Pad the boarders of the points-array with empty space so marching cubes correctly generates the mesh at the edges
-        PadBoardersWithAir(points, width, height, depth);
+        PadBordersWithAir(points, width, height, depth);
 
         // Boarders are already padded, so only need to iterate from [1, size-1)
         Parallel.For(1, width - 1, x =>
@@ -106,7 +106,7 @@ public partial class PlanetNoise
     /// </summary>
     /// <param name="arrayToPadWithAir"></param>
     /// <param name="size"></param>
-    private static void PadBoardersWithAir(float[,,] arrayToPadWithAir, int width, int height, int depth)
+    private static void PadBordersWithAir(float[,,] arrayToPadWithAir, int width, int height, int depth)
     {
         int widthEdge = width - 1;
         for (int y = 0; y < height; y++)
