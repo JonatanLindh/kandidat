@@ -107,6 +107,7 @@ pub struct SimulatedBody {
     /// Current velocity vector
     pub vel: Vec3A,
 
+    /// Current acceleration vector
     pub acc: Vec3A,
 }
 
