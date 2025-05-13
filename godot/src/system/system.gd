@@ -162,7 +162,7 @@ func generatePlanetsData(r, system_data):
 	var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS)
 	var orbit_radius = SUN.radius + BASE_DISTANCE_FROM_SUN
 	for i in range(n):
-		var orbit_increase = log(i + 1) * DISTANCE_BETWEEN_PLANETS
+		var orbit_increase = log(5*i + 1) * DISTANCE_BETWEEN_PLANETS
 		orbit_radius += orbit_increase;
 		var planet_data = generatePlanetData(r, orbit_radius)
 		system_data["planets"].append(planet_data)

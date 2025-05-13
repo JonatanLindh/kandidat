@@ -7,8 +7,11 @@
 
 [node name="System" type="Node3D"]
 script = ExtResource("1_7my1l")
+MIN_NUMBER_OF_PLANETS = 8
+DISTANCE_BETWEEN_PLANETS = 500.0
 
 [node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
+grav_const = 100.0
 simulation_steps = 1000
 simulation_step_delta = 0.1
 sim_center_body = NodePath("Star")

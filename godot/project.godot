@@ -105,4 +105,4 @@ flashlight={
 
 [physics]
 
-common/physics_ticks_per_second=240
+common/physics_ticks_per_second=400
