@@ -17,7 +17,7 @@ public partial class UISelectableStar : CanvasLayer
 	[Export] float sidePadding = 10.0f;
 	[Export] float baseOffset = 10.0f; // Minimum offset from star
 	// Scaling strength factor at max/min distances
-	[Export] float scalingMaxStrength = 15.0f;
+	[Export] float scalingMaxStrength = 10.0f;
 	[Export] float scalingMinStrength = 1.0f;
 	// Distance range that the UI scales within
 	[Export] float minDistance = 0.0f;
