@@ -15,13 +15,6 @@ public partial class UISelectableStar : CanvasLayer
 
 	[ExportCategory("Star Select UI")]
 	[Export] float sidePadding = 10.0f;
-	[Export] float baseOffset = 10.0f; // Minimum offset from star
-	// Scaling strength factor at max/min distances
-	[Export] float scalingMaxStrength = 10.0f;
-	[Export] float scalingMinStrength = 1.0f;
-	// Distance range that the UI scales within
-	[Export] float minDistance = 0.0f;
-	[Export] float maxDistance = 4500.0f;
 	Vector3 targetPosition;
 
 	Node hudSignalBus;
@@ -85,16 +78,19 @@ public partial class UISelectableStar : CanvasLayer
 		{
 			Vector2 screenPosition = GetVector3ScreenPosition(targetPosition);
 
-			// Offset to center the star ui vertically on the star
+			// Offset to center the star ui on the star
 			Vector2 posOffset = new Vector2(0, -starSelectContainer.Size.Y / 2);
 
+			// Offset based on the distance to the star
 			float distance = player.Position.DistanceTo(targetPosition);
-			float normalizedDistance = Mathf.Clamp((distance - minDistance) / (maxDistance - minDistance), 0.0f, 1.0f);
-			float proximityFactor = Mathf.Lerp(scalingMaxStrength, scalingMinStrength, normalizedDistance);
-			
-			float dynamicOffset = baseOffset * proximityFactor;
-			Vector2 horizontalOffset = new Vector2(dynamicOffset, 0); // Position to the right of the star
-			Vector2 newPos = screenPosition + horizontalOffset + posOffset;
+			float offsetStrength = Mathf.Clamp(1 / distance, 0, 1) * distanceOffsetStrength;
+			Vector2 distanceOffset = new Vector2(1, 0) * offsetStrength;
+
+			// Proposed new UI position
+			Vector2 newPos = screenPosition + (distanceOffset + posOffset);
+			starSelectContainer.Position = newPos;
+
+			// Make sure that the new position ensures that the entire panel is within screen bounds
 			newPos = GetClampedPositionIfOutside(newPos);
 
 			starSelectContainer.Position = newPos;
