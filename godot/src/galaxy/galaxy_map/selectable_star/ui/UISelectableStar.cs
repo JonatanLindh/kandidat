@@ -28,7 +28,7 @@ public partial class UISelectableStar : CanvasLayer
 	bool orbits_visibility = false;
 
 	// Star Select UI
-	Panel starSelect;
+	PanelContainer starSelectContainer;
 	Label starNameLabel;
 	Label starDistanceLabel;
 
@@ -48,7 +48,7 @@ public partial class UISelectableStar : CanvasLayer
 
 	public override void _Ready()
 	{
-		starSelect = GetNode<Panel>("%StarSelectPanel");
+		starSelectContainer = GetNode<PanelContainer>("%StarSelectContainer");
 		starNameLabel = GetNode<Label>("%StarName");
 		starDistanceLabel = GetNode<Label>("%StarDistance");
 
@@ -86,7 +86,7 @@ public partial class UISelectableStar : CanvasLayer
 			Vector2 screenPosition = GetVector3ScreenPosition(targetPosition);
 
 			// Offset to center the star ui vertically on the star
-			Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
+			Vector2 posOffset = new Vector2(0, -starSelectContainer.Size.Y / 2);
 
 			float distance = player.Position.DistanceTo(targetPosition);
 			float normalizedDistance = Mathf.Clamp((distance - minDistance) / (maxDistance - minDistance), 0.0f, 1.0f);
@@ -97,7 +97,7 @@ public partial class UISelectableStar : CanvasLayer
 			Vector2 newPos = screenPosition + horizontalOffset + posOffset;
 			newPos = GetClampedPositionIfOutside(newPos);
 
-			starSelect.Position = newPos;
+			starSelectContainer.Position = newPos;
 			starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " AU";
 		}
 	}
@@ -168,7 +168,7 @@ public partial class UISelectableStar : CanvasLayer
 
 		// Check if the star select panel is fully visible on the screen
 		Rect2 screenSpace = GetViewport().GetVisibleRect();
-		Rect2 starSelectBounds = starSelect.GetGlobalRect();
+		Rect2 starSelectBounds = starSelectContainer.GetGlobalRect();
 
 		bool isOnScreen = IsFullyVisible(screenSpace, starSelectBounds);
 
@@ -181,14 +181,14 @@ public partial class UISelectableStar : CanvasLayer
 			{
 				clampedPos.X = dir.X > 0 ?
 					screenSpace.Position.X + sidePadding :
-					screenSpace.End.X - starSelect.Size.X - sidePadding;
+					screenSpace.End.X - starSelectContainer.Size.X - sidePadding;
 			}
 
 			if (dir.Y != 0)
 			{
 				clampedPos.Y = dir.Y > 0 ?
 					screenSpace.Position.Y + sidePadding :
-					screenSpace.End.Y - starSelect.Size.Y - sidePadding;
+					screenSpace.End.Y - starSelectContainer.Size.Y - sidePadding;
 			}
 		}
 
