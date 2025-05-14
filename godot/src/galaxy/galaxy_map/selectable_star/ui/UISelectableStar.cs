@@ -15,6 +15,7 @@ public partial class UISelectableStar : CanvasLayer
 
 	[ExportCategory("Star Select UI")]
 	[Export] float sidePadding = 10.0f;
+	[Export] float distanceOffsetStrength = 80000;
 	Vector3 targetPosition;
 
 	Node hudSignalBus;
