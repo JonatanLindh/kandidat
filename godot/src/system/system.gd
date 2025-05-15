@@ -92,7 +92,6 @@ func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planet
 	bodyInstance.name = "Body" + str(randomID);
 	bodyInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
 
-	bodyInstance._seed = generatePlanetDataSeed(rand.seed, bodyInstance.position);
 	# Creates new seed based on the planet seed
 	bodyInstance._seed = generateCelestialBodyDataSeed(planetSeed, bodyInstance.position);
 	print("Moon seed " + str(bodyInstance._seed) + " based on planet: " + str(planetSeed));
