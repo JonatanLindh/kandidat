@@ -99,12 +99,6 @@ size_flags_horizontal = 3
 text = "Planets:"
 horizontal_alignment = 1
 
-[node name="VSeparator" type="VSeparator" parent="PanelContainer/TabContainer/Info/HBoxContainer3"]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.01
-
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/TabContainer/Info/HBoxContainer3"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -190,6 +184,11 @@ text = "  X  "
 layout_mode = 2
 text = "Orbit Overlay"
 
+[node name="FloatingStarCheckButton" type="CheckButton" parent="PanelContainer/TabContainer/Actions"]
+layout_mode = 2
+button_pressed = true
+text = "Floating Info Overlay"
+
 [node name="HSeparator" type="HSeparator" parent="PanelContainer/TabContainer/Actions"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -251,6 +250,7 @@ text = "Distance"
 [connection signal="pressed" from="PanelContainer/TabContainer/Info/CloseButton2" to="." method="OnCloseButtonPressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Actions/CloseButton2" to="." method="OnCloseButtonPressed"]
 [connection signal="toggled" from="PanelContainer/TabContainer/Actions/OrbitsCheckButton" to="." method="OnOrbitsVisibilityChanged"]
+[connection signal="toggled" from="PanelContainer/TabContainer/Actions/FloatingStarCheckButton" to="." method="OnFloatingStarOverlayVisibilityChanged"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Actions/TravelButton" to="." method="OnTravelButtonPressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Dev/CloseButton2" to="." method="OnCloseButtonPressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Dev/VisitButton" to="." method="OnVisitButtonPressed"]

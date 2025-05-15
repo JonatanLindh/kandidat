@@ -319,4 +319,11 @@ public partial class UISelectableStar : CanvasLayer
 	{
 		hudSignalBus.EmitSignal("orbits_visibility", orbits_visibility);
 	}
+
+	private void OnFloatingStarOverlayVisibilityChanged(bool visible)
+	{
+		starSelectContainer.Visible = visible;
+
+		player.Position = star.transform.Origin;
+	}
 }
