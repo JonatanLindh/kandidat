@@ -95,6 +95,7 @@ func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planet
 	bodyInstance._seed = generatePlanetDataSeed(rand.seed, bodyInstance.position);
 	# Creates new seed based on the planet seed
 	bodyInstance._seed = generateCelestialBodyDataSeed(planetSeed, bodyInstance.position);
+	print("Moon seed " + str(bodyInstance._seed) + " based on planet: " + str(planetSeed));
 
 	$GravityController.add_child(bodyInstance);
 	bodyInstance.owner = self
@@ -115,6 +116,7 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	
 	# Create a new seed for each planet to be used when generating marching cubes planet
 	planetInstance._seed = generateCelestialBodyDataSeed(r.seed, planetInstance.position);
+	print("Planet seed: " + str(planetInstance._seed) + " based on system: " + str(r.seed));
 	
 	$GravityController.add_child(planetInstance);
 	
