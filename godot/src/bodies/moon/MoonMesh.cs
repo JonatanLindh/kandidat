@@ -194,7 +194,16 @@ public partial class MoonMesh : Node
 		}
 		var dataPoints = GenerateDataPoints(_resolution);
 		_marchingCube ??= new MarchingCube();
-		var mesh = _marchingCube.GenerateMesh(dataPoints);
+		//var mesh = _marchingCube.GenerateMesh(dataPoints);
+		
+		var mesh = new SphereMesh()
+		{
+			Radius = _resolution,
+			Height = _resolution * 2f,
+			RadialSegments = _resolution * 2,
+			Rings = _resolution,
+		};
+		
 		_mesh = new MeshInstance3D();
 		_mesh.Mesh = mesh;
 		
