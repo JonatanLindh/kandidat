@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://du6jp713wv2h5"]
 
 [ext_resource type="Script" uid="uid://be8xbyj5m5urc" path="res://src/bodies/planet/PlanetMarchingCube.cs" id="1_ha83e"]
-[ext_resource type="PackedScene" uid="uid://o1yxfrcs4pok" path="res://src/marchingcubes/OctreePlanet/OctreeTest2.tscn" id="2_736bg"]
+[ext_resource type="PackedScene" uid="uid://o1yxfrcs4pok" path="res://src/marchingcubes/OctreePlanet/OctreePlanet.tscn" id="2_736bg"]
 [ext_resource type="Shader" uid="uid://b2yi8ib46fc6k" path="res://src/bodies/planet/atmosphere/atmosphere.gdshader" id="2_umdtg"]
 [ext_resource type="Script" uid="uid://1e7tm60t4h55" path="res://src/bodies/planet/atmosphere/atmosphere.gd" id="3_f3734"]
 [ext_resource type="Script" uid="uid://ba2chkln3f48f" path="res://src/bodies/planet/planet_gravity_field.gd" id="5_736bg"]
@@ -40,10 +40,9 @@ Warmth = 0.5
 
 [node name="Atmosphere" type="MeshInstance3D" parent="."]
 transform = Transform3D(16.7, 0, 0, 0, 16.7, 0, 0, 0, 16.7, 0, 0, 0)
-visible = false
 mesh = SubResource("BoxMesh_736bg")
 script = ExtResource("3_f3734")
-radius = 150.0
+radius = 1.0
 planet_seed = 1558686225
 
 [node name="PlanetGravityField" type="Area3D" parent="."]
@@ -52,7 +51,7 @@ gravity_point = true
 gravity_point_center = Vector3(0, 0, 0)
 gravity_direction = Vector3(0, 0, 0)
 script = ExtResource("5_736bg")
-radius = 150.0
+radius = 1.0
 metadata/_custom_type_script = "uid://ba2chkln3f48f"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlanetGravityField"]

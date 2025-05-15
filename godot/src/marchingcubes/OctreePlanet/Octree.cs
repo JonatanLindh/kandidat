@@ -85,6 +85,16 @@ public partial class Octree : Node3D
 	/// </summary>
 	public void OnPlanetSpawnerReady(float size)
 	{
+		if (OctreePlanetSpawner == null)
+		{
+			OctreePlanetSpawner = GetNodeOrNull("../PlanetSpawner");
+			if (OctreePlanetSpawner == null)
+			{
+				GD.PrintErr("OctreePlanetSpawner is null");
+				return;
+			}
+		}
+		
 		// Set up player position reference
 		PlayerPosition ??= !Engine.IsEditorHint() 
 			? GetNode("/root/PlayerVariables") 
