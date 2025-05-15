@@ -212,7 +212,9 @@ text = "  X  "
 
 [node name="VisitButton" type="Button" parent="PanelContainer/TabContainer/Dev"]
 layout_mode = 2
-text = "Explore"
+size_flags_horizontal = 4
+size_flags_vertical = 6
+text = "Enter System Scene"
 
 [node name="StarSelectContainer" type="PanelContainer" parent="."]
 unique_name_in_owner = true
