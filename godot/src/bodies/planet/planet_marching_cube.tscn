@@ -34,7 +34,7 @@ resource_local_to_scene = true
 [node name="PlanetMarchingCube" type="GravityBody"]
 script = ExtResource("1_ha83e")
 Resolution = 32
-Seed = 1558686225
+Radius = 2.0
 Planet = ExtResource("2_736bg")
 Warmth = 0.5
 
@@ -42,8 +42,7 @@ Warmth = 0.5
 transform = Transform3D(16.7, 0, 0, 0, 16.7, 0, 0, 0, 16.7, 0, 0, 0)
 mesh = SubResource("BoxMesh_736bg")
 script = ExtResource("3_f3734")
-radius = 150.0
-planet_seed = 1558686225
+radius = 2.0
 
 [node name="PlanetGravityField" type="Area3D" parent="."]
 gravity_space_override = 3
@@ -51,7 +50,7 @@ gravity_point = true
 gravity_point_center = Vector3(0, 0, 0)
 gravity_direction = Vector3(0, 0, 0)
 script = ExtResource("5_736bg")
-radius = 150.0
+radius = 2.0
 metadata/_custom_type_script = "uid://ba2chkln3f48f"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PlanetGravityField"]
