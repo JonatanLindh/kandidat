@@ -146,17 +146,28 @@ public partial class MoonMesh : Node
 	private float _smoothness = 0.1f;
 	
 	private Crater[] _craters;
+	private long _task;
+	private bool _hasTaskStarted = false;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		_marchingCube = new MarchingCube();
-		SpawnMesh();
+		_task = WorkerThreadPool.AddTask(Callable.From(SpawnMesh));
+		_hasTaskStarted = true;
+		//SpawnMesh();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		// Check if task is running and completed
+		if (_hasTaskStarted && WorkerThreadPool.IsTaskCompleted(_task))
+		{
+			WorkerThreadPool.WaitForTaskCompletion(_task);
+			// Mark task as no longer running after completion
+			_hasTaskStarted = false;
+		}
 	}
 
 	private float[,,] GenerateDataPoints(int radius)
@@ -191,7 +202,7 @@ public partial class MoonMesh : Node
 
 	private void OnResourceSet()
 	{
-		SpawnMesh();
+		//SpawnMesh();
 	}
 
 	private void SpawnMesh()
@@ -224,7 +235,7 @@ public partial class MoonMesh : Node
 		GenerateCraters();
 		_mesh.Scale = Vector3.One * (1 / (float)_resolution);
 		_mesh.Scale *= _radius;
-		AddChild(_mesh);
+		CallDeferred(Node.MethodName.AddChild, _mesh);
 	}
 	
 
