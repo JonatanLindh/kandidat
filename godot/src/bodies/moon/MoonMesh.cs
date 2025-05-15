@@ -19,7 +19,7 @@ public partial class MoonMesh : Node
 			Centre = centre;
 		}
 	}
-	
+
 	[ExportCategory("Mesh Settings")]
 	[Export]
 	public int Radius
@@ -47,6 +47,16 @@ public partial class MoonMesh : Node
 
 
 	[ExportCategory("Crater Settings")]
+	[Export]
+	public int Seed
+	{
+		get => _seed;
+		set
+		{
+			_seed = value;
+			OnResourceSet();
+		}
+	}
 	[Export]
 	public int AmountOfCraters
 	{
@@ -125,8 +135,8 @@ public partial class MoonMesh : Node
 	private int _radius = 50;
 	private MeshInstance3D _mesh;
 	private int _resolution = 40;
-	
-	
+
+	private int _seed = 0;
 	private int _amountOfCraters = 10;
 	private float _rimWidth = 2f;
 	private float _rimSteepness = 0.5f;	
@@ -274,8 +284,12 @@ public partial class MoonMesh : Node
 		for(int i = 0; i < amount; i++)
 		{
 			// Randomize the Crater Radius
-			var craterRadius = Mathf.Lerp(_minCraterRadius, _maxCraterRadius, (float)GD.RandRange(0f, 1f));
-			var centre = RandomVector3(_resolution - 5, _resolution,_resolution * Vector3.One);
+			Random random = new Random(_seed + i);
+			//var randomValue = (float)GD.RandRange(0f, 1f);
+			var randomValue = (float)random.NextDouble();
+			
+			var craterRadius = Mathf.Lerp(_minCraterRadius, _maxCraterRadius,randomValue);
+			var centre = RandomVector3(Mathf.Max(1, _resolution - 5), _resolution, Vector3.Zero, seed: _seed + i);
 			craters[i] = new Crater(craterRadius, centre);
 		}
 		return craters;
@@ -294,7 +308,7 @@ public partial class MoonMesh : Node
 
 	private static Vector3 RandomVector3(float minLength, float maxLength, Vector3 origin = default, int seed = -1)
 	{
-		var random = seed == -1 ? new Random() : new Random(seed);
+		var random = new Random(seed);
         
 		// Generate a random direction
 		float x = (float)(random.NextDouble() * 2.0 - 1.0);
