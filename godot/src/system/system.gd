@@ -75,11 +75,11 @@ func randomPlanetRadius(r):
 	return r.randf_range(MIN_PLANET_RADIUS, MAX_PLANET_RADIUS)
 
 # Creates a unique seed for every planet in a system based on the seed for that solar system
-func generatePlanetDataSeed(systemSeed: int, position: Vector3):
+func generateCelestialBodyDataSeed(celestialBodySeed: int, position: Vector3):
 	var seedGen = SeedGenerator.new();
-	return seedGen.GenerateSeed(systemSeed, position);
+	return seedGen.GenerateSeed(celestialBodySeed, position);
 
-func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primaryPosition = Vector3.ZERO, primaryVelocity = Vector3.ZERO):
+func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planetSeed, primaryPosition = Vector3.ZERO, primaryVelocity = Vector3.ZERO):
 	var randomID = rand.randi_range(100000, 999999);
 	var bodyInstance = PLANET_MARCHING_CUBE_SCENE.instantiate(); # Uses PLANET_SCENE for now since moon scene didn't quite work
 	bodyInstance.mass = moonMass;
@@ -93,6 +93,8 @@ func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primar
 	bodyInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
 
 	bodyInstance._seed = generatePlanetDataSeed(rand.seed, bodyInstance.position);
+	# Creates new seed based on the planet seed
+	bodyInstance._seed = generateCelestialBodyDataSeed(planetSeed, bodyInstance.position);
 
 	$GravityController.add_child(bodyInstance);
 	bodyInstance.owner = self
@@ -112,7 +114,7 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	planetInstance.trajectory_color = Color.from_hsv(r.randf_range(0, 1), 0.80, 0.80) * 3;
 	
 	# Create a new seed for each planet to be used when generating marching cubes planet
-	planetInstance._seed = generatePlanetDataSeed(rand.seed, planetInstance.position);
+	planetInstance._seed = generateCelestialBodyDataSeed(r.seed, planetInstance.position);
 	
 	$GravityController.add_child(planetInstance);
 	
@@ -259,6 +261,7 @@ func instantiateSystem(system_data):
 			moon_data.orbit_radius,
 			moon_data.orbit_speed,
 			moon_data.orbit_angle,
+			rand.seed,
 			moon_data.primary_position,
 			moon_data.primary_velocity
 		)
