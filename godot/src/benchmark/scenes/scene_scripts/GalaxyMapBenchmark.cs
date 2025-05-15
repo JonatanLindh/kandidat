@@ -11,8 +11,10 @@ public partial class GalaxyMapBenchmark : BenchmarkScene
 
 	public override void BenchmarkReady()
 	{
+		galaxyMap.SetPlayer(player);
+
+		//galaxy.Set("player", player);
 		InfiniteGalaxy galaxy = galaxyMap.GetNode<InfiniteGalaxy>("InfiniteGalaxy");
-		galaxy.Set("player", player);
 		galaxy.Set("seed", seed);
 	}
 
