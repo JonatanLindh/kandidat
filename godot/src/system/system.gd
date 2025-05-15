@@ -81,7 +81,7 @@ func generateCelestialBodyDataSeed(celestialBodySeed: int, position: Vector3):
 
 func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planetSeed, primaryPosition = Vector3.ZERO, primaryVelocity = Vector3.ZERO):
 	var randomID = rand.randi_range(100000, 999999);
-	var bodyInstance = PLANET_MARCHING_CUBE_SCENE.instantiate(); # Uses PLANET_SCENE for now since moon scene didn't quite work
+	var bodyInstance = MOON_SCENE.instantiate(); # Uses PLANET_SCENE for now since moon scene didn't quite work
 	bodyInstance.mass = moonMass;
 	bodyInstance.position = primaryPosition + Vector3(sin(orbitAngle) * orbitRadius, 0, cos(orbitAngle) * orbitRadius)
 	var bodySpeedAroundSun = orbitSpeedFromRadius((bodyInstance.position - SUN.position).length(), SUN.mass)
@@ -93,7 +93,7 @@ func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planet
 	bodyInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
 
 	# Creates new seed based on the planet seed
-	bodyInstance._seed = generateCelestialBodyDataSeed(planetSeed, bodyInstance.position);
+	bodyInstance.set("Seed",generateCelestialBodyDataSeed(planetSeed, bodyInstance.position));
 	print("Moon seed " + str(bodyInstance._seed) + " based on planet: " + str(planetSeed));
 
 	$GravityController.add_child(bodyInstance);
