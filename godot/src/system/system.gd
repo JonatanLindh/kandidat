@@ -81,7 +81,7 @@ func generateCelestialBodyDataSeed(celestialBodySeed: int, position: Vector3):
 
 func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planetSeed, primaryPosition = Vector3.ZERO, primaryVelocity = Vector3.ZERO):
 	var randomID = rand.randi_range(100000, 999999);
-	var bodyInstance = MOON_SCENE.instantiate(); # Uses PLANET_SCENE for now since moon scene didn't quite work
+	var bodyInstance = MOON_SCENE.instantiate();
 	bodyInstance.mass = moonMass;
 	bodyInstance.position = primaryPosition + Vector3(sin(orbitAngle) * orbitRadius, 0, cos(orbitAngle) * orbitRadius)
 	var bodySpeedAroundSun = orbitSpeedFromRadius((bodyInstance.position - SUN.position).length(), SUN.mass)
