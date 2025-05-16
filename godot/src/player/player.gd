@@ -95,9 +95,7 @@ func in_space_state_movement(delta : float):
 	emit_player_status_changed()
 	move_and_slide()
 
-func in_gravity_field_movement(delta : float):
-	current_speed = max(BASE_SPEED,current_speed)
-	
+func in_gravity_field_movement(delta : float):	
 	planet_velocity = PlayerVariables.planet_velocity
 	gravity_vector = get_gravity()
 	
@@ -210,7 +208,7 @@ func on_gravity_field_entered(gravity : float, gravity_direction : Vector3, plan
 	#gravity_strength = gravity
 	#gravity_vector = gravity_direction * gravity_strength
 	self.planet_velocity = planet_velocity
-	current_speed = planet_velocity.length() + BASE_SPEED
+	current_speed = 5
 
 func on_gravity_field_exited():
 	in_gravity_field = false
@@ -219,6 +217,7 @@ func on_gravity_field_exited():
 	velocity = Vector3.ZERO
 	gravity_strength = 0
 	flying = true
+	current_speed = BASE_SPEED
 	print("exited")
 
 func apply_velocity(dir : Vector3, speed_multiplier, base_velocity):
