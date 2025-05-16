@@ -24,7 +24,7 @@ where
     ///
     /// The PARALLEL constant determines whether the force calculations are done in parallel.
     /// The octree determines its own parallelism based on the number of particles.
-    fn calculate_accelerations<const PARALLEL: bool>(g: f32, particles: &'a [T]) -> Vec<Vec3A> {
+    fn calc_accs<const PARALLEL: bool>(g: f32, particles: &'a [T]) -> Vec<Vec3A> {
         if particles.is_empty() {
             return Vec::new();
         }

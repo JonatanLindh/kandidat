@@ -2,7 +2,7 @@
 #![feature(iter_collect_into)]
 #![test_runner(criterion::runner)]
 
-use criterion::{BatchSize, BenchmarkId, Criterion, black_box};
+use criterion::{AxisScale, BatchSize, BenchmarkId, Criterion, PlotConfiguration, black_box};
 use criterion_macro::criterion;
 use glam::Vec3A;
 use godot::prelude::*;
@@ -66,7 +66,11 @@ fn random_gravity_data(rng: &mut StdRng, n: u32, range: f32) -> Vec<GravityData>
 }
 
 fn custom_criterion() -> Criterion {
-    Criterion::default().sample_size(20)
+    Criterion::default()
+}
+
+fn log_plotter() -> PlotConfiguration {
+    PlotConfiguration::default().summary_scale(AxisScale::Logarithmic)
 }
 
 #[criterion(custom_criterion())]
@@ -74,8 +78,12 @@ fn compute_accelerations(c: &mut Criterion) {
     static GRAV_CONST: f32 = 1.0;
 
     let mut group = c.benchmark_group("compute_accelerations");
+    group.plot_config(log_plotter());
 
-    let sizes = [10, 100, 1000, 10000, 30000, 60000, 80000, 100000, 150000];
+    let sizes = [
+        5, 10, 20, 50, 100, 150, 200, 300, 500, 1000, 2000, 5000, 10000, 20000, 50000, 70000,
+        100_000,
+    ];
 
     // Direct summation
     for size in sizes.iter().filter(|s| **s <= 10000) {
@@ -83,16 +91,14 @@ fn compute_accelerations(c: &mut Criterion) {
 
         group.bench_function(BenchmarkId::new("direct/sequential", size), |b| {
             b.iter(|| {
-                let accelerations =
-                    DirectSummation::calculate_accelerations::<false>(GRAV_CONST, &bodies);
+                let accelerations = DirectSummation::calc_accs::<false>(GRAV_CONST, &bodies);
                 black_box(accelerations);
             });
         });
 
         group.bench_function(BenchmarkId::new("direct/parallel", size), |b| {
             b.iter(|| {
-                let accelerations =
-                    DirectSummation::calculate_accelerations::<true>(GRAV_CONST, &bodies);
+                let accelerations = DirectSummation::calc_accs::<true>(GRAV_CONST, &bodies);
                 black_box(accelerations);
             });
         });
@@ -104,16 +110,14 @@ fn compute_accelerations(c: &mut Criterion) {
 
         group.bench_function(BenchmarkId::new("barnes_hut/sequential", size), |b| {
             b.iter(|| {
-                let accelerations =
-                    MortonBasedOctree::calculate_accelerations::<false>(GRAV_CONST, &bodies);
+                let accelerations = MortonBasedOctree::calc_accs::<false>(GRAV_CONST, &bodies);
                 black_box(accelerations);
             });
         });
 
         group.bench_function(BenchmarkId::new("barnes_hut/parallel", size), |b| {
             b.iter(|| {
-                let accelerations =
-                    MortonBasedOctree::calculate_accelerations::<true>(GRAV_CONST, &bodies);
+                let accelerations = MortonBasedOctree::calc_accs::<true>(GRAV_CONST, &bodies);
                 black_box(accelerations);
             });
         });
@@ -236,8 +240,14 @@ fn parallel_octree_partition(c: &mut Criterion) {
 fn morton_encode(c: &mut Criterion) {
     let mut rng = StdRng::seed_from_u64(BENCH_SEED);
     let mut group = c.benchmark_group("morton_encode");
+    group.plot_config(log_plotter());
 
-    for size in [1, 10, 100, 1000, 3000, 5000, 7000, 10000].iter() {
+    for size in [
+        5, 10, 20, 50, 100, 150, 200, 300, 500, 1000, 2000, 5000, 10000, 20000, 50000, 70000,
+        100_000,
+    ]
+    .iter()
+    {
         let data = random_gravity_data(&mut rng, *size, 1000.0);
         let bounds = BoundingBox::containing_gravity_data(&data);
 

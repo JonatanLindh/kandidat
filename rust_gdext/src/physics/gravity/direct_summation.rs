@@ -10,7 +10,7 @@ impl<'a, T> NBodyGravityCalculator<'a, T> for DirectSummation
 where
     T: Particle + Sync,
 {
-    fn calculate_accelerations<const PARALLEL: bool>(g: f32, particles: &'a [T]) -> Vec<Vec3A> {
+    fn calc_accs<const PARALLEL: bool>(g: f32, particles: &'a [T]) -> Vec<Vec3A> {
         if particles.is_empty() {
             return Vec::new();
         }

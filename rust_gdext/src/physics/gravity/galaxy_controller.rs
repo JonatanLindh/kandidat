@@ -60,7 +60,7 @@ impl INode for GalaxyController {
             }
         };
 
-        let accs = MortonBasedOctree::calculate_accelerations::<true>(self.grav_const, stars);
+        let accs = MortonBasedOctree::calc_accs::<true>(self.grav_const, stars);
         for (star, acc) in stars.iter_mut().zip(accs.iter()) {
             star.velocity += acc * delta as f32;
             star.position += star.velocity * delta as f32;
