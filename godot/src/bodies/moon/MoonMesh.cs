@@ -22,7 +22,7 @@ public partial class MoonMesh : Node
 
 	[ExportCategory("Mesh Settings")]
 	[Export]
-	public int Radius
+	public float Radius
 	{
 		get => _radius;
 		set
@@ -132,7 +132,7 @@ public partial class MoonMesh : Node
 	}
 
 	private MarchingCube _marchingCube;
-	private int _radius = 50;
+	private float _radius = 50;
 	private MeshInstance3D _mesh;
 	private int _resolution = 40;
 
@@ -209,12 +209,12 @@ public partial class MoonMesh : Node
 	{
 		if (_mesh != null)
 		{
-			RemoveChild(_mesh);
+			CallDeferred(Node.MethodName.RemoveChild, _mesh);
 			_mesh.QueueFree();
 			_mesh = null;
 		}
-		var dataPoints = GenerateDataPoints(_resolution);
-		_marchingCube ??= new MarchingCube();
+		//var dataPoints = GenerateDataPoints(_resolution);
+		//_marchingCube ??= new MarchingCube();
 		//var mesh = _marchingCube.GenerateMesh(dataPoints);
 		
 		var mesh = new SphereMesh()
@@ -253,11 +253,12 @@ public partial class MoonMesh : Node
 		var positions = meshData[(int)Mesh.ArrayType.Vertex].AsVector3Array();
 		var normal = meshData[(int)Mesh.ArrayType.Normal].AsVector3Array();
 
-		foreach (var crater in _craters)
+
+		for (int i = 0; i < positions.Length; i++)
 		{
-			for (int i = 0; i < positions.Length; i++)
+			var craterHeight = 0f;
+			foreach (var crater in _craters)
 			{
-				var craterHeight = 0f;
 				var x = positions[i].DistanceTo(crater.Centre) / crater.Radius;
 			
 				// Cavity Calculation
@@ -273,13 +274,12 @@ public partial class MoonMesh : Node
 			
 				// Modify the Crater Height
 				craterHeight += craterShape * crater.Radius;
-
-				positions[i] += positions[i].Normalized() * craterHeight;
 				
-				// Calculate the Normal
-				normal[i] = positions[i].Normalized();
-
 			}
+			positions[i] += positions[i].Normalized() * craterHeight;
+				
+			// Calculate the Normal
+			normal[i] = positions[i].Normalized();
 		}
 		
 		meshData[(int)Mesh.ArrayType.Vertex] = positions;

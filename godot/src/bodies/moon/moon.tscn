@@ -1,34 +1,35 @@
 [gd_scene load_steps=8 format=3 uid="uid://ckitx7rndvp5l"]
 
 [ext_resource type="Script" uid="uid://bffvdmmiyvv8y" path="res://src/bodies/moon/MoonMesh.cs" id="1_7s32x"]
-[ext_resource type="Texture2D" uid="uid://b7gwp1fdsawjp" path="res://src/bodies/moon/textures/Moon_002_basecolor.png" id="2_2i2p8"]
+[ext_resource type="Texture2D" uid="uid://b7gwp1fdsawjp" path="res://src/bodies/moon/textures/Moon_002_basecolor.png" id="2_vnp0w"]
 [ext_resource type="Texture2D" uid="uid://4r88h2ohgsh2" path="res://src/bodies/moon/textures/Moon_002_ambientOcclusion.png" id="3_asatr"]
 [ext_resource type="Texture2D" uid="uid://b548etlru44ap" path="res://src/bodies/moon/textures/Moon_002_normal.png" id="3_tkrt2"]
-[ext_resource type="Texture2D" uid="uid://qgpm6x22nq26" path="res://src/bodies/moon/textures/Moon_002_roughness.png" id="4_vnp0w"]
+[ext_resource type="Texture2D" uid="uid://qgpm6x22nq26" path="res://src/bodies/moon/textures/Moon_002_roughness.png" id="5_asatr"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_asatr"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tkrt2"]
-albedo_texture = ExtResource("2_2i2p8")
+albedo_texture = ExtResource("2_vnp0w")
 albedo_texture_force_srgb = true
-roughness_texture = ExtResource("4_vnp0w")
+roughness_texture = ExtResource("5_asatr")
 normal_enabled = true
 normal_scale = 1.5
 normal_texture = ExtResource("3_tkrt2")
-ao_enabled = true
 ao_texture = ExtResource("3_asatr")
 heightmap_texture = SubResource("CompressedTexture2D_asatr")
+backlight = Color(0.0415072, 0.0415072, 0.0415072, 1)
 uv1_scale = Vector3(0.02, 0.02, 0.02)
 uv1_triplanar = true
 
 [node name="Moon" type="GravityBody"]
 script = ExtResource("1_7s32x")
-Radius = 4
-Resolution = 32
+Radius = 6.0
+Resolution = 64
 MeshMaterial = SubResource("StandardMaterial3D_tkrt2")
-AmountOfCraters = 100
-RimSteepness = 0.45
-FloorHeight = 0.0
-MinCraterRadius = 3.0
+Seed = 16
+AmountOfCraters = 30
+RimWidth = 0.8
+RimSteepness = 1.0
+MinCraterRadius = 6.0
 MaxCraterRadius = 8.0
 Smoothness = 1.0
