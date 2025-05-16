@@ -3,3 +3,4 @@
 [resource]
 shading_mode = 0
 disable_ambient_light = true
+vertex_color_use_as_albedo = true

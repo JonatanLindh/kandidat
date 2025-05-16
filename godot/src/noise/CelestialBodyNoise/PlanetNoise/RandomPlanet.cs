@@ -34,11 +34,11 @@ public partial class RandomPlanet : RandomCelestialBodyNoise
         param.Amplitude =  Math.Max(5.0f, (float)Math.Round(random.NextSingle(), 2) * MAX_AMPLITUDE);
 
         //               amplitude 1-4, freq. 0-16                                             amplitude 1-20, freq. 0-4
-        param.Frequency = (param.Amplitude < 4) ? (float)Math.Round(random.NextSingle(), 2) * 12.0f : (float)Math.Round(random.NextDouble(), 2) * 2.0f;
+        param.Frequency = (param.Amplitude < 4) ? (float)Math.Round(random.NextSingle(), 2) * 12.0f : (float)Math.Round(random.NextSingle(), 2) * 2.0f;
 
 
         if (param.Frequency < 4) param.Lacunarity = (float)Math.Round(random.NextSingle(), 2) * 4.0f;  // amplitude 1-20, freq. 0-4, lac. 0-4
-        else param.Lacunarity = (float)Math.Round(random.NextDouble(), 2) * 8.0f;                // amplitdue 1-4, freq. 0-16, lac. 0-8
+        else param.Lacunarity = (float)Math.Round(random.NextSingle(), 2) * 8.0f;                // amplitdue 1-4, freq. 0-16, lac. 0-8
 
         param.Persistence = Math.Max(0.1f, Math.Min(0.25f, (float)Math.Round(random.NextSingle(), 2)));  // persistence 0.1-0.25 always
     }

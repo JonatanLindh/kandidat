@@ -20,6 +20,7 @@ seamless = true
 noise = SubResource("FastNoiseLite_cp7ty")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_2watn"]
+resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("2_yo06i")
 shader_parameter/Glow_Power = 5.438
@@ -33,6 +34,7 @@ shader_parameter/scale = 0.02
 shader_parameter/blendSharpness = 0.456
 
 [sub_resource type="SphereMesh" id="SphereMesh_m6dof"]
+resource_local_to_scene = true
 material = SubResource("ShaderMaterial_2watn")
 radius = 5.0
 height = 10.0

@@ -47,6 +47,7 @@ public partial class BasicPlanet : Node, CelestialBodyNoise
         param.Frequency = input.GetFrequency();
         param.Lacunarity = input.GetLacunarity();
         param.Persistence = input.GetPersistence();
+        param.FalloffStrength = input.GetFalloffStrength();
         param.NoiseType = input.GetNoiseType();
     }
 

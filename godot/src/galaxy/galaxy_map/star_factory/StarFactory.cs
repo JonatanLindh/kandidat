@@ -1,8 +1,17 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public class StarFactory
 {
+	private string[] starCatalog = {
+		"HD",
+		"HR",
+		"SAO",
+		"GSC",
+		"BD"
+	};
+
 	/// <summary>
 	/// Creates a star at the given position with a new seed based on the galaxy seed and position.
 	/// </summary>
@@ -14,7 +23,7 @@ public class StarFactory
 		Transform3D starTransform = new Transform3D(Basis.Identity, position);
 
 		uint starSeed = GenerateSeed(galaxySeed, position);
-		string starName = GenerateName();
+		string starName = GenerateName(starSeed);
 
 		Star star = new Star(starTransform, starSeed, starName);
 		return star;
@@ -33,11 +42,16 @@ public class StarFactory
 	}
 
 	/// <summary>
-	/// 
+	/// Generates a name for the star based on its seed, 
+	/// and a randomly selected catalog acronym.
 	/// </summary>
+	/// <param name="seed"></param>
 	/// <returns></returns>
-	private string GenerateName()
+	private string GenerateName(uint seed)
 	{
-		return "Star";
+		Random rnd = new Random((int)seed);
+		int index = rnd.Next(0, starCatalog.Length);
+		string starAcronym = starCatalog[index];
+		return starAcronym + " " + seed;
 	}
 }

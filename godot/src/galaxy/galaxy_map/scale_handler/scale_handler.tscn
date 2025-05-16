@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b4jovodmbn12y"]
+
+[ext_resource type="Script" uid="uid://ijns0wetpqnr" path="res://src/galaxy/galaxy_map/scale_handler/ScaleHandler.cs" id="1_xklvl"]
+
+[node name="ScaleHandler" type="Node"]
+script = ExtResource("1_xklvl")

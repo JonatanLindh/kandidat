@@ -10,8 +10,8 @@ class_name Player
 signal updated_status(position, speed)
 
 const JUMP_VELOCITY = 4.5
-const BASE_SPEED = 5.0
-var current_speed = 5.0
+const BASE_SPEED = 1200.0
+var current_speed = 1200.0
 var mouse_sensitivity = 0.1
 var sprint_factor = 2
 var float_speed = 5
