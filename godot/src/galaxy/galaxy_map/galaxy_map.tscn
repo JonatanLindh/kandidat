@@ -1,18 +1,36 @@
-[gd_scene load_steps=5 format=3 uid="uid://qbrs85sp3ds4"]
+[gd_scene load_steps=7 format=3 uid="uid://qbrs85sp3ds4"]
 
 [ext_resource type="Script" uid="uid://cy00ohqgm2bfg" path="res://src/galaxy/galaxy_map/GalaxyMap.cs" id="1_8ccs1"]
 [ext_resource type="PackedScene" uid="uid://dpl2k6yof7xst" path="res://src/galaxy/galaxies/infinite_galaxy/infinite_galaxy.tscn" id="2_3xdco"]
 [ext_resource type="PackedScene" uid="uid://cycjumpx1yadr" path="res://src/galaxy/galaxy_map/selectable_star/ui/ui_selectable_star.tscn" id="3_51kxb"]
 [ext_resource type="PackedScene" uid="uid://byngp3rjfc0jm" path="res://src/galaxy/galaxy_map/star_finder/star_finder.tscn" id="4_c4q7o"]
+[ext_resource type="PackedScene" uid="uid://b2xg522gnifdo" path="res://src/galaxy/galaxy_map/system_handler/system_handler.tscn" id="5_pb70j"]
+[ext_resource type="PackedScene" uid="uid://b4jovodmbn12y" path="res://src/galaxy/galaxy_map/scale_handler/scale_handler.tscn" id="6_ov8lt"]
 
 [node name="GalaxyMap" type="Node3D"]
 script = ExtResource("1_8ccs1")
 
 [node name="InfiniteGalaxy" parent="." instance=ExtResource("2_3xdco")]
 unique_name_in_owner = true
+chunkSize = 30000
+starCount = 100
 
 [node name="UiSelectableStar" parent="." instance=ExtResource("3_51kxb")]
 unique_name_in_owner = true
+fastTravelDistanceOffset = 1000.0
 
 [node name="StarFinder" parent="." instance=ExtResource("4_c4q7o")]
 unique_name_in_owner = true
+maxRadius = 400.0
+intervalSizeRatio = 1.8
+
+[node name="SystemHandler" parent="." instance=ExtResource("5_pb70j")]
+unique_name_in_owner = true
+closeStarEarlyGenerateRadius = 5500.0
+closeStarLateGenerateRadius = 3500.0
+closeStarCullRadius = 7000.0
+
+[node name="ScaleHandler" parent="." instance=ExtResource("6_ov8lt")]
+unique_name_in_owner = true
+baseSystemScale = 1.0
+scalingType = 1

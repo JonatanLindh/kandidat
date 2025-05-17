@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public partial class CelestialBodyParameters
 {
@@ -15,6 +14,7 @@ public partial class CelestialBodyParameters
     private float frequency;
     private float lacunarity;
     private float persistence;
+    private float falloffStrength;
     private FastNoiseLite.NoiseTypeEnum noiseType;
 
     public int Radius { get => radius; set { radius = value; } }
@@ -28,5 +28,7 @@ public partial class CelestialBodyParameters
     public float Frequency { get => frequency; set { frequency = value; } }
     public float Lacunarity { get => lacunarity; set { lacunarity = value; } }
     public float Persistence { get => persistence; set { persistence = value; } }
+    public float FalloffStrength { get => falloffStrength; set { falloffStrength = value; } }
+
     public FastNoiseLite.NoiseTypeEnum NoiseType { get => noiseType; set { noiseType = value; } }
 }

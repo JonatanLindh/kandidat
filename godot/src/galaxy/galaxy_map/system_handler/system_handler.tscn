@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://b2xg522gnifdo"]
+
+[ext_resource type="Script" uid="uid://d078hr1ybjy01" path="res://src/galaxy/galaxy_map/system_handler/SystemHandler.cs" id="1_16pwn"]
+[ext_resource type="PackedScene" uid="uid://dru1frs0nrf78" path="res://src/system/system.tscn" id="2_t7ykt"]
+
+[node name="SystemHandler" type="Node"]
+script = ExtResource("1_16pwn")
+systemScene = ExtResource("2_t7ykt")
