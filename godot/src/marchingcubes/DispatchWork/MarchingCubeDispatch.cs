@@ -15,6 +15,7 @@ public sealed partial class MarchingCubeDispatch: Node
 	
 	private static readonly object Lock = new object();
 	private readonly object _generateMeshLock = new();
+	private readonly object _materialAssignmentLock = new();
 	
 	private Thread _planetGenerator;
 	private readonly ConcurrentStack<MarchingCubeRequest> _planetQueue = new();
@@ -155,33 +156,28 @@ public sealed partial class MarchingCubeDispatch: Node
 		var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
 		if (IsInstanceValid(meshInstance))
 		{
-			if (request.CustomMeshInstance != null)
-			{
-				meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
-				//meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateMultipleConvexCollisions);
-				meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateTrimeshCollision);
-			}
-			else
-			{
-				meshInstance.Mesh = mesh;
-				//meshInstance.CreateMultipleConvexCollisions();
-				meshInstance.CreateTrimeshCollision();
-			}
+			meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
+
 		}
 		//meshInstance.Translate(request.Offset); 
 					
 		if (request.GeneratePlanetShader != null)
 		{
-			var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight, request.Center);
+			// Create the material directly in the worker thread
 			if (IsInstanceValid(meshInstance))
 			{
-				meshInstance.MaterialOverride = material;
-				/*
-				meshInstance.MaterialOverride = new StandardMaterial3D()
+				lock (_materialAssignmentLock)
 				{
-					CullMode = BaseMaterial3D.CullModeEnum.Disabled
-				};
-				*/
+					try
+					{
+						var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight, request.Center);
+						meshInstance.MaterialOverride = material;
+					}
+					catch (Exception)
+					{
+						// ignored
+					}
+				}
 			}
 		}
 

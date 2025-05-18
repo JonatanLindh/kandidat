@@ -8,14 +8,14 @@
 
 [node name="OctreePlanet" type="Node3D"]
 script = ExtResource("1_23uc2")
-radius = 500
+radius = 20
 seed = 5436959
 
-[node name="Octree" type="Node3D" parent="." node_paths=PackedStringArray("PlayerPosition", "OctreePlanetSpawner")]
+[node name="Octree" type="Node3D" parent="." node_paths=PackedStringArray("PlayerPosition")]
 script = ExtResource("2_xv7cc")
-PlayerPosition = NodePath("../../../../../../../../../@Node3DEditor@12336/@HSplitContainer@11535/@HSplitContainer@11537/@VSplitContainer@11539/@Node3DEditorViewportContainer@11540/@Node3DEditorViewport@11587/@SubViewportContainer@11541/@SubViewport@11542/@Camera3D@11544")
-MaxDepth = 6
-OctreePlanetSpawner = NodePath("../PlanetSpawner")
+PlayerPosition = NodePath("")
+MaxDepth = 4
+ShowOctree = true
 
 [node name="PlanetSpawner" type="Node3D" parent="." node_paths=PackedStringArray("CelestialBody")]
 script = ExtResource("3_qbmy6")

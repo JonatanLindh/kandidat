@@ -30,14 +30,14 @@ public partial class PlanetNoise
         float falloffStrength = param.FalloffStrength;
 
         // Pad the boarders of the points-array with empty space so marching cubes correctly generates the mesh at the edges
-        PadBordersWithAir(points, width, height, depth);
+        //PadBordersWithAir(points, width, height, depth);
 
         // Boarders are already padded, so only need to iterate from [1, size-1)
-        Parallel.For(1, width - 1, x =>
+        Parallel.For(0, width, x =>
         {
-            for (int y = 1; y < height - 1; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (int z = 1; z < depth - 1; z++)
+                for (int z = 0; z < depth; z++)
                 {
                     // Calculate distance from center of planet to the point (x,y,z)
                     Vector3 currentPoint = new Vector3(x, y, z) * voxelSize;
@@ -51,7 +51,7 @@ public partial class PlanetNoise
                     // if > 1   --> the point is outside the planet
                     // if <= 1  --> the point is inside the planet
                     // Used for calculating the amount of falloff applied to the value
-                    float falloffRatio = distanceToCenter / (float)radius;
+                    float falloffRatio = Mathf.Abs(distanceToCenter / (float)radius);
 
                     // Exponential falloff based on the ratio between the radius and the distance from the centerPoint
                     // Values outside the planet gets larger (falloffRatio > 1) and

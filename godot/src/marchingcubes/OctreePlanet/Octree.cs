@@ -62,7 +62,7 @@ public partial class Octree : Node3D
 	private void SpawnPlanetChunk()
 	{
 		// First check if the spawner is valid
-		if (OctreePlanetSpawner == null || !IsInstanceValid(OctreePlanetSpawner))
+		if (OctreePlanetSpawner == null)
 		{
 			return;
 		}
@@ -157,7 +157,7 @@ public partial class Octree : Node3D
 	}
 
 	
-	public override void _PhysicsProcess(double delta)
+	public override void _Process(double delta)
 	{
 		if (PlayerPosition == null) return;
 		
@@ -354,6 +354,7 @@ public partial class Octree : Node3D
 	
 	private void CreateChildForSubdivision(Octree newCell, Vector3 newCenter)
 	{
+		//HidePlanetMesh();
 		newCell._center = newCenter;
 		newCell._depth = _depth + 1;
 		newCell.MaxDepth = MaxDepth;
