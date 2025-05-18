@@ -26,6 +26,10 @@ public sealed partial class MarchingCubeDispatch: Node
 	
 	private readonly ConcurrentDictionary<Guid, MarchingCubeRequest> _requests = new();
 	public ConcurrentDictionary<Guid, MarchingCubeRequest> Requests => _requests;
+
+	private ConcurrentQueue<(Mesh, MeshInstance3D)> _meshQueue = new();
+	private int _meshQueueCount = 0;
+	private const int MaxMeshQueueCount = 10;
 	
 	
 	/// <summary>
@@ -36,6 +40,14 @@ public sealed partial class MarchingCubeDispatch: Node
 	{
 		Cleanup();
 		_insideTree = true;
+		
+		// Add the singleton to the scene tree if it's not already
+		if (!IsInsideTree())
+		{
+			// Get the current scene tree
+			var tree = Engine.GetMainLoop() as SceneTree;
+			tree?.Root.AddChild(this);
+		}
 		
 		// Start the planet generator thread
 		if (_planetGenerator is { IsAlive: true }) return;
@@ -78,6 +90,25 @@ public sealed partial class MarchingCubeDispatch: Node
 				}
 				return _instance;
 			}
+		}
+	}
+
+	public override void _Process(double delta)
+	{
+		// Process the mesh queue
+		while (_meshQueue.TryDequeue(out var tuple) && _meshQueueCount < MaxMeshQueueCount)
+		{
+			if (IsInstanceValid(tuple.Item2))
+			{
+				tuple.Item2.CallDeferred(MeshInstance3D.MethodName.SetMesh, tuple.Item1);
+				tuple.Item2.CallDeferred(MeshInstance3D.MethodName.CreateConvexCollision);
+			}
+			_meshQueueCount++;
+		}
+		if (_meshQueueCount > 0)
+		{
+			// Reset the mesh queue count
+			_meshQueueCount = 0;
 		}
 	}
 
@@ -156,7 +187,9 @@ public sealed partial class MarchingCubeDispatch: Node
 		var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
 		if (IsInstanceValid(meshInstance))
 		{
-			meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
+			_meshQueue.Enqueue((mesh, meshInstance));
+			//meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
+			//meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateTrimeshCollision);
 
 		}
 		//meshInstance.Translate(request.Offset); 
