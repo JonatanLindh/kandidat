@@ -17,3 +17,4 @@ shader_parameter/min_height = 4.2151
 shader_parameter/max_height = 4.64334
 shader_parameter/height_color = SubResource("GradientTexture1D_3elnh")
 shader_parameter/cliff_color = Vector3(0.2, 0.2, 0.2)
+shader_parameter/chunk_center = Vector3(0, 0, 0)

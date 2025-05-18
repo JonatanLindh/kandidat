@@ -99,6 +99,7 @@ public partial class McSpawner : Node
 			GD.PrintErr("celestialBody is null");
 		}
 		var planetRadius = celestialBody.GetRadius();
+		celestialBody.Resolution = planetRadius * 2;
 
 		_meshInstance3D = new MeshInstance3D();
 			
@@ -114,17 +115,20 @@ public partial class McSpawner : Node
 			_temporaryMeshInstance.MaterialOverride = GeneratePlanetShader(planetRadius, planetRadius);
 			AddChild(_temporaryMeshInstance);
 		}
+		
+		AddChild(_meshInstance3D);
 			
 		// Send the request to the MarchingCubeDispatch
 		MarchingCubeRequest cubeRequest = new MarchingCubeRequest
 		{
 			PlanetDataPoints = celestialBody,
 			Scale = 1,
-			Offset = Vector3.Zero,
-			Root = this,
+			Offset = Vector3.One * planetRadius,
+			Center = Vector3.Zero,
+			Root = this,	
 			CustomMeshInstance = _meshInstance3D,
 			TempNode = _useTemp ? _temporaryMeshInstance : null,
-			GeneratePlanetShader = GeneratePlanetShader
+			//GeneratePlanetShader = GeneratePlanetShader
 		};
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
 	}

@@ -12,7 +12,7 @@ public partial class PlanetNoise
 
     public PlanetNoise() {}
 
-    public float[,,] CreateDataPoints(CelestialBodyParameters param, FastNoiseLite fastNoise)
+    public float[,,] CreateDataPoints(CelestialBodyParameters param, FastNoiseLite fastNoise, Vector3 offset = default, float voxelSize = 1)
     {
         int radius = param.Radius;
         int diameter = 2 * radius;
@@ -22,22 +22,26 @@ public partial class PlanetNoise
         int depth = param.Depth;
 
         float[,,] points = new float[width, height, depth];
-        Vector3 centerPoint = new Vector3I(radius, radius, radius);
+        Vector3 centerPoint = Vector3I.Zero;
+        
+        //if (offset == default)
+          //  offset = Vector3.One * -radius;
 
         float falloffStrength = param.FalloffStrength;
 
         // Pad the boarders of the points-array with empty space so marching cubes correctly generates the mesh at the edges
-        PadBordersWithAir(points, width, height, depth);
+        //PadBordersWithAir(points, width, height, depth);
 
         // Boarders are already padded, so only need to iterate from [1, size-1)
-        Parallel.For(1, width - 1, x =>
+        Parallel.For(0, width, x =>
         {
-            for (int y = 1; y < height - 1; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (int z = 1; z < depth - 1; z++)
+                for (int z = 0; z < depth; z++)
                 {
                     // Calculate distance from center of planet to the point (x,y,z)
-                    Vector3 currentPoint = new Vector3I(x, y, z);
+                    Vector3 currentPoint = new Vector3(x, y, z) * voxelSize;
+                    currentPoint += offset;
                     float distanceToCenter = (centerPoint - currentPoint).Length();
                     float distanceToBorder = (float)radius - distanceToCenter;
 
@@ -47,7 +51,7 @@ public partial class PlanetNoise
                     // if > 1   --> the point is outside the planet
                     // if <= 1  --> the point is inside the planet
                     // Used for calculating the amount of falloff applied to the value
-                    float falloffRatio = distanceToCenter / (float)radius;
+                    float falloffRatio = Mathf.Abs(distanceToCenter / (float)radius);
 
                     // Exponential falloff based on the ratio between the radius and the distance from the centerPoint
                     // Values outside the planet gets larger (falloffRatio > 1) and

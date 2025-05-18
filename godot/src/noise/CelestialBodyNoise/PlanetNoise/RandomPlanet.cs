@@ -4,10 +4,10 @@ using System;
 public partial class RandomPlanet : RandomCelestialBodyNoise
 {
     private const int RADIUS = 64;
-    private const int WIDTH = 2 * RADIUS + 2;
-    private const int HEIGHT = 2 * RADIUS + 2;
-    private const int DEPTH = 2 * RADIUS + 2;
-    private const int SIZE = 2 * RADIUS + 2;
+    private const int WIDTH = 2 * RADIUS + 1;
+    private const int HEIGHT = 2 * RADIUS + 1;
+    private const int DEPTH = 2 * RADIUS + 1;
+    private const int SIZE = 2 * RADIUS + 1;
 
     private const int MAX_OCTAVES = 8;
     private const float MAX_AMPLITUDE = 20.0f;
@@ -19,10 +19,10 @@ public partial class RandomPlanet : RandomCelestialBodyNoise
 
     protected override void RandomizeParameters(CelestialBodyParameters param)
     {
-        param.Width = GetRadius() * 2 + 2;
-        param.Height = GetRadius() * 2 + 2;
-        param.Depth = GetRadius() * 2 + 2;
-        param.Size = GetRadius() * 2 + 2;
+        param.Width = Resolution + 2;
+        param.Height = Resolution + 2;
+        param.Depth = Resolution + 2;
+        param.Size = Resolution + 2;
 
         param.Octaves = random.Next(4, MAX_OCTAVES);
         param.Seed = random.Next();

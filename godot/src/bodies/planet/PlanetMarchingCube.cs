@@ -134,21 +134,33 @@ public partial class PlanetMarchingCube : Node3D
 			
 			if (_planet != null)
 			{
-				_planet.Set("radius", _resolution);
 				_planet.Set("falloffStrength", _falloffStrength);
+				_planet.Set("radius", _radius);
 				_planet.Set("seed", _seed);
 				
-				_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
+				//_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
 
 				AddChild(_planet);
 
                 // Find McSpawner node and set Warmth
+                /*
                 var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
 				if (mcSpawner != null)
 				{
 					mcSpawner.ThemeGenerator = _themeGenerator;
                     mcSpawner.Warmth = warmth;
 				}
+				*/
+				// Find the Octree node and set Warmth
+				
+				var octree = _planet.GetNodeOrNull<OctreePlanetSpawner>("PlanetSpawner");
+				if (octree != null)
+				{
+					octree.ThemeGenerator = _themeGenerator;
+					octree.Warmth = warmth;
+
+				}
+				
             }
 		}
 		

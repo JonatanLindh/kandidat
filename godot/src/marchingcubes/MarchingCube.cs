@@ -59,31 +59,22 @@ public class MarchingCube
     /// <param name="datapoints">3D array of float values representing the scalar field</param>
     /// <param name="scale">The scale factor to adjust the size of the generated mesh.</param>
     /// <returns>A MeshInstance3D object representing the generated mesh</returns>
-    public Mesh GenerateMesh(float[,,] datapoints, float scale = 1)
+    public Mesh GenerateMesh(float[,,] datapoints, float scale = 1, Vector3 offset = default)
     {
         _scale = scale;
         
         var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
-        if (vertices.Count == 0) return new Mesh();
-        
-        // Calculate the actual geometric center of the vertices
-        var center = Vector3.Zero;
-        foreach (var vertex in vertices)
-        {
-            center += vertex;
-        }
-        center /= vertices.Count;
+        if (vertices.Count == 0) return null;
         
         var surfaceTool = new SurfaceTool();
         surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
-
         //surfaceTool.SetSmoothGroup(UInt32.MaxValue);
         surfaceTool.SetSmoothGroup(0);
     
         foreach (var vertex in vertices)
         {
             // Center the mesh using the actual geometric center
-            var newVertex = vertex - center;
+            var newVertex = vertex - offset;
             float height = newVertex.Length();
 			if (height > _maxHeight) _maxHeight = height;
 			if (height < _minHeight) _minHeight = height;

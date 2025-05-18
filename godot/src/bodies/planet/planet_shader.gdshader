@@ -5,16 +5,24 @@ uniform float min_height;
 uniform float max_height;
 uniform sampler2D height_color;
 uniform vec3 cliff_color = vec3(0.2);
+uniform vec3 chunk_center = vec3(0.0);  // Local center of this chunk relative to planet
 
 varying float height;
 varying vec3 dir_to_center;
 varying vec3 normal;
 
 void vertex() {
-	height = length(VERTEX);
-	// Convert node position from world coordinates to local
-	dir_to_center = normalize(VERTEX - ((inverse(MODEL_MATRIX) * vec4(NODE_POSITION_WORLD, 1.0)).xyz));
-	normal = NORMAL;
+    // Calculate position relative to planet center (which is 0,0,0 in local space)
+    vec3 relative_pos = VERTEX + chunk_center;
+    
+    // Calculate height as distance from planet center
+    height = length(relative_pos);
+    
+    // Direction to center
+    dir_to_center = normalize(-relative_pos);
+    
+    // Normal stays the same
+    normal = NORMAL;
 }
 
 void fragment() {
