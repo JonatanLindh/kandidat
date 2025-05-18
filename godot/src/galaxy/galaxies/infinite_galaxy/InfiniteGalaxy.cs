@@ -8,6 +8,9 @@ public partial class InfiniteGalaxy : Node3D
 	[Export] FastNoiseLite noise;
 	[Export] Node3D player;
 
+	ChunkCoord playerChunkCoord;
+	StarChunk playerChunk;
+
 	private List<StarChunk> starChunks;
 	[Export] uint seed;
 
@@ -17,6 +20,10 @@ public partial class InfiniteGalaxy : Node3D
 	[Export(PropertyHint.Range, "-1, 1, 0.01")] float IsoLevel = 0.3f;
 	[Export] int chunkSize = 1000;
 	[Export] int starCount = 1000;
+	[Export] float minimumDistance = 5000f;
+
+	[ExportCategory("Color")]
+	[Export] bool colorStars = true;
 
 	public override void _Ready()
 	{
@@ -34,7 +41,7 @@ public partial class InfiniteGalaxy : Node3D
 			return;
 		}
 
-		ChunkCoord playerChunk = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
+		playerChunkCoord = ChunkCoord.ToChunkCoord(chunkSize, player.Position);
 
 		for (int x = -viewDistance; x <= viewDistance; x++)
 		{
@@ -42,7 +49,7 @@ public partial class InfiniteGalaxy : Node3D
 			{
 				for (int z = -viewDistance; z <= viewDistance; z++)
 				{
-					ChunkCoord chunkPos = new ChunkCoord(playerChunk.x + x, playerChunk.y + y, playerChunk.z + z);
+					ChunkCoord chunkPos = new ChunkCoord(playerChunkCoord.x + x, playerChunkCoord.y + y, playerChunkCoord.z + z);
 					if (!IsChunkGenerated(chunkPos))
 					{
 						GenerateChunk(chunkPos);
@@ -51,7 +58,8 @@ public partial class InfiniteGalaxy : Node3D
 			}
 		}
 
-		CullChunks(playerChunk);
+		UpdatePlayerChunk(playerChunkCoord);
+		CullChunks(playerChunkCoord);
 	}
 
 	private void GenerateChunk(ChunkCoord pos)
@@ -62,7 +70,7 @@ public partial class InfiniteGalaxy : Node3D
 		chunk.starMesh = starMesh;
 		chunk.galaxyNoise = noise;
 
-		chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos);
+		chunk.Generate(seed, chunkSize, starCount, IsoLevel, pos, colorStars, minimumDistance);
 
 		starChunks.Add(chunk);
 		AddChild(chunk);
@@ -99,6 +107,22 @@ public partial class InfiniteGalaxy : Node3D
 	public IStarChunkData[] GetGeneratedChunks()
 	{
 		return starChunks.ToArray();
+	}
+
+	private void UpdatePlayerChunk(ChunkCoord playerPos)
+	{
+		foreach (StarChunk chunk in starChunks)
+		{
+			if (chunk.pos.Equals(playerChunkCoord))
+			{
+				this.playerChunk = chunk;
+			}
+		}
+	}
+
+	public StarChunk GetPlayerChunk()
+	{
+		return this.playerChunk;
 	}
 
 	public uint GetSeed()

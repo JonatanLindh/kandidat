@@ -105,6 +105,14 @@ public partial class CelestialBodyInput : Node3D
         set { persistence = value; }
     }
 
+    private float falloffStrength = 8.0f;
+    [Export(PropertyHint.Range, "0, 32, 0.01")]
+    private float FalloffStrength
+    {
+        get { return falloffStrength; }
+        set { falloffStrength = value; }
+    }
+
     [Export] private FastNoiseLite.NoiseTypeEnum noiseType = FastNoiseLite.NoiseTypeEnum.Simplex;
 
     [Export] private int seed = 0;
@@ -168,6 +176,10 @@ public partial class CelestialBodyInput : Node3D
         return persistence;
     }
 
+    public float GetFalloffStrength()
+    {
+        return falloffStrength;
+    }
     public FastNoiseLite.NoiseTypeEnum GetNoiseType()
     {
         return noiseType;
@@ -230,6 +242,11 @@ public partial class CelestialBodyInput : Node3D
     public void SetPersistence(float newPersistence)
     {
         persistence = newPersistence;
+    }
+
+    public void SetFalloffStrength(float newFalloffStrength)
+    {
+        falloffStrength = newFalloffStrength;
     }
 
     public void SetNoiseType(FastNoiseLite.NoiseTypeEnum newNoiseType)

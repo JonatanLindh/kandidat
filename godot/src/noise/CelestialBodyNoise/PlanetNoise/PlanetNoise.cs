@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 /// <summary>
 /// A class for creating different types of noise to be used when generating planets
@@ -13,8 +14,7 @@ public partial class PlanetNoise
 
     public float[,,] CreateDataPoints(CelestialBodyParameters param, FastNoiseLite fastNoise, Vector3 offset = default, float voxelSize = 1)
     {
-        int radius = Math.Max(1 ,param.Radius - Mathf.CeilToInt(param.Radius * 0.2));
-        //int radius = param.Radius;
+        int radius = param.Radius;
         int diameter = 2 * radius;
 
         int width = param.Width;  
@@ -27,51 +27,42 @@ public partial class PlanetNoise
         //if (offset == default)
           //  offset = Vector3.One * -radius;
 
-         // creates a cube of points
-         for (int x = 0; x < width; x++)
-         {
-             for (int y = 0; y < height; y++)
-             {
-                 for (int z = 0; z < depth; z++)
-                 {
-                    // Pad the boarders of the cube with empty space so marching cubes correctly generates the mesh at the edges
-                    /*
-                    if (x == 0 || x == width - 1 || y == 0 || y == height - 1 || z == 0 || z == depth - 1)
-                    {
-                        points[x, y, z] = -1.0f;
-                        continue;
-                    }
-                    */
+        float falloffStrength = param.FalloffStrength;
 
+        // Pad the boarders of the points-array with empty space so marching cubes correctly generates the mesh at the edges
+        //PadBordersWithAir(points, width, height, depth);
+
+        // Boarders are already padded, so only need to iterate from [1, size-1)
+        Parallel.For(0, width, x =>
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int z = 0; z < depth; z++)
+                {
                     // Calculate distance from center of planet to the point (x,y,z)
-                    Vector3 currentPosition = new Vector3(x, y, z) * voxelSize;
-                    currentPosition += offset;
-
-                    /*
-                    // Pad the borders of the planet with empty space so marching cubes correctly generates the mesh at the edges
-                    if (currentPosition.X <= -radius || currentPosition.X >= radius ||
-                        currentPosition.Y <= -radius || currentPosition.Y >= radius ||
-                        currentPosition.Z <= -radius || currentPosition.Z >= radius)
-                    {
-                        points[x, y, z] = -1.0f;
-                        continue;
-                    }
-                    */
-                    
-
-                    
-                    float distanceToCenter = (centerPoint - currentPosition).Length();
-                    float distanceAwayFromCenter = (float)radius - distanceToCenter;
+                    Vector3 currentPoint = new Vector3(x, y, z) * voxelSize;
+                    currentPoint += offset;
+                    float distanceToCenter = (centerPoint - currentPoint).Length();
+                    float distanceToBorder = (float)radius - distanceToCenter;
 
                     // Apply fbm to layer noise
-                    float value = Fbm(distanceAwayFromCenter, currentPosition, param, fastNoise);
+                    float value = Fbm(distanceToBorder, currentPoint, param, fastNoise);
 
-                    // Update point (x,y,z) with value from fbm
-                    points[x, y, z] = value;
+                    // if > 1   --> the point is outside the planet
+                    // if <= 1  --> the point is inside the planet
+                    // Used for calculating the amount of falloff applied to the value
+                    float falloffRatio = Mathf.Abs(distanceToCenter / (float)radius);
+
+                    // Exponential falloff based on the ratio between the radius and the distance from the centerPoint
+                    // Values outside the planet gets larger (falloffRatio > 1) and
+                    // values within the planet gets smaller (falloffRatio <= 1)
+                    float falloff = falloffRatio * falloffRatio * falloffStrength;
+
+                    points[x, y, z] = value - falloff;
                 }
             }
-         }
-        
+        });
+
         return points;
     }
 
@@ -88,9 +79,14 @@ public partial class PlanetNoise
     {
         float valueAfterFbm = value;
 
-        // Get parameters from editor which will change locally in the loop
+        // Get parameters from editor which will change locally in the loop.
+        // param's parameters should not change at this point as each planet has its own CelestialBodyParameters instance, so it's thread-safe
         float amplitude = param.Amplitude;
         float frequency = param.Frequency;
+        float persistence = param.Persistence;
+        float lacunarity = param.Lacunarity;
+
+        float h = Mathf.Pow(2, persistence);
 
         // Used to slightly offset the position when getting noise-value for each octave
         Vector3 offset = Vector3.Zero;
@@ -99,14 +95,52 @@ public partial class PlanetNoise
         // FBM - Fractal Brownian Motion 
         for (int i = 0; i < param.Octaves; i++)
         {
-            // TODO Add offset before or after *frequency?
+            // FastNoiseLite.GetNoise3DV should be thread-safe if not changed while executing the Parallel.For-loop
             valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
-            amplitude *= param.Persistence;
-            frequency *= param.Frequency;
+            amplitude *= persistence;
+            frequency *= lacunarity;
             offset += new Vector3(random.Next(param.Octaves), random.Next(param.Octaves), random.Next(param.Octaves));
         }
 
         return valueAfterFbm;
+    }
+
+    /// <summary>
+    /// Pads the array with "air" (-1.0) at the edges of the array, i.e. x,y,z = 0 & x,y,z = size-1. Directly modifies the given array.
+    /// </summary>
+    /// <param name="arrayToPadWithAir"></param>
+    /// <param name="size"></param>
+    private static void PadBordersWithAir(float[,,] arrayToPadWithAir, int width, int height, int depth)
+    {
+        int widthEdge = width - 1;
+        for (int y = 0; y < height; y++)
+        {
+            for(int z = 0; z < depth; z++)
+            {
+                arrayToPadWithAir[0, y, z] = -1.0f;
+                arrayToPadWithAir[widthEdge, y, z] = -1.0f;
+            }
+        }
+
+        int heightEdge = height - 1;
+        for (int x = 0; x < width; x++)
+        {
+            for (int z = 0; z < depth; z++)
+            {
+                arrayToPadWithAir[x, 0, z] = -1.0f;
+                arrayToPadWithAir[x, heightEdge, z] = -1.0f;
+            }
+        }
+
+        int depthEdge = depth - 1;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                arrayToPadWithAir[x, y, 0] = -1.0f;
+                arrayToPadWithAir[x, y, depthEdge] = -1.0f;
+            }
+        }
     }
 
     public ImageTexture3D Get3DNoiseTexture(FastNoiseLite fastNoise, int width, int height, int depth, bool useMipmaps)

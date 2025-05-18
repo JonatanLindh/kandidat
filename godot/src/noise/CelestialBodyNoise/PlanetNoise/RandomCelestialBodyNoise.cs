@@ -7,6 +7,7 @@ public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNo
 {
     [Export] private int radius = 0;
     [Export] private int seed = 0;
+    [Export] private float falloffStrength = 8.0f;
  
     private CelestialBodyParameters param;
     private PlanetNoise planetNoise;
@@ -17,6 +18,7 @@ public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNo
         this.param = new CelestialBodyParameters();
         param.Radius = radius;
         param.Seed = seed;
+        param.FalloffStrength = falloffStrength;
 
         this.planetNoise = new PlanetNoise();
         this.fastNoise = new FastNoiseLite();
@@ -26,6 +28,7 @@ public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNo
 
     public float[,,] GetNoise()
     {
+        UpdateNoise();
         RandomizeParameters(param);
         return planetNoise.CreateDataPoints(param, fastNoise, voxelSize: VoxelSize);
     }
@@ -34,6 +37,11 @@ public abstract partial class RandomCelestialBodyNoise : Node3D, CelestialBodyNo
     {
         RandomizeParameters(param);
         return planetNoise.CreateDataPoints(param, fastNoise, offset, VoxelSize);
+    }
+    private void UpdateNoise()
+    {
+        fastNoise.Seed = param.Seed;
+        fastNoise.NoiseType = param.NoiseType;
     }
 
     public int GetRadius()

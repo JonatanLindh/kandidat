@@ -15,6 +15,7 @@ public sealed partial class MarchingCubeDispatch: Node3D
 	
 	private static readonly object Lock = new object();
 	private readonly object _generateMeshLock = new();
+	private readonly object _materialAssignmentLock = new();
 	
 	private Thread _planetGenerator;
 	private readonly ConcurrentStack<MarchingCubeRequest> _planetQueue = new();
@@ -24,6 +25,11 @@ public sealed partial class MarchingCubeDispatch: Node3D
 	private const uint MaxThreads = 32;
 	
 	private readonly ConcurrentDictionary<Guid, MarchingCubeRequest> _requests = new();
+	public ConcurrentDictionary<Guid, MarchingCubeRequest> Requests => _requests;
+
+	private ConcurrentQueue<(Mesh, MeshInstance3D)> _meshQueue = new();
+	private int _meshQueueCount = 0;
+	private const int MaxMeshQueueCount = 10;
 	
 	/// <summary>
 	/// Initializes the <see cref="MarchingCubeDispatch"/> instance, setting up the necessary resources
@@ -33,6 +39,14 @@ public sealed partial class MarchingCubeDispatch: Node3D
 	{
 		Cleanup();
 		_insideTree = true;
+		
+		// Add the singleton to the scene tree if it's not already
+		if (!IsInsideTree())
+		{
+			// Get the current scene tree
+			var tree = Engine.GetMainLoop() as SceneTree;
+			tree?.Root.AddChild(this);
+		}
 		
 		// Start the planet generator thread
 		if (_planetGenerator is { IsAlive: true }) return;
@@ -78,8 +92,28 @@ public sealed partial class MarchingCubeDispatch: Node3D
 		}
 	}
 
+	public override void _Process(double delta)
+	{
+		// Process the mesh queue
+		while (_meshQueue.TryDequeue(out var tuple) && _meshQueueCount < MaxMeshQueueCount)
+		{
+			if (IsInstanceValid(tuple.Item2))
+			{
+				tuple.Item2.CallDeferred(MeshInstance3D.MethodName.SetMesh, tuple.Item1);
+				tuple.Item2.CallDeferred(MeshInstance3D.MethodName.CreateConvexCollision);
+			}
+			_meshQueueCount++;
+		}
+		if (_meshQueueCount > 0)
+		{
+			// Reset the mesh queue count
+			_meshQueueCount = 0;
+		}
+	}
+
 	public bool IsTaskBeingProcessed(Guid id)
 	{
+		//_requests.TryGetValue(id, out var request);
 		return _requests.TryGetValue(id, out _);
 		//&& request.IsProcessing;
 	}
@@ -103,6 +137,9 @@ public sealed partial class MarchingCubeDispatch: Node3D
 			// If the request is null or the request is already processing, continue to the next iteration
 			if (request == null) continue;
 			if(request.IsProcessing) continue;
+			
+			// Skip if the request has been cancelled (no longer in the dictionary)
+			if (!_requests.ContainsKey(request.Id)) continue;
 
 			// Add the task to the worker thread pool
 			_workerThreads.Add(WorkerThreadPool.AddTask(Callable.From(() => { GeneratePlanet(request); })));
@@ -138,6 +175,10 @@ public sealed partial class MarchingCubeDispatch: Node3D
 					
 		if (mesh == null || mesh.GetSurfaceCount() == 0)
 		{
+			if (!_requests.TryRemove(request.Id, out _))
+			{
+				GD.Print($"Unable to remove request with ID {request.Id} from the queue.");
+			}
 			return;
 		}
 
@@ -145,33 +186,30 @@ public sealed partial class MarchingCubeDispatch: Node3D
 		var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
 		if (IsInstanceValid(meshInstance))
 		{
-			if (request.CustomMeshInstance != null)
-			{
-				meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
-				//meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateMultipleConvexCollisions);
-				meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateTrimeshCollision);
-			}
-			else
-			{
-				meshInstance.Mesh = mesh;
-				//meshInstance.CreateMultipleConvexCollisions();
-				meshInstance.CreateTrimeshCollision();
-			}
+			_meshQueue.Enqueue((mesh, meshInstance));
+			//meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
+			//meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateTrimeshCollision);
+
 		}
 		//meshInstance.Translate(request.Offset); 
 					
 		if (request.GeneratePlanetShader != null)
 		{
-			var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight, request.Center);
+			// Create the material directly in the worker thread
 			if (IsInstanceValid(meshInstance))
 			{
-				meshInstance.MaterialOverride = material;
-				/*
-				meshInstance.MaterialOverride = new StandardMaterial3D()
+				lock (_materialAssignmentLock)
 				{
-					CullMode = BaseMaterial3D.CullModeEnum.Disabled
-				};
-				*/
+					try
+					{
+						var material = request.GeneratePlanetShader(marchingCube.MinHeight, marchingCube.MaxHeight, request.Center);
+						meshInstance.MaterialOverride = material;
+					}
+					catch (Exception)
+					{
+						// ignored
+					}
+				}
 			}
 		}
 
@@ -239,16 +277,12 @@ public sealed partial class MarchingCubeDispatch: Node3D
 		_planetQueue.Push(request);
 	}
 
-	public void RemoveFromQueue(Guid requestId)
+	public void CancelRequest(Guid requestId)
 	{
-		_requests.TryRemove(requestId, out var request);
-		if (request == null)
+		if (_requests.TryRemove(requestId, out _))
 		{
-			GD.PrintErr($"Request with ID {requestId} not found in the queue.");
-			return;
+			// Successfully removed the request
 		}
-		request.IsProcessing = true;
-		
 	}
 	
 	private static float[,,] GenerateDataPoints(Vector3 offset , float voxelSize)

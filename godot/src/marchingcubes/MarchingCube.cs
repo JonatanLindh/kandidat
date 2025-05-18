@@ -65,17 +65,9 @@ public class MarchingCube
         
         var vertices = _strategy.GenerateVertices(datapoints, _threshold, _scale);
         if (vertices.Count == 0) return null;
-        // Calculate the actual geometric center of the vertices
-        var center = Vector3.Zero;
-        foreach (var vertex in vertices)
-        {
-            center += vertex;
-        }
-        center /= vertices.Count;
         
         var surfaceTool = new SurfaceTool();
         surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
-
         //surfaceTool.SetSmoothGroup(UInt32.MaxValue);
         surfaceTool.SetSmoothGroup(0);
     

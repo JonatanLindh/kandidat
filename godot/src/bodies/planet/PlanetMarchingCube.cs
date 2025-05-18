@@ -39,6 +39,17 @@ public partial class PlanetMarchingCube : Node3D
 			_radius = value;
 		}
 	}
+
+	[Export(PropertyHint.Range, "0, 32, 0.01")]
+	public float FalloffStrength
+	{
+		get => _falloffStrength;
+		set
+		{
+			_falloffStrength = value;
+		}
+	}
+
 	[Export]
 	public int Seed
 	{
@@ -68,6 +79,7 @@ public partial class PlanetMarchingCube : Node3D
     private MarchingCube _marchingCube;
 	private int _resolution = 16;
 	private float _radius = 1;
+	private float _falloffStrength = 8.0f;
 	private int _seed = 0;
 	private Vector3 _sunPosition;
 	private Node3D _planet;
@@ -122,6 +134,7 @@ public partial class PlanetMarchingCube : Node3D
 			
 			if (_planet != null)
 			{
+				_planet.Set("falloffStrength", _falloffStrength);
 				_planet.Set("radius", _radius);
 				_planet.Set("seed", _seed);
 				
