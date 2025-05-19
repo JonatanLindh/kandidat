@@ -19,10 +19,10 @@ public partial class MoonMesh : Node
 			Centre = centre;
 		}
 	}
-	
+
 	[ExportCategory("Mesh Settings")]
 	[Export]
-	public int Radius
+	public float Radius
 	{
 		get => _radius;
 		set
@@ -47,6 +47,16 @@ public partial class MoonMesh : Node
 
 
 	[ExportCategory("Crater Settings")]
+	[Export]
+	public int Seed
+	{
+		get => _seed;
+		set
+		{
+			_seed = value;
+			OnResourceSet();
+		}
+	}
 	[Export]
 	public int AmountOfCraters
 	{
@@ -122,11 +132,11 @@ public partial class MoonMesh : Node
 	}
 
 	private MarchingCube _marchingCube;
-	private int _radius = 50;
+	private float _radius = 50;
 	private MeshInstance3D _mesh;
 	private int _resolution = 40;
-	
-	
+
+	private int _seed = 0;
 	private int _amountOfCraters = 10;
 	private float _rimWidth = 2f;
 	private float _rimSteepness = 0.5f;	
@@ -136,17 +146,28 @@ public partial class MoonMesh : Node
 	private float _smoothness = 0.1f;
 	
 	private Crater[] _craters;
+	private long _task;
+	private bool _hasTaskStarted = false;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		_marchingCube = new MarchingCube();
-		SpawnMesh();
+		_task = WorkerThreadPool.AddTask(Callable.From(SpawnMesh));
+		_hasTaskStarted = true;
+		//SpawnMesh();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		// Check if task is running and completed
+		if (_hasTaskStarted && WorkerThreadPool.IsTaskCompleted(_task))
+		{
+			WorkerThreadPool.WaitForTaskCompletion(_task);
+			// Mark task as no longer running after completion
+			_hasTaskStarted = false;
+		}
 	}
 
 	private float[,,] GenerateDataPoints(int radius)
@@ -181,20 +202,29 @@ public partial class MoonMesh : Node
 
 	private void OnResourceSet()
 	{
-		SpawnMesh();
+		//SpawnMesh();
 	}
 
 	private void SpawnMesh()
 	{
 		if (_mesh != null)
 		{
-			RemoveChild(_mesh);
+			CallDeferred(Node.MethodName.RemoveChild, _mesh);
 			_mesh.QueueFree();
 			_mesh = null;
 		}
-		var dataPoints = GenerateDataPoints(_resolution);
-		_marchingCube ??= new MarchingCube();
-		var mesh = _marchingCube.GenerateMesh(dataPoints);
+		//var dataPoints = GenerateDataPoints(_resolution);
+		//_marchingCube ??= new MarchingCube();
+		//var mesh = _marchingCube.GenerateMesh(dataPoints);
+		
+		var mesh = new SphereMesh()
+		{
+			Radius = _resolution,
+			Height = _resolution * 2f,
+			RadialSegments = _resolution * 2,
+			Rings = _resolution,
+		};
+		
 		_mesh = new MeshInstance3D();
 		_mesh.Mesh = mesh;
 		
@@ -205,7 +235,7 @@ public partial class MoonMesh : Node
 		GenerateCraters();
 		_mesh.Scale = Vector3.One * (1 / (float)_resolution);
 		_mesh.Scale *= _radius;
-		AddChild(_mesh);
+		CallDeferred(Node.MethodName.AddChild, _mesh);
 	}
 	
 
@@ -223,11 +253,12 @@ public partial class MoonMesh : Node
 		var positions = meshData[(int)Mesh.ArrayType.Vertex].AsVector3Array();
 		var normal = meshData[(int)Mesh.ArrayType.Normal].AsVector3Array();
 
-		foreach (var crater in _craters)
+
+		for (int i = 0; i < positions.Length; i++)
 		{
-			for (int i = 0; i < positions.Length; i++)
+			var craterHeight = 0f;
+			foreach (var crater in _craters)
 			{
-				var craterHeight = 0f;
 				var x = positions[i].DistanceTo(crater.Centre) / crater.Radius;
 			
 				// Cavity Calculation
@@ -243,13 +274,12 @@ public partial class MoonMesh : Node
 			
 				// Modify the Crater Height
 				craterHeight += craterShape * crater.Radius;
-
-				positions[i] += positions[i].Normalized() * craterHeight;
 				
-				// Calculate the Normal
-				normal[i] = positions[i].Normalized();
-
 			}
+			positions[i] += positions[i].Normalized() * craterHeight;
+				
+			// Calculate the Normal
+			normal[i] = positions[i].Normalized();
 		}
 		
 		meshData[(int)Mesh.ArrayType.Vertex] = positions;
@@ -265,8 +295,12 @@ public partial class MoonMesh : Node
 		for(int i = 0; i < amount; i++)
 		{
 			// Randomize the Crater Radius
-			var craterRadius = Mathf.Lerp(_minCraterRadius, _maxCraterRadius, (float)GD.RandRange(0f, 1f));
-			var centre = RandomVector3(_resolution - 5, _resolution,_resolution * Vector3.One);
+			Random random = new Random(_seed + i);
+			//var randomValue = (float)GD.RandRange(0f, 1f);
+			var randomValue = (float)random.NextDouble();
+			
+			var craterRadius = Mathf.Lerp(_minCraterRadius, _maxCraterRadius,randomValue);
+			var centre = RandomVector3(Mathf.Max(1, _resolution - 5), _resolution, Vector3.Zero, seed: _seed + i);
 			craters[i] = new Crater(craterRadius, centre);
 		}
 		return craters;
@@ -285,7 +319,7 @@ public partial class MoonMesh : Node
 
 	private static Vector3 RandomVector3(float minLength, float maxLength, Vector3 origin = default, int seed = -1)
 	{
-		var random = seed == -1 ? new Random() : new Random(seed);
+		var random = new Random(seed);
         
 		// Generate a random direction
 		float x = (float)(random.NextDouble() * 2.0 - 1.0);
