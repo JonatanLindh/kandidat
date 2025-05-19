@@ -75,22 +75,27 @@ func randomPlanetRadius(r):
 	return r.randf_range(MIN_PLANET_RADIUS, MAX_PLANET_RADIUS)
 
 # Creates a unique seed for every planet in a system based on the seed for that solar system
-func generatePlanetDataSeed(systemSeed: int, position: Vector3):
+func generateCelestialBodyDataSeed(celestialBodySeed: int, position: Vector3):
 	var seedGen = SeedGenerator.new();
-	return seedGen.GenerateSeed(systemSeed, position);
+	return seedGen.GenerateSeed(celestialBodySeed, position);
 
-func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, primaryPosition = Vector3.ZERO, primaryVelocity = Vector3.ZERO):
+func spawnMoon(moonRadius, moonMass, orbitRadius, orbitSpeed, orbitAngle, planetSeed, primaryPosition = Vector3.ZERO, primaryVelocity = Vector3.ZERO):
 	var randomID = rand.randi_range(100000, 999999);
-	var bodyInstance = PLANET_SCENE.instantiate(); # Uses PLANET_SCENE for now since moon scene didn't quite work
+	var bodyInstance = MOON_SCENE.instantiate();
 	bodyInstance.mass = moonMass;
 	bodyInstance.position = primaryPosition + Vector3(sin(orbitAngle) * orbitRadius, 0, cos(orbitAngle) * orbitRadius)
 	var bodySpeedAroundSun = orbitSpeedFromRadius((bodyInstance.position - SUN.position).length(), SUN.mass)
 	var bodyAngleAroundSun = atan2(bodyInstance.position.x - SUN.position.x, bodyInstance.position.z - SUN.position.z)
 	var bodyVelocityAroundSun = Vector3(cos(bodyAngleAroundSun) * bodySpeedAroundSun, 0, -sin(bodyAngleAroundSun) * bodySpeedAroundSun)
 	bodyInstance.velocity = bodyVelocityAroundSun + Vector3(cos(orbitAngle) * orbitSpeed, 0, -sin(orbitAngle) * orbitSpeed)
-	bodyInstance.planet_data.radius = moonRadius
+	bodyInstance.set("Radius", moonRadius)
 	bodyInstance.name = "Body" + str(randomID);
 	bodyInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
+
+	# Creates new seed based on the planet seed
+	bodyInstance.set("Seed",generateCelestialBodyDataSeed(planetSeed, bodyInstance.position));
+	print("Moon seed " + str(bodyInstance._seed) + " based on planet: " + str(planetSeed));
+
 	$GravityController.add_child(bodyInstance);
 	bodyInstance.owner = self
 	bodies.append(randomID);
@@ -106,10 +111,11 @@ func spawnPlanetMarchingCube(planetRadius, planetMass, orbitRadius, orbitSpeed, 
 	planetInstance.set("Radius", planetRadius)
 	planetInstance.SunPosition = SUN.global_position;
 	planetInstance.name = "Body" + str(randomID);
-	planetInstance.trajectory_color = Color.from_hsv(rand.randf_range(0, 1), 0.80, 0.80) * 3;
+	planetInstance.trajectory_color = Color.from_hsv(r.randf_range(0, 1), 0.80, 0.80) * 3;
 	
 	# Create a new seed for each planet to be used when generating marching cubes planet
-	planetInstance._seed = generatePlanetDataSeed(r.seed, planetInstance.position);
+	planetInstance._seed = generateCelestialBodyDataSeed(r.seed, planetInstance.position);
+	print("Planet seed: " + str(planetInstance._seed) + " based on system: " + str(r.seed));
 	
 	$GravityController.add_child(planetInstance);
 	
@@ -256,6 +262,7 @@ func instantiateSystem(system_data):
 			moon_data.orbit_radius,
 			moon_data.orbit_speed,
 			moon_data.orbit_angle,
+			rand.seed,
 			moon_data.primary_position,
 			moon_data.primary_velocity
 		)
