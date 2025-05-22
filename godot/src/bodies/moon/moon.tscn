@@ -1,21 +1,35 @@
-[gd_scene load_steps=6 format=3 uid="uid://ckitx7rndvp5l"]
+[gd_scene load_steps=8 format=3 uid="uid://ckitx7rndvp5l"]
 
 [ext_resource type="Script" uid="uid://bffvdmmiyvv8y" path="res://src/bodies/moon/MoonMesh.cs" id="1_7s32x"]
-[ext_resource type="Texture2D" uid="uid://cnrdrx5w2ohub" path="res://src/bodies/moon/textures/ground_0010_normal_opengl_1k.png" id="2_7wtx1"]
-[ext_resource type="Texture2D" uid="uid://b6coglqac1abn" path="res://src/bodies/moon/textures/ground_0010_color_1k.jpg" id="3_47726"]
-[ext_resource type="Shader" uid="uid://1u0xbe0tborg" path="res://src/bodies/moon/shader/triplanar.gdshader" id="3_lqxmc"]
+[ext_resource type="Texture2D" uid="uid://b7gwp1fdsawjp" path="res://src/bodies/moon/textures/Moon_002_basecolor.png" id="2_vnp0w"]
+[ext_resource type="Texture2D" uid="uid://4r88h2ohgsh2" path="res://src/bodies/moon/textures/Moon_002_ambientOcclusion.png" id="3_asatr"]
+[ext_resource type="Texture2D" uid="uid://b548etlru44ap" path="res://src/bodies/moon/textures/Moon_002_normal.png" id="3_tkrt2"]
+[ext_resource type="Texture2D" uid="uid://qgpm6x22nq26" path="res://src/bodies/moon/textures/Moon_002_roughness.png" id="5_asatr"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_b3avl"]
-render_priority = 0
-shader = ExtResource("3_lqxmc")
-shader_parameter/albedo_texture = ExtResource("3_47726")
-shader_parameter/normal_texture = ExtResource("2_7wtx1")
-shader_parameter/smoothness = 0.5
-shader_parameter/metallic = 0.0
-shader_parameter/occlusion_strength = 1.0
-shader_parameter/texture_scale = Vector2(0.02, 0.02)
-shader_parameter/texture_offset = Vector2(0, 0)
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_asatr"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tkrt2"]
+albedo_texture = ExtResource("2_vnp0w")
+albedo_texture_force_srgb = true
+roughness_texture = ExtResource("5_asatr")
+normal_enabled = true
+normal_scale = 1.5
+normal_texture = ExtResource("3_tkrt2")
+ao_texture = ExtResource("3_asatr")
+heightmap_texture = SubResource("CompressedTexture2D_asatr")
+backlight = Color(0.0415072, 0.0415072, 0.0415072, 1)
+uv1_scale = Vector3(0.02, 0.02, 0.02)
+uv1_triplanar = true
 
 [node name="Moon" type="GravityBody"]
 script = ExtResource("1_7s32x")
-MeshMaterial = SubResource("ShaderMaterial_b3avl")
+Radius = 6.0
+Resolution = 64
+MeshMaterial = SubResource("StandardMaterial3D_tkrt2")
+Seed = 16
+AmountOfCraters = 30
+RimWidth = 0.8
+RimSteepness = 1.0
+MinCraterRadius = 6.0
+MaxCraterRadius = 8.0
+Smoothness = 1.0
