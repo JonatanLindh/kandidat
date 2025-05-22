@@ -323,7 +323,13 @@ public partial class UISelectableStar : CanvasLayer
 	private void OnFloatingStarOverlayVisibilityChanged(bool visible)
 	{
 		starSelectContainer.Visible = visible;
+	}
 
-		player.Position = star.transform.Origin;
+	private void OnPlayerHUDVisibilityChanged(bool visible)
+	{
+		if (player != null)
+		{
+			player.Call("hud_visibility", visible);
+		}
 	}
 }

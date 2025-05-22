@@ -5,6 +5,7 @@ class_name Player
 @onready var camera_3d: Camera3D = $Head/Camera3D
 @onready var ray_cast_3d: RayCast3D = $RayCast3D
 @onready var spot_light_3d: SpotLight3D = $Head/SpotLight3D
+@onready var hud = $HUD
 
 signal updated_status(position, speed)
 
@@ -241,4 +242,7 @@ func align_with_vector(alignment_vector: Vector3, rotation_speed : float):
 
 	var target_basis = Basis(right_direction, up_direction, forward_direction).orthonormalized()
 	global_transform.basis = global_transform.basis.slerp(target_basis, rotation_speed)
+	
+func hud_visibility(visible: bool):
+	hud.visible = visible
 	
