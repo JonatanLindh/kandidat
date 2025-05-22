@@ -120,7 +120,8 @@ public sealed partial class MarchingCubeDispatch: Node
 			ProjectHullVertices = true
 		};
 
-		meshInstance.CreateMultipleConvexCollisions(settings);
+		//meshInstance.CreateMultipleConvexCollisions(settings);
+		meshInstance.CreateConvexCollision();
 		meshInstance.Translate(request.Offset);
 
 		if (request.GeneratePlanetShader != null)
