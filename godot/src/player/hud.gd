@@ -17,7 +17,8 @@ var controls_text := "-WASD for directional movement
 						\n-4 to roll clockwise
 						\n-v to stop flying when close to a planet
 						\n-h to close this text
-						\n-f to turn on/off flashlight"
+						\n-f to turn on/off flashlight
+						\n-5-8 for speeds 1200-200"
 
 func _ready():
 	var player = get_parent()

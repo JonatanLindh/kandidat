@@ -51,6 +51,15 @@ func _input(event):
 	if Input.is_action_just_pressed("ui_cancel"):
 		toggle_mouse_lock()
 		
+	if Input.is_action_just_pressed("1200_speed"):
+		current_speed = 1200
+	elif Input.is_action_just_pressed("800_speed"):
+		current_speed = 800
+	elif Input.is_action_just_pressed("400_speed"):
+		current_speed = 400
+	elif Input.is_action_just_pressed("200_speed"):
+		current_speed = 200
+		
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("flashlight"):
 		spot_light_3d.visible = not spot_light_3d.visible
@@ -217,7 +226,7 @@ func on_gravity_field_exited():
 	velocity = Vector3.ZERO
 	gravity_strength = 0
 	flying = true
-	current_speed = BASE_SPEED
+	current_speed = 200
 	print("exited")
 
 func apply_velocity(dir : Vector3, speed_multiplier, base_velocity):
