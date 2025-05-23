@@ -18,7 +18,7 @@ grow_vertical = 0
 
 [node name="TabContainer" type="TabContainer" parent="PanelContainer"]
 layout_mode = 2
-current_tab = 1
+current_tab = 2
 
 [node name="Info" type="VBoxContainer" parent="PanelContainer/TabContainer"]
 visible = false
@@ -171,6 +171,7 @@ text = "Planet count"
 clip_text = true
 
 [node name="Actions" type="VBoxContainer" parent="PanelContainer/TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
@@ -205,7 +206,6 @@ size_flags_vertical = 6
 text = "Travel"
 
 [node name="Dev" type="VBoxContainer" parent="PanelContainer/TabContainer"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
@@ -215,10 +215,42 @@ size_flags_horizontal = 8
 size_flags_vertical = 0
 text = "  X  "
 
-[node name="VisitButton" type="Button" parent="PanelContainer/TabContainer/Dev"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/TabContainer/Dev"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+text = "Add custom celestial body:"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+
+[node name="TextEditMass" type="TextEdit" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "50000"
+placeholder_text = "Mass"
+
+[node name="TextEditSpeed" type="TextEdit" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "2"
+placeholder_text = "Speed"
+
+[node name="AddPhysicsBodyButton" type="Button" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Spawn"
+
+[node name="Label2" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+text = "Other:"
+
+[node name="VisitButton" type="Button" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 6
 text = "Enter System Scene"
 
 [node name="StarSelectContainer" type="PanelContainer" parent="."]
@@ -261,4 +293,5 @@ text = "Distance"
 [connection signal="toggled" from="PanelContainer/TabContainer/Actions/PlayerHUDCheckButton" to="." method="OnPlayerHUDVisibilityChanged"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Actions/TravelButton" to="." method="OnTravelButtonPressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Dev/CloseButton2" to="." method="OnCloseButtonPressed"]
-[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VisitButton" to="." method="OnVisitButtonPressed"]
+[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer/AddPhysicsBodyButton" to="." method="OnAddPhysicsBodyButtonPressed"]
+[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VBoxContainer/VisitButton" to="." method="OnVisitButtonPressed"]
