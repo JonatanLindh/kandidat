@@ -38,19 +38,34 @@ public partial class DiscGalaxy : Node3D
 	private void Generate()
 	{
 		int starsGenerated = 0;
+		float middle_mass = 10e6f;
+		
+		TrueStar white_hole = new TrueStar(
+			new Transform3D(Basis.Identity, Vector3.Zero),
+			0,
+			middle_mass,
+			Vector3.Zero,
+			"Center"
+		);
+
+		stars[starsGenerated] = white_hole;
+		starsGenerated++;
 
 		while (starsGenerated < starCount)
 		{
 			Vector3 point = SamplePointInSphere();
 			float noiseVal = noise.GetNoise3D(point.X, point.Y, point.Z);
-
+			
+			Vector3 v0 = Vector3.Up.Cross(-point).Normalized();
+			v0 *= Mathf.Sqrt(middle_mass / point.Length());
+			
 			if (GetISOLevel(point) > noiseVal)
 			{
 				TrueStar star = new TrueStar(
 					new Transform3D(Basis.Identity, point),
 					seedGen.GenerateSeed(seed, point),
-					2000f,
-					Vector3.Zero,
+					1f,
+					v0,
 					"Star"
 				);
 
