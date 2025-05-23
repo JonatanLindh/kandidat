@@ -10,7 +10,7 @@
 
 
 
-## Group member
+## Group members
 | Name | GitHub username |
 | ------------- | ------------- |
 | Jacob Andersson  | [JacobAndersso](https://github.com/JacobAndersso) |
