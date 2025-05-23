@@ -18,26 +18,23 @@
     hanging-indent: 0pt,
   )
   counter(heading).update(0)
-  body
+  [#body <no-wc>]
 }
 
 #set heading(numbering: "1.")
-#show: word-count
 
 
 #page()[
   #set align(center + horizon)
   #grid(
-    rows: (1fr),
+    rows: (1fr, 10fr, 1fr),
     image("EN_Black_Chalmers_GU.png"),
     [
       #set text(size: 30pt)
       #text(maroon)[Ord: #total-words]
       
-      #image("ozempic.png", width: 40%)
-
-
-      Exo Explorer 2? Chalmers Galaxy Solar-System Planet Generation App (CGSSPGA)
+      #image("nice image maybe.png", width: 80%)
+      Chalmers Galaxy Solar-System Planet Generation Simulation Software System Application
       
       #set text(size: 17pt)
       Simulating a physics-based procedurally generated galaxy
@@ -111,6 +108,11 @@ We would like to thank our supervisor Staffan Björk for his invaluable support 
 ]
 #outline(title: none, target: figure.where(kind: table))
 
+#show text.where(fill: red): it => [
+  #it <no-wc>
+]
+#show: word-count.with(exclude: <no-wc>)
+
 #pagebreak()
 #heading(numbering: none)[
   Glossary
@@ -121,9 +123,9 @@ We would like to thank our supervisor Staffan Björk for his invaluable support 
     - *Normal:* A vector that is perpendicular to a surface. Used in lighting calculations.
     - *UV coordinates:* a 2D coordinate system used to map a texture image to a 3d object surface.
   - *Edge:* A line segment connecting two vertices.
-  - *Face (Triangle):* A flat surface bounded by edges (typically a triangle in real-time graphics). Triangles are used because they are always planar.
+  - *Face (Triangle):* A flat surface bounded by edges (typically a triangle in real-time graphics). Triangles are used because they are always #text(red)[planar]. #text(maroon)[Staffan: som betyder vad?]
   
-- *Rendering Pipeline:* The sequence of stages a GPU uses to render a 3D scene.
+- *Rendering Pipeline:* The sequence of stages a #text(red)[GPU] #text(maroon)[S: borde vara med i glossary] uses to render a 3D scene.
 
 - *Shader:* A small program that runs on the GPU. Primarily used for controlling how objects are rendered.
     - *Vertex Shader:* Processes each vertex; transforms positions from model space to clip space and manipulates vertex attributes.
@@ -135,32 +137,38 @@ We would like to thank our supervisor Staffan Björk for his invaluable support 
     - *Compute Shader:* Used for general-purpose computation on the GPU (not directly part of the rendering pipeline).
 
 - *Procedural Generation:* The creation of data (models, textures, etc.) algorithmically, rather than manually. This often uses noise functions and other mathematical techniques to create varied and complex results.
-  - *Noise Function (Perlin, Simplex):* Algorithms for generating pseudo-random values with a smooth, continuous appearance, used for procedural generation.
+  - *Seed:* A value used to initialize a pseudo-random number generator. Using the same seed ensures the same sequence of "random" numbers @godot-random-number-generator.
+  - *Noise Function #text(red)[(Perlin, Simplex)] #text(maroon)[S: ta bort?]:* Algorithms for generating pseudo-random values with a smooth, continuous appearance, used for procedural generation.
   - *Marching Cubes:* An algorithm to create a triangle mesh from a 3D scalar field (e.g., noise data).
 
 - *LOD (Level of Detail):* Rendering objects with varying complexity based on distance.
 - *PCG*: Procedural content generation
-- *Axis Aligned Bounding Box (AABB):*  A box where each face is aligned to a basis vector.
-#pagebreak()
+- *Axis Aligned Bounding Box (AABB):*  A box where each face is aligned to the coordinate vectors (x, y, z).
+
+- *Performance metrics:*
+    - *FPS (Frames per second):* The amount of images (frames) that a computers render every second @nvidia_fps. Higher FPS generally means smoother motion. For example, 60 FPS means the screen is updated 60 times per second. Closely related to frame time.
+    - *Frame time:* The amount of time (in milliseconds) it takes to render a single frame @techreport_inside_the_second. Closely related to FPS, e.g., 60 FPS = \~16.67 ms frame time per frame.
 
 #set page(numbering: "1")
 #counter(page).update(1)
 
-= Introduction #text(red)[ERIK klar]
-Procedural generation offers a way to algorithmically create vast and diverse game worlds without the immense manual effort required to design every detail. Applications of procedural generation range from the random placement of enemies in confined dungeon spaces to the generation of entire universes comprising millions of celestial bodies. Using procedural content generation (PCG) also has the potential to increase re-playability #cite(<PCGNeuroevolution>).
+= Introduction #text(red)[ERIK KLAR]
+Procedural content generation (PCG) offers a way to algorithmically create vast and diverse game worlds without the immense manual effort required to design every detail. Applications of PCG range from the random placement of enemies in confined dungeon spaces to the generation of entire universes comprising millions of celestial bodies. Using PCG also has the potential to increase re-playability #cite(<PCGNeuroevolution>).
 
 Using PCG algorithms is particularly relevant in the context of space exploration games, where the scale of the universe is inherently beyond manual creation. Creating compelling, varied, and believable planetary systems and galaxies is a challenging problem within this domain. Key issues include the computational efficiency required to generate hundreds to millions of celestial objects, as well as the need to balance performance constraints with the goal of providing a plausible and playable experience. 
 
-This project aims to address the technical and creative challenges of building such systems in a computationally efficient manner, while also simulating them within a game engine, such as Godot. Implementation requires utilization of techniques within the area, such as utilizing the power of GPU computations and different terrain generation algorithms. In addition, the project hopes to provide insight into how such challenges can be approached by documenting the thought process behind decisive development decisions.
+This thesis addresses these challenges by developing a system for procedurally generating a galaxy composed of multiple solar systems, with an emphasis on computational efficiency and physical accuracy. The implementation is built in the Godot game engine, and requires utilization of techniques in this domain, such as utilizing the power of GPU computations, different terrain generation algorithms, and physical models. In addition, the project hopes to provide insight into how such challenges can be approached by documenting the thought process behind decisive development decisions.
+
+A related project, Exo Explorer @exo_exporer:2023, a bachelor's from Chalmers University of Technology, explored similar themes. While Exo Explorer focused on a single solar system and emphasized gameplay and planetary ecosystems, this thesis places a greater focus on simulating a physically accurate model of a procedurally generated, explorable galaxy. 
 
 == Purpose #text(red)[Jacob klar] <purpose-ref>
 The aim of this project is to create a physics-based simulation of a procedurally generated, explorable galaxy. 
 
-Each solar system that make up the galaxy will consist of various procedurally generated planets, orbiting a central star. These orbits are governed by a simplified physics simulation based on Newtonian physics. System complexity can vary, ranging from a sun with a single planet, to arrangements with multiple planets and moons.
+Each solar system that make up the galaxy will consist of various procedurally generated planets, orbiting a central star. These orbits are governed by a simplified physics simulation based on Newtonian physics. System complexity can vary, ranging from a sun with a single planet, to arrangements with multiple planets and moons. #text(maroon)[Staffan: skillnad från tidigare?]
 
 While procedurally generated, the galaxy will remain consistent and revisitable by ensuring deterministic generation. Different seeds will allow for unique galaxies to be created, while also enabling parts to be generated identically, upon revisit.
 
-== Limitations
+== Initial Limitations
 Some limitations for the projects have been set. The physics simulation will be simplified and not necessarily accurate according to real laws of gravity. This does not mean that the program will completely disregard the accuracy of the physics model, but will instead focus on specific aspects such as the orbit of celestial bodies and how they affect each others orbits. The system needs to be realistic enough to simulate solar systems, but not realistic to a point where all intricacies of physics will be considered.
 
 Furthermore, the project will not be developed into a full scale video game. Rather, the focus will lie on the more technical aspects: terrain generation, physics, and performance optimization. Other features such as a UI for quick travel or detailed planet properties are not prioritized. Essentially, the goal of the project is to create a model of a procedurally generated galaxy, not an engaging game play experience.
@@ -172,10 +180,12 @@ This report hopes to contribute with a computationally efficient, conceptually i
 This section presents the foundational theoretical concepts that were needed before beginning the project, followed by a few select previous works that utilize some of these concepts.
 
 == Procedural Content Generation #text(red)[William klar]
-Procedural Content Generation (PCG) is defined as “the algorithmic creation of game content with limited or indirect user input”@shaker2016procedural. In video games, this typically involves the automatic generation of content such as unique levels for each gameplay session or the stochastic placement of environmental elements like vegetation. Throughout the project procedural generation will be used in variation. 
+Procedural Content Generation (PCG) is defined as “the algorithmic creation of game content with limited or indirect user input”@shaker2016procedural. While PCG is widely used in video games—typically involving the automatic generation of content such as unique levels for each gameplay session or the stochastic placement of environmental elements like vegetation—it also has applications beyond gaming, such as in architectural design, and data generation.. Throughout the project procedural generation will be used in variation. 
 
-== Noise #text(red)[ANTON typ KLAR]
-Noise is very commonly used in a plethora of computer generated content, such as for generating mountains, textures and vegetation @proceduralgame:2016. Noise is generated through the use of a pseudo random function and is often stored and visualized as a texture. Perlin noise @perlinnoise:1985 is a famous gradient noise function founded by Ken Perlin in 1985 that has been used extensively to produce procedural content in games and films. Noise will be at the core of many of the things developed in this project and will be used frequently.
+== Noise #text(red)[ANTON typ KLAR] <background-noise-ref>
+Noise is very commonly used in a plethora of #text(red)[computer generated content] #text(maroon)[Staffan: Vad är skillnaden på detta om PCG? Om samma, använd samma i hela rapporten (gäller alla begrepp)], such as for generating mountains, textures and vegetation @proceduralgame:2016. Noise is generated through the use of a pseudo random function and is often stored and visualized as a texture. Perlin noise @perlinnoise:1985 is a famous gradient noise function founded by Ken Perlin in 1985 that has been used extensively to produce procedural content in games and films. Noise will be at the core of many of the things developed in this project and will be used frequently.
+
+#text(maroon)[Staffan: Detta förklara hur noise används och skapas men inte vad det är (inom PCG)...]
 
 == Terrain Generation #text(red)[William klar]
 This subsection provides an overview of height maps and the marching cubes algorithm, the two techniques used to procedurally generate terrain in the project.
@@ -202,19 +212,20 @@ Height maps serve as data structures that encode elevation information for each 
   )
 )
 
-=== Marching Cubes #text(red)[William klar]<marching-cubes>
-The Marching Cubes algorithm @marchingcubes:1998 is a method for extracting a polygonal mesh representation of an isosurface from a three-dimensional scalar field. In essence, it receives a grid of scalar values as input and produces a mesh that approximates the isosurface defined by a specified threshold value. Initially developed for the visualization of medical imaging data such as CT and MRI scans, the algorithm has also found recent applications in procedural mesh generation within computer graphics.
+=== Marching Cubes #text(red)[William, Anton]<marching-cubes>
+ The Marching Cubes algorithm @marchingcubes:1998 is a method for extracting a polygonal mesh representation of an isosurface from a three-dimensional scalar field. An isosurface is a surface that represents points of a constant value within a volume. A scalar field, on the other hand, is a "_scalar-valued function of the points of a domain in some space, such as the temperature or the density field inside a body_" @scalarfield. The algorithm takes a grid of scalar values as input and generates a mesh approximating the isosurface defined by a given threshold, enabling the visualization of complex structures within the data.
 
-The procedure involves traversing the scalar field and evaluating groups of eight adjacent grid points, which collectively form a logical cube. For each cube, the algorithm determines the polygon(s) that approximate the isosurface intersecting that region. This is achieved by classifying each vertex of the cube as either inside or outside the isosurface, based on whether its scalar value is above or below a predefined iso-level. The algorithm then references a precomputed lookup table to identify the appropriate triangulation for the cube's configuration.
+The procedure involves traversing the scalar field and evaluating groups of eight adjacent grid points, which forms a logical cube. For each cube, the algorithm determines the polygon(s) that approximate the isosurface intersecting that region. This is achieved by classifying each vertex of the cube as either inside or outside the isosurface, based on whether its iso-value (the scalar value at that vertex) is above or below the predefined iso-level (the chosen threshold value that defines the isosurface). 
+In other words, the iso-level specifies the value that the isosurface represents, while the iso-value is the actual scalar value at a specific vertex. The algorithm then references a precomputed lookup table to identify the appropriate triangulation for the cube's configuration.
 
-Given that each of the eight cube vertices can exist in one of two states (inside or outside), there are $2^8 = 256$ possible configurations. However, due to symmetry and rotational equivalence, these reduce to 15 unique cases (see #ref(<mc15>)), with all others derivable through reflection or rotation. The process is repeated throughout the entire scalar field, and the resulting polygons are aggregated to form the final mesh.
+Given that each of the eight cube vertices can exist in one of two states (on or off), there are $2^8 = 256$ possible configurations. However, due to symmetry and rotational equivalence, these reduce to 15 unique cases (see #ref(<mc15>)), with all others derivable through reflection or rotation. The process is repeated throughout the entire scalar field, and the resulting polygons are combined to form the final mesh.
 #figure(
   image("images/MarchingCube/MarchingCubesEdit.svg"),
   caption: [Marching Cubes 15 unique polygon combination. Ryoshoru, #link("https://creativecommons.org/licenses/by-sa/4.0")[CC BY-SA 4.0], via Wikimedia Commons]
 ) <mc15>
 
 == Chunks #text(red)[William klar]
-Chunks refers to (in this context) a fixed-size segments of data that is loaded, processed, and rendered independently. This approach is particularly beneficial in large or procedurally generated environments, as it allows the game engine to manage memory and computing resources efficiently by loading only the chunks near the player.
+Chunks @Chunk1 refers to (in this context) a fixed-size segments of data that is loaded, processed, and rendered independently. This approach is particularly beneficial in large or procedurally generated environments, as it allows the game engine to manage memory and computing resources efficiently by loading only the chunks near the player.
 
 Chunking can be used for additional optimization such as:
 - Frustum Culling: Rendering only the chunks within the player's field of view.​
@@ -222,27 +233,28 @@ Chunking can be used for additional optimization such as:
 - Level of Detail (LOD): Reducing the complexity of distant chunks to save on processing power.
 
 === Octrees #text(red)[William klar]<B-octree>
-An octree is a hierarchical data structure that recursively subdivides three-dimensional space into eight octants using a tree structure (see #ref(<octreeimg>)). This structure is particularly effective for managing sparse or large-scale environments, as it allows for efficient spatial queries, collision detection, and level-of-detail (LOD) rendering.​ @octree1
+An octree @octree1 is a hierarchical data structure that recursively subdivides three-dimensional space into eight octants using a tree structure (see #ref(<octreeimg>)). This structure is particularly effective for managing sparse or large-scale environments, as it allows for efficient spatial queries, collision detection, and level-of-detail (LOD) rendering.​
 
 #figure(
   image("images/Octree/Octree2.svg.png", width: 65%),
-  caption: [Visulaizaiton of a Octree in both a square- and tree format. WhiteTimberwolf, #link("https://creativecommons.org/licenses/by-sa/3.0/deed.en")[CC BY-SA 3.0], via Wikimedia Commons]
+  caption: [Visualization of a in both a cube- and tree format. WhiteTimberwolf, #link("https://creativecommons.org/licenses/by-sa/3.0/deed.en")[CC BY-SA 3.0], via Wikimedia Commons]
 )<octreeimg>
+
 While chunks are typically uniform, fixed-size sections of the game world loaded and unloaded as needed, octrees offer a more dynamic approach. In some implementations, each leaf node of an octree represents a chunk, allowing for variable levels of detail within different regions of the game world. This integration enables efficient memory usage and rendering performance, especially in procedurally generated or expansive environments.
 == GPU Computation #text(red)[Erik]
-GPU computing is the process of utilizing the highly parallel nature of the GPU for running code. Since the GPU has significantly more processing units than the CPU @princeTonGPU, it can be utilized to write highly parallelized pieces of code to solve certain programming problems. These programs that run on the GPU are often referred to as compute shaders @UnityComputeShaders.
+GPU #text(maroon)[Staffan: ref] computing is the process of utilizing the highly parallel nature of the GPU for running code. Since the GPU has significantly more processing units than the CPU @princeTonGPU, it can be utilized to write highly parallelized pieces of code to solve certain programming problems. These programs that run on the GPU are often referred to as compute shaders @UnityComputeShaders.
 
 == Previous works #text(red)[William klar]
+#text(maroon)[Staffan: Gå igenom olika exempel och koppla dom till begreppen som introducerats tidigare? 2.6.4. gör detta bra (kanske går det att göra bättre)]
 Several existing games and research projects provide a foundation for this work, demonstrating both the potential and the challenges of procedural planet and solar system generation and simulation:
 
-=== Minecraft
-While not focused on planetary systems, Minecraft @minecraft:2009 demonstrates the power of procedural generation for creating vast and varied landscapes using noise. This random generation results in virtually endless environments, drawing players in with the offer of exploring new, never seen before areas. Minecraft's success highlights the appeal of procedurally generated worlds, and the endless possibilities they offer for creativity and exploration.
+=== Minecraft #text(red)[Jacob klar]
+While not focused on planetary systems, Minecraft @minecraft:2009 demonstrates the power of procedural generation in creating vast and varied landscapes using noise functions (explained in @background-noise-ref). In Minecraft, noise is used to procedurally create terrain features such as mountains, valleys, and cave systems. This approach results in endless, unique environments for the player to explore.
 
 #figure(
   image("images/PreviousWorks/minecraft_landscape.png", width: 65%),
   caption: [Minecraft Windswept Hills biome]//@minecraft_landscape]
 )
-
 
 === No Man's Sky
 No Man's Sky @hello_games:2016 famously utilized procedural generation to create a universe of planets, each with unique flora, fauna, and landscapes. It demonstrated the potential of large-scale procedural planet generation in a commercial game.
@@ -254,8 +266,8 @@ No Man's Sky @hello_games:2016 famously utilized procedural generation to create
 
 
 === Outer wilds
-Outer Wilds is a space exploration and adventure game that bears a small resemblance to this project. Unlike the other works mentioned, which are related through their use of procedural generation, Outer Wilds features entirely hand-crafted content. Its relevance to this project instead lies in its approach to physics. In Outer Wilds, all physics interactions are computed in real time, with no pre-defined behaviors. For instance, planetary motion is governed by a modified version of Newton's law of gravitation, and all velocities are dynamically calculated during gameplay.
-@outerwilds1
+Outer Wilds @OuterWilds0 is a space exploration and adventure game that bears a small resemblance to this project. Unlike the other works mentioned, which are related through their use of procedural generation, Outer Wilds features entirely hand-crafted content. Its relevance to this project instead lies in its approach to physics. In Outer Wilds, all physics interactions are computed in real time, with no pre-defined behaviors. For instance, planetary motion is governed by a modified version of Newton's law of gravitation, and all velocities are dynamically calculated during gameplay @outerwilds1.
+
 #figure(
   image("images/PreviousWorks/outerwilds_mech_3.jpg", width: 65%),
   caption: [Map of the Outer Wilds solar system]
@@ -264,53 +276,99 @@ Outer Wilds is a space exploration and adventure game that bears a small resembl
 === Exo Explorer
 Exo Explorer @exo_exporer:2023 is an earlier bachelor thesis project, also from Chalmers, directly addressed the challenge of procedurally generating solar systems using the Unity engine. The project utilized Perlin noise @perlinnoise:1985 and the marching cubes algorithm @marchingcubes:1998 to create planet terrain featuring forests, lakes, and creatures with basic simulated needs (hunger, thirst, reproduction). 
 
-Exo Explorer will serve as a valuable source of inspiration for this project, demonstrating techniques of procedural generation, optimization, etc, that this project aims to explore as well. Whilst aiming to delve deeper into other aspects such as the complexity of the simulated physics, performance, and exploration; especially with a greater focus on simulating several solar systems at the same time for the user to explore.
+Exo Explorer served as a valuable source of inspiration for this project, demonstrating techniques of procedural generation, optimization, etc, that this project aims to explore as well. Whilst aiming to delve deeper into other aspects such as the complexity of the simulated physics, performance, and exploration; especially with a greater focus on simulating several solar systems at the same time for the user to explore.
 
 #figure(
   image("images/PreviousWorks/exoexplorer.png", width: 65%),
   caption: [Cover photo from the #link("https://github.com/Danilll01/Kandidatarbete2023?tab=readme-ov-file")[#underline[project's repository]]]
 )
 
-= Method and Planning #text(red)[Fixa tempus till typ was planned to]<Method>
+= Method and Planning #text(red)[Fixa tempus till typ was planned to] #text(maroon)[Staffan: Planning bara funkar nog här också. För att en del av planning är vilka metoder ni tänkt använda.]<Method>
 This section describes the methodology and planning behind the project. It presents the chosen workflow, the intended features, selected tools and technologies, as well as considerations related to societal and ethical implications.
 
-== Workflow
-Development followed an Agile adjacent workflow @Agile101, meaning that the work was divided into "sprints" with iterative task refinement. Task prioritization and addition of tasks to the backlog was be done during the end of the week before the weekly supervisor meeting. Task management involved tracking various states for each task (on the Kanban board), including "blocked", "todo", "in progress", "in review", and "done". All labels are self-explanatory except for "blocked"; tasks categorized under this label cannot be worked on before prerequisite task(s) are finished. 
+== Workflow <Workflow>
+Development was planned to follow an Agile @Agile101 adjacent #text(maroon)[Staffan: få med i stycket varför det är adjacent] workflow, meaning that the work were to be divided into "sprints" #text(fuchsia)[_hur långa?_] with iterative task refinement. Task prioritization and addition of tasks to the backlog was to be done during the end of the week before the weekly supervisor meeting. Task management involved tracking various states for each task (on the Kanban board @kanban), including "blocked", "todo", "in progress", "in review", and "done". All labels are self-explanatory except for "blocked"; tasks categorized under this label cannot be worked on before prerequisite task(s) are finished. 
 
-== Git
-During the development process, the version control system Git was utilized in conjunction with Github. Additionally, the Github repository served as a platform for task management by employing a Kanban board to facilitate tracking of task assignments and progress.
+== Git <Git-section>#text(red)[Jacob klar]
+During the development process, the version control system Git @git-version-control was utilized in conjunction with GitHub @github. Additionally, the GitHub repository served as a platform for task management by employing a Kanban board @kanban to facilitate tracking of task assignments and progress.
 
-The projects standard workflow for Git and GitHub involves maintaining each feature within a dedicated branch. GitHub’s Kanban board allowed us to associate branches with specific tasks, ensuring a clear and structured development process. Moreover, acceptance criteria were established for each task on the Kanban board. Once all criteria were met, a pull request was created to merge the changes into the main branch. Before finalizing the merge, at least one other team member was required to review the code and the feature. This review process served both as a quality assurance measure and as an opportunity to provide constructive feedback.
+The projects standard workflow for Git and GitHub involves maintaining each feature within a dedicated branch. GitHub’s Kanban board allowed us to associate branches with specific tasks. Moreover, acceptance criteria were established for each task on the Kanban board. Once all criteria were met, a pull request was created to merge the changes into the main branch. Before finalizing the merge, at least one other team member was required to review the code and the feature. This review process served both as a quality assurance measure and as an opportunity to provide feedback.
 
-== Godot
-The Godot game engine is the engine that was chosen for this project. Godot is a free and open-source game engine recognized for its lightweight architecture, efficient scene system, and user-friendly interface. It employs a node-based system that enables modular and reusable component design. The engine officially supports multiple programming languages, including GDScript, C\#, and C++. @GodotFeatures Furthermore, community-driven extensions, detailed in @GDExtension, expand language compatibility beyond these officially supported options.
+== Godot #text(red)[Jacob klar, William kollat lite]
+The Godot game engine #text(maroon)[Staffan: referens] is the engine that was chosen for this project. Godot is a free and open-source game engine. It employs a node-based system that enables modular and reusable component design. The engine officially supports multiple programming languages, including GDScript, C\#, and C++. @GodotFeatures #text(red)[vad pekar referensen till?] Furthermore, community-driven extensions, detailed in @GDExtension, expand language compatibility beyond these officially supported options to languages such as C++ and Rust.
 
 As mentioned, everything is built using what are called Nodes. A *Node* is a fundamental building block for creating game elements, and it can represent various components such as an image, a 3D model, a camera, a collider, a sound, and more. Together, nodes form a *Tree*, and when you organize nodes in a tree, the resulting assembly is called a *Scene*. Scenes can be saved, and reused as self-contained nodes, allowing them to be instantiated in different parts of the application @godot-nodes-and-scenes. For example, a Player character might consist of multiple nodes, such as an image, collider and camera. All grouped together, they form a Player Character Scene, which can then be reused wherever needed.
 
-To minimize conflicts during the merging process in Git, concurrent modifications to the same scene will be limited. This practice helps prevent merge conflicts, which can otherwise introduce inefficiencies and complications in development.
-
-Godot was chosen over other engines because it is a light weight engine compared to others (such as Unity and Unreal Engine); it does not have heavy pc requirements which means that it can easily work on lower end machines. 
-Additionally, it's support for multiple languages gives support to more performance efficient languages such as C++ or Rust, which can help with optimization. 
-Lastly, as a relatively new engine, it was deemed to be worth learning from an academic perspective. 
-
 == Benchmarking and Performance #text(red)[Jacob klar] <benchmarking-and-performance-ref>
-When developing real-time applications such as simulations, video games, or other computer applications, maintaining responsiveness and stability during runtime is essential for the user experience. A common metric to measure the performance of any such application is Frames Per Second (FPS), which is the amount of rendered images (frames) that are displayed each second. Higher and consistent FPS is desirable for a stable experience, as well as reduced visual artifacts, and improved system latency from when a user inputs, to it being represented on the display. @nvidia_fps
+When developing real-time applications such as simulations, video games, or other computer applications, maintaining responsiveness and stability during runtime is essential for the user experience. A common metric to measure the performance of any such application is Frames Per Second (FPS), which is the amount of rendered images (frames) that are displayed each second. Higher and consistent FPS is desirable for a stable experience, as well as reduced visual artifacts, and improved system latency from when a user inputs, to it being represented on the display @nvidia_fps.
 
-However, FPS alone does not always provide a complete picture of performance. Instead, the time it takes to render each frame (frame times) is considered instead. Frame times reveal inconsistencies during runtime, such as brief momentary lag at computation heavy moments. These moments may be overlooked in average FPS values, while being detrimental to the user experience. Metrics such as 1% lows and 0.1% lows of FPS (highs of frame times) have become common to expose these worst-case scenarios, capturing the average of the slowest (highest value) 1% and 0.1% of all frame times respectively.
+However, FPS alone does not always provide a complete picture of performance. Instead, the time it takes to render each frame (frame times) is considered instead. Frame times reveal inconsistencies during runtime, such as brief momentary lag at computation heavy moments. These moments may be overlooked in average FPS values, while being detrimental to the user experience. Metrics such as 1% lows and 0.1% lows of FPS have become common @gamers_nexus_dragons_dogma_benchmark to expose these worst-case scenarios, this corresponds directly to capturing the slowest (highest value) 1% highs and 0.1% highs of frame times @nvidia_frametimes @techreport_inside_the_second.
 
-The disparities between the 3 values of: the total frame time average, the 1% lows, and the 0.1% lows, are what is important. Reducing the disparities between each other is what is crucial for an overall stable user experience. Gamers Nexus@gamers_nexus_youtube_fps_lows mentions that disparities between frames of 8ms or more, are what is starting to become perceptible to the user.
+The disparities between the 3 values of: the total frame time average, the 1% highs, and the 0.1% highs, are what is important. Reducing the disparities between each other is what is crucial for an overall stable user experience. Gamers Nexus@gamers_nexus_youtube_fps_lows mentions that disparities between frames of 8ms or more, are what is starting to become perceptible to the user.
 
-This approach is detailed in NVIDIA's developer guides@nvidia_frametimes, explained by Gamers Nexus@gamers_nexus_youtube_fps_lows, employed in benchmarks by Gamers Nexus@gamers_nexus_dragons_dogma_benchmark, with underlying work in "Inside the Second" by Scott Wasson@techreport_inside_the_second.
+All in all, the project was planned to put emphasis on maintaining consistent frame times, rather than high FPS, more precisely:
+- Keep the disparities between the frame time average, its 1% highs, and its 0.1% highs, to a maximum of 8ms.
+- Maintain an average 30 FPS (frame times of 33.33ms), when the program is not experiencing its frame time 1%, or 0.1% highs.
 
-All in all, this project will put emphasis on maintaining consistent frame times, rather than high FPS, more precisely:
-- Keep the disparities between the frame time average, the 1% lows, and the 0.1% lows, to a maximum of 8ms.
-- Maintain an average 30 FPS (frame times of 33.33ms), when the program is not experiencing its 1%, or 0.1% lows.
-This, on a dedicated benchmarking computer of the following specifications:
+This, on a dedicated benchmarking computer (denoted as *PC-1*) of the following specifications:
 
-SPECS
+#figure(
+  table(
+  columns: (auto, auto),
+  inset: 7pt,
+  align: left,
+  table.header([*Component*],[*Specification*]),
+  [CPU], [Intel i7-11800H],
+  [GPU], [Nvidia GeForce RTX 3050 Ti Mobile],
+  [RAM], [64 GB DDR4 3200 MHz],
+  ),
+  caption: [PC-1 Specifications],
+) <pc-1-specs>
 
-== Planning
+Benchmarking will occasionally be performed on other machines, and their results may not directly reflect performance on the primary benchmarking computer. If benchmarks are performed on a different machine, it will be explicitly noted. Even then, comparisons before and after changes, in performance, can still offer meaningful insights into a relative improvement or degradation on the primary benchmarking computer. Any other utilized computers are: ...
+
+#text(red)[Lägga i typ appendix istället? ->] 
+
+#align(center,
+  grid(
+    columns: 2,
+    gutter: 5pt,
+    [
+      #figure(
+        table(
+        columns: (auto, auto),
+        inset: 7pt,
+        align: left,
+        table.header([*Component*],[*Specification*]),
+        [CPU], [AMD Ryzen 7 7800X3D],
+        [GPU], [NVIDIA GeForce RTX 4080],
+        [RAM], [32GB DDR5 6000MHz],
+        ),
+        caption: [PC-2 Specifications],
+      ) <pc-2-specs>
+    ],
+    [
+      #figure(
+        table(
+        columns: (auto, auto),
+        inset: 7pt,
+        align: left,
+        table.header([*Component*],[*Specification*]),
+        [CPU], [Intel Core i7-8850H],
+        [GPU], [NVIDIA Quadro P1000],
+        [RAM], [32GB DDR4 2267MHz],
+        ),
+        caption: [PC-3 Specifications],
+      ) <pc-3-specs>
+    ],
+  )
+)
+
+
+
+== Planning #text(red)[Erik KLAR]
 This sub section provides an overview of the identified task and sub tasks to complete the project, the planned features to be implemented as well as a rough timeline for the project.
+
 // gantt schema
 #let gantt = timeliney.timeline(
   show-grid: true,
@@ -369,18 +427,18 @@ This sub section provides an overview of the identified task and sub tasks to co
   }
 )
 
-=== Task #text(green)[ERIK KLAR]
+=== Task #text(red)[ERIK KLAR]
 This chapter outlines the key tasks identified during the planning phase of the project. These have been categorized into four main areas: _procedural generation_, _physics simulation_, _exploration_, and _optimization_. Each category encompasses specific objectives and implementation considerations necessary to achieve the project’s goals.
 
-_*Procedural Generation*_
+_*Procedural Content Generation*_
 
-As previously discussed, procedural generation refers to the algorithmic creation of content such as terrain and planetary systems. This represents a core component of the project, allowing for the generation of planets, solar systems, and entire galaxies. To ensure determinism and reproducibility, all procedural content was designed to be generated using a fixed seed.
+All content in the program was planned to be generated procedurally. Furthermore, to ensure determinism and reproducibility, all procedural content was designed to be generated using a fixed seed.
 
 _*Planets*_
 
 It was decided that the planets should primarily be generated using different types of noise. The planets should also be given shape as explained earlier using the marching cube algorithm. Furthermore, the planets should be generated to be aesthetically distinct from on another.
 
-_*Solar System*_
+_*Solar Systems*_
 
 The solar systems were planned to be generated using different randomized parameters such as:
 - Number of planets in the system
@@ -389,11 +447,11 @@ The solar systems were planned to be generated using different randomized parame
   - Mass
   - Rotation
   - Size
-Certain parameters, such as orbital radius, mass, and velocity, were fine-tuned manually to ensure system stability. This approach would allow for the possibility of generating coherent systems in real time.
+Certain parameters, such as orbital radius, mass, and velocity, were planned to be fine-tuned manually to ensure system stability. This approach would allow for the possibility of generating coherent systems in real time.
 
 _*Physics Simulation*_
 
-Accurate gravity simulation was a central requirement for achieving realistic physical behaviors. Different gravity systems were planned to be utilized for different purposes. For example, the player system could utilize the built in physics engine to simulate gravity on planets, while the celestial bodies and solar systems could utilize a manual implementation that is better suited for them.
+An accurate gravity simulation was a central requirement for achieving realistic physical behaviors. Different gravity systems were planned to be utilized for different purposes. For example, the player system could utilize the built in physics engine to simulate gravity on planets, while the celestial bodies and solar systems could utilize a manual implementation that is better suited for them.
 
 _*Exploration*_
 
@@ -401,10 +459,10 @@ An ability to explore the generated content needed to be implemented. Multiple s
 
 _*Optimization*_
 
-The aim is to construct a real-time application, and thus, optimization techniques are increasingly important. Inefficient algorithms and resource management will eventually lead to performance bottlenecks. To address this, proven techniques and smart solutions were explored throughout all parts of the project to improve overall efficiency.
+The aim is to construct a real-time application, and thus, optimization techniques are increasingly important. Inefficient algorithms and resource management will eventually lead to performance bottlenecks. To address this, proven techniques and smart solutions were planned to be explored throughout all parts of the project.
 
 === Features <features>
-Features that were planned to be implemented were prioritized using the MoSCow analysis method @moscowprio:2018 (see #ref(<MosCow>)). This was done in order to better understand which features to prioritize and which to save for later.
+After specifying the main objectives and implementation considerations, the project's features were identified and prioritized using the MoSCoW analysis method @moscowprio:2018 (see #ref(<MosCow>)). This was done in order to better understand which features to prioritize and which to save for later.
 
 #figure(
   table(
@@ -448,22 +506,23 @@ Features that were planned to be implemented were prioritized using the MoSCow a
   caption: [The projects MoSCow Table],
 )<MosCow>
 #pagebreak()
-=== Timeline
-This subsection provides a rough timeline for the project (see #ref(<Gantt>)).
+=== Timeline #text(red)[ERIK KLAR]
+Based on the identified tasks and features, a timeline (see #ref(<Gantt>)) for the project was created to easily follow the projects progress as time went on. It included work on the minimal viable product (MVP), development, writing of the report, and relevant deadlines.
+
 #figure(
-  // image("gantt_rev2.png", width: 90%),
-  gantt,
+  image("GANTT.png", width: 100%),
   caption: [Gantt Chart]
 ) <Gantt>
 
-== Societal and Ethical aspects #text(red)[ERIK KLAR]
-The two main points of discussion regarding ethical and societal aspects that are deemed to be relevant are how procedural content generation in game development affects game designers, mainly focusing on level designers, and how players might be affected by procedural content generation in games.
+== Societal and Ethical aspects #text(red)[ERIK, Jacob klar]
 
-Game designers within game development might lose their relevance if the procedural generation and the use of AI gets precise enough, meaning that the algorithms can perfectly replace human developers. Even though procedural content generation can help game companies reduce development cost and time#cite(<computers13110304>), the concerns that the algorithms proficient enough to replace human creativity are still present. An example for this is when the Swedish game company Mindark announced plans to fire half of their employees, primarily world builders, in favor of AI-driven content generation#cite(<MindarkAftonbladet>).
+Two main points of discussion were identified during the planning phase: How procedural content generation (PCG) affects game designers, particularly level designers, as well as its impact on players.
 
-The procedural content generation must be interesting enough and playable to not negatively affect players. Games containing procedural content generation are at the risk of containing repetitive content, which may influence a player's sense of immersion or reduce re-playability. An example where the content generation affected the game play negatively is when the game "No Man's Sky" was released . The planets generated by the game ended up being too repetitive and basic @pcgchallanges:2017. Additionally, PCG systems may inadvertently create environments that hinder gameplay, such as untraversable terrain, thereby negatively affecting the overall playability of the game.
+As PCG and AI advance, there's a risk that it could replace human developers. While PCG reduces cost and development time #cite(<computers13110304>), the concerns that it may become proficient enough to replace human creativity are still present. An example for this is when the Swedish game company Mindark announced plans to fire half of their employees, primarily world builders, in favor of AI-driven content generation#cite(<MindarkAftonbladet>)
 
-= Process #text(red)[SKRIVEN AV NÅGON, ERIK? KLAR]
+For players, PCG must be interesting enough, and playable, to not negatively affect players. Games containing PCG are at risk of containing repetitive content, which may influence a player's sense of immersion or reduce re-playability. An example is No Man’s Sky, where the procedurally generated planets felt overly repetitive and basic @pcgchallanges:2017. Additionally, PCG can also create environments that hinder gameplay, such as untraversable terrain, negatively affecting the overall experience.
+
+= Process #text(red)[Erik, Jacob klar]
 This section outlines the process for creating the various components that comprise the project. Each subsection represents a step in increasing scale - starting from the planet-scale, focusing on unique terrain generation and other planetary features, expanding to the system-scale organization of celestial bodies and their orbital physics, and finally reaching the galaxy-scale distribution of stars.
 
 Unless stated otherwise, all figures shown in this section were produced by ourselves.
@@ -471,8 +530,11 @@ Unless stated otherwise, all figures shown in this section were produced by ours
 == Planet Generation #text(red)[ANTON] <planet-gen-ref>
 This section will describe the process how the planet generation was implemented.
 
-=== Height-map planets #text(red)[ANTON KLAR]<heightmap-planets>
-The first planets to be constructed was the height-map planets. They where very simple and did not offer any complex terrain. These planets were made  mapping a cube onto a sphere and utilizing height maps (@height-maps) to create variation in the terrain elevation; using the values stored in the height-map to displace the vertices of the sphere. This worked well to start with, but the goal was to create more advanced planets that utilized the marching cubes algorithm and 3D noise in order to get more "interesting looking" terrain, including for instance overhangs and caves. Additionally, a simple planet shader was implemented to add visual interest by coloring the planets based on their height relative to the lowest point.
+=== Height-map planets #text(red)[ANTON, ERIK, ANTON, ERIK KLAR]<heightmap-planets>
+The first planets to be constructed were the height-map planets. These planets were created by mapping a cube onto a sphere and displacing the vertices using height map values (@height-maps) to create variation in the terrain elevation. Additionally, a simplistic planet shader was implemented to add visual interest by coloring the planets based on their height relative to their lowest point. 
+
+While height maps were sufficient for generating simple planets, generating more complex terrain, such as overhangs or caves, required a different approach to be implemented. The marching cubes algorithm @marchingcubes:1998 was chosen for this purpose during the planning stage.
+
 
 #align(center,
   grid(
@@ -493,18 +555,35 @@ The first planets to be constructed was the height-map planets. They where very 
   )
 )
 
-=== Transitioning from height-maps to marching cubes #text(red)[ANTON KLAR, WILLIAM SKRIVER]<transition>
-When transitioning from height-maps to marching cubes, the method of generating the planets needed to change from a cube mapped onto a sphere to a collection of equidistant points in 3D space, with each point containing a noise-value. These points was then to be used as input to the marching cubes algorithm (@marching-cubes). The points were constructed as a simple 3D-matrix and @fig:noise-cube shows what these points could look like when visualized using small spheres.
+=== Transitioning from height-maps to marching cubes #text(red)[ANTON, WILLIAM, ANTON, WILLIAM KLAR]<transition>
+When transitioning from height-maps to marching cubes, the method of generating the planets needed to change from a cube mapped onto a sphere to an isosurface, with each point containing an iso-value, as shown in @mct1.
 
-#figure(
-  image("images/PlanetNoise/noise.png", width: 160pt, height: 160pt),
-  caption: [Cube of points]
-)<fig:noise-cube>
+The marching cubes algorithm was used to implement this approach, following the method outlined in @marching-cubes. It iterated through all points in the scalar field, identified neighboring points, compared their stored iso-values to a threshold, and computed an index used to retrieve the corresponding polygon from a lookup table (@mc15). These polygons were then used to construct the final mesh. @mct2 shows the result of this process applied to the scalar field shown in @mct1.
 
-Each point in the noise field gets assigned a noise-value which represents whether or not it's "inside" or "outside" the object. These points and corresponding value are then passed to the marching cubes algorithm to construct the mesh.
+#text(red)[Note to self: ändra alla "noise-value" till iso-value och 3d-matrix till scalar field!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! OCH BYT TILL PCG]
 
-- *Skriv om hur vi implementera Marhing Cubes*
-- *Lägg till pseudo-kod i appendix*
+//#figure(
+//  image("images/PlanetNoise/noise.png", width: 160pt, height: 160pt),
+//  caption: [Cube of points]
+//)<fig:noise-cube>
+#align(center,
+  grid(
+    columns: 2,
+    gutter: 30pt,
+    [
+      #figure(
+        image("images/MarchingCube/mct1.png", width: 200pt, height: 180pt),
+        caption: [Scalar field input for Marching Cubes, where green represents inside the iso-surface and red outside]
+      )<mct1>
+    ],
+    [
+      #figure(
+        image("images/MarchingCube/mct2.png", width: 200pt, height: 180pt),
+        caption: [Marching Cube generated mesh from the scalar field]
+      )<mct2>
+    ]
+  )
+)
 
 === Noise planets #text(red)[ANTON KLAR]<noise-planets>
 The noise planets were the first version of planets utilizing marching cubes. These planets were formed by generating a 3D matrix of points as shown in @transition and assigning a value to all points. Initially, the values given were binary in nature, with ```typst -1``` representing that point as being "outside" the surface (or considered as "empty space"/"above the ground") and ```typst 1``` representing the point being "inside" the surface (or as "included in the surface geometry"/"under the ground"). In order to make the planets spherical, the value of ```typst 1``` was given to all points that were inside some defined radius from a the planet's center point and all other points was given the value of ```typst -1```.
@@ -552,10 +631,6 @@ The noise planets (@noise-planets) were a step in the right direction, but they 
 
 Thus, research was conducted to find a better approach and eventually a method called fractional Brownian motion was identified and later utilized to add more complexity and detail to the terrain, making the planets more aesthetically appealing.
 
-
-
-
-
 Fractional Brownian motion (fBm) is a technique that is often used in computer graphics and the video games industry for generating realistic-looking terrain @fbm-chow. 
 
 The idea is to layer several "octaves" of noise, each with increasing frequency and decreasing amplitude to produce smaller and smaller details. Consider a sine-wave, if one where to add another sine-wave to the first one, the amplitude of both would be added together to form a sine-wave oscillating from negative two to two. If the second sine-wave had a larger frequency than the first but a lower amplitude, then its "height contribution" would become smaller but it would instead add smaller detail to the end result:
@@ -563,10 +638,21 @@ The idea is to layer several "octaves" of noise, each with increasing frequency 
 ```cs
               float firstOctave = sin(x);
               float secondOctave = sin(x) + sin(2*x)*0.5;
-              float third octave = sin(x) + sin(2*x)*0.5 + sin(4*x)*0.25;
+              float thirdOctave = sin(x) + sin(2*x)*0.5 + sin(4*x)*0.25;
 ```
+$("octave")_0 = sin(x)$
 
-The lower octaves have the same appearance as the higher octaves but on a smaller scale, due to fBm being self similar. This property is useful when generating natural-looking terrain because it ensures that the detail will scale consistently and that the result will blend well together.
+$("octave")_1 = sin(x) + 1/2sin(2x)$
+
+$("octave")_2 = sin(x) + 1/2sin(2x) + 1/4sin(4x)$
+
+$("octave")_n = sum(i=0)^n 1/2^i sin(2^i x), n in NN, 0 <= n < "octaves"$
+
+
+
+#text(red)[matte eller kod?]
+
+The lower octaves have the same appearance as the higher octaves but on a smaller scale, due to fBm being self similar #text(maroon)[Staffan: är "self similar" förklarat på något annat ställe? ref?]. This property is useful when generating natural-looking terrain because it ensures that the detail will scale consistently and that the result will blend well together.
 
 The implementation of fBm in this project was straight forward, and instead of using sine-waves, the 3D noise from before was used:
 
@@ -574,27 +660,34 @@ The implementation of fBm in this project was straight forward, and instead of u
 Vector3 currentPosition = new Vector3I(x, y, z);
 float distanceToCenter = (centerPoint - currentPosition).Length();
 float distanceToSurface = (float)radius - distanceToCenter;
-points[x, y, z] = Fbm(distanceToSurface, currentPosition, param, fastNoise);;
+points[x, y, z] = Fbm(distanceToSurface, currentPosition, fastNoise);;
 ```
 
-In the fBm function, there is a single for-loop which, for each octave, transforms the previously used point-value by adding noise with increased frequency and decreased amplitude. Lacunarity is the amount that the frequency should be changed by each octave, and persistence is the amount the amplitude should be multiplied by each octave. Typical values for these are ```cs lacunarity = 2``` and ```cs persistence = 0.5``` due to generating natural-looking terrain @quilez2019fbm. However, both of these parameters are randomly chosen based on logic later described in @proc-gen in order to add more variation to the planets; to broaden the types of planets that can be generated.
+In the fBm function, there is a single for-loop which, for each octave, transforms the previously used point-value by adding noise with increased frequency and decreased amplitude. Lacunarity is the amount that the frequency should be changed by each octave, and persistence is the amount the amplitude should be multiplied by each octave. Typical values for these are ```typst lacunarity = 2``` and ```typst persistence = 0.5``` due to generating natural-looking terrain @quilez2019fbm. However, both of these parameters are randomly chosen based on logic later described in @proc-gen in order to add more variation to the planets; to broaden the types of planets that can be generated.
 
 #text(red)[KANSKE TA UPP SEN - in the papers, a hurst exponent is talked about... (main part)... this is related to the persistence which is used here. Commonly 2^(-h) (h is [0,1]) is used and h=1/2 => regular brownian motion.]
 
-#figure(
-  block[
-    ```cs  
-      float Fbm(float fbmValue, Vector3 pos, FastNoiseLite noise) {
-          for (int i = 0; i < octaves; i++) {
-              fbmValue += noise.GetNoise3Dv(frequency * pos + offset) * amplitude;
-              amplitude *= persistence;
-              frequency *= lacunarity;
-              offset += new Vector3(random.NextInt(octaves));
-          } return fbmValue; 
-      }```
-  ],
-  caption: [Fractional Brownian Motion implementation (simplified for readability) used in planet generation]
-)<fbm-code>
+#box[
+  #show figure: set align(left)
+  #show figure.caption: set align(center)
+  #figure(
+        algorithm({
+          import algorithmic: *
+          Function("FBM", args: ("valueToModify", "position", "noise"), {
+            For(cond: [$i$ *in* $0..$octaves-1$$], {
+              Assign[valueToModify][noise.*Get3DNoise*(frequency $times$ position $plus$ offset) $times$ amplitude]
+              Assign[amplitude][amplitude $times$ persistence]
+              Assign[frequency][frequency $times$ lacunarity]
+              Assign[offset][offset $plus$ smallRandomOffset]        
+            })
+            Return[valueToModify]
+          })
+        }),
+      caption: [Pseudo-code for fBm (fractional Brownian motion)]
+  )<fbm-code>
+] 
+
+#text(red)[HUR GÖR MAN SÅ ATT CAPTION HAMNAR UNDER KODEN?!!!!]
 
 Using fBm, the planets were further improved, with more varied terrain and, most importantly, variation in the elevation. The result of these changes can be seen in @fig:fbm-1 and @fig:fbm-2 below.
 
@@ -618,21 +711,51 @@ Using fBm, the planets were further improved, with more varied terrain and, most
 )
 
 #block[
-  _Note_: Between @noise-planets and @fbm-planets, interpolation was introduced to the marching cubes algorithm, which causes the planet terrain in @fig:fbm-1 and @fig:fbm-2 as well as _all subsequent figures_ to appear smoother compared to the terrain depicted in @noise-planets. #text(purple)[Är detta bra?]
+  _Note_: Between @noise-planets and @fbm-planets, interpolation was introduced to the marching cubes algorithm, which caused the planet terrain in @fig:fbm-1 and @fig:fbm-2 as well as _all subsequent figures_ to appear smoother compared to the terrain depicted in @noise-planets. #text(purple)[Är detta bra?]
 ]
 
 
 
-There where some issues with these planets however, as can be seen in the center of @fig:fbm-2, where sometimes the noise function together with the fBM algorithm can cause the boarders of the planet to become part of the planet geometry in the marching cubes algorithm, which can make flat areas on the surface of the planet, or just cut of entire areas.
+There where some issues with these planets however, as can be seen in the center of @fig:fbm-2, where sometimes the noise function together with the fBm algorithm can cause the boarders of the planet to become part of the planet geometry in the marching cubes algorithm, which can make flat areas on the surface of the planet, or just cut of entire areas.
 
-TODO:
-This was fixed by tex... 
-- dynamiskt förstora, arrayen
-- dynamiskt skala om radien
+This issue was later solved by introducing a fall-off parameter that reduces values closer to the edge:
+
+```cs
+            falloffRatio = distanceToCenter / radius;
+            falloff = falloffRatio * falloffRatio * falloffStrength;
+            points[x, y, z] = fBmValue - falloff;
+```
+
+@fig:fbm_falloff_0 depicts a particularly bad example of the discussed problem and @fig:fbm_falloff_8 and @fig:fbm_flaoff_32 shows how the planet transformed with different values of the fall-off strength. The optimal strength had to be 
+
+#align(center,
+  grid(
+    columns: 3,
+    gutter: 55pt,
+    grid.cell([
+      #figure(
+        image("fbm_planet_no_falloff.png", width: 160pt, height: 160pt),
+        caption: [fBm planet without fall-off],
+      )<fig:fbm_falloff_0>
+    ]),
+    grid.cell([
+      #figure(
+        image("fbm_planet_8_falloff.png", width: 160pt, height: 160pt),
+        caption: [fBm planet with fall-off strength 8],
+      )<fig:fbm_falloff_8>
+    ]),
+    grid.cell([
+      #figure(
+        image("fbm_planet_32_falloff.png", width: 160pt, height: 160pt),
+        caption: [fBm planet with fall-off strength 32],
+      )<fig:fbm_flaoff_32>
+    ])
+  )
+)
 
 
-=== Procedural planet generation #text(red)[ANTON KLAR] <proc-gen>
-The next step after creating the planet generation, were to procedurally generate the planets at run-time. This was done by manually experimenting with the fBm parameter values until ranges that produced visually satisfactory results (as judged by the developers) was identified. Then, the parameters was randomized, according to the logic presented in the following pseudo-code:
+=== Procedural planet generation #text(red)[ANTON KLAR ERIK] <proc-gen>
+The next step after creating the planet generation, was to procedurally generate the planets at run-time. This was done by manually experimenting with the fBm parameter values until ranges that produced visually satisfactory results (as judged by the developers) were identified. Then, the parameters was randomized, according to the logic presented in the following pseudo-code:
 
 ```cs
 void RandomizeParameters() {
@@ -653,14 +776,14 @@ void RandomizeParameters() {
     persistence = random.NextFloat(0.1, 0.25);
 }
 ```
-However, it was found that this method was non-deterministic, meaning that on subsequent visits to the same solar system, the planets would not look identical to those seen during the first visit. To address this issue, individual planet seeds derived from the planet's solar system seed were introduced. The following pseudo-code shows how the system seed and the planet's starting position is used to calculate a new planet seed (using the method described later in @seed-ref) which is then used to update the seed of the ```typst Random``` variable from earlier:
+However, it was found that this method was non-deterministic, meaning that on subsequent visits to the same solar system, the planets would not look identical to those seen during the first visit. To address this issue, individual planet seeds derived from the planet's solar system seed were introduced. #text(red)[ Behövs denna delen för att förstå att det blev deterministiskt? The following pseudo-code shows how the system seed and the planet's starting position is used to calculate a new planet seed (using the method described later in @seed-ref) which is then used to update the seed of the ```typst Random``` variable from earlier:
 ```cs
     Random random = new Random();
     int planetSeed = GenerateSeed(systemSeed, planetPosition)
     random.seed = planetSeed;
 ```
-
-=== Coloring the marching cubes planets #text(red)[ERIK KLAR]
+]
+=== Coloring the fbm planets #text(red)[ERIK KLAR]
 The code for coloring the planets was reused from the first planet implementation, with one extension. Cliff edges could be simulated by calculating the dot product between the  direction of a specific vertex normal and the direction to the planet center. If the resulting value was close to one, the corresponding fragments at that position were assigned the cliff color (see #ref(<fig:cliff-face>)). Some color themes were created in order to get aesthetically pleasing results (see examples in #ref(<PlanetColors>)).
 
 #figure(
@@ -685,47 +808,120 @@ To simulate temperature falloff with increasing distance to the stars, the plane
 $
 "normalized_warmth"=("planet_warmth" - "min_warmth")/("max_warmth" - "min_warmth")
 $
-To further randomize appearance and to simulate the impact of atmosphere thickness on surface temperature, a chance that a neighboring theme set could be chosen was also added. For example, if a planet had a warmth of 0.5, there would be a chance that a theme set from a slightly higher or lower warmth could be chosen.
 
+== Optimizing the Planet Generation #text(red)[William Klar ERIK] <planet-optimize-ref>
+Replacing height maps with marching cubes in mesh generation significantly increases computational demands due to the added dimensionality. This section describes how the planet generation was optimized in order to address this challenge.
 
+=== Compute Shader #text(red)[William klar, Jacob klar]
+#text(blue)[
+The first optimization step involved moving the marching cubes from the CPU to a compute shader on the GPU. Unlike the standard rendering pipeline, compute shaders are standalone programs invoked directly by the CPU, with custom-defined inputs @openglcs.
 
-== Optimizing the Planet Generation #text(red)[William Klar] <planet-optimize-ref>
-One of the changes introduced with the transition from height-maps to marching cubes is the increased computational power required to generate a mesh. This is due to the additional dimension involved in the mesh generation process. While height-maps only require a 2D texture to determine the height, as previously mentioned, marching cubes necessitate a 3D array, which significantly increases the computational scale.
- 
-=== Compute Shader #text(red)[William klar]
-The initial optimization step involved transitioning the marching cubes generation process from the CPU to a compute shader.
+The main motivation for this shift was to leverage the GPU’s strong parallelization capabilities. Given that the marching cubes processes each scalar independently, it inherently lends itself to parallel execution, making the GPU well-suited for this task.
+]
+
+#text(red)[
+*Förslag ^*
+  
+#strike[The initial optimization step involved transitioning the marching cubes generation process from the CPU to a compute shader.
 
 Unlike the standard rendering pipeline, a compute shader operates independently and is invoked directly by the CPU. In contrast to other shader stages in the rendering pipeline that follow a clearly defined input-output structure, compute shaders utilize an abstract input model that is defined by the user. @openglcs
 
-The primary motivation for employing a compute shader was the significant parallelization capabilities offered by the GPU. As previously noted, the marching cubes algorithm iterates through a grid of points, using the eight neighboring points at each step to construct a polygon. Since each iteration is largely independent of the others, the algorithm is inherently parallelizable— an area in which GPUs excel.
+The primary motivation for employing a compute shader was the significant parallelization #text(red)[capabilities] #text(maroon)[Staffan: avstavning på?] offered by the GPU. As previously noted, the marching cubes algorithm iterates through a scalar field, using the eight neighboring points at each step to construct a polygon. Since each iteration is largely independent of the others, the algorithm is inherently parallelizable\u{2014}an area in which GPUs excel.]
+]
 
-After transitioning the marching cubes algorithm to a compute shader-based approach, a compute shader was successfully implemented to generate a mesh using this algorithm. Following the implementation, performance testing was carried out to assess whether GPU-based mesh generation offered improved efficiency compared to the CPU-based approach.
+#text(blue)[
+After transitioning the marching cubes algorithm to a compute shader, this GPU-based mesh generation approach was tested against its CPU counterpart. The testing involved feeding identical scalar fields to both the CPU and GPU #text(red)[implementations] #text(maroon)[Staffan: avstavning på?] of the algorithm and measuring the time required to generate the resulting mesh. The tests were performed across a range of different sizes to ensure broader applicability of the results.
+]
 
-This testing involved feeding identical grids of data points to both the CPU and GPU implementations of the algorithm and measuring the time required to generate the resulting mesh. The tests were performed across a range of different grid sizes to ensure broader applicability of the results.
+#text(red)[
+*Förslag ^*
 
-Contrary to initial expectations, the GPU implementation demonstrated lower performance than its CPU counterpart. It is hypothesized that this outcome is primarily due to the overhead associated with buffer setup and retrieval, which is a known bottleneck in compute shader workflows. Additionally, the triangle buffer was configured to accommodate the worst-case scenario in mesh generation, assuming that each voxel could produce up to five polygons, thereby increasing retrieval time.
+#strike[After transitioning the marching cubes algorithm to a compute shader-based approach, a compute shader was successfully implemented to generate a mesh using this algorithm. Following the implementation, performance testing was carried out to assess whether GPU-based mesh generation offered improved efficiency compared to the CPU-based approach.
 
-Furthermore, unlike Unity—which allows for indirect mesh creation directly within compute shaders to mitigate buffer-related overhead—Godot lacks such functionality. As a result, buffer retrieval must be performed manually, which introduces additional inefficiencies within the engine's pipeline. In the end, this approach did not achieve the intended reduction in planet generation time; however, as alternative methods remain available, the focus will now shift to exploring a different solution.
+This testing involved feeding identical grids of data points to both the CPU and GPU #text(red)[implementations] #text(maroon)[Staffan: avstavning på?] of the algorithm and measuring the time required to generate the resulting mesh. The tests were performed across a range of different grid sizes to ensure broader applicability of the results.]
+]
 
-=== Worker Thread Pooling #text(red)[William klar]
+#text(blue)[
+Surprisingly, the GPU approach performed worse (see blabla (*ta med en figur/table som visar någon benchmark*)). This is likely due to overhead from buffer setup and data retrieval from the buffer, a common bottleneck in compute shader workflows. Additionally, the triangle buffer was configured for the worst case polygonization (up to five vertices per polygon(s)), which added to retrieval time. 
+
+In the end, this approach did not achieve the intended reduction in planet generation time; however, as alternative methods remain available, the focus shifted to exploring a different solution.
+]
+
+#text(red)[
+*Förslag ^*
+  
+#strike[Contrary to initial expectations, the GPU implementation demonstrated lower performance than its CPU counterpart. It is hypothesized that this outcome is primarily due to the overhead associated with buffer setup and retrieval, which is a known bottleneck in compute shader workflows. Additionally, the triangle buffer was configured to accommodate the worst-case scenario in mesh generation, assuming that each voxel could produce up to five polygons, thereby increasing retrieval time.]
+]
+
+#text(red)[Vi behöver nog inte nämna Unity här?] #text(purple)[_ sant _]
+
+#text(red)[#strike[Furthermore, unlike Unity—which allows for indirect mesh creation directly within compute shaders to mitigate buffer-related overhead—Godot lacks such functionality. As a result, buffer retrieval must be performed manually, which introduces additional inefficiencies within the engine's pipeline. In the end, this approach did not achieve the intended reduction in planet generation time; however, as alternative methods remain available, the focus shifted to exploring a different solution.]]
+
+=== Worker Thread Pooling #text(red)[William klar] <worker-thread-pooling-ref>
 An alternative approach involved partitioning the workload across multiple threads. Specifically, in addition to the main thread, a dedicated thread was introduced to handle planet generation requests. Previously, all operations were executed on the main thread, including a loop responsible for generating each planet during solar system creation. This process led to performance issues, as the computationally intensive planet generation caused noticeable stuttering; when the function to create a planet or solar system was invoked, the frame could not advance until the corresponding meshes had been fully generated. By offloading the generation tasks to a separate thread, the main thread could simply dispatch requests and proceed without delay. 
 
-To further enhance this multi-threading strategy and reduce the overhead associated with repeatedly creating and destroying threads, the planet generation system was transitioned to use a thread pool. Since creating threads incurs considerable overhead and is relatively resource-intensive, it is desirable to minimize this cost—an objective that thread pools are designed to address. A thread pool functions by allocating a predefined number of threads at startup; in the context of Godot @threadpool2, this initialization occurs during project startup. When a task—such as planet generation—is submitted, it is added to a task queue. One of the pre-allocated threads (commonly referred to as workers) retrieves the task from the queue, executes it, and then proceeds to the next available task. This approach eliminates the need to create new threads for each operation, thereby improving efficiency and performance. @threadpool1
+#text(blue)[
+  To further optimize this two-threaded strategy, a thread pool is introduced to distribute the workload of planet generation across multiple threads, rather than relying on a single thread. A thread pool @threadpool2 works by pre-allocating a set number of threads at startup. When a task, like planet generation, is submitted, it joins a queue, and an available worker thread executes it. This approach improves efficiency and performance by reusing threads, thereby avoiding the substantial overhead associated with creating new threads for each task.
+]
 
-This adjustment significantly reduced stuttering between frames and allowed for a smoother experience.
+#text(red)[#strike[To further enhance this multi-threading strategy and reduce the overhead associated with repeatedly creating and destroying threads, the planet generation system was transitioned to use a thread pool. Since creating threads incurs considerable overhead and is relatively resource-intensive, it is desirable to minimize this cost—an objective that thread pools are designed to address.
+
+A thread pool functions by allocating a predefined number of threads at startup; in the context of Godot @threadpool2, this initialization occurs during project startup. When a task—such as planet generation—is submitted, it is added to a task queue. One of the pre-allocated threads (commonly referred to as workers) retrieves the task from the queue, executes it, and then proceeds to the next available task. This approach eliminates the need to create new threads for each operation, thereby improving efficiency and performance. @threadpool1
+]]
+
+This multi-threaded adjustment significantly reduced stuttering between frames and allowed for a smoother experience. #text(red)[_Kanske visa någon slags benchmark för att visa att det förbättrades? (Dock så kanske lite svårt eftersom det ända som har hänt är att planet generation är på en annan tråd?)_]
 
 === Chunking & Level-of-detail #text(red)[William klar]
+#text(red)[#strike[
 An additional optimization technique for planet generation involved implementing a chunking system. Chunking, as previously described, partitions data into equally sized segments. However, to further enhance performance, it was necessary to integrate a level-of-detail (LOD) mechanism. In this context, LOD entails reducing mesh complexity for distant planetary regions by using fewer data points during mesh generation—particularly relevant when employing the marching cubes algorithm. This reduction improves performance by enabling faster loading of less detailed planetary areas.
 
 To support both chunking and LOD, an octree data structure was adopted. As referenced in #ref(<B-octree>), an octree recursively subdivides space into hierarchical nodes. Each leaf node in the octree represents a chunk of the planet, with the depth of the node determining the level of detail—shallower leaves correspond to lower resolution. Subdivision is driven by the player's proximity: as the player approaches a region, the corresponding node subdivides into eight higher-resolution child nodes, increasing local mesh detail dynamically. This approach ensures that only regions near the player are rendered in high detail, significantly improving efficiency. In summary, the octree effectively addresses both chunking and LOD requirements in a unified structure.
 
-The implementation begins by initializing an instance of the _Octree_ class, using a size equal to the planet's diameter. A separate class, _OctreePlanetSpawner_, is responsible for handling mesh generation. Within this class, a resolution variable defines the number of data points required along each axis for a given chunk. For example, if the resolution is set to 32, each chunk will contain $32^3$data points.
+The implementation initializes an instance of the Octree class with a size equal to the planet's diameter. Mesh generation is managed by the OctreePlanetSpawner class, where a resolution variable defines the number of data points per chunk (e.g., a resolution of 32 results in $32^3$ data points). @fig:octmc1 illustrates the octree planet structure with visible chunk outlines.
 
-The _Octree_ class performs subdivision based on the player's position relative to the axis-aligned bounding box (AABB) of each leaf node. If the player enters the AABB of a leaf node, the _Octree_ subdivides that node, continuing this process until a predefined MaxDepth is reached. Upon subdivision, the new leaf nodes invoke the _OctreePlanetSpawner_, providing the center and size of their respective AABBs to generate new meshes. The parent node then disables the previously used mesh.
+Subdivision occurs based on the player’s proximity to leaf nodes: when the player approaches within a set distance, the Octree subdivides the node up to a predefined MaxDepth, generating higher-resolution meshes via the OctreePlanetSpawner and disabling the parent mesh. When the player moves away, subdivisions are removed, and the parent mesh is re-enabled. The root node is never removed.
 
-Conversely, when the player exits a leaf node's AABB, the _Octree_ removes the corresponding subdivisions. This process continues until the player is once again located within a valid leaf node, at which point the associated mesh is re-enabled. The only exception is the root node which cannot be removed. 
+While the implementation successfully incorporates chunks and varying levels of detail (LODs), a limitation inherent to the marching cubes algorithm when used with differing LODs is the occasional appearance of gaps at the borders between chunks of disparate resolutions (as partially evident in @mct2). This issue arises because higher-resolution chunks capture more points along the isosurface, potentially revealing dips that may be overlooked in lower-resolution chunks.
 
-== Planetary Features
+There exists solutions to fix it but due to time constraints we were unable to implement them.]]
+
+#text(blue)[
+  A chunking system was implemented to optimize planet generation. To further boost performance, a level-of-detail (LOD) mechanism was added, reducing mesh complexity for distant planetary regions by using fewer scalar values, which is especially important when using the marching cubes algorithm. This speeds up loading as rendering less detailed areas is quicker.
+
+  An octree data structure was employed to support both chunking and LOD. An octree, as mentioned in @B-octree, recursively divides space into nodes, where each leaf will now represent a planet chunk. Node depth determines the detail level—shallower leaves have lower resolution and vice versa. Subdivision is driven by player proximity: as the player approaches, the node subdivides into higher-resolution child nodes, increasing detail. This dynamic adjustment ensures that only nearby regions are rendered in high detail, improving efficiency.
+  
+  The implementation works by having an _Octree_ class, which is initialized with a size matching the planet's diameter, while the _OctreePlanetSpawner_ class manages mesh generation. A resolution variable sets the number of scalar values per chunk (e.g., $32^3$ for a resolution of 32). As the player nears a leaf node, it subdivides, unless it is at a predefined MaxDepth (to avoid infinite subdivisions), generating higher-resolution meshes while disabling the parent mesh. Moving away reverses this process, with subdivisions removed and the parent mesh restored. The root node always remains intact.
+  
+  However, a limitation of the marching cubes algorithm with varying LODs is occasional gaps between chunks of different resolutions (as partially evident in @mct2), as higher-resolution chunks capture more surface points while lower resolution might miss them. Although solutions exist to fix this issue, time constraints prevented their implementation and thus were not addressed.
+]
+
+
+#align(center,
+  grid(
+    columns: 2,
+    gutter: 55pt,
+    grid.cell([
+      #figure(
+        image("images/Octree/octmc1.png", width: 200pt),
+        caption: [Octree planet outlining the chunks],
+      )<fig:octmc1>
+    ]),
+    grid.cell([
+      #figure(
+        image("images/Octree/octmc2.png", width: 200pt),
+        caption: [Octree planet showing the varying LODs],
+      )<fig:octmc2>
+    ]),
+  )
+)
+
+=== Reducing stuttering??
+While the mesh generation was fast at this point in the project... 
+Planet data point multithread and moons not use old planets
+
+== Planetary Features #text(red)[ERIK Klar]
+This section describes process of creating the additional planetary features including: surface elements, oceans, and atmospheres.
+
 === Surface Elements #text(red)[William Klar]
 In order to enhance the variety of the planet's surface details, it was decided to incorporate elements such as grass, bushes, trees, and oceans. This addition aims to increase the diversity of the planet's landscape. 
 
@@ -737,7 +933,8 @@ In contrast, the _features_ category encompasses elements like trees. These are 
 
 For both categories, it remains important to ensure that the generated elements are aligned with the normal of the underlying mesh. However, due to their differing visual and functional requirements, each category necessitates a distinct implementation approach.
 
-*Surface Details (Grass)* #text(red)[Räknas detta som en till rubriksnivå? även om inte explicit skriven]
+*Surface Details (Grass)* 
+#text(red)[Räknas detta som en till rubriksnivå? även om inte explicit skriven]#text(blue)[Jo det tror jag... Vi skulle nog egentligen ha det som "4.3.1 Grass", och baka in nuvarande 4.3.1 in i 4.3 Planetary features. Potentiellt ta bort mycket av nuvarande 4.3.1 för att minska ord. /Jacob]
 
 To generate surface details, the system first identifies the current chunk associated with the player, along with adjacent chunks within a defined range. It then iterates through all triangles in the mesh data of each relevant chunk. For each triangle, a random point is generated within its bounds using barycentric coordinates, as described in @barycentriccoordiantes1.
 
@@ -797,20 +994,19 @@ By iterating through each face and applying this calculation, the number of inst
   )<fig:simplegrass4>
 ])
 )
-One issue with this simple implementation is that when faces are very small in comparison to others it will not render any instances as the calculation above will yield a instance number lower than 1 which means that no surface details will be added on that face, for example you can see it on a basic sphere mesh (see @fig:simplegrass5 and @fig:simplegrass6), however for our generated mesh the difference in the faces will not be as extreme as in @fig:simplegrass5 so it suffices for the moment. 
 One limitation of this method is that faces with relatively small areas may yield fewer than one instance, resulting in no surface detail being rendered on those faces. This effect is illustrated in @fig:simplegrass5 and @fig:simplegrass6 using a basic sphere mesh. However, for the generated mesh in this project, face size variation is significantly less pronounced than in @fig:simplegrass3, making this limitation acceptable for the current purposes.
 #grid(
   columns: 2,
   gutter: 0.75cm,
   grid.cell([
     #figure(
-    image("images/Grass/grasss5.png", width: 200pt),
+    image("images/Grass/grasss5.png", width: 180pt),
     caption: [Density-Based Grass Spawning on a sphere]
   )<fig:simplegrass5>
 ]),
   grid.cell([
     #figure(
-    image("images/Grass/grass6.png", width: 200pt),
+    image("images/Grass/grass6.png", width: 180pt),
     caption: [Wire-frame of Density-Based Grass Spawning on a sphere]
   )<fig:simplegrass6>
 ])
@@ -842,8 +1038,8 @@ Although this uniform sampling technique is computationally efficient and straig
   caption: [Poisson vs random distribution]
 )<randomvspossion>
 
-To achieve a more spatially uniform distribution of points, the sampling method was subsequently replaced with Poisson-disc sampling. Unlike uniform sampling, Poisson-disc sampling ensures that each point is separated by a minimum distance $r$ @bridson2007fast, thereby avoiding clustering and producing a more even distribution of samples.
-The algorithm used follows the method described in _Fast Poisson Disk Sampling in Arbitrary Dimensions_, which operates as follows @bridson2007fast:
+To achieve a more spatially uniform distribution of points, the sampling method was subsequently replaced with Poisson-disc @bridson2007fast sampling. Unlike uniform sampling, Poisson-disc sampling ensures that each point is separated by a minimum distance $r$, thereby avoiding clustering and producing a more even distribution of samples.
+The algorithm used follows the method described in _Fast Poisson Disk Sampling in Arbitrary Dimensions_ @bridson2007fast, which operates as follows:
 
 *Step 1. * Initialize a background grid with cell size $frac(r, sqrt(n))$ where $n$ is the dimensionality of the space (in this case, $n = 3$). 
 
@@ -922,18 +1118,21 @@ Put together, the ocean added a large improvement to the visuals of the planets,
 )<fig:ocean-planet>
 
 
-=== Atmospheres #text(red)[ERIK KLAR]
-Before starting development on the atmospheres, research was made to try to find existing solutions and inspiration for how it could be done. Two videos that explained two different approaches to the problem were found. One created by Martin Donald that explains a simpler approach #cite(<martin-donald-atmosphere>), and one made by Sebastian Lague that explains a more complex but realistic approach #cite(<sebastian-lague-atmosphere>). The simpler version was implemented at first to quickly get something working, followed by the realistic one, which was the ultimate goal to replicate. Both of the solutions tested were implemented as post-processing shaders applied to a cube with flipped faces to get the desired effect.
+=== Atmospheres #text(red)[ERIK, JACOB klar Erik Kollat]
 
-The first iteration of the atmosphere was based purely on ray sphere intersections that could generate a transparent colored sphere around the planet (see #ref(<ray-sphere-atmosphere>)). This was, as mentioned, the simplest version of the atmosphere as it did not account for the sun's position, which meant that it remained a single uniform color regardless of how the sun shone on the planets. Unsuccessful attempts at shading the atmosphere were made by calculating the dot product between each vertex normal and the sun ray directions. The color of the atmosphere were then supposed to change based on the produced value. Due to issues with fetching the correct sun position, and issues with different coordinate spaces, the attempt was unsuccessful. As a result, development shifted toward a more advanced solution in the second iteration.
+Atmosphere development began with research into existing solutions, resulting in two approaches: a simpler method by Martin Donald @martin-donald-atmosphere and a more physically accurate one by Sebastian Lague @sebastian-lague-atmosphere. Both implementations utilize a post-processing shader on a cube with flipped faces.
+
+The simpler version was implemented using ray-sphere intersections to create a transparent, uniformly colored, sphere around the planet (see @ray-sphere-atmosphere). The color remains uniform since it does not account for the sun's position. Attempts to improve shading involved calculating the dot product between each vertex normal and the sun ray directions, meant to influence the resulting color. However, due to issues with different coordinate spaces, and fetching the sun's position, this was unsuccessful and caused a shift towards the more realistic approach.
 
 #figure(
   image("images/Atmosphere/basic_atmosphere.png", width: 50%),
-  caption: [Implementation of a basic atmosphere]
-)<ray-sphere-atmosphere>
-The second iteration intended to generate a more physically realistic atmosphere. As mentioned earlier, the inspiration for this atmosphere was found in Sebastian Lague's video, in which he created a planetary atmosphere based on pure Rayleigh scattering. Rayleigh scattering is a physical phenomenon which describes how light is affected by particles much smaller than the wavelength of the light #cite(<RayleighScattering>). This would allow simulating atmospheric light scattering, density falloff with altitude, and visually accurate effects such as sunsets when observed from a planet’s surface.
+  caption: [Implementation of a simple atmosphere]
+) <ray-sphere-atmosphere>
 
-The color is based on a three dimensional vector containing three wavelengths, corresponding to different parts of the visible light spectrum. However, basing the atmosphere color on just Rayleigh scattering limited the achievable color options. For example, creating a naturally red, Mars-like atmosphere was not possible through this method alone. To address this, one of the wavelength values was set significantly lower than the others, amplifying the scattering of that particular wavelength and thereby altering the perceived color. Finally, to get reasonable colors, some preset wavelength vectors were made. These were chosen at random as the planets were generated (see #ref(<AtmosphereColors>)). 
+The second iteration aimed for a more physically accurate atmosphere involving Rayleigh scattering. Rayleigh scattering is a physical phenomenon which describes how light interacts with particles smaller than its wavelength @RayleighScattering, allowing for atmospheric light scattering, density falloff with altitude, and sunsets. The algorithm roughly works by approximating light scattering along a ray cast from the camera through the atmosphere, using a series of sampling points for optical depth and scattering calculations.
+
+The color is based on a 3D vector representing different light wavelengths corresponding the different parts of the visible light spectrum. However, basing it on only Rayleigh scattering limited the achievable color options. For example, a red Mars-like atmosphere was not possible through this method alone. To address this, one of the wavelengths was set lower than the others, amplifying the scattering of that wavelength, and thereby altering its color. Finally, a set of preset wavelength vectors were created and are chosen at random as the planets are generated. See @AtmosphereColors.
+
 #figure(
     grid(
         columns: (auto, auto),
@@ -947,13 +1146,12 @@ The color is based on a three dimensional vector containing three wavelengths, c
     caption: [Main colors of the different atmosphere variations.]
 ) <AtmosphereColors>
 
-The initial implementation of atmospheric rendering significantly impacted performance due to the computational cost of light scattering calculations. Options to solve this were discussed: offloading calculations to a compute shader, implementing multiple levels of detail (LOD) for atmospheres, or maintaining the current method while integrating an LOD system to reduce rendering complexity at greater distances. The latter was selected for its simplicity. This approach dynamically adjusts the number of scattering and optical depth sampling points based on the player’s distance from a planet. Initially, both values were set to 30, which resulted in severe performance drops when near planets. After testing alternative configurations, a value of 10 for both parameters achieved a more optimal balance between visual aesthetics and performance. Benchmarking in a test scene with a single planet showed an increase in average frame rate from 39.2 FPS (with 30 sampling points) to 59.9 FPS (with 10 sampling points).
+Initially, atmospheric rendering was performance-heavy due to costly light scattering calculations. Two solutions were considered: offloading calculations to a compute shader, and a LOD system. The latter was chosen for its simplicity, and is done by dynamically reducing scattering and optical depth samples with distance to the player.
 
+Originally set to 30, the number of sampling points along the rays traveling through the atmosphere caused significant performance drops.After testing, a sample count of 10 was found to balance visual fidelity and performance effectively, reducing average frame time from 132.2 ms (at 30 samples) to 18.56 ms in a single-planet benchmark on PC-3 (see #ref(<pc-3-specs>)). Furthermore, with the LOD in place, the amount of sampling points reduce from the set maximum value, downwards to 1, as the distance to the player increase. This further increases performance since all atmospheres in a system does no longer render at full quality at the same time.
 
 == Player Controller #text(red)[ERIK KLAR] <player-controls-ref>
-The initial player controller was implemented as a simple flying camera, allowing free movement and rotation for exploring the galaxy and star systems. Collision detection and planetary landings were not considered necessary at this stage.
-
-Aa landing was considered a ‘should-have’ feature development began after terrain generation was implemented. Key subcomponents included simulating planetary gravity, enabling surface movement with proper rotation, and allowing jumping.
+The player controller was initially implemented as a flying camera for free exploration of the galaxy, without collision or surface interaction. After terrain generation was completed, support for planetary landings began it's development. This required simulating local gravity, surface-aligned movement, and jumping.
 
 Planetary gravity fields were implemented using an Area3D node with a spherical collision shape (see #ref(<Area3D>)). This node allows any physics body that enters it's collision shape to inherit the gravity direction and strength set by the Area3D. The gravity direction is calculated by subtracting the planet's world position with the player's world position. This is updated each physics process to allow the direction to always point towards the planet center. 
 #figure(
@@ -962,20 +1160,19 @@ Planetary gravity fields were implemented using an Area3D node with a spherical 
 )<Area3D>
 To facilitate exploration and simulate orbital behavior, the player inherits a planet’s total velocity upon entering its gravitational field, ensuring they remain in orbit with actively moving. The final step was implementing surface landing and movement mechanics.
 
-Rotating the player while moving on the planetary surfaces was achieved by linearly interpolating the player’s basis toward a target basis with its ‘up’ vector aligned against the gravity vector. Initially, this caused conflicts with camera movement, as the camera rotated the player around its local Y-axis while the movement system applied rotation relative to a global axis. This was resolved by ensuring that the camera system rotated the player around it's global Y-axis instead. Finally the ability to jump was implemented by adding an impulse along the opposite direction of the gravity vector.
+Rotating the player while moving on the planetary surfaces was achieved by linearly interpolating the player’s basis toward a target basis with its ‘up’ vector aligned against the gravity vector. Finally the ability to jump was implemented by adding an impulse along the opposite direction of the gravity vector.
 
-#text(red)[Behövs detta/ är det intressant med vilka problem som finns? VI kanske kan skita i det?!????]
-During testing, several issues emerged. The player can occasionally fall off the planets at high velocities, this was solved by lowering the base speed to a small value. A possibility considered was to adapt the base speed depending on planet radius, but was not implemented as it was deemed unnecessary. Another issue is that the player can sometimes start bouncing uncontrollably. A possible explanation to this is the unevenness of the generated terrain. If the player is moving at high speeds they could possibly bounce off of any small bump they encounter. To counteract this, a downward raycast was added beneath the player’s collision shape, supplementing the default collision system in cases where it falters. A final edge case issue involved overlapping gravitational fields from adjacent planets, occasionally pulling the player toward a second planet. Due to the rarity of this occurrence, it was not prioritized for resolution.
+Several issues emerged during testing. At high velocities, the player could fall off planets, which was resolved by lowering the base speed. Adapting speed to planet radius was considered but deemed unnecessary. Uncontrollable bouncing, likely caused by uneven terrain at high speeds, was mitigated by adding a downward raycast to support the collision system. Furthermore, many issues were ultimately traced to planets moving at high speeds while the player was also in motion, combined with inaccurate planetary collision shapes, and possibly small planet radii.
 
-== Physics Engine #text(red)[JONATAN TYP KLAR] <physics-engine-ref>
-Simulating the gravitational interactions within a galaxy, containing potentially thousands or millions of stars and planets, presents a significant computational challenge known as the N-body problem. The goal is to calculate the net gravitational force acting on each body at discrete time steps and use this information to update their positions and velocities over time. This section details the progression of methods implemented to tackle this problem within our project, moving from a simple baseline to an optimized approximation algorithm, and discusses the performance analysis that guided these choices.
+== Physics Engine #text(red)[JONATAN, JACOB klar, Jonatan Klar] <physics-engine-ref>
+Simulating the gravitational interactions within a galaxy, containing potentially thousands or millions of stars and planets, presents a significant computational challenge known as the N-body problem @Gangestad2025. The goal is to calculate the net gravitational force acting on each body at discrete time steps and use this information to update their positions and velocities over time. This section details the progression of methods implemented to tackle this problem within our project, moving from a simple baseline to an optimized approximation algorithm, and discusses the performance analysis that guided these choices.
 
-=== Direct Summation #text(red)[Jonatan Klar]
-The most straightforward approach to solving the N-body problem is the direct summation method. This technique relies directly on Newton's Law of Universal Gravitation #text(red)[CITE NEWTON?], calculating the gravitational force between every pair of particles in the system.
+=== Direct Summation #text(red)[Jonatan, Jacob klar, Jonatan, Anton klar] <physics-direct-summation-ref>
+The most straightforward approach to solving the N-body problem is the direct summation method#text(blue)[ [källa]] #text(red)[(Jacob: Nu är jag petig men behövs det källa till att det är den mest "stragihtforward approach"? Man kanske bara kan skriva att det är "an approach" annars)]#text(fuchsia)[Jonatan: Vet inte om det behövs eftersom den senare direkt härleds från newtons lagar] #text(blue)[Anton: tror också det är bäst att inte skriva "most straightforward approach to solving" utan en förklaring till varför alla andra metoder inte är mer straightforward + en källa till det. Kanske är bättre med "In order to solve the N-body problem research was conducted.. and eventually an approach called direct summation method was discovered.. this is why it was good for this situation.." + en källa till den :P]. This technique relies directly on Newton's Law of Universal Gravitation @newton1687, calculating the gravitational force between every pair of particles in the system.
 
 The force $arrow(F)_12$ exerted on particle 1 by particle 2 is given by:
 $
-  arrow(F)_12 = G (m_1 m_2)/(|arrow(r)_12|^3) vec(r)_12 quad "where" quad arrow(r)_12 = arrow(r)_2 - arrow(r)_1
+  arrow(F)_12 = G (m_1 m_2)/(|arrow(r)_12|^3) arrow(r)_12 quad "where" quad arrow(r)_12 = arrow(r)_2 - arrow(r)_1
 $
 
 The total acceleration $arrow(a)_i$ on particle $i$ is the sum of accelerations caused by all other particles $j != i$:
@@ -991,60 +1188,69 @@ $
 )
 
 
-This requires $N(N−1)/2$ pairwise calculations per time step, resulting in a computational complexity of $O(N^2)$. Our implementation (`rust_gdext/src/physics/gravity/direct_summation.rs`) uses nested loops as illustrated in the pseudocode below:
-
+This requires $N(N−1)/2$ pairwise calculations per time step, resulting in a computational complexity of $O(N^2)$. Our implementation uses nested loops as illustrated in the pseudocode below:
 
 #box[
-#algorithm({
-  import algorithmic: *
-  Function("Direct-Summation-Gravity", args: ("G", "particles"), {
-    Cmt[Get the number of particles]
-    Assign[$n$][#FnI[length][particles]]
+#show figure: set align(left)
+#show figure.caption: set align(center)
 
-    State[]
-    Cmt[Initialize acceleration array]
-    Assign[acc][#FnI[array][#FnI[Vec3][0, 0, 0]\; $n$]]
-
-    State[]
-    Cmt[For each particle $i$, calculate acceleration from each particle $j != i$]
-    For(cond: [$i$ *in* $0..n$], {
-      For(cond: [$j != i$ *in* $0..n$], {
-
-        Assign[$vec(r)_(i j)$][particles[j].*position* - particles[i].*position*]
-        Assign[$m_j$][particles[j].*mass*]
-        
-        State[]
-        Cmt[Note: Softening factor $epsilon$ omitted for brevity, but used in implementation]
-        If(cond: [$|vec(r)_(i j)|> 0$], {
-          Assign[$vec(a)_(i j)$][$G m_j/(|vec(r)_(i j)|^3) vec(r)_(i j)$]
-          Assign[acc[i]][acc[i] $+ vec(a)_(i j)$]
-        })      
+#figure(
+  algorithm({
+    import algorithmic: *
+    Function("Direct-Summation-Gravity", args: ("G", "particles"), {
+      Cmt[Get the number of particles]
+      Assign[$n$][#FnI[length][particles]]
+  
+      State[]
+      Cmt[Initialize acceleration array]
+      Assign[acc][#FnI[array][#FnI[Vec3][0, 0, 0]\; $n$]]
+  
+      State[]
+      Cmt[For each particle $i$, calculate acceleration from each particle $j != i$]
+      For(cond: [$i$ *in* $0..n$], {
+        For(cond: [$j != i$ *in* $0..n$], {
+  
+          Assign[$arrow(r)_(i j)$][particles[j].*position* - particles[i].*position*]
+          Assign[$m_j$][particles[j].*mass*]
+          
+          State[]
+          Cmt[Note: Softening factor $epsilon$ omitted for brevity, but used in implementation]
+          If(cond: [$|arrow(r)_(i j)|> 0$], {
+            Assign[$arrow(a)_(i j)$][$G m_j/(|arrow(r)_(i j)|^3) arrow(r)_(i j)$]
+            Assign[acc[i]][acc[i] $+ arrow(a)_(i j)$]
+          })      
+        })
       })
+  
+      Return[acc]
     })
-
-    Return[acc]
-  })
-})
+  }),
+  kind: "code",
+  supplement: [Code],
+  caption: [Pseudocode for the direct summation algorithm]
+)
 ]
 
 While simple and accurate, the $O(N^2)$ complexity makes direct summation computationally prohibitive for large N within our target performance goals, necessitating an approximation method.
 
-=== Barnes-Hut Approximation #text(red)[Jonatan Klar]
-To efficiently simulate large numbers of bodies, we implemented the Barnes-Hut algorithm @Barnes_Hut_1986, which reduces the computational complexity to $O(N "log"N)$. The core idea is to use an *octree* (a hierarchical spatial partitioning structure, described in @B-octree) to group distant particles together. The gravitational influence of these distant groups is then approximated by treating the group as a single point mass located at its center of mass (CoM). This approximation leverages Newton's shell theorem and is effective when the distance to the group is large compared to the group's size.
+=== Barnes-Hut Approximation #text(red)[Jonatan, Jacob klar. phew, Jonatan Klar (-diagram)]
+To efficiently simulate large numbers of bodies, we implemented the Barnes-Hut algorithm @Barnes_Hut_1986, which reduces the computational complexity to $O(N "log"N)$. The core idea is to use an *octree* @octree1 (Described in @B-octree) to group distant particles together. The gravitational influence of these groups is then approximated by treating the group as a single point mass located at its center of mass (CoM). This approximation leverages Newton's shell theorem @newton1687 and is effective when the distance to the group is large compared to the group's size.
 
-A crucial aspect of dynamic N-body simulations is that particle positions change continuously. This means the spatial hierarchy represented by the octree becomes outdated quickly and must be reconstructed frequently, typically time step (physics frame). This frequent rebuild demands a highly efficient octree construction algorithm, motivating our choice of a *Morton-code-based linear octree* #text(red)[citation] (`rust_gdext/src/octree/morton_based.rs`). This approach offers several advantages for rapid reconstruction:
+In dynamic N-body simulations, constantly changing particle positions quickly invalidate the octree, typically requiring reconstruction each time step (physics frame). This demands an efficient construction algorithm, for which a *Morton-code-based linear octree* @gargantini1982 was chosen, enabling:
 
-1.  *Parallelizable Steps:* Key phases of the construction — calculating Morton codes and sorting particles — are trivial to parallelize.
+
+1.  *Parallelizable Steps:* Calculating Morton codes and sorting particles are trivial to parallelize.
+
 2.  *Cache Efficiency:* Processing spatially local data sequentially after sorting can lead to better CPU cache utilization compared to pointer-chasing in traditional octree implementations.
+
 3.  *Efficient Partitioning:* The sorted order allows for fast partitioning of particles into child nodes using binary search rather than geometric tests.
 
 The construction process proceeds as follows:
-- *Morton Codes:* A 64-bit Morton code is calculated for each particle using the `encode` function. This function maps a particle's 3D position within the global simulation bounds to a 1D integer by interleaving the bits of its scaled coordinates [CITE MORTON]. This mapping largely preserves spatial locality – nearby particles tend to have numerically close Morton codes. This encoding step is parallelized using `rayon` #text(red)[CITE RAYON] for particle counts larger than `PARALLEL_ENCODE_THRESHOLD`, a threshold determined via benchmarking (see @physics-benchmarking-ref).
 
+1. *Morton Codes:* A 64-bit Morton code is calculated for each particle by mapping a particle's 3D position within the global simulation bounds to a 1D integer by interleaving the bits of its scaled coordinates. This mapping largely preserves spatial locality since nearby particles tend to have numerically close Morton codes @morton1966. This step is parallelized using `rayon` @rayon for particle counts larger than a set threshold, determined via benchmarking (see @physics-benchmarking-ref).
 
 #grid(
   columns: (1fr, 1fr),
-
     figure(
       image("morton_z_curve_2d.png", width: 94%),
       caption: [2D version of Morton codes, showing how they preserve space locality. Nomen4Omen, CC BY-SA 4.0]
@@ -1054,18 +1260,18 @@ The construction process proceeds as follows:
       image("morton_3d.png"),
       caption: [How points are ordered in 3D when sorted using Morton codes. Robert Dickau, CC BY-SA 3.0]
     )
-
 )
 
-- *Sorting:* The particles (represented by ```rs MortonEncodedItem<usize>``` containing the code and original index) are then sorted based solely on their Morton codes. This crucial step clusters spatially adjacent particles together in a linear array. This sorting is performed in parallel using `rayon::par_sort_unstable`, providing significant speedup.
+2. *Sorting:* Particles are sorted based on their Morton codes, effectively grouping spatially adjacent particles in memory. The sorting is parallelized using `rayon`, providing significant speedup.
 
-- *Tree Construction (`build_recursive`):* An explicit tree structure (`Vec<Node>`) is built recursively from the sorted particle list.
-    - The function operates on a range (`body_range`) within the sorted list.
-    - Leaf nodes are created if the range contains only one particle or the maximum depth (`MAX_DEPTH`) is reached. `GravityData` (mass, CoM) is computed from the particles in the range.
-    - For internal nodes, the algorithm partitions the `body_range` into 8 sub-ranges corresponding to the child octants. This is done efficiently by `find_octant_split`, which performs a binary search (`partition_point`) on the sorted Morton codes, checking the relevant 3 bits at the current depth (`get_octant_index_at_depth`) to find the split points.
-    - Recursive calls are made for each non-empty child sub-range.
-    - Parent nodes aggregate `GravityData` from their completed children.
-    - In our current implementation, this recursive building phase itself runs *sequentially*, although the potential for parallelizing it exists.
+3. *Tree Construction:* An explicit linear tree structure is built recursively from the sorted list of particles. The construction works by dividing the particle list into smaller ranges:
+    - If a range contains one particle or the maximum depth is reached, a leaf node is created, and its `GravityData` (mass and center of mass) is computed.
+    - For internal nodes, the range is partitioned into into 8 sub-ranges (octants). This is done efficiently by performing a binary search on the sorted Morton codes, checking the relevant 3 bits at the current depth to find the split points.
+    - Recursive calls are made for each non-empty octant, and parent nodes aggregate `GravityData` from their children.
+  Currently the tree-building step is run sequentially, but there's potential for parallelization.
+
+
+
 
 The `Node` struct stores the necessary information for the algorithm:
 #box[
@@ -1080,34 +1286,30 @@ The `Node` struct stores the necessary information for the algorithm:
 ```
 ]
 
-Once the octree is built for the current time step, the force (acceleration) calculation proceeds by traversing this tree for each particle $i$. The traversal starts at the root and uses the _Multipole Acceptance Criterion (MAC)_ to decide whether to approximate or recurse:
 
-1.  Calculate distance $d$ from particle $i$ to the node $n$'s CoM.
-2.  Get the node's size $s$ (bounding box width).
-3.  If $s^2 < theta^2 d^2$ (where $theta$ is a threshold parameter), the node is far enough away. Its gravitational effect is approximated using the node's total mass and CoM (`node.data`), and the traversal down this branch stops.
+After the octree is built for the current time step, each particle's acceleration is computed by traversing the tree, using the _Multipole Acceptance Criterion (MAC)_ @Barnes_Hut_1986:
+
+1.  Compute the distance $d$ between the particle and the node's center of mass (CoM).
+2.  Determine the node's size $s$ (bounding box width).
+3.  If $s^2 < theta^2 d^2$ (where $theta$ is a threshold parameter), the node is far enough. Its gravitational effect is approximated using its total mass and CoM, and the traversal down this branch stops.
 4.  If the node is too close:
-    * If it's an internal node, recursively traverse its non-empty children.
-    * If it's a leaf node, perform direct summation between particle $i$ and all other particles $j != i$ within that leaf's `body_range`, accessing original particle data via the `sorted_indices` map and `data_ref`. A softening factor $epsilon$ is used to avoid singularities ($d^2$ replaced by $d^2+epsilon^2$).
-    
-This traversal logic is implemented in `calculate_accel_recursive`. The crucial optimization here is that the force calculation for *each* particle $i$ is an independent tree traversal. Therefore, these traversals are trivially parallelized using `rayon`:
+    - For internal nodes, recursively traverse its non-empty children.
+    - For leaf nodes, perform direct summation (@physics-direct-summation-ref) of all particles in that region. To avoid singularities, a softening factor $epsilon$ is used ($d^2$ replaced by $d^2+epsilon^2$).
+
+Because each particle's traversal is an independent tree traversal, this process is trivially parallelized using `rayon`, greatly improving performance:
 
 #box[
 ```rs
-// From NBodyGravityCalculator impl in src/physics/gravity/controller.rs
-accelerations
-    .par_iter_mut() // parallel iterator through rayon
-    .enumerate()
-    // Calculate acceleration for particle `i` by traversing the octree
-    .for_each(|(i, acc)| {
-         // Starts the recursive traversal
-         *acc = self.calculate_accel_on_particle(i); 
-    });
+accelerations = (0..particles.len())
+    .into_par_iter() // Only need this line to pararellize computation
+    .map(|i| octree.calculate_accel_on_particle(g, i))
+    .collect()
 ```
 ]
 
-#text(red)[Diagram illustrating the BH traversal for one particle (MAC pass/fail).]
+#text(red)[Diagram illustrating the BH traversal for one particle (MAC pass/fail). #text(blue)[jo det låter nice]]
 
-=== Integration #text(red)[Jonatan Klar]
+=== Integration #text(red)[Jonatan Klar] <P-integration>
 Finally, the calculated accelerations (whether from Direct Summation or Barnes-Hut) are used to advance the simulation state via numerical integration. Our implementation uses the Forward Euler method @euler1768integral (specifically, symplectic Euler, which offers better long-term stability for orbital mechanics @brorson_symplectic_integrators)  within the `step_time` function (`controller.rs`) to update velocities and positions based on the accelerations computed in parallel for the current time step $Delta t$:
 
 $v_"new" = v_"old" + arrow(a) dot Delta t quad $ (```rs body.vel += acc * delta```)
@@ -1117,56 +1319,86 @@ $p_"new" = p_"old" + arrow(v)_"new" dot Delta t quad $ (```rs body.pos += body.v
 This combination - parallelized efficient octree construction via Morton codes, $O(N "log"N)$ force calculation with parallel traversals, and simple Euler integration - allows the simulation of large-scale galactic systems.
 
 === Performance Benchmarking and Threshold Tuning #text(red)[Jonatan Klar] <physics-benchmarking-ref>
-To guide optimization efforts and make informed decisions about algorithm choices and parallelization strategies, rigorous performance benchmarking was conducted on the core components of the physics engine. We utilized the `criterion` @criterion.rs Rust library, a powerful statistical benchmarking harness. `Criterion` provides several advantages over simple timing loops, including running benchmarks multiple times to gather statistically significant data, detecting performance regressions between code versions, and generating detailed reports, making it invaluable for performance analysis. Benchmarks were defined in `rust_gdext/benches/gravity_bench.rs` and executed via `cargo bench`.
+To guide optimization efforts and make informed decisions about algorithm choices and parallelization strategies, rigorous performance benchmarking was conducted on the core components of the physics engine. We utilized the `criterion` @criterion.rs Rust library, a powerful statistical benchmarking harness. `Criterion` provides several advantages over simple timing loops, including running benchmarks multiple times to gather statistically significant data, detecting performance regressions between code versions, and generating detailed reports, making it invaluable for performance analysis.
 
-The benchmark suite was designed to measure the performance of critical functions under varying workloads, primarily different numbers of simulated bodies (`N`). Key benchmark groups included `compute_accelerations` (comparing Direct Summation vs. Barnes-Hut) and specific parts of the Morton-based octree construction like `morton_encode` and `morton_sort`. Test data (`SimulatedBody` instances) was generated consistently using helper functions like `create_bench_bodies` to ensure repeatable results across runs.
+The benchmark suite was designed to measure the performance of critical functions under varying workloads, primarily different numbers of simulated bodies ($N$). Key benchmark groups included `compute_accelerations` (comparing Direct Summation vs. Barnes-Hut) and specific parts of the Morton-based octree construction like `morton_encode` and `morton_sort`. Test data (`SimulatedBody` instances) was generated consistently using helper functions like `create_bench_bodies` to ensure repeatable results across runs.
 
-The insights gained from these benchmarks directly influenced several implementation details, particularly the selection of performance thresholds:
 
-1.  *Parallel Morton Encoding Threshold (`PARALLEL_ENCODE_THRESHOLD`):*
-    The `morton_encode` benchmark compared the performance of calculating Morton codes sequentially versus in parallel using `rayon`. As shown by the benchmark results (#text(red)[REF APPENDIX]), while parallelization offers benefits for large datasets, the overhead associated with thread management and work distribution makes the sequential version faster for smaller numbers of particles. The parallel version only overtakes the sequential one after a certain crossover point. Based on these measurements, the threshold `PARALLEL_ENCODE_THRESHOLD = 3000` was selected in the Morton-based octree. Below this number of bodies, Morton codes are calculated sequentially; at or above this threshold, the parallel `rayon::par_iter` implementation is used.
+1. *Algorithm Selection Thresholds for Force Calculation:* The key results for the `compute_accelerations` benchmark group are summarized in @fig:calc-acc-bench. This graph plots the average computation time (in milliseconds, on a logarithmic scale) against the number of bodies for four variants: sequential Direct Summation (`direct/sequential`, yellow line), parallel Direct Summation (`direct/parallel`, blue line), sequential Barnes-Hut (`barnes_hut/sequential`, green line), and parallel Barnes-Hut (Morton-based octree, `barnes_hut/parallel`, red line). Each data point represents the average of 100 samples and was run on. The benchmarks were ran on PC-1 (see @pc-1-specs), so thresholds on other hardware might vary - especially regarding number of CPU-cores. This visualization was crucial for determining our performance thresholds:
 
-2.  *Direct Summation vs. Barnes-Hut Threshold:*
-    The `compute_accelerations` benchmark directly compared the $O(N^2)$ `DirectSummation` method against the $O(N "log"N)$ `MortonBasedOctree` (Barnes-Hut) implementation. While Barnes-Hut has better asymptotic complexity, it incurs a higher constant overhead (tree build, traversal). Direct summation has low overhead but scales quadratically. The benchmark results (#text(red)[REF]) confirmed this trade-off, showing that direct summation was faster below approximately $N=100$. Consequently, a dynamic switching mechanism was implemented in the physics controller (`rust_gdext/src/physics/gravity/controller.rs`):
+    - For very small numbers of bodies ($N < 100$), the `direct/sequential` method (yellow line) is the most performant. Its low intrinsic overhead makes it ideal for these scenarios, despite its $O(N^2)$ complexity. All other algorithms show an overhead, especially the parallel ones.
+    
+    - As $N$ increases beyond approximately $100$, the `direct/parallel` method (blue line) surpasses sequential direct summation and also remains faster than `barnes_hut/parallel` (red line) for a significant range. This is because the parallelization of the $N^2$ calculations effectively utilizes multiple cores, and this benefit outweighs the Barnes-Hut octree construction overhead until the $N^2$ factor becomes too dominant.
+    
+    - The final crossover occurs at approximately $N=440$, where the `barnes_hut/parallel` method (red line) becomes the most efficient. Beyond this point, the $O(N "log"N)$ complexity of Barnes-Hut, combined with parallelism, provides superior performance over both direct summation variants.
+    
+  These empirical results from the benchmark graph directly informed the multi-tiered dynamic switching mechanism implemented in the physics controller.
+
     #box[
     ```rs
-    let accelerations = if bodies_sim.len() < 100 {
-        // Use sequential direct summation for small N
-        DirectSummation::calculate_accelerations::<false>(/*...*/)
-    } else {
-        // Use parallel Barnes-Hut for larger N
-        MortonBasedOctree::calculate_accelerations::<true>(/*...*/)
-    };
+    let accelerations = match bodies_sim.len() {
+            //          Algorithm                  Parallel
+               ..100 => DirectSummation::calc_accs::<false>(grav_const, bodies_sim),
+            100..440 => DirectSummation::calc_accs::<true>(grav_const, bodies_sim),
+            440..    => MortonBasedOctree::calc_accs::<true>(grav_const, bodies_sim),
+        }
     ```
     ]
     
-    This ensures the simulation adaptively uses the most efficient algorithm based on the current number of bodies.
+    This strategy ensures the simulation adaptively selects the most performant algorithm variant—sequential direct sum for very few bodies, parallel direct sum for an intermediate range, and parallel Barnes-Hut for larger numbers—based on the current number of interacting bodies. The "Real-time (60Fps) threshold" line on the diagram provides additional context regarding the absolute performance of these methods.
+
+#figure(
+ image("calc_acc_bench.png"),
+ caption: [
+   Benchmark results for N-body acceleration calculations, illustrating the performance crossover points that informed the selection of algorithm-switching thresholds. Average time per 100 samples (ms, log scale) vs. number of bodies. Key thresholds for Direct Summation vs. Barnes-Hut, and parallelization overheads are noted.
+ ]
+)<fig:calc-acc-bench>
+
+    
+2.  *Parallel Morton Encoding Threshold (`PARALLEL_ENCODE_THRESHOLD`):*
+    The `morton_encode` benchmark group specifically compared the performance of calculating Morton codes sequentially versus in parallel using rayon. The results are visualized in @fig:morton-bench. This graph plots average encoding time against the number of bodies, for both sequential (`morton-sequential`, green line) and parallel (`morton-parallel`, red line) implementations.
+    
+    As the diagram illustrates, for smaller numbers of particles, the sequential encoding is faster due to the overhead associated with initializing and managing parallel tasks. However, as the number of bodies increases, the benefits of parallel computation become apparent. The intersection point, where the parallel version starts to outperform the sequential one, is clearly visible around $N approx 4000$. Based on these empirical results, for particle counts below 4000, Morton codes are calculated sequentially, while for counts at or above 4000, the parallel `rayon` implementation is utilized to leverage multi-core processing.
+
+#figure(
+  image("morton-bench.png"),
+  caption: [
+    Morton encoding benchmark results demonstrating the benefit of parallelization for larger datasets. Average time per 100 samples (ms, log scale) vs. number of bodies. Parallel encoding surpasses sequential performance around N ≈ 4000, after overcoming initial Rayon overhead.
+  ]
+)<fig:morton-bench>
+
 
 In summary, using `criterion` for systematic benchmarking was crucial for optimizing the physics engine. It provided the quantitative data needed to justify algorithmic choices and fine-tune parameters like parallelization and algorithm-switching thresholds, leading to a more performant and scalable simulation.
 
 === Trajectory Simulation and Visualization <P-trajectories>
 
-To understand orbital dynamics and aid in system design, a trajectory simulation system was implemented (`rust_gdext/src/physics/gravity/trajectories.rs`) to predict and visualize the future paths of celestial bodies. This system runs a separate N-body simulation for a configurable number of future steps (`simulation_steps`) and time increment (`simulation_step_delta`), using the same core physics logic (Direct Summation or Barnes-Hut) and semi-implicit Euler integration as the main simulation (`GravityController::step_time`). The resulting sequence of future positions for each body is stored in a `Trajectory` struct and can be rendered as colored line strip meshes (`MeshInstance3D`) in Godot. Trajectories can also be calculated relative to a central body.
+To understand orbital dynamics and aid in system design, a trajectory simulation system was implemented to predict and visualize the future paths of celestial bodies. This system runs a separate N-body simulation for a configurable number of future steps (`simulation_steps`) and time increment (`simulation_step_delta`), using the same core physics logic (Direct Summation or Barnes-Hut) and semi-implicit Euler integration as the main simulation (`GravityController::step_time`). The resulting sequence of future positions for each body is stored in a `Trajectory` struct and can be rendered as colored line strip meshes (`MeshInstance3D`) in Godot. Trajectories can also be calculated relative to a central body.
 
-Given the computational cost, especially for many steps or bodies, trajectory calculations are offloaded to a background thread managed by `TrajectoryWorker` (an instance of the generic `Worker` found in `rust_gdext/src/worker.rs`). The main thread sends `TrajectoryCommand::Calculate` messages with `SimulationInfo` to this worker and retrieves results asynchronously using a queue-and-poll mechanism (`queue_simulate_trajectories`, `poll_trajectory_results`). This prevents the main game loop from freezing during intensive calculations. The worker is designed to process the latest request if multiple are queued, ensuring responsiveness.
+Given the computational cost, especially for many steps or bodies, trajectory calculations are offloaded to a background thread managed by `TrajectoryWorker`. The main thread sends `TrajectoryCommand::Calculate` messages with `SimulationInfo` to this worker and retrieves results asynchronously using a queue-and-poll mechanism (`queue_simulate_trajectories`, `poll_trajectory_results`). This prevents the main game loop from freezing during intensive calculations. The worker is designed to process the latest request if multiple are queued, ensuring responsiveness.
 
 The accuracy of these predicted trajectories is subject to the same numerical errors as the primary Euler integration, accumulating with the number of steps; smaller `simulation_step_delta` improves accuracy at the cost of computation. However, it was observed that less precise trajectories (larger `delta`) tended to overestimate instability, providing a useful heuristic: if a system appeared stable with coarse predictions, it was generally stable in practice.
 
 This trajectory visualization proved invaluable for the `System Generation` process (@system-gen-ref), allowing for iterative tuning of orbital parameters to achieve stable or aesthetically desirable configurations. It served as a key diagnostic tool for debugging physics and visually confirming the immediate future dynamics of generated solar systems.
 
 
-== System Generation #text(red)[Paul klar, kan behöva renskrivas lite] <system-gen-ref>
-System generation means creating a system from a seed such that the system is stable and has certain aesthetics. The generation includes placement of planets and moons such that they are in a stable orbit. It's also responsible for creating the seeds of the individual bodies in the system.
+== System Generation #text(red)[Paul klar, kan behöva renskrivas lite ERIK renskrev Klar] <system-gen-ref>
 
-The generation of systems has to make a tradeoff between realism and aesthetics, while keeping the system stable. Creating stable system with realistic distance/planet-size is easy but comes at a cost of aesthetics. With distances as large as they are in real life the planets become really hard to see, which doesn't make for a good experience.
+  System generation involves deterministically generating stable and aesthetically plausible solar systems and their contained celestial bodies. This includes calculating orbital positions for planets and moons to ensure long-term stability, and assigning unique seeds to each celestial body for reproducible procedural generation.
 
-Creating smaller distances and larger planets helps with aesthetics but can come at a cost of stability, specifically for moons. Having larger planets means that the moons will have to be orbit further. This increases the risk of instability due to the moons interacting with other planets.
+  The generation of systems must balance realism, aesthetics, and stability. Generating stable systems with realistic distances lead to planets appearing too small to be visible, which deteriorates the game play experience. On the contrary, smaller distances with large planets could lead to instability, specifically for moons. The moons' orbit radius increase with the planets' radius, increasing the risk of moons interacting neighboring planets.
+  
+  To verify a system's stability, the previously implemented trajectories (see #ref(<P-trajectories>)) were used (see #ref(<threePlanetTrajectories>)). However, these trajectories were not entirely accurate; numerical errors accumulate over time, meaning that initially stable orbits may eventually become unstable.
+  
+  These errors tended to grow when bodies undergo large transformations between physics steps. The errors were reduced by utilizing a higher physics frame rate and slowing down the orbit speeds. Conversely, faster orbits could lead to a higher accumulation of errors, making stable systems appear unstable in the simulation.
 
-This investigate if a certain setup resulted in a stable or unstable system it was helpful to see the trajectories of the planets. The trajectories were calculated by calculating the position of the planets a certain number of steps $n$ in the future where each step would go $Delta t$ time in the future. To see further into the future we would increase $n$. To see a more accurate trajectory we would lower $Delta t$. The faster the planets are moving the lower $Delta t$ is needed to get accurate enough trajectories. One helpful thing to note is that in almost all cases a less accurate trajectorie *overestimates* the risk of instability/chaos. Meaning if a system looked stable according to the trajectories with low granularity (high $Delta t$) we could be confident that the system is actually stable. (as far into the future as the trajectories showed)
+#figure(
+  image("trajectoriesSystem3Planets.png", width: 50%),
+  caption: [Three planet system with visible trajectories.]
+)<threePlanetTrajectories>
+=== General Flow #text(red)[PAUL KLAR ERIK]
+#text(red)[Denna delen kanske skulle kunna vara i resultatet, med tanke på att den bara säger som det är och inte beskriver processen? JAg tror typ att vi också beskriver den i kapitlet ovan] 
 
-
-=== General Flow #text(red)[PAUL KLAR]
-The input seed for the system gets added as the seed to a random number generator. This ensures that it produces the same random numbers each time the system gets generated. For each attribute of the system a value for that attribute gets randomized within an interval like so:
+The input seed for the system gets added as the seed to a random number generator. This ensures that it produces the same random numbers each time the system gets generated. For each attribute of the system a value for that attribute gets randomized within an interval like so.
 
 ```ts
 func generateSystemDataFromSeed(s: int):
@@ -1177,96 +1409,160 @@ func randomPlanetMass(r):
 	return r.randf_range(MIN_PLANET_MASS, MAX_PLANET_MASS)
 ```
 
-=== Star #text(red)[PAUL KLAR]
-The only randomized attribute of the star is it's color. Which gets picked randomly out of a list. 
-```py 
-  var colors := [
-		Color(1, 0.14, 0), # Red (Red dwarf or red giant)
-		Color(1, 0.5, 0), # Orange (Orange dwarf)
-		Color(1, 1, 1), # White (White star)
-		Color(0.5, 0.5, 1), # Light blue (A-type star)
-		Color(0.2, 0.2, 1), # Blue (Hot B-type star)
-		Color(0.1, 0.1, 1), # Very hot blue (O-type star)
-		Color(0.8, 0.8, 1), # Pale blue-white (F-type star)
-		Color(0.9, 0.8, 0), # Yellow-orange (K-type star)
-		Color(0.8, 0.6, 0.4) # Yellow-brownish (G-type star, slightly more red)
-	]
-```
+=== Solar System Stars #text(red)[PAUL KLAR ERIK KLAR]
 
-The mass of star is constant across all systems but is something which can easily be changed if needed. The star gets placed at coordinate (0,0,0) and always has the same radius. Again, this is something can be changed to scale with mass if we would like to. It's worth to note however that one can only notice a change in size *relative* to another object. Same with the mass. It has been largely unnecessary to modify the stars mass/radius as the stars don't interect and can't be seen side by side. So modifying the look of the solar system only required modifying the planets and moons.
+  The stars were at first implemented as simple yellow spheres with constant masses and fixed positions and radiuses. Other than the colors, the constant variables would not be randomly generated as the stars would not physically interact with other stars. This could easily be changed if necessary.
+  
+  To increase variety between solar systems and increase visual interest, a star shader snippet @StarShader was found online and implemented. Additionally, an array of star color presets was defined, from which a color was randomly selected during generation (see #ref(<ExampleStarColors>)).
 
-=== Planets #text(red)[PAUL KLAR]
- The system randomizes how many planets it should have.
-```py
-  var n = r.randi_range(MIN_NUMBER_OF_PLANETS, MAX_NUMBER_OF_PLANETS)
-```
+  #figure(
+    grid(
+        columns: 3,     // 2 means 2 auto-sized columns
+        gutter: 2mm,    // space between columns
+        image("images/System/RedStar.png"),
+        image("images/System/BlueStar.png"),
+        image("images/System/OrangeStar.png")
+    ),
+    caption: "Example solar system star colors (red, blue, and orange)."
+  )<ExampleStarColors>
+  
 
-The planets orbit radiuses were at first scaled linearly, with the same difference in orbitradius between two adjacent planets.
+=== Planets #text(red)[PAUL KLAR ERIK KLAR]
 
-```py
-var orbit_radius = SUN.radius + BASE_DISTANCE_FROM_SUN
-	for i in range(n):
-		var orbit_increase = DISTANCE_BETWEEN_PLANETS
-		orbit_radius += orbit_increase #Linear;
-```
+   To fulfill the goal of generating solar systems, planets needed to be placed into the systems along with the stars. The planets were initially assigned orbit radiuses which increased linearly with a base distance from the sun. This proved to be unstable for systems containing moons and with smaller distances between planets. After experimentation, scaling the orbit radiuses linearithmically proved to provide a better balance between aesthetics and stability. This design choice is inspired by the structure of our own solar system, where outer planets are spaced farther apart than inner ones @planetary-fact-sheet.
 
-When adding moons and pushing the planets closer together the outer planets became unstable. To mitigate this the orbitradius was changed away from scaling linearly to some scaling were that distance between planets increased the further out in the system. We found that linearithmic scaling worked the best. With linearithmic scaling the planets are close enough to be visible throughout the system, but far enough away from eachother so that moons can orbit at a distance and be decently sized with destabilizing. 
+   
 
-Taking inspiration from how the planets are organized in our real solar system helped as the planets further out have larger distances between them. But they're divided into the "inner planets" and the "outer planets" by the asteroid belt. Both having a roughly linear or linearithmic scaling just with different slopes.@planetary-fact-sheet
+  In order for a planet to stay at the same distance from its star, it was assigned an initial velocity perpendicular to the vector in the direction of the star. The velocity $v$ scales with the star's mass $m$, the gravitational constant $G$, and inversely with the orbit radius $r$.
+  
+  $ |v| = sqrt(G dot m/ r) $
+  
+  Modifying these variables would therefore increase or decrease the planet's velocity.
+  
+  It was discussed whether to simulate elliptical orbits or to continue with the spherical. Elliptical orbits are more realistic and would be possible but comes with the risk of increasing system instability.
+  
+  Besides the placements of planets the system also randomizes the angle around the star it should be placed at, mass, and radius of planets. Unlike reality, in which mass scales with the radius and placing moons, the mass and radius are randomized and independent from each other.
 
-```py
-var orbit_radius = SUN.radius + BASE_DISTANCE_FROM_SUN
-	for i in range(n):
-		var orbit_increase = DISTANCE_BETWEEN_PLANETS
-		orbit_radius += log(i + 1) * orbit_increase #Linearithmic;
-```
 
-In order for a planet to stay at the same distance from its star, it gets an initial velocity perpendicular to the vector pointing towards the star. The velocity $v$ scales with the stars mass $m$, the gravitational constant $G$ and inversely with the orbit radius $r$.
 
-$ |v| = sqrt(G dot m/ r) $
 
-As the velocity scales with $G$ it's easy to modify the orbit speeds of planets within systems. Simply increasing G will create faster orbits in systems. One could also modify $m$ to change the speed of the orbits. So to create more variation between the systems we could change the orbit speeds by modifying $m$.
+=== Moons #text(red)[William KLAR (generated, textured) och PAUL KLAR (system) Erik Klar]
+  
+  Procedurally placing the moons followed the same procedure as the planet placement, but with the planet as the central reference point instead of the star. Only the planets from the fourth position outward were allowed to have moons, to avoid gravitational interference due to their closer proximity.
 
-Creating elliptical orbits is possible but comes with a risk as the distance between planets is harder to guarantee, causing chaotic systems more easily. 
+  The moons’ orbit radii increased linearly. The spacing between moons was computed by dividing the planet’s orbit increase value by a constant MOON_ORBIT_RATIO_PLANET_DISTANCE, typically set between 40 and 100. A higher ratio results in moons being closer to their planet and to each other.
 
-Besides the placements of planets the system also randomizes orbitangle (what angle around the star it should start at), mass and size (radius) of planets. They mass and size are randomized independent of each other, when in reality the mass scales with the radius cubed. The radius gets used when generating the planet texture@planet-gen-ref and placing moons.
-
-=== Moons #text(red)[William (generated, textured) och PAUL KLAR (system)]
-
-The moons were placed around planets in a similar way to how planets were placed around the star. The number of moons increased by 1 starting from the fourth planet, with the 3 innermost planets having zero moons.
-
-The orbitradius of moons around their planet increased linearly, with the moons being placed at even steps around their planet. The stepsize/slope wasn't fixed but instead based on the difference in orbitradius between the planet and the previous planet. The stepsize, _distance_between_moons_, is calculated as the orbit difference divided by a constant _MOON_ORBIT_RATIO_PLANET_DISTANCE_ which is set to somewhere in the range 40-100. Higher ratio means the moons are closer to the planet and closer together.
-
-```py
-  var moons_count = max(2, i) - 2
-  var distance_between_moons = orbit_increase / MOON_ORBIT_RATIO_PLANET_DISTANCE
-  for m in range(moons_count):
-    var moon_orbit_radius = planet_data.radius + (m + 1) * distance_between_moons
-```
-
-The velocity is calculated in the same way as with the velocity of the planet. But the mass $m$ is instead the mass of the planet the moons orbit.
- $ |v| = sqrt(G dot m/ r) $
-
- Orbitangle is calculated exactly the same as with planets. Mass is not randomized but instead directly calculated as 1/10 000 of the planets nass. The radius is randomized but within the range of $r/10 -r/5$ where $r$ is the planets radius.
+  The orbital velocity and initial angle (orbit angle) were calculated in the same way as for planets. However, it uses the planet’s mass rather than the star’s.
  
- ```py
- var moon_radius = r.randf_range(planet_data.radius / 10, planet_data.radius / 5)
-	var orbit_angle = randomOrbitAngle(r)
- var moon_mass = planet_data	.mass * 0.0001
- ```
+  The mass of a moon is fixed to be 1/10,000 of its planet's mass, while its radius is randomly chosen within the range of $r/10$ to $r/5$, where $r$ is the planet’s radius.
+
+  The moon's appearance was created by generating a sphere, followed by randomly positioning craters along its surface. Each vertex was then processed by iterating through all predefined craters to calculate height adjustments based on a method created by Sebastian Lague @SebLagPlanet, using the following formulas:
+  ```cs
+    cavity = x * x - 1;
+    
+    rimX = Min(x - 1 - rimWidth, 0);
+    rim = rimSteepness * rimX * rimX;
+    
+    craterShape = Max(cavity, floorHeight);
+    craterShape = Min(craterShape, rim);
+    
+    craterHeight += craterShape * crater.Radius;
+  ```
+  Here, _x_ denotes the distance from the vertex to the crater, while the constants _rimWidth_, _rimSteepness_, and _floorHeight_ control the crater shape. The calculated _craterHeight_ determines the displacement of the vertex along its normal.
+
+  An issue that arises when using the _Max_ and _Min_ functions is that only one of the values will be utilized, which can result in the formation of harsh shaped craters (see @MoonSmooth0). To address this, a smooth minimum and maximum was employed. These functions are based on the approach described in Inigo Quilez's article _Smooth minimum for SDFs_ @SmoothMinMax.
+  
+  The smooth minimum function can be formulated as follows:
+  ```cs
+  	SmoothMin(float a, float b, float k)
+  	{
+  		var h = Clamp((b - a + k) / (2.0 * k), 0.0, 1.0);
+  		return a * h + b * (1.0 - h) - k * h * (1.0 - h);
+  	}
+  ```
+Here, the parameter k represents the smoothness factor, indicating the degree to which the values are smoothed.
+
+The smooth maximum function can be derived by inverting the smoothness factor as follows:
+  ```cs
+  	SmoothMax(float a, float b, float k)
+  	{
+  		return SmoothMin(a, b, -k);
+  	}
+  ```
+  Enabling this smoothing mechanism allows for better smoothness over craters, as illustrated in @MoonSmooth1
+  #figure(
+    grid(
+        columns: 2,     // 2 means 2 auto-sized columns
+        gutter: 2mm,    // space between columns
+        image("images/Moon/moon_smooth0.png", width: 70%),
+        image("images/Moon/moon_smooth0_wireframe.png", width: 70%),
+    ),
+    caption: "Craters with smoothness set to 0"
+  )<MoonSmooth0>
+    #figure(
+    grid(
+        columns: 2,     // 2 means 2 auto-sized columns
+        gutter: 2mm,    // space between columns
+        image("images/Moon/moon_smooth1.png", width: 70%),
+        image("images/Moon/moon_smooth1_wireframe.png", width: 70%),
+    ),
+    caption: "Craters with smoothness set to 1"
+  )<MoonSmooth1>
 
 
-== Galaxy #text(red)[Jacob, ANTON KLAR] #text(blue)[blå är förslag på ny text],#text(red)[ röd är kommentarer],#text(orange)[ text markerad med orange är din text och kommentaren som kommer efteråt syftar till den oranga texten. Tex. orange + blå => ersätta orange text med blå], #text(purple)[lila betyder Ta bort]
-A galaxy is a massive collection of stars, gas and dust, ranging in diameters of 1500 to 300,000 light-years@galaxy-term. In the context of this project, the galaxy represents the largest scale of the simulation -- a vast space populated by procedurally placed stars.
 
-#text(red)[detta stycke hade nog passat mer i resultat? passar inte direkt i processen för du pratar om hur slutversionen fungerar ]A key feature of the Galaxy's implementation is deterministic generation, or "seeded" generation. This approach allows for the "random" values produced by a random number generator to be predetermined based on an initial seed. This is desirable since a goal of this project is to ensure reproducible and consistent generation.
+  
+  To further enhance the visuals of the moons, textures and a normal map were added. However, incorporating textures presented a challenge: the textures became stretched due to vertex manipulations used to create craters (see @MoonTexture0). While vertex positions were adjusted, the UV mapping—which determines how texture coordinates correspond to the 3D model’s surface—was not updated accordingly.
+  
+  To resolve this issue, triplanar mapping @TriplanarMapping was employed. This technique involves sampling the texture by projecting it from the three basis vectors (x, y, z), effectively "wrapping" the texture around the object. Since triplanar mapping is a built-in feature in Godot, it was simply enabled in the material setting. By applying both a color texture and a normal texture, the moon achieved a rocky surface with well-defined craters shown in @MoonTexture1.
+  
+  #align(center,
+  grid(
+    columns: 2,
+    gutter: 2mm,
+    [
+      #figure(
+        image("images/Moon/moontext0.png", width: 70%),
+        caption: [Moon with a texture (triplanar disabled)]
+      )<MoonTexture0>
+    ],
+    [
+      #figure(
+        image("images/Moon/moontext1.png", width: 70%),
+        caption: [Moon with a texture (triplanar enabled)],
+      )<MoonTexture1>,
+    ]
+  )
+)
 
-#text(red)[samma här, nämner också seed mycket men inte förklarat vad det är ]All iterations of the galaxy utilizes an arbitrary integer seed to influence the generation of stars, with the same input seed always yielding the same galaxy. The term "randomly" is used loosely, as it refers to this #text(red)[controlled process, lite otydligt vilken process den menar ]controlled process. #text(blue)[The term "random" is used loosely, as it refers to the described seeding process of always generating the same star configuration with the same seed.] #text(red)[kanske något sånt istället?]
 
-The following sections introduce the various iterations the galaxy underwent during development, #text(orange)[each exploring new, or refined approaches to star interaction and distribution.] #text(red)[kan möjligtvis tas bort]
+== Galaxy #text(red)[Jacob, Anton, Jonatan, Jacob klar]
+A galaxy is a massive collection of stars, gas and dust, ranging in diameters of 1500 to 300,000 light-years @galaxy-term. In the context of this project, the galaxy represents the largest scale of the simulation — a vast space populated by procedurally placed stars.
 
-=== Star field #text(red)[Jacob, ANTON KLAR] <star-field-ref>
-The first version #text(blue)[of the galaxy] was a three-dimensional star field#text(blue)[,] #text(red)[vad är en star field?] as can be seen in @star-field-img. Points were sampled randomly within a cube to determine the location of #text(orange)[star placement] #text(blue)[each star]. #text(orange)[The stars #text(purple)[are] made up out of a single circular mesh, @star-img.] #text(blue)[The stars were constructed using a single circular mesh, as displayed in @star-field-img] This #text(orange)[iteration] #text(blue)[version] of the galaxy was finite in scale.
+#text(red)[*SEED står nu i Glossary. Ta bort allt det här?*]
+#strike()[
+#text(red)[detta stycke hade nog passat mer i resultat? passar inte direkt i processen för du pratar om hur slutversionen fungerar ]A key feature of the Galaxy's implementation is deterministic, or "seeded", generation. This approach allows for the "random" values produced by a random number generator to be predetermined based on an initial seed. This is desirable since a goal of this project is to ensure reproducible and consistent generation.
+
+#text(red)[samma här, nämner också seed mycket men inte förklarat vad det är ]#text(fuchsia)[!!!] All iterations of the galaxy utilizes an arbitrary integer seed to influence the generation of stars, with the same input seed always yielding the same galaxy configuration. #text(blue)[The term "random" is used loosely, as it refers to this described seeding process] #text(fuchsia)[_Och för att det är en dator och inte ren slump?_]
+
+
+#text(red)[Se det blå ovan ^]
+
+#strike()[
+The term "randomly" is used loosely, as it refers to this #text(red)[controlled process, lite otydligt vilken process den menar ]controlled process. #text(blue)[The term "random" is used loosely, as it refers to the described seeding process of always generating the same star configuration with the same seed.] #text(red)[kanske något sånt istället?]
+
+]
+
+]
+
+
+The following sections introduce the various iterations the galaxy underwent during development.
+
+
+=== Star field #text(red)[Jacob, ANTON, Jacob, Jonatan, Jacob] <star-field-ref>
+The first version of the galaxy, a 3D distribution of stars that we called a 'star field', can be seen in @star-field-img. Points were sampled randomly within a finite cube using Godot's random number generator @godot-random-number-generator, and seeding it, to determine where each star would be instantiated. The stars were constructed using a single circular mesh, as displayed in @star-img. 
+
+#text(fuchsia)[_ Vet inte om bara random räcker, kanske måste skriva vilken sorts distr._] #text(blue)[Joo, sant. jag skrev till det ^ /Jacob]
 
 #align(center,
   grid(
@@ -1287,37 +1583,44 @@ The first version #text(blue)[of the galaxy] was a three-dimensional star field#
   )
 )
 
-=== Disc galaxy #text(red)[Jacob, ANTON KLAR] <disc-galaxy-ref>
-Shortly thereafter, a version to imitate a disc galaxy formation #text(red)[vad är en disc galaxy formation?] was created. #text(orange)[The implementation was based on a slightly modified star field from @star-field-ref.] #text(red)[kan nog tas bort] Rather than sampling random points from within a cube, #text(blue)[as done previously,] they were #text(blue)[now] sampled from within a sphere. Depending on #text(orange)[each] #text(blue)[the] sample#text(blue)[']s height #text(blue)[within the sphere] #text(purple)[position], #text(orange)[the likelihood of a star being placed decreased from further away from the center of the galaxy] #text(blue)[the likelihood of a star being placed decreased the farther it was from the center of the galaxy] #text(red)[hur har height position något att göra med sänkt chans att en stjärna utplaceras?]. #text(orange)[This combined] #text(blue)[The combination of these things]#text(purple)[,] resulted in a disc shape as well as a concentration of stars #text(orange)[towards] the center, as can be seen in @disc-galaxy-img.
+=== Disc galaxy #text(red)[Jacob, Anton, Jacob, Anton, Jonatan klar] <disc-galaxy-ref>
+Thereafter, a version of the galaxy that imitates the formation of a disc galaxy was created. A disc galaxy is characterized by a flat, rotating disc structure, with a greater concentration of stars at the center @disc-galaxy.
+
+This was achieved by sampling random points from within a sphere instead of a cube, again, using Godot's random number generator @godot-random-number-generator. The distribution was also influenced by reducing the probability of a star being placed the further away it was located from the galaxy center, thus:
+ - reducing vertical spread, which would mimic the flattened shape of a disc.
+ - increasing the probability of stars being placed near the center, resulting in a greater concentration of stars near the center.
+ 
+Together, this resulted in a galaxy with a disc-like distribution, as can be seen in @disc-galaxy-img. 
 
 #figure(
   image("images/Galaxy/disc_galaxy.PNG", width: 60%),
   caption: [Disc galaxy],
 ) <disc-galaxy-img>
 
-=== Skybox #text(red)[Jacob, ANTON KLAR] #text(red)[- KAN TAS BORT OM VI BEHÖVER MINSKA ORD - bra att nämna någonstans åtminstånde tycker jag även om man tar bort denna underrubriken]
-A traditional skybox was created in Blender @blender @blender-youtube to serve as a background, #text(orange)[primarily to be used for the half-time presentation of the project when visiting a solar system] #text(red)[tas bort?]. Unlike the procedurally generated star fields, the skybox does not contain actual 3D stars. Instead, it consists of a pre-rendered image designed to imitate a galaxy of stars. As shown in @skybox-testing-img.
-#text(red)[används denna i slutprodukten? Räcker kanske att bara nämna att den är gjord i blender och att det är en pre-rendered image]
+=== Skybox #text(red)[Jacob, ANTON, Jacob, Anton, Jonatan klar] <skybox-ref>
+
+A traditional skybox was created in Blender @blender @blender-youtube to serve as a pre-rendered galaxy background. Unlike the procedurally generated star fields, it does not contain actual 3D stars, but instead imitates a dense star field using a single static image, as seen in @skybox-testing-img.
 
 #figure(
   image("images/Galaxy/skybox_testing_environment.PNG", width: 60%),
   caption: [Skybox testing environment],
 ) <skybox-testing-img>
 
-#text(orange)[As mentioned, this approach was primarily used for presentation] #text(red)[upprepning, det sas typ för 2 meningar sen] but also testing purposes. Since the final aim is a star backdrop composed of actual stars that can be explored, as in the other galaxy iterations. So this implementation won't necessarily be used in the future.
+This approach was mainly used for presentation and testing purposes. Since the final goal was to use a backdrop composed of actual, explorable stars, this implementation was not intended for the final product.
 
-=== Infinite galaxy #text(red)[Jacob klar] <infinite-galaxy-ref>
-This version is based on the original star field concept from @star-field-ref, this time, extending infinitely in all directions rather than being limited to a confined structure. Stars are distributed procedurally using a seeded random generator. The result can be seen in @infinite-galaxy-img.
 
-// källor för noise o liknande? antagligen så har vi förstås beskrivit det i ett "bakgrunds"-kapitel.
-Additionally, star placement is now influenced by sampling a noise texture, which can help create formations of stars rather than purely random distributions. These star arrangements can result in regions of higher or lower concentrations of stars, making the galaxy more varied.
+=== Infinite galaxy #text(red)[Jacob, Erik, Jacob klar] <infinite-galaxy-ref>
+This version is based on the original star field concept from @star-field-ref, this time, expanding infinitely in all directions rather than being limited to a confined structure. Stars were distributed procedurally using a seeded random generator. The result can be seen in @infinite-galaxy-img.
+
+Additionally, star placement was further refined by sampling from a noise texture. This approach was used to influence clustering, creating areas of higher and lower star densities, to make the galaxy more varied and visually interesting. #text(red)[Tycker den här delen låter lite som ett resultat? Mest på grund av att det är skrivet it presens "star placement *is* now..."] #text(blue)[Tycker nog det inte är fel att ha den här. men du har rätt om hur det hade formulerats så jag ändrade lite. Se vad du tycker.]
 
 #figure(
   image("images/Galaxy/infinite_galaxy.PNG", width: 70%),
   caption: [Infinite galaxy],
 ) <infinite-galaxy-img>
 
-The galaxy is also chunked, allowing generation of stars in the player's closest vicinity, while culling chunks that are further away. This allows the galaxy to be infinitely explorable, with new chunks of stars generating as the player moves through space. An example of a "Star chunk" can be seen in @star-chunk-img.
+To support infinite exploration, the galaxy space was divided into discrete chunks. Only chunks in the player's closest vicinity are generated and rendered, while distant chunks are culled to save performance. As the player moves, new chunks are generated procedurally, giving the illusion of an endless galaxy. An example of a "Star chunk" is shown in @star-chunk-img. #text(red)[den här delen också?] #text(blue)[Jag ändrade formuleringen här också.]
+
 
 #figure(
   image("images/Galaxy/star_chunk.PNG", width: 70%),
@@ -1325,14 +1628,15 @@ The galaxy is also chunked, allowing generation of stars in the player's closest
 ) <star-chunk-img>
 
 
-=== Finite physics-based galaxy #text(red)[Jacob klar]
+=== Finite physics-based galaxy #text(red)[Jacob klar Erik] <physics-galaxy-ref>
 
 //-Changed to multimesh here as well.
 //-Star finder refactored to work with octree's, as well as for moving stars (maybe)
+#text(red)[Jag undrar om inte den här delen kan vara en del av resultatet/nån diskussion också? Förstår ju varför man vill beskriva det här i processen, eftersom vi ändå har gjort den? Men det känns som att den skulle kunna passa in i nån form a diskussion eller resultat, men att man ändå nämner den i processen med kanske?]
 
-An Infinite galaxy is a compelling concept, but applying physics to stars of an ever-expanding galaxy is not doable. Since such galaxies are infinitely vast, there is not any fixed point of reference making any attempt at global physics calculations not make sense.
+An Infinite galaxy is a compelling concept, but applying physics to stars of an ever-expanding galaxy is not doable. Since such galaxies are infinitely vast, there is not any fixed point of reference making any attempt at global physics calculations not work.
 
-With great advancements in the physics engine from @physics-engine-ref, an attempt to simulate physics of a finite disc-shaped galaxy was performed -- no longer confined to the bounds of the solar system.
+With great advancements in the physics engine (@physics-engine-ref), an attempt to simulate physics of a finite disc-shaped galaxy was performed — no longer confined to the bounds of the solar system.
 
 To test this idea the disc galaxy implementation from @disc-galaxy-ref was revisited and repurposed. It was retrofitted with new stars containing mass and velocity, to interact with each other through the physics engine. The resulting galaxy can be seen as follows:
 
@@ -1358,7 +1662,7 @@ To test this idea the disc galaxy implementation from @disc-galaxy-ref was revis
 Since all masses are equal, and no initial velocity is set, the galaxy does not remain stable. However, it still demonstrates the potential of simulating a galaxy using the physics engine. With 10,000 stars in this initial setup, the performance impact remained minimal. Given more time, this would have been explored further.
 
 == Galaxy map #text(red)[Jacob klar]<galaxy-map-ref>
-The Galaxy Map serves as the connection of all previous components of the project, and combining them into a unified experience. It accumulates all prior work of the Infinite galaxy (@infinite-galaxy-ref), as well as connects with the implementations of planets (@planet-gen-ref), solar systems (@system-gen-ref), physics (@physics-engine-ref), player controls (@player-controls-ref), and more.
+The Galaxy Map serves as the final connection, connecting the implementation at the galaxy-scale of the Infinite Galaxy (@infinite-galaxy-ref), to the system-scale of Solar Systems (@system-gen-ref), which in turn connects down to the planet-scale. Combining it all into a unified experience.
 
 === Selectable stars #text(red)[Jacob klar] <selectable-star-ref>
 To enable interaction with individual stars, a new type of selectable star was implemented. Players can now hover over a star with the mouse cursor and click to select it. This was achieved by adding a spherical collision shape to the star object, which detects mouse input events within the collider. This star, and its collider, is shown in @selectable-star-img.
@@ -1373,15 +1677,12 @@ Infinite galaxy (@infinite-galaxy-ref) was developed to allow for distribution o
 To indicate that a star has been selected, the star's location in space is highlighted, together with a distance measured in "Light years" (LYs). This can be seen in the center of @galaxy-map-img. In addition, the coordinates and unique seed of the star is displayed in the bottom-right corner.
 
 === Navigation #text(red)[Jacob klar] <galaxy-map-navigation-ref>
-Two distinct modes of transportation have been implemented for navigating the galaxy map.
+Two modes of transportation were been implemented for navigating the Galaxy Map.
 
 1. Manual movement: The player can freely move around using the same player controls introduced in @player-controls-ref.
 2. Fast travel: Once a star is selected, press the "->"-button in the bottom-right of @galaxy-map-img. This moves the player rapidly towards it, stopping a short distance away.
 
 To explore the solar systems themselves, the "Explore"-button in the bottom-right of @galaxy-map-img, can be used to enter the star/solar system currently selected. When pressed, a solar system is generated based on the selected star's seed and transitions the player into it. This system exists in a separate scene from the Galaxy Map.
-
-/// även nämna hur när man går iväg från planeter inne i solsystem så går man ut o tillbaks till galaxy map?
-/// samt navigeringen (bara flyg atm) runt planeterna i solsystemen.
 
 === Seed #text(red)[Jacob klar]<seed-ref>
 The galaxy utilizes a unique "Galaxy Seed", the same used in @infinite-galaxy-ref, to deterministically generate the placement of stars. With the implementation of explorable solar systems, a need arose to generate new seeds for each system. Were they to utilize the same seed, all solar systems would be identical.
@@ -1397,7 +1698,7 @@ To address this, a custom hash function was developed, allowing for the generati
 ) <galaxy-map-img>
 
 
-=== Multi-Meshed Stars & Star Finder #text(red)[Jacob klar]
+=== Multi-Meshed Stars & Star Finder #text(red)[Jacob klar] <star-multimesh-and-finder-ref>
 As the scale of the galaxy expanded, performance issues began to surface. In particular, stuttering upon loading new chunks. Whenever the player would reach the border of a chunk (@star-chunk-img), chunks would cull, and new ones would generate.
 
 Since the instancing of hundreds or thousands of new stars made up the bulk of the operations at that time, the theory was that it was that which caused the stutters to occur. With each star possessing a MeshInstance3D @godot-meshinstance3d, and a collider (as introduced in @selectable-star-ref).
@@ -1418,14 +1719,14 @@ This resulted in performance improvements, as can be seen in @multi-mesh-perform
   [From], [0.39 ms], [3.88 ms], [33.43 ms],
   [To], [0.44 ms], [1.04 ms], [1.9 ms],
   ),
-  caption: [Before and after frame time metrics with the multi-mesh implementation],
+  caption: [Frame time metrics on PC-2 (@pc-2-specs) - Multi-mesh stars],
 ) <multi-mesh-performance-table>
 
 However, this change introduced a new challenge. Since multi-mesh only instances visual meshes, and not other objects such as colliders, the stars were no longer selectable. To reintroduce star selection, two approaches were considered:
 
 1. *Instantiate colliders at star positions*: Instantiate only a collider at each star position, but still render the meshes with the multi-mesh implementation.
 
-2. *Ray-based selection - The "Star Finder"*: Use the known positions of stars in space, and when the player clicks, cast a ray in that direction. At regular intervals along the ray, check the surrounding area for any star positions falling within a set radius of the ray.
+2. *Ray-based selection*: Use the known positions of stars in space, and when the player clicks, cast a ray in that direction. At regular intervals along the ray, check the surrounding area for any star positions falling within a set radius of the ray.
 
 The second option was implemented as a system called "Star Finder", which again allows for interaction with stars, despite them only consisting of a visual mesh. Achieved via ray-casting and distance checks to the ray at regular intervals, iterating through the array of star positions of the current chunk. The Star Finder can be seen in action in @star-finder-img, with the interval and radius of proximity checks (the blue spheres) are regular in order to not miss any stars. The radius of each check also increases the further from the start position it gets, to make selection of distant stars easier.
 
@@ -1436,15 +1737,37 @@ The first option would have allowed for simpler logic in star selection, but wou
   caption: [Star Finder],
 ) <star-finder-img>
 
-=== Seamless systems #text(red)[Jacob klar? Kanske inte helt 100 än hur vi gör]
-
-In combination with great improvements in optimizing planet generation, as detailed in @planet-optimize-ref, new opportunities emerged. Previously, transitioning from the galaxy scale into individual solar systems was a static process, triggered by a button click (@galaxy-map-navigation-ref), which then loaded a separate system scene. But now, system scenes could be dynamically instantiated in real-time as the player moves towards a star. This allows the galaxy to be populated by fully realized solar systems that load seamlessly during exploration. An example of this can be seen in @seamless-systems-img.
+=== Seamless galaxy #text(red)[Jacob klar]
+With great improvements in optimizing planet generation, as detailed in @planet-optimize-ref, new opportunities emerged. Previously, transitioning from the galaxy scale into individual solar systems was a static process, triggered by a button click (@galaxy-map-navigation-ref), which then loaded a separate system scene. But now, system scenes could be dynamically instantiated in real-time as the player moves towards a star. This allows the galaxy to be populated by fully realized solar systems that load seamlessly during exploration. An example of multiple systems visible at the same time, can be seen in @seamless-galaxy-img.
 
 #figure(
-  image("images/Galaxy/seamless_galaxy.PNG", width: 90%),
-  caption: [Seamless systems],
-) <seamless-systems-img>
+  image("images/Galaxy/seamless_galaxy_multiple_systems.png", width: 90%),
+  caption: [Seamless galaxy],
+) <seamless-galaxy-img>
 
+By using the same Star Finder from @star-multimesh-and-finder-ref, stars could be continuously detected in a sphere around the player, and instantiated at a set distance from the player. The solar systems will then scale slightly upon approach, until it reaches its full scale.
+
+However, even with the improvements in the planet generation, this still had great performance implications, as can be seen in @seamless-galaxy-table. With the frame time average remaining stable throughout, although with noticeable stutters during runtime as indicated by the 1% and 0.1% highs.
+
+#text(red)[*Kör om testerna med de senaste fixarna*]
+#figure(
+  table(
+  columns: (auto, auto, auto, auto),
+  inset: 7pt,
+  align: left,
+  table.header([],[*Average*], [*1% high*], [*0.1% high*]),
+  [From], [4.17 ms], [4.79 ms], [9.75 ms],
+  [To], [4.31 ms], [20.81 ms], [132.01 ms],
+  ),
+  caption: [Frame time metrics on PC-2 (@pc-2-specs) – Seamless galaxy],
+) <seamless-galaxy-table>
+
+In addition, the UI received updates (seen in @seamless-systems-ui-img) to display more information about each solar system. Together with some added flair of an assigned stellar classification @britannica-stellar-classification roughly associated to its color, as well as a randomly selected star catalogue acronym, followed by an integer number @star-naming (the system's seed).
+
+#figure(
+  image("images/Galaxy/seamless_galaxy_ui_update.png", width: 90%),
+  caption: [Updated Star Select UI],
+) <seamless-systems-ui-img>
 
 = Result #text(red)[ANTON KLAR]
 The following chapter presents the final result of the project. First, a brief overview of the final product is provided in @result-overview. Then, in subsequent sections, a more in-depth look at the final product will be presented, in the style of a live-demonstration, focusing on the typical user experience and what can be expected of the developed application.
@@ -1458,8 +1781,75 @@ Entering a solar system causes its belonging celestial bodies (planets and moons
 
 Finally, the end product includes a robust physics engine that is capable of updating thousands of objects simultaneously in real time.
 
-== "Technical" ge mig ett bra namn tack
+== "Technical" ge mig ett bra namn tack -- Vi kanske inte behöver en överrubrik för detta. Vi kan bara ha "5.2 Physics Engine", "5.3 Galaxy", ... Sedan en "5.X Demo" eller nått.
 abc fysik def gravitation ghijklmnopqrstuvwxyzåäö fysik
+huh ""
+
+=== Physics Engine #text(red)[Jonatan klar ish]
+The Rust-based N-body physics engine (@physics-engine-ref) was successfully developed, incorporating parallelized versions of both Direct Summation and a Barnes-Hut algorithm. Benchmarks (@physics-benchmarking-ref) validated its design and optimization. A key aspect of "real-time" performance is the ability to complete computationally intensive steps within a single frame budget. For a 60 FPS target, this implies each frame, including physics calculations, should ideally complete within approximately 16.7 milliseconds. As illustrated in @fig:calc-acc-bench the parallel Barnes-Hut method (`barnes_hut/parallel`) demonstrated its capability to calculate accelerations for tens of thousands of bodies (up to approximately 45,000) within this 16.7 ms threshold, confirming its suitability for real-time simulation of large systems.
+
+In the final application, this engine primarily governs solar system dynamics, typically performing calculations on fewer than 30 bodies. For this scale, it correctly defaults to the efficient Direct Summation method, a choice justified by its superior performance for small $N$ due to lower overhead, as detailed in our benchmark analysis (@physics-benchmarking-ref). This ensures stable local orbital mechanics. This current usage, however, is significantly below the engine's benchmarked capacity, meaning its advanced Barnes-Hut optimizations for large N are not leveraged in the primary gameplay loop. This scope was a consequence of project priorities focusing on broad galaxy exploration and diverse procedural content across multiple scales, rather than extensive inter-star dynamics in the final seamless galaxy.
+
+The engine's scalability was nevertheless demonstrated in the "Finite physics-based galaxy" experiment (@physics-galaxy-ref), which handled 10,000 interacting stars, further confirming the engine's robustness and its potential for larger-scale simulations within real-time constraints. Thus, while currently applied to smaller-scale interactions, the physics engine stands as a performant and validated component with significant capacity for future expansions involving more complex, large-N gravitational simulations.
+
+
+=== Galaxy #text(red)[Jacob] <result-galaxy-ref>
+
+The galaxy system went through multiple iterations, with each iteration playing a part in the foundation for the final version, The Galaxy Map (@galaxy-map-ref). Within the Galaxy Map the distribution of stars from the Infinite Galaxy connects seamlessly with the Solar Systems implementation, which in turn connects to the planets. Each step in scale can be seen in the following figures, the galaxy-scale (@galaxy_map_result_1), towards the system-scale (@galaxy_map_result_2), eventually reaching the planet-scale (@galaxy_map_result_3).
+
+#figure(
+  image("images/Galaxy/Result/galaxy_map_result_1.png", width: 90%),
+  caption: [Galaxy Map at the galaxy-scale],
+) <galaxy_map_result_1>
+
+#figure(
+  image("images/Galaxy/Result/galaxy_map_result_2.png", width: 90%),
+  caption: [Galaxy Map at the system-scale],
+) <galaxy_map_result_2>
+
+#figure(
+  image("images/Galaxy/Result/galaxy_map_result_3.png", width: 90%),
+  caption: [Galaxy Map at the planet-scale],
+) <galaxy_map_result_3>
+
+The seamless instantiation of system's was left as a toggleable option. By enabling it, you get the result that is seen in the images above. However, the resulting performance implications on the dedicated benchmarking computer (PC-1, Specs: @pc-1-specs) is significant, see @galaxy-map-seamless-result-table:
+
+
+#text(red)[*Jonatan ->* 
+
+var snäll och kör benchmarks för dessa. Använd branch 'star-select-ui-offset', gå till benchmark.tscn, och låt den scenen köra tills att den stängs ned av sig självt. Spara resultatet. Gå sedan till galaxy_map_benchmark.tscn och på GalaxyMap-noden klicka rutan för att stänga av seamless-galaxer, gå sedan tillbaks till benchmark.tscn och kör den igen.]
+
+#figure(
+  table(
+  columns: (auto, auto, auto, auto),
+  inset: 7pt,
+  align: left,
+  table.header([],[*Average*], [*1% high*], [*0.1% high*]),
+  [From], [ ms], [ ms], [ ms],
+  [To], [ ms], [ ms], [ ms],
+  ),
+  caption: [Frame time metrics on PC-1 (@pc-1-specs) – Seamless galaxy enabled],
+) <galaxy-map-seamless-result-table>
+
+Compared to our performance goals, as dictated earlier in @benchmarking-and-performance-ref, the average FPS is x and the greatest frame time disparity is y. This, achieves one out of two of set goals.
+
+By disabling seamless instantiation the resulting performance is:
+
+#figure(
+  table(
+  columns: (auto, auto, auto, auto),
+  inset: 7pt,
+  align: left,
+  table.header([],[*Average*], [*1% high*], [*0.1% high*]),
+  [From], [ ms], [ ms], [ ms],
+  [To], [ ms], [ ms], [ ms],
+  ),
+  caption: [Frame time metrics on PC-1 (@pc-1-specs) – Seamless galaxy disabled],
+) <galaxy-map-no-seamless-result-table>
+
+In this instance, the average FPS is x and the greatest frame time disparity is y. This, falls within our performance goals.
+
+
 
 == "Demo" byt till bra namn tack
 === Galaxy#text(red)[PAUL O ANTON ver1 klar]<demo>
@@ -1525,53 +1915,130 @@ blbalbabbalbalb
 ]
 
 
-== Result Discussion - #text(red)[TA SENARE]
+== Result Discussion - #text(red)[TA NU]
+Hur bra systemet är, uppnådde vi målen, moscow. Realism vs Gameplay experience.
 
-#text(orange)[Performance vs. kvalitet/hur snyggt det är? kanske hade passat här? alltså atmosfärer samt att skapa planeter med färre punkter och sen skala upp dom. Jacob skrev tidigare om frame-times och att min hålla sig inom dippar av 8ms (alltså att minska "stutters" där fps plötsligt går ner när den annars har varit stabil etc)]
-
-After considerable effort, we managed to achieve a result, but this process forces us to contemplate the underlying reasons for our actions. What exactly drove us to take these steps in the first place? What prompted each individual choice along the way? The journey was not without its challenges, and we were constantly questioning whether our decisions were justified or logical. Despite these uncertainties, we persevered and reached an outcome that validated our efforts. Yet, this outcome now prompts a retrospective evaluation of the entire process, leading us to wonder if the initial reasons for our decisions align with the final result.
-
-The result did result in something, but this makes us think hard. WHy did we do it, why did we do that? And yes it did lead us to a result in the end!
-
+=== The MoSCow table?
 Vad vi lyckades med i moscow-- vilka vi avklarade gjorde
 
+See @MosCowFinished.
 
-=== EXO explorer differences? ... we should probably discuss it somewhere.
+Could have been more clear with our MoSCow schema. Some features were a bit unclear and some were features overlapped with each other (?), such as UI for navigating were a bit unclear and clashed a bit with galaxy traversal. Because the project was so open-ended it was difficult to get ideas out and these ideas that shaped the foundation for everything could turn out to be vague. 
 
+#figure(
+  table(
+  columns: (auto, auto, auto),
+  gutter: 5pt,
+  inset: 7pt,
+  align: left,
+  table.header(
+    [*Must Have*], [*Should Have*], [*Could Have*]
+  ),
+  [
+    - #highlight(fill:rgb("#a8ffa4"))[Working terrain-generation using computer generated noise].
+    - #highlight(fill:rgb("#a8ffa4"))[There should be at least one procedurally generated planet and sun].
+    - #highlight(fill:rgb("#a8ffa4"))[The planet should orbit the stars with as accurately as possible to the laws of physics].
+    - #highlight(fill:rgb("#a8ffa4"))[A way to explore the generated terrain using a camera controller].
+  ],
+  [
+    - #highlight(fill:rgb("#a8ffa4"))[To explore different performance techniques to achieve effective procedural generation of planets]
+      - #highlight(fill:rgb("#a8ffa4"))[Occlusion, backface, etc, -culling]
+      - #highlight(fill:rgb("#a8ffa4"))[Levels of detail (LOD)]
+      - #highlight(fill:rgb("#a8ffa4"))[Applied spatial data structures (E.g octrees and grids)].
+      - #highlight(fill:rgb("#a8ffa4"))[Chunking]
+    - #highlight(fill: rgb("#a8ffa4"))[A technique to draw complex terrain with overhangs and the like, e.g Marching cubes].
+    - #highlight(fill: rgb("#a8ffa4"))[Solar systems can have multiple planets].
+    - #highlight(fill: rgb("#a8ffa4"))[Some planets should have moon(s)].
+    - #highlight(fill: rgb("#a8ffa4"))[Galaxy. A procedurally generated galaxy constructed out of solar systems]
+    - #highlight(fill: rgb("#a8ffa4"))[Galaxy traversal. Ways of navigating between solar systems, using a UI galaxy map or traveling from solar systems in real time. Zooming out: Solar system level, solar systems in proximity, galaxy level. (examples)]
+    - #highlight(fill:rgb("#a8ffa4"))[There should be shaders to improve the look of things in the solar system, such:]
+      - #highlight(fill: rgb("#a8ffa4"))[Planet atmospheres]
+      - #highlight(fill: rgb("#a8ffa4"))[Water on planets]
+    - #highlight(fill: rgb("#a8ffa4"))[Player abides by the laws of physics, interacting with planets by walking for example].
+  ],
+  [
+    - #highlight(fill: rgb("#a8ffa4"))[Get interesting info about planets and solar systems, such as information about a planet's mass, amount of moons]
+    - #highlight(fill: rgb("#a8ffa4"))[Planet properties like temperature that change according to, for example, distance from the sun. Hot at equator, cold at poles, etc].
+    - #highlight(fill: rgb("#ff8f8f"))[UI for navigating between planets/solar systems/galaxies (fast travel)]
+    - #highlight(fill: rgb("#ff8f8f"))[Other celestial bodies. E.g. asteroids, black holes, asteroid belts, gas planets, nebulae, etc].
+    - #highlight(fill: rgb("#ffbc7e"))[Vegetation]
+  ],
+  ),
+  caption: [The projects MoSCow Table showing which tasks were finished (marked green), tasks unfinished (marked red), and tasks that were started but not finished (marked orange).],
+)<MosCowFinished>
+
+
+
+=== Balancing performance, visuals and user experience? #text(red)[ANTON]
+#text(orange)[Performance vs. kvalitet/hur snyggt det är? kanske hade passat här? alltså atmosfärer samt att skapa planeter med färre punkter och sen skala upp dom. Jacob skrev tidigare om frame-times och att min hålla sig inom dippar av 8ms (alltså att minska "stutters" där fps plötsligt går ner när den annars har varit stabil etc)] #text(red)[Det tycker jag låter coolt /ERIK]
+
+Atmospheres scatter points, planet resolution
+
+One of the most important parts of this project in order to make it work was ... but eventually one has to make the decision of improving performance or the visuals.. at some point, improving performance becomes more difficult if you want to keep the same visual quality... These kinds of considerations had to be discussed throughout the project... The goal was still to have consistent frame-times.. 
+
+Making the planets is one such ... Due to having to iterate through all data points in order to construct the mesh, only so much can be done.... multi-thread... The solution that was decided upon was to 
+
+Since the amount of data points for each planet scales cubicly with the resolution, the time to iterate over these points is a major concern for the performance. A higher resolution produces more detailed and complex terrain which can make the experience ... but this comes at the cost of the performance. This cost was greatly reduced as explained during @planet-optimize-ref, but..
+
+A key aspect of the project, from the outset, was optimization...... but at the same time, we wanted the finished product to look good. So, balancing the quality of the visuals with the performance was decided to be an important task. There are several ways this was done. 
+
+.
+
+Initially, the resolution of the planets directly correlated with the amount of data points within them, meaning that a planet with a larger radius required more iterations to generate. This posed a problem when scaling up the galaxy as the planets became too demanding to generate. Therefore, by separating the radius from the amount of data points (the resolution of the planet) it became possible to scale the planets without increasing their resolution.
+
+.
+
+To reduce stuttering when loading in a new solar system (due to the planets generating), the planet generation was offloaded to different threads (@worker-thread-pooling-ref), and to avoid planets popping in during gameplay, they were given a temporary mesh that gets replaced once their real mesh has been constructed. This was an example of where the visuals where directly impacted by the performance, albeit temporarily during gameplay. It also affected the user experience due to players having to wait for the planets to be constructed. We felt that this was a good compromise between user experience and visuals because otherwise players might get frustrated when the game freezes each time a solar system loads.
+
+
+
+=== Balance Between Realism and Gameplay #text(red)[ERIK klarrr men kan nog utökas]
+Balancing realism and gameplay was a recurring challenge. The solar systems are not to scale, as realistic distances made planets too far apart to be visible during exploration. To address this, all celestial bodies were scaled down to ensure visibility and a better gameplay experience.
+
+Planetary motion also posed challenges for surface exploration, as moving planets affected player physics. One considered solution was to freeze a planet’s movement when a player was on it, simplifying implementation by removing velocity effects. However, this was rejected in favor of maintaining physical accuracy, therefore, planets continue moving at all times.
+
+=== EXO explorer differences #text(red)[ERIK klar men kan nog utökas]
+#text(red)[Behöver man gå mer i detalj kring hur vi skiljer oss? Alltså exakt vilka features de hade och vilka vi inte har osv?]
+
+This project explored similar areas as the previously mentioned Exo Explorer, but with a greater emphasis on an advanced physics engine, proper benchmarking, and real-time exploration of a procedurally generated galaxy. By contrast, Exo Explorer focused on a single solar system, allowing for deeper detail in planetary environments, whereas this thesis prioritizes scalable procedural systems suitable for rendering and simulating large-scale space exploration.
 
 == Process/Method Discussion - #text(red)[METATEXT]
 This sub section provides a discussion for our process and method. Discussions surrounding the overall result, usage of multiple programming languages, the chosen workflow, how AI was used, and how some things changed from the planning stage throughout the project are included.
 
-=== Multiple programming languages - #text(green)[JONATAN, ANTON, KLAR]
-This project utilized a multi-language approach within Godot, integrating C\#, GDScript, and Rust via the GDExtension system. This strategy allowed us to select the optimal language for specific tasks. Due to being officially supported and allowing for fast development iterations, C\# and GDScript was in used for most of the game logic.
+=== Multiple programming languages - #text(red)[JONATAN, ANTON, JACOB klar]
+This project utilized a multi-language approach within Godot, integrating C\#, GDScript, and Rust via the GDExtension system @GDExtension. This strategy allowed us to select the optimal language for specific tasks. Due to being officially supported and allowing for fast development iterations, C\# and GDScript was in used for most of the game logic.
 
-For computationally intensive components, the physics engine in particular, Rust was chosen. Its strengths in raw performance, memory safety, and concurrency enabled significant optimization. We leveraged Rust's capabilities and the `rayon` crate to parallelize demanding calculations like particle sorting for octree building and the N-body force computations within the Barnes-Hut algorithm.
+For computationally intensive components, the physics engine in particular, Rust was chosen. Its strengths in raw performance, memory safety, and concurrency enabled significant optimization #text(red)[Källa?]. We leveraged Rust's capabilities and the `rayon` crate to parallelize demanding calculations like particle sorting for octree building and the N-body force computations within the Barnes-Hut algorithm.
 
 While this hybrid approach provided substantial performance benefits for critical sections, it introduced complexities. Managing a multi-language build process, debugging across the GDExtension boundary, and passing data between Rust and C\#/GDScript required careful setup and proved to be cumbersome on occasion. However, the overall experience was positive, confirming that leveraging each language's strengths was advantageous for achieving the project's simulation goals despite the added overhead.
 
-=== Arbetsstruktur. Lite rörigt, särskilt mot slutet typ... - #text(red)[JONATAN]
-KANBAN - ? 
+=== Workflow and Collaboration #text(red)[Jonatan klar ERIK klar]
+#text(red)[Bra skrivet men lite upprepning från planeringskapitlet under rubriken "introduction", tror inte vi behöver prata om hur vi jobbade eller vad vi för arbetssätt igen (eftersom vi redan gjort det förut eller?), utan mer vad vi tyckte om hur vi jobbade.]
 
-Sprintar? - nej?
+#text(red)[
+  Förslag på text utan en längre förklaring av hur vi jobbade:
 
-Branchar, feature branches - ?
+  The group followed an Agile-adjacent workflow (detailed in #ref(<Workflow>)) centered on a GitHub Projects Kanban board for task tracking, with version control managed through Git and a feature-branch model on GitHub (as detailed in #ref(<Git-section>)). GitHub also supported PR reviews, issue tracking, and rule enforcement, while Discord facilitated team communication and meetings.
 
-TOOLS? - ??
+  While this structured approach was largely effective, maintaining detailed Kanban updates and strict process adherence became more challenging towards the project's end due to increased time pressure from integration and bug fixing. Nevertheless, the core elements—feature branches, enforced PRs, and centralized task tracking—proved essential for managing collaborative development throughout the project.
+]
 
-libgdx
+Our team employed an agile-inspired workflow, centered around a GitHub Projects Kanban board for task management (tracking "To Do" through "Done," with defined acceptance criteria and self-assignment by team members for clarity on task ownership). This was complemented by iterative, weekly planning cycles aligned with supervisor meetings, allowing for adaptive prioritization and progress.
 
-Bevy \<3
+Version control and collaboration relied on Git with a feature branch workflow hosted on GitHub. Each feature was developed in isolation, facilitating parallel work. Crucially, GitHub branch protection rules were enforced: direct pushes to the `master` branch were disallowed, and Pull Requests (PRs) required at least one peer review and approval before merging. This mandatory code review process was vital for quality assurance, knowledge sharing, and maintaining an overview of progress.
 
-PR REVIEWS <<< Skriv om detta. 
-Jag tycker det ändå funkat ganska bra. Man fångar många fel, och fler får sig en idé över vad alla lägger till... etc
+GitHub served as the central hub for repositories, the Kanban board, PRs, issue tracking, and rule enforcement. Discord was our primary platform for all team communication, including text discussions and digital meetings.
 
-=== Use of generative AI - #text(red)[NÅN TA, William klar]
-Artificial intelligence (AI) was utilized at various stages throughout the project. During the development phase, tools such as ChatGPT and GitHub Copilot were employed to support the coding process. Copilot was also integrated into the pull request (PR) review workflow, providing quick feedback on code submissions. While AI-generated reviews were not considered substitutes for peer-reviewed evaluations, they offered an efficient means of identifying and addressing obvious issues that might otherwise be overlooked.
+While this structured approach was largely effective, maintaining detailed Kanban updates and strict process adherence became more challenging towards the project's end due to increased time pressure from integration and bug fixing. Nevertheless, the core elements—feature branches, enforced PRs, and centralized task tracking—proved essential for managing collaborative development throughout the project.
+
+
+=== Use of generative AI - #text(red)[William, Jacob klar]
+Artificial intelligence (AI) was utilized at various stages throughout the project. During the development phase, tools such as ChatGPT and GitHub Copilot were employed to support the coding process. Copilot was also integrated into the pull request (PR) review workflow, providing quick feedback on code submissions. While AI-generated reviews were not considered substitutes for peer-reviewed evaluations, they offered an efficient means of identifying obvious issues that might otherwise be overlooked.
 
 Additionally, AI was employed during the report writing phase. Tools such as ChatGPT and Google Gemini were occasionally used to refine written text and enhance the overall quality of the writing.
 
-=== Project purpose #text(red)[Jacob klar]
-The projects purpose underwent a greater change after the feedback from the planning report. The original purpose is what follows:
+=== Project purpose #text(red)[Jacob, ERIK klar]
+The projects purpose underwent a greater change after the feedback from the planning report. The original purpose was what follows:
 
 #block(
   fill: luma(230),
@@ -1583,29 +2050,27 @@ The projects purpose underwent a greater change after the feedback from the plan
   This project also aims to explore and combine different techniques for optimization to ensure that the simulation will run in a performance-efficient manner."
 ]
 
-It appeared that it was unclear to what the project set out to do, which after internal discussions the project team agreed upon. Any changes, particularly to the purpose, sought to address the following three problems:
+It became clear that the project’s objectives were not clearly defined. After internal discussions the team reached a consensus on the purpose of the project. Any changes, particularly to the purpose, sought to address the following three problems:
 
 1. A great deal had been explained specifically about solar systems in the planning report, while the team, in reality, had drifted towards wanting to create an entire galaxy of solar systems instead.
 2. An entire section of the planning report was dedicated to performance and optimization, as well as a part of the purpose. This played a part in making it unclear whether this projects major focus was about optimization, or something else.
 3. It was unclear how this project differs from the similar bachelor's thesis project Exo Explorer@exo_exporer:2023, from a couple of years ago.
 
-Through internal discussions, consultation with our supervisor, and study of the previously mentioned feedback, a rewrite to facilitate a clarification of project goals and a refinement of its scope, took place. The resulting purpose can be seen in @purpose-ref.
+Through internal discussions, consultation with our supervisor, and study of the previously mentioned feedback, the purpose was rewritten to clarify and refine the project's goals and scope. The resulting purpose can be seen in @purpose-ref.
 
-=== MoSCoW changes #text(red)[Jacob klar]
-The MoSCoW method served as a tool for structuring and prioritizing the project's tasks. By categorizing features into "Must," "Should," and "Could"-have tiers, we maintained a clear structure of what features were to be worked on, and which to be prioritized.
-
-As the project progressed, some features shifted, some were removed, and some were added, as we gained a greater understanding of the project's scope. We treated the categories and its features as agile, rather than fixed, allowing us to adjust, as we have done.
+=== MoSCoW changes #text(red)[Jacob, ERIK KLAR]
+The MoSCoW method was used to structure and prioritize project features into tiers of importance. As the project progressed and it's scope became clearer, the MoSCow table underwent change. Due to the agile workflow of the project, features were re-prioritized, removed or added.
 
 While most features remained unchanged throughout, some of the most notable changes were:
 
 - Camera/player controls: Moved from "Should have" to "Must have" as the focus on being able to explore the planets, systems, and galaxy, was deemed very important.
 - Space background: Removed from "Must have", since it was deemed not critical for project's success. Although, a space background was eventually given by itself as the stars were distributed in the galaxy.
 - Galaxy traversal: Added as a "Should have" to allow for traversal at different scales. On the solar galaxy level, the solar system level, and on the planet level.
-- Other celestial bodes e.g. asteroids or nebulae, as well as planet vegetation, were added as potential features to be added. In the end planet vegetation was explored.
+- Other celestial bodies e.g. asteroids or nebulae, as well as planet vegetation, were added as potential features to be added. In the end planet vegetation was explored.
 
 
 
-=== Performance #text(red)[Jacob klar]
+=== Performance #text(red)[Jacob, ERIK klar]
 Initially, in the planning report, the key performance metrics to evaluate the application were stated as follows:
 
 #block(
@@ -1620,36 +2085,15 @@ Initially, in the planning report, the key performance metrics to evaluate the a
 *Frames per second (FPS)* – Assessing the rendering performance of the simulation."
 ]
 
-Shortly thereafter, a target of maintaining an average of 60 FPS was determined as a concrete benchmark to strive toward. The performance varies between computer systems with different computer hardware, so this target was to be achieved on a specific benchmarking computer with specific hardware specifications, those specifications were detailed in @benchmarking-and-performance-ref.
+Shortly thereafter, a target of maintaining an average of 60 FPS was determined as a concrete benchmark to strive toward. The performance varies between computer systems with different computer hardware, so this target was to be achieved on a specific benchmarking computer with specific hardware specifications, those specifications were detailed in @pc-1-specs.
 
-However, as development progressed and with greater research into real-time performance, the team improved its understanding of what constitutes a smooth and responsive performance. Rather than aiming for a high average FPS, we shifted focus to consistency in frame times instead, which offers a more accurate reflection of the user experience. In particular, frame time spikes can result in noticeable stutter during runtime, but still, the average FPS will remain and appear stable. This updated benchmarking methodology, along with a more in depth explanation, can be found in @benchmarking-and-performance-ref.
+However, as development progressed and with greater research into real-time performance, the team improved its understanding of what constitutes a smooth and responsive performance. Rather than aiming for a high average FPS, the focus shifted towards consistency in frame times instead, this updated benchmarking methodology is described in @benchmarking-and-performance-ref.
 
 Regarding the other original metrics:
 
-- Scene generation time: Was initially marked as a performance metric, aiming to measure how long it takes to initialize and load new scenes. However, as development progressed this became less critical since the majority of elements are streamed at runtime, rather than through traditional loading screens in between. Content such as stars, systems, and planets are generated dynamically as the player explores. As long as the initial startup time remains reasonable, the performance is better reflected in runtime frame time stability, rather than by any isolated loading durations. However, some operations were measured in time it takes to complete, to easily compare performance of different implementations and/or optimizations during development. E.g. planet generation.
+- *Scene generation time:* This refers to how long it takes to initialize and load new scenes and was initially marked as a performance metric. However, since the majority of elements are streamed at runtime, rather than through traditional loading screens in between, the metric was eventually deemed less critical. Even so, it was still utilized as a metric for some operations, such as during planet generation, to compare different implementations and optimizations.
 
-- Memory consumption: While initially a concern, proved not to be a limiting factor in practice. This is likely due to the procedural nature of the project, where the majority of elements are generated procedurally at runtime, rather than pre-loaded and/or stored in memory. As a result, memory usage remained relatively low throughout development. Although it continued to be monitored, but in the end no memory-related issues occurred, making it a non-critical metric for this project.
-
-=== Benchmarking (idk, perhaps. probably place under method.) - #text(red)[TA BORT?]
-Benchmarksystem?
-To document improvements and declines in performance, a streamlined benchmarking system was implemented to provide an additional point of argument....
-
-https://www.tomshardware.com/news/what-makes-a-good-game-benchmark
-Discusses benchmarking practices.
-Repetability is important. Mentions that AC Odyssey was notoriously inconsistent to benchmark due to random weather effects such as rain and cloud coverage having a great impact om the benchmark results. Goes well with the deterministic nature of this project.
-Having the benchmark represent actual situations that the user could encounter, -- mentions is a good thing as well. An early version of the galaxy map benchmark ran at a fact pace, moving the player at a speed that won't be encountered in a typical user scenario. The speed was decreased. // kanske
-
-*General benchmarking*
-benchmarking system. fps, frame times, memory usage. runs specific scenes and tracks these.
-e.g. a scene of the galaxy map (@galaxy-map-ref), testing the implications of generating new chunks of stars (@star-chunk-img) continuously, for a duration of time.
-
-*Other, more specific, benchmarking that differs between separate features.*
-
-...measure of milliseconds for marching cubes CPU vs GPU computations.
-
-...physics benchmarks
-
-
+- *Memory consumption:* While initially a concern, it proved not to be a limiting factor in practice. This is likely due to the content being generated procedurally at runtime, rather than pre-loaded or stored in memory. Although it was continiously monitored, no memory-related issues occurred, making it a non-critical performance metric for this project.
 
 == Generalizability and Validity - #text(red)[Jonatan KLAR ]
 This section considers the broader applicability of the project's components and the soundness of its simulation results.
@@ -1657,7 +2101,7 @@ This section considers the broader applicability of the project's components and
 === Generalizability
 Many techniques employed in this project are highly generalizable. The implemented N-body algorithms are standard methods applicable to other systems governed by inverse-square laws (like gravity or electrostatics). The Morton-based octree construction represents an efficient approach for spatial partitioning relevant to various particle simulations. Furthermore, optimization strategies like octree-driven Level of Detail (LOD), chunking, multi-mesh instancing, and CPU parallelism (for example using `rayon`) are standard practices widely used across real-time 3D graphics and game development for managing large-scale environments and computations. The procedural generation techniques (noise, Marching Cubes) are also broadly applicable. Finally, the integration with Godot via GDExtension also demonstrates a general pattern for offloading heavy computations from the game engine to a high-performance Rust backend.
 
-=== Validity
+=== Validity <validity>
 Evaluating the validity of this project requires considering the goal of achieving the most scientifically accurate physics model possible within the constraints of a smooth, real-time simulation.
 
 1. *Physics Simulation*: The simulation is grounded in established physical principles, using Newton's Law of Universal Gravitation and standard N-body algorithms like Direct Summation and Barnes-Hut. The choice of the Barnes-Hut method provides a computationally tractable way $O(N "log"N)$ to handle large numbers of bodies, which is essential for simulating galactic scales in real-time. However, achieving the necessary performance demanded certain trade-offs regarding accuracy:
@@ -1678,17 +2122,21 @@ During the planning phase of this project, two primary ethical and societal conc
 
 The first point is related to the concern about game designers losing their jobs to procedural generation algorithms. However, the development process in this project revealed that significant manual effort remained necessary. Generating aesthetically pleasing content and scaling and positioning the celestial bodies in a plausible manner all required substantial manual tweaking of parameters and settings. Moreover, PCG algorithms have the potential to generate content that may be faulty, unrealistic or unnatural. Solutions to these issues include setting specific constraints before executing the algorithms, or involving a human designer at the end of the content generation #cite(<computers13110304>). Although it is still a possibility that future PCG algorithms can automate these processes, current implementations seem to depend on a collaborative relationship between human designers and algorithmic systems. 
 
-The second concern focused on the potential for PCG to produce content that is overly repetitive, thereby decreasing the quality of the user experience. While the primary objective of this project was not to create an engaging game play experience, certain measures were nonetheless taken to mitigate repetitiveness. For instance, planetary coloration was randomized based on each planet’s distance from the sun, with additional randomization applied to simulate variations in atmospheric thickness. These methods introduced greater diversity in the generated content, demonstrating that careful parameterization and randomness can effectively counteract some of the inherent risks associated with procedural generation.
+The second concern focused on the potential for PCG to produce content that is overly repetitive, thereby decreasing the quality of the user experience. While the primary objective of this project was not to create an engaging game play experience, certain measures were nonetheless taken to reduce repetitiveness. For instance, planetary coloration was randomized based on each planet’s distance from the sun, with additional randomization applied to simulate variations in atmospheric thickness. These methods introduced greater diversity in the generated content, demonstrating that careful parameterization and randomness can effectively counteract some of the inherent risks associated with procedural generation.
 
 
-== Future work - #text(red)[William klar]
+== Future work - #text(red)[William klar, Jacob klar - jag gav inte förslag på ny text, kanske något jag kan göra. Men du får gärna kolla på mina kommenterer annars :)]
 There are several directions in which this project could be expanded. A number of planned features were not implemented due to time constraints, and these could serve as valuable additions in future iterations.
 
-In particular, the planet generation system offers significant room for enhancement. At present, the generated planets include basic features such as vegetation (e.g., trees and grass) and bodies of water (e.g., oceans), but they remain relatively un-engaging. Future improvements could include the addition of fauna, subterranean structures such as cave systems, and other biome-specific features to increase diversity and immersion within the planet.
+In particular, the planet generation system offers significant room for enhancement. At present, the generated planets include basic features such as vegetation (e.g., trees and grass) and bodies of water (e.g., oceans), but they remain relatively un-engaging. Future improvements could include the addition of fauna, subterranean structures such as cave systems #text(red)[(Vill man nämna för att "dra mer nytta av marching cubes-implementationen"? Den är väl ändå på plats för att kunna lägga till grottor, osv)], and other biome-specific features to increase diversity and immersion within the planet.
 
-Another potential extension involves incorporating a wider range of celestial bodies, such as gas giants, meteoroids, and comets. This would significantly enhance the diversity and complexity of the planetary generation system. A realistic galaxy comprises various types of astronomical objects, not solely solid-surface planets. Currently, the project does not convey this diversity, and expanding the range of celestial bodies would contribute to a more authentic and immersive galactic environment.
+Another potential extension involves incorporating a wider range of celestial bodies #text(red)["och att det finns i vår moscow som 'could have'", men som vi inte hann arbeta på? Bara för att koppla till Moscow:en.], such as gas giants, meteoroids, and comets. This would significantly enhance the diversity and complexity of the planetary generation system. A realistic galaxy comprises various types of astronomical objects, not solely solid-surface planets. Currently, the project does not convey this diversity, and expanding the range of celestial bodies would contribute to a more authentic and immersive galactic environment.
 
+#text(red)[
+ Sure, kanske, men det måste inte heller vara så att man vill att spelaren ska påverkas mycket mer än vad den redan gör. Jag tror vad som vore viktigare att nämna är "_Increasing the *utilization of the existing* physics system...blabla_", "man kan se ett hint av det i @physics-galaxy-ref ...blabla".
+  
 Enhancing the physics system is another area which could be expanded upon. Currently, the player character is not fully integrated into the simulation of celestial bodies; gravitational effects are applied only when the player is in close proximity to a planet, rather than being simulated by the implemented physics engine (see #ref(<physics-engine-ref>) and #ref(<player-controls-ref>)). Integrating the player into the same physics framework as the celestial bodies would increase realism and coherence within the simulation.
+]
 
 Overall, the project presents many opportunities for refinement and expansion, particularly in the areas of planetary diversity and physical simulation. Enhancing these aspects would contribute to a more engaging and immersive user experience.
 
@@ -1703,7 +2151,7 @@ The project successfully met its primary goals, fulfilling the essential "Must H
 
 Ultimately, this work contributes a practical implementation and analysis of techniques essential for simulating large-scale procedural galaxies. It demonstrates the successful integration of advanced procedural generation, N-body physics simulation, and targeted optimization strategies within the Godot engine, offering a viable and efficient model for developers aiming to create expansive, dynamic, and interactive celestial environments. While acknowledging necessary simplifications for real-time performance, the project establishes a solid foundation upon which future enhancements, such as greater celestial diversity or more complex physical interactions, can be built.
 
-
+#[
 
 
 #pagebreak()
@@ -1853,13 +2301,12 @@ Simulating illumination in the systems is important for player experience, not o
 
 Simulating light correctly can be difficult but it is helpful that, in general, detail is only needed once the player is close to a planet. Which would mean that the player is far away from other planets, opening the possibility for big performance gains due to only one having to render one planet in detail at a time.]
 
-
-
-
-
-
-
-
+=== Galaxy summary
+1. The Star Field (@star-field-ref), of randomly distributed stars within a cubic volume with stars of a single mesh. It served as a spatial proof of concept.
+2. Next, the Disc Galaxy (@disc-galaxy-ref), shaped to resemble a disc-shaped galaxy. With stars sampled within a sphere, and placed via a distance-based probability, to mimic a disc shape.
+3. A Skybox (@skybox-ref), a pre-rendered star field image, mostly used in testing environments.
+4. The Infinite Galaxy (@infinite-galaxy-ref), removed spatial boundaries of the Star Field, by generating new chunks of stars in any direction that the user moves.
+5. An experimental Physics-Based Galaxy (@physics-galaxy-ref), that simulates real gravitational interactions between stars, within the Disc Galaxy implementation. Although it lacked stability due to no proper mass and initial velocity of each star, it demonstrated the capabilities of the Physics Engine.
 
 
 
@@ -1921,7 +2368,7 @@ Simulating light correctly can be difficult but it is helpful that, in general, 
 
     State[]
     Cmt[Check the _Multipole Acceptance Criterion (MAC)_]
-    If(cond: $s_n / d < theta$, {
+    If(cond: $s_n^2 / d^2 < theta^2$, {
       Cmt[Node is far enough, use approximation]
       Assign[accel][#CallI[calcAcc][G, $m_n$, $Delta"pos"$]]
       Return[accel]
@@ -1969,3 +2416,5 @@ Simulating light correctly can be difficult but it is helpful that, in general, 
     Return[a]
   })
 })
+
+]<no-wc>
