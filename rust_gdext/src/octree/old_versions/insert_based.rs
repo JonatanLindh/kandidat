@@ -3,7 +3,7 @@ use crate::{
         BoundingBox, MAX_BODIES_PER_LEAF, MIN_HALF_WIDTH, SOFTENING_SQUARED,
         visualize::VisualizeOctree,
     },
-    physics::gravity::{Particle, Spacial},
+    physics::gravity::{HasPosition, PosMass},
 };
 use glam::Vec3A;
 use godot::prelude::{godot_error, godot_warn};
@@ -38,14 +38,14 @@ pub struct LeafData {
 
 /// The main Octree structure using an arena allocator (Vec<NodeData>).
 #[derive(Debug)]
-pub struct InsertBasedOctree<'a, T: Spacial> {
+pub struct InsertBasedOctree<'a, T: HasPosition> {
     nodes: Vec<NodeData>,
     root_index: usize,
     bounds: BoundingBox,
     external_data: &'a [T],
 }
 
-impl<T: Spacial> VisualizeOctree for InsertBasedOctree<'_, T> {
+impl<T: HasPosition> VisualizeOctree for InsertBasedOctree<'_, T> {
     fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
         let mut result = Vec::new();
         let mut stack: Vec<(usize, u32)> = Vec::new();
@@ -76,7 +76,7 @@ impl<T: Spacial> VisualizeOctree for InsertBasedOctree<'_, T> {
 
 // --- Implementation ---
 
-impl<'a, T: Spacial> InsertBasedOctree<'a, T> {
+impl<'a, T: HasPosition> InsertBasedOctree<'a, T> {
     /// Creates a new, empty Octree.
     pub fn new(external_data: &'a [T]) -> Self {
         InsertBasedOctree {
@@ -283,7 +283,7 @@ impl<'a, T: Spacial> InsertBasedOctree<'a, T> {
     }
 }
 
-impl<'a, T: Particle> InsertBasedOctree<'a, T> {
+impl<'a, T: PosMass> InsertBasedOctree<'a, T> {
     /// Computes total mass and center of mass for the subtree rooted at node_index.
     /// This is now called on-demand when needed (e.g., by calculate_force).
     /// Returns (total_mass, center_of_mass).

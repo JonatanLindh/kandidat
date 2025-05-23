@@ -29,7 +29,7 @@ use godot::{
     prelude::*,
 };
 use itertools::Itertools;
-use std::mem;
+use std::{collections::HashMap, mem};
 
 /// Represents a single body's trajectory path with visual styling information.
 ///
@@ -52,7 +52,7 @@ pub struct SimulationInfo {
     bodies_sim: Vec<SimulatedBody>,
 
     /// Trajectory data structures to populate during simulation
-    trajectories: Vec<Trajectory>,
+    trajectories: HashMap<InstanceId, Trajectory>,
 
     /// Optional reference body index and initial position for relative trajectories
     /// When present, (index, initial_position) is used to make trajectories relative to the body
@@ -66,6 +66,10 @@ pub struct SimulationInfo {
 
     /// Number of steps to simulate
     n_steps: usize,
+
+    merge_on_collision: bool,
+
+    merge_scaler: f32,
 }
 
 /// Manages a background thread for trajectory calculations.
@@ -107,7 +111,7 @@ impl GravityController {
                     TrajectoryCommand::Calculate(info) => {
                         let trajectories = Self::simulate_trajectories_inner(info);
 
-                        if let Err(e) = result_tx.send(trajectories) {
+                        if let Err(e) = result_tx.send(trajectories.into_values().collect()) {
                             godot_error!("Failed to send trajectory results: {}", e);
                         }
                     }
@@ -164,7 +168,7 @@ impl GravityController {
             .as_ref()
             .and_then(|worker| worker.try_recv_latest())
         {
-            self.replace_trajectories(trajectories)
+            self.replace_trajectories(&trajectories)
         }
     }
 
@@ -185,7 +189,7 @@ impl GravityController {
     fn simulate_trajectories(&mut self) {
         let info = self.get_simulation_info();
         let trajectories = Self::simulate_trajectories_inner(info);
-        self.replace_trajectories(trajectories);
+        self.replace_trajectories(trajectories.values());
     }
 
     /// Removes all trajectories currently displayed in the scene.
@@ -194,7 +198,7 @@ impl GravityController {
     /// It does this by replacing the current trajectories with an empty vector.
     #[func]
     fn clear_trajectories(&mut self) {
-        self.replace_trajectories(Vec::new());
+        self.replace_trajectories(std::iter::empty());
     }
 
     /// Updates trajectory visualizations if auto_update_trajectories is enabled
@@ -220,7 +224,7 @@ impl GravityController {
         let delta = self.simulation_step_delta;
         let grav_const = self.grav_const;
 
-        let (bodies_sim, trajectories): (Vec<_>, Vec<_>) = self
+        let (bodies_sim, trajectories): (Vec<_>, HashMap<_, _>) = self
             .bodies
             .iter()
             .map(|b| (SimulatedBody::from(b), b.bind().trajectory_color))
@@ -228,7 +232,9 @@ impl GravityController {
                 let mut points = Vec::with_capacity(n_steps);
                 points.push(b.pos);
 
-                (b, Trajectory { color, points })
+                let instance_id = b.body_instance_id;
+
+                (b, (instance_id, Trajectory { color, points }))
             })
             .unzip();
 
@@ -250,6 +256,8 @@ impl GravityController {
             delta,
             grav_const,
             n_steps,
+            merge_on_collision: self.merge_on_collision,
+            merge_scaler: self.merge_scaler,
         }
     }
 
@@ -273,19 +281,33 @@ impl GravityController {
             delta,
             grav_const,
             n_steps,
+            merge_on_collision,
+            merge_scaler,
         }: SimulationInfo,
-    ) -> Vec<Trajectory> {
+    ) -> HashMap<InstanceId, Trajectory> {
         for _ in 1..n_steps {
             // Step
             Self::step_time(grav_const, delta, &mut bodies_sim);
+
+            // Check for collisions
+            if merge_on_collision {
+                let a = Self::merge_bodies(merge_scaler, &mut bodies_sim);
+                if !a.is_empty() {}
+            }
 
             let offset = offset_info
                 .map(|(idx, init)| bodies_sim[idx].pos - init)
                 .unwrap_or(Vec3A::ZERO);
 
             // Store positions
-            for (i, body) in bodies_sim.iter().enumerate() {
-                trajectories[i].points.push(body.pos - offset);
+            for body in bodies_sim.iter() {
+                let instance_id = body.body_instance_id;
+                let trajectory = trajectories
+                    .get_mut(&instance_id)
+                    .expect("Trajectory not found for body");
+
+                // Append the new position to the trajectory
+                trajectory.points.push(body.pos - offset);
             }
         }
 
@@ -300,9 +322,9 @@ impl GravityController {
     /// # Parameters
     ///
     /// * `new_trajectories` - Vector of trajectories to visualize
-    fn replace_trajectories(&mut self, new_trajectories: Vec<Trajectory>) {
+    fn replace_trajectories(&mut self, new_trajectories: impl IntoIterator<Item = &Trajectory>) {
         let new_meshes = new_trajectories
-            .iter()
+            .into_iter()
             .filter(|traj| traj.points.len() >= 2)
             .map(|traj| {
                 // Build the mesh for the trajectory
