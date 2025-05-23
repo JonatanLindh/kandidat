@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class UISelectableStar : CanvasLayer
 {
@@ -36,7 +37,10 @@ public partial class UISelectableStar : CanvasLayer
 	ColorRect starColor;
 	Label planetCountLabel;
 	CheckButton visibleOrbitsCheckButton;
-	
+
+	Label galaxySeedLabel;
+	Node gameSettings;
+
 	// System Scene To Be Used For Seed Evaluation
 	Node3D systemScene;
 
@@ -57,6 +61,12 @@ public partial class UISelectableStar : CanvasLayer
 
 		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
 		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
+
+		gameSettings = GetNode<Node>("/root/GameSettings");
+		uint seed = (uint)gameSettings.Get("SEED");
+		galaxySeedLabel = GetNode<Label>("%GalaxySeedLabel");
+		galaxySeedLabel.Text = seed.ToString();
+
 
 		systemScene = GetNode<Node3D>("../../System");
 		Hide();
