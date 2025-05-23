@@ -10,6 +10,10 @@ pub mod direct_summation;
 pub mod galaxy_controller;
 pub mod trajectories;
 
+/// Common softening factor for gravitational calculations to prevent singularities.
+/// This value is squared to avoid square roots in distance comparisons.
+pub const GRAVITATIONAL_SOFTENING_SQUARED: f32 = 1e-2;
+
 use glam::Vec3A;
 
 pub trait Spacial {

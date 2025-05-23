@@ -1,4 +1,4 @@
-use super::{NBodyGravityCalculator, Particle};
+use super::{GRAVITATIONAL_SOFTENING_SQUARED, NBodyGravityCalculator, Particle}; // Added import
 use crate::octree::{GravityData, morton_based::MortonBasedOctree};
 use glam::Vec3A;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -9,10 +9,6 @@ use std::{assert_matches::debug_assert_matches, marker::Sync};
 /// Barnes-Hut opening angle parameter
 const THETA: f32 = 0.7;
 const THETA_SQ: f32 = THETA * THETA;
-
-/// Softening factor to prevent infinite forces at zero distance
-const EPSILON: f32 = 0.01;
-const EPSILON_SQ: f32 = EPSILON * EPSILON;
 
 impl<'a, T> NBodyGravityCalculator<'a, T> for MortonBasedOctree<'a, T>
 where
@@ -95,7 +91,8 @@ impl<'a, T: Particle + Sync> MortonBasedOctree<'a, T> {
         let s_sq = node_width * node_width;
 
         // If distance is zero (or very small), skip interaction (might be self or coincident)
-        if dist_sq < EPSILON_SQ * 0.1 {
+        if dist_sq < GRAVITATIONAL_SOFTENING_SQUARED * 0.1 {
+            // Use common constant
             // Special case: If it's a leaf node containing *only* the target particle,
             // we definitely skip. Otherwise, if it's an internal node or a leaf
             // with other particles, the recursive calls/direct interactions below
@@ -115,7 +112,7 @@ impl<'a, T: Particle + Sync> MortonBasedOctree<'a, T> {
             // --- Node is far enough: Use approximation ---
             // Calculate acceleration contribution from this node's CoM
             // acc = G * M_node * delta_pos / (|delta_pos|^2 + eps^2)^(3/2)
-            let dist = (dist_sq + EPSILON_SQ).sqrt(); // Add softening
+            let dist = (dist_sq + GRAVITATIONAL_SOFTENING_SQUARED).sqrt(); // Add softening using common constant
             let dist_cubed = dist * dist * dist;
             if dist_cubed < 1e-18 {
                 return Vec3A::ZERO;
@@ -177,11 +174,12 @@ impl<'a, T: Particle + Sync> MortonBasedOctree<'a, T> {
                 let direct_dist_sq = direct_delta_pos.length_squared();
 
                 // Skip if coincident
-                if direct_dist_sq < EPSILON_SQ * 0.1 {
+                if direct_dist_sq < GRAVITATIONAL_SOFTENING_SQUARED * 0.1 {
+                    // Use common constant
                     return Vec3A::ZERO;
                 }
 
-                let direct_dist = (direct_dist_sq + EPSILON_SQ).sqrt(); // Softening
+                let direct_dist = (direct_dist_sq + GRAVITATIONAL_SOFTENING_SQUARED).sqrt(); // Softening using common constant
                 let direct_dist_cubed = direct_dist * direct_dist * direct_dist;
                 if direct_dist_cubed < 1e-18 {
                     return Vec3A::ZERO; // Avoid division by zero

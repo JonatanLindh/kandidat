@@ -2,7 +2,7 @@ use glam::Vec3A;
 use godot::builtin::math::FloatExt;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
-use super::{NBodyGravityCalculator, Particle};
+use super::{GRAVITATIONAL_SOFTENING_SQUARED, NBodyGravityCalculator, Particle}; // Added import
 
 pub struct DirectSummation;
 
@@ -37,9 +37,11 @@ fn calc_acc<T: Particle>(g: f32, body: &T, bodies: &[T]) -> Vec3A {
         .filter(|(diff, _)| !diff.length_squared().is_zero_approx())
         .map(|(diff, other_mass)| {
             let r2 = diff.length_squared();
-            let dir = diff.normalize();
+            let r2_softened = r2 + GRAVITATIONAL_SOFTENING_SQUARED; // Apply softening using common constant
 
-            g * dir * (other_mass) / r2
+            let inv_r_softened_cubed = r2_softened.powf(-1.5); // 1 / (r_softened^3/2)
+
+            diff * inv_r_softened_cubed * g * other_mass
         })
         .sum()
 }
