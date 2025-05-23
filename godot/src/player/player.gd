@@ -26,6 +26,7 @@ var in_gravity_field = false
 var planet_velocity: Vector3 = Vector3.ZERO
 var gravity_strength := 0
 var on_sufarce_movement := false
+var rotate_with_planet := false
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -110,8 +111,11 @@ func in_gravity_field_movement(delta : float):
 	
 	if Input.is_action_just_pressed("fly"):
 		flying = not flying
-		
-	align_with_vector(gravity_vector, 0.1)
+	
+	if Input.is_action_just_pressed("toggle_rotate"):
+		rotate_with_planet = not rotate_with_planet
+	if rotate_with_planet:
+		align_with_vector(gravity_vector, 0.1)
 	
 	if flying:
 		handle_flying()

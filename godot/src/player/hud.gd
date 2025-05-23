@@ -13,8 +13,8 @@ var controls_text := "-WASD for directional movement
 						\n-Increase base speed with arrowkey up or scroll wheel up 
 						\n-Decrease base speed with arrowkey down or scroll wheel down
 						\n-Spacebar to jump
-						\n-1 to roll counter clockwise
-						\n-4 to roll clockwise
+						\n-r to toggle aligning with planet surface (only when inside planet gravity field)
+						\n-1 and 4 to barrel roll
 						\n-v to stop flying when close to a planet
 						\n-h to close this text
 						\n-f to turn on/off flashlight
