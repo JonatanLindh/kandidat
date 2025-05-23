@@ -1,7 +1,7 @@
 @tool
 extends GravityBody
 
-func _ready() -> void:
+func _init() -> void:
 	mass = 5000
 	trajectory_color = Color.WHITE
 
