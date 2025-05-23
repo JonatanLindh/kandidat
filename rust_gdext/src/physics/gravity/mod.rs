@@ -34,5 +34,5 @@ pub trait Particle: Spacial + Massive {
 impl<T: Spacial + Massive> Particle for T {}
 
 pub trait NBodyGravityCalculator<'a, T: Particle> {
-    fn calculate_accelerations<const PARALLEL: bool>(g: f32, particles: &'a [T]) -> Vec<Vec3A>;
+    fn calc_accs<const PARALLEL: bool>(g: f32, particles: &'a [T]) -> Vec<Vec3A>;
 }

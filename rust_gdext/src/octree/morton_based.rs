@@ -187,7 +187,7 @@ impl<'a, T> MortonBasedOctree<'a, T>
 where
     T: Particle + Sync,
 {
-    const PARALLEL_ENCODE_THRESHOLD: usize = 3000;
+    const PARALLEL_ENCODE_THRESHOLD: usize = 4000;
 
     /// Main function to build the octree from body data using Morton codes.
     pub fn new(bodies: &'a [T]) -> Self {
