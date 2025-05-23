@@ -127,6 +127,7 @@ func in_gravity_field_movement(delta : float):
 		apply_flying_movement(planet_velocity, delta)
 	else:
 		if is_falling():
+			align_with_vector(gravity_vector, 0.1)
 			velocity += (gravity_vector) * delta
 		else:
 			velocity = planet_velocity
