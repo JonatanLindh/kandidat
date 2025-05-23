@@ -291,8 +291,7 @@ impl GravityController {
 
             // Check for collisions
             if merge_on_collision {
-                let a = Self::merge_bodies(merge_scaler, &mut bodies_sim);
-                if !a.is_empty() {}
+                let _ = Self::merge_bodies(merge_scaler, &mut bodies_sim);
             }
 
             let offset = offset_info

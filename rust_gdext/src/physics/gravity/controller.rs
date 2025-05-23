@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::{
     HasMass, HasPosition, HasVelocity, NBodyGravityCalculator, body::GravityBody,
     direct_summation::DirectSummation, trajectories::TrajectoryWorker,
@@ -256,7 +258,7 @@ impl GravityController {
             440.. => MortonBasedOctree::new(bodies_sim).detect_collisions(merge_scaler),
         };
 
-        let mut instances_to_remove = Vec::new();
+        let mut instances_to_remove = HashSet::new();
 
         for (idx_a, idx_b) in collisions {
             // Keep the body with the higher mass, remove the other
@@ -268,12 +270,12 @@ impl GravityController {
 
             let to_remove = &bodies_sim[remove_idx].clone();
 
-            instances_to_remove.push(to_remove.body_instance_id);
+            instances_to_remove.insert(to_remove.body_instance_id);
             bodies_sim[keep_idx].non_elastic_collision(to_remove);
         }
 
         bodies_sim.retain(|b| !instances_to_remove.contains(&b.body_instance_id));
-        instances_to_remove
+        instances_to_remove.into_iter().collect()
     }
 }
 
