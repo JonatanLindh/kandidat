@@ -56,7 +56,7 @@ public partial class GalaxyMap : Node3D
 
 		List<Vector3> starPos = starFinder.FindAllStarsInSphere(player.Position, systemHandler.closeStarEarlyGenerateRadius, chunks);
 
-		if(starPos != null)
+		if (starPos != null)
 		{
 			foreach (Vector3 pos in starPos)
 			{
@@ -93,5 +93,13 @@ public partial class GalaxyMap : Node3D
 				}
 			}
 		}
+	}
+
+	public void SetPlayer(Node3D player)
+	{
+		this.player = player;
+		galaxy.SetPlayer(player);
+		scaleHandler.SetPlayer(player);
+		uiSelectableStar.SetPlayer(player);
 	}
 }
