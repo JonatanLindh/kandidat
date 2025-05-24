@@ -10,7 +10,8 @@ extends Node3D
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	HudSignalBus.emit_signal("orbits_visibility", true)
-	system.generateSystemFromSeed(420)
+	var menu_seed = randi()
+	system.generateSystemFromSeed(menu_seed)
 	
 
 func _on_start_button_pressed() -> void:
