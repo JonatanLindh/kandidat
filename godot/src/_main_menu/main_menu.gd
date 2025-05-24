@@ -15,5 +15,11 @@ func _ready() -> void:
 	
 
 func _on_start_button_pressed() -> void:
-	GameSettings.SEED = seed_text_edit.text
+	var seed
+	if(seed_text_edit.text == ""):
+		seed = randi()
+	else:
+		seed = seed_text_edit.text
+	
+	GameSettings.SEED = -seed
 	get_tree().change_scene_to_packed(start_scene)

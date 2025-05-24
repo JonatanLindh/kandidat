@@ -29,8 +29,7 @@ text = "Galaxy Engine"
 [node name="SeedTextEdit" type="TextEdit" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-text = "0"
-placeholder_text = "Seed"
+placeholder_text = "Leave blank for a random seed"
 
 [node name="StartButton" type="Button" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
