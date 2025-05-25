@@ -1,0 +1,58 @@
+[gd_scene load_steps=4 format=3 uid="uid://bel75q1uph5qv"]
+
+[ext_resource type="Script" uid="uid://bus4qqxg7chq5" path="res://src/marchingcubes/OctreePlanet/TestUI/grass_density_text.gd" id="1_744lc"]
+[ext_resource type="Script" uid="uid://n5bjq116l0c4" path="res://src/marchingcubes/OctreePlanet/TestUI/surface_ui.gd" id="1_xi007"]
+[ext_resource type="Script" uid="uid://ds08yqdgidyum" path="res://src/marchingcubes/OctreePlanet/TestUI/surface_ui_button.gd" id="3_bi1qr"]
+
+[node name="SurfaceUi" type="CanvasLayer"]
+rotation = 0.000743227
+scale = Vector2(1, 1)
+transform = Transform2D(1, 0.000743227, -0.000743227, 1, 0, 0)
+script = ExtResource("1_xi007")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="MarginContainer" type="MarginContainer" parent="Control"]
+layout_mode = 0
+offset_right = 400.0
+offset_bottom = 154.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "WARNING VERY EXPERIMENTAL"
+horizontal_alignment = 1
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "GRASS DENSITY: "
+fit_content = true
+script = ExtResource("1_744lc")
+
+[node name="HScrollBar" type="HScrollBar" parent="Control/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Amount of Trees: "
+fit_content = true
+
+[node name="SpinBox" type="SpinBox" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+rounded = true
+prefix = "Trees:"
+
+[node name="Button" type="Button" parent="Control/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Apply"
+script = ExtResource("3_bi1qr")
+
+[connection signal="value_changed" from="Control/MarginContainer/VBoxContainer/HScrollBar" to="Control/MarginContainer/VBoxContainer/RichTextLabel" method="_on_h_scroll_bar_value_changed"]
+[connection signal="pressed" from="Control/MarginContainer/VBoxContainer/Button" to="." method="_on_button_pressed"]

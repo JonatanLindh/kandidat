@@ -68,6 +68,7 @@ public partial class OctreePlanetSpawner : Node3D
 	}
 
 	[Export] public int Resolution { get; set; } = DefaultResolution;
+	[Export] public float GrassDensity { get; set; } = 50f;
 	
 	
 	private Vector3 _center = Vector3.Zero;
@@ -88,12 +89,17 @@ public partial class OctreePlanetSpawner : Node3D
 	private PlanetThemeGenerator _themeGenerator;
 	private ShaderMaterial _planetShader;
 	private double _warmth;
-	
+
+	private Shader _shader;
+	private Gradient _gradient;
 	
 	public override void _Ready()
 	{
 		Init();
 		EmitSignal(SignalName.Spawned, _radius * 2f);
+		_shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
+		//_gradient = _themeGenerator.Gradient;
+
 	}
 	
 	/// <summary>
@@ -137,7 +143,12 @@ public partial class OctreePlanetSpawner : Node3D
 			CustomMeshInstance = requestInstance,
 			GeneratePlanetShader = GeneratePlanetShader,
 			Id = id,
-			//GenerateGrass = depth == _maxDepth
+			GenerateGrass = depth == _maxDepth,
+			GrassRequest = new GrassRequest
+			{
+				GenerateGrass = depth == _maxDepth,
+				GrassDensity = GrassDensity
+			}
 		}; 
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest, id);
 		
@@ -150,12 +161,14 @@ public partial class OctreePlanetSpawner : Node3D
 		Aabb aabb = new Aabb(center - Vector3.One * (size / 2) + chunkPosition, Vector3.One * size);
 		var raycastHits =
 			GenerateFeatures.PerformRayCastsWithBounds(rayPositions, GetWorld3D().DirectSpaceState, aabb, GlobalPosition);
+		
 		var multiMeshes = generateFeatures.GenFeatures
 			(raycastHits, features, offset: - GlobalPosition - Vector3.One * center, seed: _celestialBody.Seed);
 		foreach (var multiMesh in multiMeshes)
 		{
 			chunk.AddChild(multiMesh);
 		}
+		
 	}
 	
 	private ShaderMaterial GeneratePlanetShader(float minHeight, float maxHeight, Vector3 chunkCenter) {
@@ -177,7 +190,7 @@ public partial class OctreePlanetSpawner : Node3D
 		// Load the shader correctly
 		Shader shader = ResourceLoader.Load<Shader>("res://src/bodies/planet/planet_shader.gdshader");
 		ShaderMaterial shaderMaterial = new ShaderMaterial();
-		shaderMaterial.Shader = shader;
+		shaderMaterial.Shader = _shader;
 		shaderMaterial.SetShaderParameter("min_height", _minHeight);
 		shaderMaterial.SetShaderParameter("max_height", _maxHeight);
 		shaderMaterial.SetShaderParameter("chunk_center", chunkCenter);
@@ -185,8 +198,9 @@ public partial class OctreePlanetSpawner : Node3D
 
 		// Access exported property (gradient)
 		Gradient gradient = _themeGenerator.Gradient;
+		_gradient ??= _themeGenerator.Gradient;
 		GradientTexture1D gradientTexture = new GradientTexture1D();
-		gradientTexture.Gradient = gradient;
+		gradientTexture.Gradient = _gradient;
 		gradientTexture.Width = 256;
 
 		shaderMaterial.SetShaderParameter("height_color", gradientTexture);

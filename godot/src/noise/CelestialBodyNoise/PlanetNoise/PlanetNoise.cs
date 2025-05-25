@@ -33,6 +33,37 @@ public partial class PlanetNoise
         //PadBordersWithAir(points, width, height, depth);
 
         // Boarders are already padded, so only need to iterate from [1, size-1)
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int z = 0; z < depth; z++)
+                {
+                    // Calculate distance from center of planet to the point (x,y,z)
+                    Vector3 currentPoint = new Vector3(x, y, z) * voxelSize;
+                    currentPoint += offset;
+                    float distanceToCenter = (centerPoint - currentPoint).Length();
+                    float distanceToBorder = (float)radius - distanceToCenter;
+
+                    // Apply fbm to layer noise
+                    float value = Fbm(distanceToBorder, currentPoint, param, fastNoise);
+
+                    // if > 1   --> the point is outside the planet
+                    // if <= 1  --> the point is inside the planet
+                    // Used for calculating the amount of falloff applied to the value
+                    float falloffRatio = Mathf.Abs(distanceToCenter / (float)radius);
+
+                    // Exponential falloff based on the ratio between the radius and the distance from the centerPoint
+                    // Values outside the planet gets larger (falloffRatio > 1) and
+                    // values within the planet gets smaller (falloffRatio <= 1)
+                    float falloff = falloffRatio * falloffRatio * falloffStrength;
+
+                    points[x, y, z] = value - falloff;
+                }
+            }
+        }
+        /*
+        
         Parallel.For(0, width, x =>
         {
             for (int y = 0; y < height; y++)
@@ -62,6 +93,7 @@ public partial class PlanetNoise
                 }
             }
         });
+        */
 
         return points;
     }

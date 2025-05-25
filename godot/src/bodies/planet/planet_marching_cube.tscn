@@ -40,6 +40,7 @@ Warmth = 0.5
 
 [node name="Atmosphere" type="MeshInstance3D" parent="."]
 transform = Transform3D(16.7, 0, 0, 0, 16.7, 0, 0, 0, 16.7, 0, 0, 0)
+visible = false
 mesh = SubResource("BoxMesh_736bg")
 script = ExtResource("3_f3734")
 radius = 2.0

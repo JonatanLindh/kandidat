@@ -44,19 +44,12 @@ public class CpuVerticesGeneratorMultiThread : IVerticesGenerationStrategy
         {
             if (tri[i] == -1) break;
             var p1 = MarchingTable.EDGES[tri[i]];
-            var p2 = MarchingTable.EDGES[tri[i + 1]];
-            var p3 = MarchingTable.EDGES[tri[i + 2]];
             
             var position1 = EvalPosition(x, y, z, p1);
-            var position2 = EvalPosition(x, y, z, p2);
-            var position3 = EvalPosition(x, y, z, p3);
-            
-            // Lock the vertices list to ensure thread safety
+
             lock (_lock)
             {
                 _vertices.Add(position1);
-                _vertices.Add(position2);
-                _vertices.Add(position3);
             }
         }
 

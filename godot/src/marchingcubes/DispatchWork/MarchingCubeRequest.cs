@@ -30,6 +30,6 @@ public record MarchingCubeRequest
 public record GrassRequest
 {
 	public bool GenerateGrass { get; init; } = false;
-	public int GrassDensity { get; init; } = 1;
+	public float GrassDensity { get; init; } = 1f;
 
 }

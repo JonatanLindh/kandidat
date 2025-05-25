@@ -100,6 +100,17 @@ public sealed partial class MarchingCubeDispatch: Node3D
 			if (IsInstanceValid(tuple.Item2))
 			{
 				tuple.Item2.CallDeferred(MeshInstance3D.MethodName.SetMesh, tuple.Item1);
+				// Create a collision shape for the mesh
+				/*
+				var collisionPolygon = tuple.Item1.CreateConvexShape();
+				StaticBody3D staticBody = new StaticBody3D();
+				CollisionShape3D collisionShape = new CollisionShape3D();
+				collisionShape.Shape = collisionPolygon;
+				staticBody.ProcessMode = ProcessModeEnum.Disabled;
+				tuple.Item2.CallDeferred(Node.MethodName.AddChild, staticBody);
+				staticBody.CallDeferred(Node.MethodName.AddChild, collisionShape);
+				*/
+
 				tuple.Item2.CallDeferred(MeshInstance3D.MethodName.CreateConvexCollision);
 			}
 			_meshQueueCount++;
@@ -223,13 +234,13 @@ public sealed partial class MarchingCubeDispatch: Node3D
 			request.Root.CallDeferred(Node.MethodName.AddChild, meshInstance);
 		}
 
-		if (request.GenerateGrass)
+		if (request.GrassRequest.GenerateGrass)
 		{	
 			NewGrass grass = new NewGrass();
 			var meshSurface = mesh.SurfaceGetArrays(0);
 			if (meshSurface != null)
 			{
-				var grassInstance = grass.PopulateMesh(meshSurface, 50f);
+				var grassInstance = grass.PopulateMesh(meshSurface, request.GrassRequest.GrassDensity);
 				if (grassInstance != null && IsInstanceValid(meshInstance))
 				{
 					meshInstance.CallDeferred(Node.MethodName.AddChild, grassInstance);

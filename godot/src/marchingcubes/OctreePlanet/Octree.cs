@@ -119,9 +119,24 @@ public partial class Octree : Node3D
 			//new SurfaceFeature(GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/stone/rock33.res"),
 			//	0.2f, size / 20f)
 		];
-		_planetFeaturePositions ??= GenerateFeatures.GenerateRayPoints(GenerateFeatures.SamplingMethod.Poisson, Vector3.One * _size, 50, _features);
+		_planetFeaturePositions ??= GenerateFeatures.GenerateRayPoints(GenerateFeatures.SamplingMethod.Poisson, Vector3.One * _size, 20, _features);
 		
 		SpawnPlanetChunk();
+	}
+
+	public void ResizeSurfaceFeatures(int surfaceAmount)
+	{
+		_planetFeaturePositions = GenerateFeatures.GenerateRayPoints(GenerateFeatures.SamplingMethod.Poisson, Vector3.One * _size, surfaceAmount, _features);
+		foreach (var child in _planetMesh.GetChildren())
+		{
+			// if child is multimeshinstance
+			if (child is MultiMeshInstance3D multiMeshInstance)
+			{
+				// remove
+				multiMeshInstance.QueueFree();
+			}
+		}
+		_hasSpawnedFeatures = false; // Reset feature spawning flag
 	}
 	
 	private void SetupDebugVisualization()
@@ -174,13 +189,13 @@ public partial class Octree : Node3D
 		if (PlayerPosition == null) return;
 		
 		// spawn planet features if the octree mesh has processed
-		if (_planetMesh != null && !_hasSpawnedFeatures && _planetMesh.Mesh != null)
+		if (_planetMesh != null && !_hasSpawnedFeatures && _planetMesh.Mesh != null && _planetMesh.IsVisible())
 		{
 			switch (OctreePlanetSpawner)
 			{
 				// Cast to OctreePlanetSpawner
 				case OctreePlanetSpawner spawner:
-					//spawner.GenFeatures(_features, _planetMesh, _planetFeaturePositions, GlobalPosition, _center, _size);
+					spawner.GenFeatures(_features, _planetMesh, _planetFeaturePositions, GlobalPosition, _center, _size);
 					break;
 				case null:
 					GD.PrintErr("OctreePlanetSpawner is null");

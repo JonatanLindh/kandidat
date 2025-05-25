@@ -99,6 +99,22 @@ public partial class PlanetMarchingCube : Node3D
 		SetAtmosphereSunDir();
 	}
 
+	public void OnSurfaceApplyClicked(float grassDensity, int treeAmount)
+	{
+		GD.Print($"Grass Density: {grassDensity}, Tree Amount: {treeAmount}");
+		var octreePlanetSpawner = _planet.GetNodeOrNull<OctreePlanetSpawner>("PlanetSpawner");
+		var octree = _planet.GetNodeOrNull<Octree>("Octree");
+		if (octreePlanetSpawner != null)
+		{
+			octreePlanetSpawner.Set("GrassDensity", grassDensity);
+		}
+
+		if (octree != null)
+		{
+			octree.Call("ResizeSurfaceFeatures", treeAmount);
+		}
+	}
+
     /// <summary>
     /// Will regenerate the mesh of this planet.
     /// 

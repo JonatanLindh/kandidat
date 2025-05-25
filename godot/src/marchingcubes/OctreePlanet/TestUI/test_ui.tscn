@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3 uid="uid://dstjuh2fg2j1n"]
+
+[ext_resource type="PackedScene" uid="uid://c78s68trv7dj3" path="res://src/player/player.tscn" id="1_2h7rf"]
+[ext_resource type="PackedScene" uid="uid://bel75q1uph5qv" path="res://src/marchingcubes/OctreePlanet/TestUI/SurfaceUI.tscn" id="2_td718"]
+[ext_resource type="PackedScene" uid="uid://du6jp713wv2h5" path="res://src/bodies/planet/planet_marching_cube.tscn" id="3_2h7rf"]
+[ext_resource type="ArrayMesh" uid="uid://eiuag6kylsfk" path="res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res" id="4_s11s3"]
+
+[node name="TestUi" type="Node3D"]
+
+[node name="Player" parent="." instance=ExtResource("1_2h7rf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 166.923, 449.56)
+
+[node name="SurfaceUi" parent="." instance=ExtResource("2_td718")]
+offset = Vector2(50, 200)
+scale = Vector2(1, 1)
+transform = Transform2D(1, 0.000743227, -0.000743227, 1, 50, 200)
+
+[node name="PlanetMarchingCube" parent="." instance=ExtResource("3_2h7rf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 348.031, 364.576, 824.378)
+Radius = 100.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(28.155, 0, 0, 0, 28.155, 0, 0, 0, 28.155, 0.0180317, 1.23579, -281.334)
+mesh = ExtResource("4_s11s3")
+
+[connection signal="apply_button_pressed" from="SurfaceUi" to="PlanetMarchingCube" method="OnSurfaceApplyClicked"]
