@@ -24,4 +24,12 @@ public record MarchingCubeRequest
 	public Guid Id { get; init; } = Guid.NewGuid();
 	
 	public bool GenerateGrass { get; init; } = false;
+	public GrassRequest GrassRequest { get; init; } = new GrassRequest();
+}
+
+public record GrassRequest
+{
+	public bool GenerateGrass { get; init; } = false;
+	public int GrassDensity { get; init; } = 1;
+
 }

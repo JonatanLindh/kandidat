@@ -89,17 +89,17 @@ public partial class PlanetNoise
         float h = Mathf.Pow(2, persistence);
 
         // Used to slightly offset the position when getting noise-value for each octave
-        Vector3 offset = Vector3.Zero;
-        Random random = new Random(param.Seed);
+        //Vector3 offset = Vector3.Zero;
+        //Random random = new Random(param.Seed);
 
         // FBM - Fractal Brownian Motion 
         for (int i = 0; i < param.Octaves; i++)
         {
             // FastNoiseLite.GetNoise3DV should be thread-safe if not changed while executing the Parallel.For-loop
-            valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
+            valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition) * amplitude;
             amplitude *= persistence;
             frequency *= lacunarity;
-            offset += new Vector3(random.Next(param.Octaves), random.Next(param.Octaves), random.Next(param.Octaves));
+            //offset += new Vector3(random.Next(param.Octaves), random.Next(param.Octaves), random.Next(param.Octaves));
         }
 
         return valueAfterFbm;

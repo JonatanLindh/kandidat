@@ -24,7 +24,7 @@ public partial class OctreePlanetSpawner : Node3D
 	public delegate void SpawnedEventHandler(float radius);
     
 	private const int DefaultResolution = 32;
-	private const int DefaultMaxDepth = 8;
+	private const int DefaultMaxDepth = 4;
 	
 	[Export] public Node CelestialBody
 	{
@@ -137,7 +137,7 @@ public partial class OctreePlanetSpawner : Node3D
 			CustomMeshInstance = requestInstance,
 			GeneratePlanetShader = GeneratePlanetShader,
 			Id = id,
-			GenerateGrass = depth == MaxDepth
+			//GenerateGrass = depth == _maxDepth
 		}; 
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest, id);
 		
@@ -151,7 +151,7 @@ public partial class OctreePlanetSpawner : Node3D
 		var raycastHits =
 			GenerateFeatures.PerformRayCastsWithBounds(rayPositions, GetWorld3D().DirectSpaceState, aabb, GlobalPosition);
 		var multiMeshes = generateFeatures.GenFeatures
-			(raycastHits, features, offset: - GlobalPosition - Vector3.One * center, seed: celestialBody.Seed);
+			(raycastHits, features, offset: - GlobalPosition - Vector3.One * center, seed: _celestialBody.Seed);
 		foreach (var multiMesh in multiMeshes)
 		{
 			chunk.AddChild(multiMesh);

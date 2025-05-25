@@ -41,8 +41,85 @@ public class GenerateFeatures
 		_aliasMethodVose = new AliasMethodVose(_features.Select(f => f.Weight).ToArray());
 	}
 
-	// TODO: When generating points, assign them a specific feature so it always spawns the same feature
-	public static List<List<(Vector3, int)>> GenerateRayPoints(Vector3 size, float amount, SurfaceFeature[] features)
+	public static List<List<(Vector3, int)>> GenerateRayPoints(SamplingMethod samplingMethod, Vector3 size,
+		float amount, SurfaceFeature[] features)
+	{
+		List<List<(Vector3, int)>> points = samplingMethod switch
+		{
+			SamplingMethod.Uniform => GenerateRayPointsUniform(size, amount, features),
+			SamplingMethod.Poisson => GenerateRayPointsPoisson(size, amount, features),
+			_ => throw new ArgumentOutOfRangeException(nameof(samplingMethod), samplingMethod, "Invalid sampling method")
+		};
+
+		return points;
+	}
+
+	private static List<List<(Vector3, int)>> GenerateRayPointsUniform(Vector3 size,
+		float amount, SurfaceFeature[] features)
+	{
+		AliasMethodVose alias = new AliasMethodVose(features.Select(f => f.Weight).ToArray());
+		Aabb aabb = new Aabb();
+		aabb.Position = Vector3.Zero - size * 0.5f;
+		aabb.Size = size;
+		
+		var corners = new[] {
+			new Vector3(aabb.Position.X, aabb.Position.Y, aabb.Position.Z),
+			new Vector3(aabb.Position.X + aabb.Size.X, aabb.Position.Y, aabb.Position.Z),
+			new Vector3(aabb.Position.X + aabb.Size.X, aabb.Position.Y + aabb.Size.Y, aabb.Position.Z),
+			new Vector3(aabb.Position.X, aabb.Position.Y + aabb.Size.Y, aabb.Position.Z),
+			new Vector3(aabb.Position.X, aabb.Position.Y, aabb.Position.Z + aabb.Size.Z),
+			new Vector3(aabb.Position.X + aabb.Size.X, aabb.Position.Y, aabb.Position.Z + aabb.Size.Z),
+			new Vector3(aabb.Position.X + aabb.Size.X, aabb.Position.Y + aabb.Size.Y, aabb.Position.Z + aabb.Size.Z),
+			new Vector3(aabb.Position.X, aabb.Position.Y + aabb.Size.Y, aabb.Position.Z + aabb.Size.Z)
+		};
+		
+		var aabbFaces = new List<Vector3[]>
+		{
+			// Front face
+			new[] { corners[0], corners[1], corners[2], corners[3] },
+			// Back face
+			new[] { corners[4], corners[5], corners[6], corners[7] },
+			// Left face
+			new[] { corners[0], corners[3], corners[7], corners[4] },
+			// Right face
+			new[] { corners[1], corners[2], corners[6], corners[5] },
+			// Top face
+			new[] { corners[3], corners[2], corners[6], corners[7] },
+			// Bottom face
+			new[] { corners[0], corners[1], corners[5], corners[4] }
+		};
+
+		List<List<(Vector3, int)>> rayPoints = new List<List<(Vector3, int)>>();
+		
+		foreach (var face in aabbFaces)
+		{
+			var v1 = face[0] ;
+			var v2 = face[1] ; 
+			var v3 = face[2] ; 
+			var v4 = face[3] ; 
+			
+			List <(Vector3, int)> facePoints = new List<(Vector3, int)>();
+			
+			for (int i = 0; i < amount; i++)
+			{
+				var selectedFeature = alias.Next();
+				// Get a random point in the face
+				float u = (float)GD.RandRange(0.0, 1.0);
+				float v = (float)GD.RandRange(0.0, 1.0);
+				// Bilinear interpolation
+				Vector3 randomPoint = v1 + u * (v2 - v1) + v * (v4 - v1);
+				
+				facePoints.Add((randomPoint, selectedFeature));
+			}
+			rayPoints.Add(facePoints);
+		}
+		
+		return rayPoints;
+		
+		//throw new NotImplementedException();
+	}
+
+	private static List<List<(Vector3, int)>> GenerateRayPointsPoisson(Vector3 size, float amount, SurfaceFeature[] features)
 	{
 		AliasMethodVose alias = new AliasMethodVose(features.Select(f => f.Weight).ToArray());
 		
@@ -58,27 +135,7 @@ public class GenerateFeatures
 		
 		//var sampleRadius = size.X / 2f;
 		var sampleTries = 1000;
-		/*
-		var poissonPointsPerFace = new List<List<(Vector3, int)>>
-		{
-			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(size.X, size.Y , 1f), sampleTries)
-				.Select(point => point - new Vector3(size.X, size.Y, size.Z) * 0.5f).ToList(),
-			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(size.X, size.Y , 1f), sampleTries)
-				.Select(point => point - new Vector3(size.X, size.Y, -size.Z) * 0.5f).ToList(),
-			
-			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(1f, size.Y , size.Z), sampleTries)
-				.Select(point => point - new Vector3(size.X, size.Y, size.Z) * 0.5f).ToList(),
-			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(1f, size.Y , size.Z), sampleTries)
-				.Select(point => point - new Vector3(-size.X, size.Y, size.Z) * 0.5f).ToList(),
-			
-			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(size.X, 1f , size.Z), sampleTries)
-				.Select(point => point - new Vector3(size.X, -size.Y, size.Z) * 0.5f).ToList(),
-			PoissonDiscSampling3D.GeneratePoints(sampleRadius, new Vector3(size.X, 1f , size.Z), sampleTries)
-				.Select(point => point - new Vector3(size.X, size.Y, size.Z) * 0.5f).ToList()
-				
-				
-		};
-		*/
+
 		var poissonPointsPerFace = new List<List<(Vector3, int)>>
 		{
 			PoissonDiscSampling3D.GeneratePointsWithAlias(alias, sampleRadius, new Vector3(size.X, size.Y , 1f), sampleTries)
@@ -127,7 +184,7 @@ public class GenerateFeatures
 				var point = face[j].Item1 + offset;
 				
 				Vector3 faceNormal = faceNormals[i];
-				Vector3 rayVector = (point - faceNormal * 500f);
+				Vector3 rayVector = (point - faceNormal * 100f);
 
 				var query = PhysicsRayQueryParameters3D.Create(point, rayVector);
 				var result = spaceState.IntersectRay(query);
@@ -165,6 +222,7 @@ public class GenerateFeatures
 		{
 			var result = rayCastHits[i];
 			var collisionPoint = result.Item1["position"].AsVector3();
+			//collisionPoint += Vector3.One * (collisionPoint.Normalized() * (-4f));
 			var transform = new Transform3D();
 			
 			Vector3 upVector = result.Item1["normal"].AsVector3(); 

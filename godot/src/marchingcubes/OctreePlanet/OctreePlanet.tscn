@@ -1,14 +1,12 @@
-[gd_scene load_steps=5 format=3 uid="uid://o1yxfrcs4pok"]
+[gd_scene load_steps=4 format=3 uid="uid://o1yxfrcs4pok"]
 
 [ext_resource type="Script" uid="uid://r87jfre8pihr" path="res://src/noise/CelestialBodyNoise/PlanetNoise/DeterministicRandomPlanet.cs" id="1_23uc2"]
 [ext_resource type="Script" uid="uid://dgmtlqs3vcg45" path="res://src/marchingcubes/OctreePlanet/Octree.cs" id="2_xv7cc"]
 [ext_resource type="Script" uid="uid://dic13ujysaolo" path="res://src/marchingcubes/OctreePlanet/OctreePlanetSpawner.cs" id="3_qbmy6"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_sfnq5"]
-
 [node name="OctreePlanet" type="Node3D"]
 script = ExtResource("1_23uc2")
-radius = 20
+radius = 100
 seed = 5436959
 
 [node name="Octree" type="Node3D" parent="." node_paths=PackedStringArray("PlayerPosition", "OctreePlanetSpawner")]
@@ -22,11 +20,5 @@ ShowOctree = true
 script = ExtResource("3_qbmy6")
 CelestialBody = NodePath("..")
 Resolution = 16
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(19.47, 0, 0, 0, 19.47, 0, 0, 0, 19.47, -46.3138, 1194.86, 112.926)
-visible = false
-mesh = SubResource("BoxMesh_sfnq5")
-skeleton = NodePath("../Octree")
 
 [connection signal="Spawned" from="PlanetSpawner" to="Octree" method="OnPlanetSpawnerReady"]

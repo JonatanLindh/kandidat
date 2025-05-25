@@ -115,13 +115,11 @@ public partial class Octree : Node3D
 		
 		_features ??= [
 			new SurfaceFeature(GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res"),
-				1f, 100f),
-			new SurfaceFeature(GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/stone/rock33.res"),
-				0.5f, 10f)
+				1f, size / 0.8f),
+			//new SurfaceFeature(GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/stone/rock33.res"),
+			//	0.2f, size / 20f)
 		];
-		_planetFeaturePositions ??= GenerateFeatures.GenerateRayPoints(Vector3.One * _size, 50, _features);
-
-
+		_planetFeaturePositions ??= GenerateFeatures.GenerateRayPoints(GenerateFeatures.SamplingMethod.Poisson, Vector3.One * _size, 50, _features);
 		
 		SpawnPlanetChunk();
 	}
@@ -134,87 +132,6 @@ public partial class Octree : Node3D
 			AddChild(_debugNode);
 			_debugNode.Visible = ShowOctree;
 		}
-	}
-	
-		private void GeneratePlanetFeatures()
-	{
-		var totalCount = _planetFeaturePositions.Select(list => list.Count).ToList().Sum();
-
-		/*
-		MultiMesh multimesh = new MultiMesh();
-		multimesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
-		multimesh.InstanceCount = totalCount;
-		multimesh.Mesh = new SphereMesh()
-		{
-			Radius = 5,
-			Height = 10
-		};
-		int i = 0;
-		foreach (var planetFeaturePosition in _planetFeaturePositions)
-		{
-			foreach (var position in planetFeaturePosition)
-			{
-				Transform3D transform = new Transform3D(Basis.Identity, position.Item1);
-				multimesh.SetInstanceTransform(i, transform);
-				i++;
-			}
-		}	
-		*/
-		// Spawn a planet feature
-		// if the feature position is not within the bounds of the octree node
-		// then discard it
-			/*
-		SurfaceFeature[] features = [
-			new (GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/meshes/tree1_lod0.res"),
-				1f, 100f),
-			new (GD.Load<Mesh>("res://src/bodies/planet/vegetation/tree/assets/stone/rock33.res"),
-				0.5f, 10f)
-		];
-		GenerateFeatures generateFeatures = new GenerateFeatures(20, null);
-		Aabb aabb = new Aabb(_center - Vector3.One * (_size / 2) + GlobalPosition, Vector3.One * _size);
-		var raycastHits =
-			GenerateFeatures.PerformRayCastsWithBounds(_planetFeaturePositions, GetWorld3D().DirectSpaceState, aabb, GlobalPosition);
-		var multiMeshes = generateFeatures.GenFeatures(raycastHits, features, offset: - GlobalPosition - Vector3.One * _center);
-
-		foreach (var multiMesh in multiMeshes)
-		{
-			_planetMesh.AddChild(multiMesh);
-		}
-		*/
-		
-		//_planetMesh.AddChild(multiMeshes);
-		_hasSpawnedFeatures = true;
-
-		//AddChild(DrawBoundingBox(aabb.Position - _center, aabb.Size.X, Colors.Green));
-		/*
-		
-		MultiMesh multimesh = new MultiMesh();
-		multimesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
-		multimesh.InstanceCount = raycastHits.Count;
-		multimesh.Mesh = new SphereMesh()
-		{
-			Radius = 0.5f,
-			Height = 1
-		};
-		
-		
-		int i = 0;
-		foreach (var hits in raycastHits)
-		{
-			var position = hits["position"].AsVector3();
-			Transform3D transform = new Transform3D(Basis.Identity, position - GlobalPosition - Vector3.One * _center);
-			multimesh.SetInstanceTransform(i, transform);
-			i++;
-
-		}
-
-		MultiMeshInstance3D meshInstance = new MultiMeshInstance3D();
-		meshInstance.Multimesh = multimesh;
-		_planetMesh.AddChild(meshInstance);
-*/
-
-		//_planetMesh.AddChild(multiMesh);
-
 	}
 
 	public override void _Notification(int what)
@@ -263,7 +180,7 @@ public partial class Octree : Node3D
 			{
 				// Cast to OctreePlanetSpawner
 				case OctreePlanetSpawner spawner:
-					spawner.GenFeatures(_features, _planetMesh, _planetFeaturePositions, GlobalPosition, _center, _size);
+					//spawner.GenFeatures(_features, _planetMesh, _planetFeaturePositions, GlobalPosition, _center, _size);
 					break;
 				case null:
 					GD.PrintErr("OctreePlanetSpawner is null");

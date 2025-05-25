@@ -31,18 +31,13 @@ public class NewGrass
 		_material.Shader = shader;
 	}
 	
-	public MultiMeshInstance3D PopulateMesh(Godot.Collections.Array meshData, int totalInstanceCount = 5000)
+	public MultiMeshInstance3D PopulateMesh(Godot.Collections.Array meshData, float density = 1.0f)
 	{
 		var vertices = meshData[(int)Mesh.ArrayType.Vertex].AsVector3Array();
 		var indices = meshData[(int)Mesh.ArrayType.Index].AsInt32Array();
+		List<Transform3D> multiMeshTransforms = new List<Transform3D>();
 		
-		MultiMesh multiMesh = new MultiMesh();
-		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
-		multiMesh.Mesh = _mesh;
-		multiMesh.UseCustomData = true; // Enable custom data
-		
-		// Set the total instance count
-		multiMesh.InstanceCount = totalInstanceCount;
+
 		int instanceIndex = 0;
 
 		float totalArea = 0f;
@@ -64,14 +59,36 @@ public class NewGrass
 			totalArea += area;
 		}
 
+		// Calculate target total instances based on total area and density
+		int totalInstanceTarget = Mathf.Max(1, Mathf.FloorToInt(totalArea * density));
 		
 		// Distribute instances based on area ratio
 		foreach (var (faceStartIndex, faceArea) in faceAreas)
 		{
 			// Calculate proportional instances for this face
 			float faceAreaRatio = faceArea / totalArea;
-			int faceInstances = Mathf.FloorToInt(totalInstanceCount * faceAreaRatio);
-			for (int j = 0; j < faceInstances && instanceIndex < totalInstanceCount; j++)
+			float idealInstanceCount = totalInstanceTarget * faceAreaRatio;
+    
+			// For very small faces with less than 1 ideal instance,
+			// use probability to determine if they get an instance
+			int faceInstances;
+			if (idealInstanceCount < 1.0f)
+			{
+				// Probabilistic approach - chance equals the fractional ideal count
+				faceInstances = GD.Randf() < idealInstanceCount ? 1 : 0;
+			}
+			else
+			{
+				// Round to nearest integer instead of floor for better distribution
+				faceInstances = Mathf.RoundToInt(idealInstanceCount);
+			}
+			
+			
+			
+			// Calculate proportional instances for this face
+			//float faceAreaRatio = faceArea / totalArea;
+			//int faceInstances = Mathf.FloorToInt(totalInstanceCount * faceAreaRatio);
+			for (int j = 0; j < faceInstances; j++)
 			{
 				Vector3 v1 = vertices[indices[faceStartIndex]];
 				Vector3 v2 = vertices[indices[faceStartIndex + 1]];
@@ -104,6 +121,10 @@ public class NewGrass
 				// Set the basis with these orthogonal vectors
 				transform.Basis = new Basis(xVector, upVector, zVector);
 				transform.Origin = pos;
+				
+				multiMeshTransforms.Add(transform);
+				
+				/*
 
 				// Add random value as custom data (stable across movements)
 				float randomValue1 = (float)GD.RandRange(0, 1000) / 1000f;
@@ -118,10 +139,36 @@ public class NewGrass
 							0)
 					);
 				multiMesh.SetInstanceTransform(instanceIndex, transform);
-				instanceIndex++;
+				*/
 			}
-
 		}
+		
+		MultiMesh multiMesh = new MultiMesh();
+		multiMesh.TransformFormat = MultiMesh.TransformFormatEnum.Transform3D;
+		multiMesh.Mesh = _mesh;
+		multiMesh.UseCustomData = true; // Enable custom data
+		
+		// Set the total instance count
+		multiMesh.InstanceCount =  multiMeshTransforms.Count;
+
+		foreach (var transform in multiMeshTransforms)
+		{
+			// Add random value as custom data (stable across movements)
+			float randomValue1 = (float)GD.RandRange(0, 1000) / 1000f;
+			float randomValue2 = (float)GD.RandRange(0, 1000) / 1000f;
+			float randomValue3 = (float)GD.RandRange(0, 1000) / 1000f;
+			multiMesh.SetInstanceCustomData(instanceIndex, 
+				new Color
+				(
+					randomValue1, 
+					randomValue2,
+					randomValue3, 
+					0)
+			);
+			multiMesh.SetInstanceTransform(instanceIndex, transform);
+			instanceIndex++;
+		}
+
 		
 		// Create a new instance of the grass mesh
 		MultiMeshInstance3D instance = new MultiMeshInstance3D();

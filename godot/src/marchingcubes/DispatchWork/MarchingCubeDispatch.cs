@@ -229,7 +229,7 @@ public sealed partial class MarchingCubeDispatch: Node3D
 			var meshSurface = mesh.SurfaceGetArrays(0);
 			if (meshSurface != null)
 			{
-				var grassInstance = grass.PopulateMesh(meshSurface, 50000);
+				var grassInstance = grass.PopulateMesh(meshSurface, 50f);
 				if (grassInstance != null && IsInstanceValid(meshInstance))
 				{
 					meshInstance.CallDeferred(Node.MethodName.AddChild, grassInstance);
