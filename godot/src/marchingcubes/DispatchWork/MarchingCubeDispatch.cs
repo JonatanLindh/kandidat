@@ -29,7 +29,7 @@ public sealed partial class MarchingCubeDispatch: Node
 
 	private ConcurrentQueue<(Mesh, MeshInstance3D)> _meshQueue = new();
 	private int _meshQueueCount = 0;
-	private const int MaxMeshQueueCount = 10;
+	private const int MaxMeshQueueCount = 12;
 	
 	
 	/// <summary>
@@ -46,7 +46,11 @@ public sealed partial class MarchingCubeDispatch: Node
 		{
 			// Get the current scene tree
 			var tree = Engine.GetMainLoop() as SceneTree;
-			tree?.Root.AddChild(this);
+			//tree?.Root.AddChild(this);
+			if (tree != null)
+			{
+				tree.Root.CallDeferred(Node.MethodName.AddChild, this);
+			}
 		}
 		
 		// Start the planet generator thread
@@ -101,7 +105,18 @@ public sealed partial class MarchingCubeDispatch: Node
 			if (IsInstanceValid(tuple.Item2))
 			{
 				tuple.Item2.CallDeferred(MeshInstance3D.MethodName.SetMesh, tuple.Item1);
-				tuple.Item2.CallDeferred(MeshInstance3D.MethodName.CreateConvexCollision);
+				var settings = new MeshConvexDecompositionSettings
+				{
+					Resolution = 200000,
+					PlaneDownsampling = 1,
+					MaxConcavity = 0.5f,
+					MaxConvexHulls = 512,
+					MaxNumVerticesPerConvexHull = 1024,
+					MinVolumePerConvexHull = 0.00001f,
+					ProjectHullVertices = true
+				};
+				//tuple.Item2.CallDeferred(MeshInstance3D.MethodName.CreateMultipleConvexCollisions, settings);
+				tuple.Item2.CallDeferred(MeshInstance3D.MethodName.CreateTrimeshCollision);
 			}
 			_meshQueueCount++;
 		}
@@ -188,7 +203,7 @@ public sealed partial class MarchingCubeDispatch: Node
 		if (IsInstanceValid(meshInstance))
 		{
 			_meshQueue.Enqueue((mesh, meshInstance));
-			//meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
+			///meshInstance.CallDeferred(MeshInstance3D.MethodName.SetMesh, mesh);
 			//meshInstance.CallDeferred(MeshInstance3D.MethodName.CreateTrimeshCollision);
 
 		}

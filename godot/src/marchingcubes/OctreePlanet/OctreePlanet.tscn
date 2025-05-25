@@ -8,8 +8,7 @@
 
 [node name="OctreePlanet" type="Node3D"]
 script = ExtResource("1_23uc2")
-radius = 20
-seed = 5436959
+radius = 100
 
 [node name="Octree" type="Node3D" parent="." node_paths=PackedStringArray("PlayerPosition", "OctreePlanetSpawner")]
 script = ExtResource("2_xv7cc")

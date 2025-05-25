@@ -96,7 +96,7 @@ public partial class PlanetNoise
         for (int i = 0; i < param.Octaves; i++)
         {
             // FastNoiseLite.GetNoise3DV should be thread-safe if not changed while executing the Parallel.For-loop
-            valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition + offset) * amplitude;
+            valueAfterFbm += fastNoise.GetNoise3Dv(frequency * currentPosition) * amplitude;
             amplitude *= persistence;
             frequency *= lacunarity;
             offset += new Vector3(random.Next(param.Octaves), random.Next(param.Octaves), random.Next(param.Octaves));

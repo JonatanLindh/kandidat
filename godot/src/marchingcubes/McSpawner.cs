@@ -112,8 +112,8 @@ public partial class McSpawner : Node
 				Radius = planetRadius,
 				Height = planetRadius * 2
 			};
-			_temporaryMeshInstance.MaterialOverride = GeneratePlanetShader(planetRadius, planetRadius);
-			AddChild(_temporaryMeshInstance);
+			//_temporaryMeshInstance.MaterialOverride = GeneratePlanetShader(planetRadius, planetRadius);
+			//AddChild(_temporaryMeshInstance);
 		}
 		
 		AddChild(_meshInstance3D);
@@ -127,7 +127,7 @@ public partial class McSpawner : Node
 			Center = Vector3.Zero,
 			Root = this,	
 			CustomMeshInstance = _meshInstance3D,
-			TempNode = _useTemp ? _temporaryMeshInstance : null,
+			//TempNode = _useTemp ? _temporaryMeshInstance : null,
 			//GeneratePlanetShader = GeneratePlanetShader
 		};
 		MarchingCubeDispatch.Instance.AddToQueue(cubeRequest);
