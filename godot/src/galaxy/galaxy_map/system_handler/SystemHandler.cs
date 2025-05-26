@@ -131,7 +131,6 @@ public partial class SystemHandler : Node
 
 		newBody.Call("set_test_body_mass", mass);
 		newBody.Call("set_test_body_velocity", velocity);
-		newBody.Set("Seed", GD.Randi());
 		gravityController.AddChild(newBody);
 		newBody.GlobalPosition = position;
 	}
