@@ -4,8 +4,11 @@ extends Node3D
 
 @onready var system : Node3D = $System
 @onready var seed_text_edit : TextEdit = %SeedTextEdit
-@export var generate_planets : bool = true
 
+@export var seed : int = 123
+@export var use_random_seed : bool = true
+
+@export var generate_planets : bool = true
 @export_category("May cause crashes:")
 @export var display_orbits : bool = false
 
@@ -13,8 +16,12 @@ func _ready() -> void:
 	if generate_planets:
 		if display_orbits:
 			HudSignalBus.emit_signal("orbits_visibility", true)
-		var menu_seed = randi()
-		system.generateSystemFromSeed(123)
+		var menu_seed
+		if use_random_seed:
+			menu_seed = randi()
+		else:
+			menu_seed = seed
+		system.generateSystemFromSeed(menu_seed)
 	
 
 func _on_start_button_pressed() -> void:
