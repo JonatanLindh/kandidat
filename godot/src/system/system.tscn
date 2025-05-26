@@ -8,6 +8,7 @@
 script = ExtResource("1_7my1l")
 
 [node name="GravityController" type="GravityController" parent="." node_paths=PackedStringArray("sim_center_body")]
+grav_const = 0.1
 simulation_steps = 1000
 simulation_step_delta = 0.1
 sim_center_body = NodePath("Star")
