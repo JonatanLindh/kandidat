@@ -14,4 +14,7 @@ func _setup_filter() -> void:
 	_filter_quad.size = screen_size;
 
 func toggle_underwater_filter(toggle: bool):
-	visible = toggle;
+	visible = false;
+	#
+	# False forever
+	#

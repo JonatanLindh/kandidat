@@ -5,8 +5,8 @@
 [ext_resource type="Script" uid="uid://ksk14jqv2o7p" path="res://src/ocean/player_detector.gd" id="3_vku73"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_hsljn"]
-radius = 32.0
-height = 64.0
+radius = 16.0
+height = 32.0
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_hsljn"]
 noise_type = 0
@@ -53,7 +53,7 @@ shader_parameter/deep_color = Color(0, 0.356863, 0.509804, 1)
 shader_parameter/shallow_color = Color(0, 0.556863, 0.784314, 1)
 shader_parameter/shallow_size = 10.5
 shader_parameter/foam_color = Color(1, 1, 1, 1)
-shader_parameter/foam_size = 0.5
+shader_parameter/foam_size = 0.16
 shader_parameter/transparency_blend = 0.5
 shader_parameter/metal = 0.0
 shader_parameter/roughness = 0.25
@@ -65,17 +65,17 @@ shader_parameter/tex3d_bump_map_blend = 0.8
 shader_parameter/wave_texture = SubResource("NoiseTexture2D_na11i")
 shader_parameter/dir_bump_map1 = Vector2(1, 0)
 shader_parameter/dir_bump_map2 = Vector2(0, 1)
-shader_parameter/speed_bump_map1 = 0.005
-shader_parameter/speed_bump_map2 = 0.005
+shader_parameter/speed_bump_map1 = 0.004
+shader_parameter/speed_bump_map2 = 0.004
 shader_parameter/wave_speed = 0.003
-shader_parameter/time = 1903.94
-shader_parameter/delta_time = 0.0166667
+shader_parameter/time = 694.913
 
 [node name="Ocean" type="MeshInstance3D"]
 cast_shadow = 0
 mesh = SubResource("SphereMesh_hsljn")
 surface_material_override/0 = SubResource("ShaderMaterial_na11i")
 script = ExtResource("2_vku73")
+radius = 16
 deep_color = Color(0, 0.356863, 0.509804, 1)
 shallow_color = Color(0, 0.556863, 0.784314, 1)
 foam_color = Color(1, 1, 1, 1)

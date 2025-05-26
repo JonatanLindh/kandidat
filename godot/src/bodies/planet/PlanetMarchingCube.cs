@@ -163,7 +163,7 @@ public partial class PlanetMarchingCube : Node3D
                 oceanSpawner = _oceanSpawner as OceanSpawner;
 
                 if (_ocean != null && IsInstanceValid(_ocean)) _ocean.QueueFree();
-                _ocean = oceanSpawner.GenerateOcean(Ocean, _resolution, scale, warmth);
+                _ocean = oceanSpawner.GenerateOcean(Ocean, (int)Math.Floor(_resolution * 0.8f), scale, warmth);
 				if(_ocean != null) AddChild(_ocean); // _ocean will be null if too hot or cold
             }
         }
