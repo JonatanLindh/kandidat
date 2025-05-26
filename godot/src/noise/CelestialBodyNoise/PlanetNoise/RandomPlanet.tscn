@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://5e7ris75mkdi"]
+[gd_scene load_steps=4 format=3 uid="uid://5e7ris75mkdi"]
 
 [ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="2_455go"]
 [ext_resource type="Script" uid="uid://b5gvbscgwukiu" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomPlanet.cs" id="3_8t10l"]
+[ext_resource type="PackedScene" uid="uid://bofhg0a64o1ap" path="res://src/ocean/ocean.tscn" id="3_455go"]
 
 [node name="RandomPlanet" type="Node3D"]
 script = ExtResource("3_8t10l")
@@ -9,3 +10,5 @@ radius = 32
 
 [node name="MarchingCube" parent="." node_paths=PackedStringArray("CelestialBody") instance=ExtResource("2_455go")]
 CelestialBody = NodePath("..")
+
+[node name="Ocean" parent="." instance=ExtResource("3_455go")]

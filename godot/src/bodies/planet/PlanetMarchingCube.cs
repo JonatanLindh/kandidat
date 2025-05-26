@@ -62,6 +62,8 @@ public partial class PlanetMarchingCube : Node3D
 
 	[Export] public PackedScene Planet { get; set; }
 
+	[Export] private PackedScene Ocean { get; set; }
+
     [Export(PropertyHint.Range, "0,1,0.1")]
     public double Warmth 
 	{ 
@@ -84,6 +86,9 @@ public partial class PlanetMarchingCube : Node3D
 	private Vector3 _sunPosition;
 	private Node3D _planet;
 	private Node _atmosphere;
+	private Node3D _ocean;
+	private Node3D _oceanSpawner;
+	private OceanSpawner oceanSpawner;
 	private Area3D _planet_gravity_field;
 	private PlanetThemeGenerator _themeGenerator;
 
@@ -138,9 +143,10 @@ public partial class PlanetMarchingCube : Node3D
 				_planet.Set("falloffStrength", _falloffStrength);
 				_planet.Set("seed", _seed);
 				
-				_planet.Scale = Vector3.One * (1 / (float)_resolution) * _radius;
+				Vector3 scale = Vector3.One * (1 / (float)_resolution) * _radius;
+				_planet.Scale = scale;
 
-				AddChild(_planet);
+                AddChild(_planet);
 
                 // Find McSpawner node and set Warmth
                 var mcSpawner = _planet.GetNodeOrNull<McSpawner>("MarchingCube");
@@ -149,8 +155,18 @@ public partial class PlanetMarchingCube : Node3D
 					mcSpawner.ThemeGenerator = _themeGenerator;
                     mcSpawner.Warmth = warmth;
 				}
+
+
+                // Spawn ocean - uses OceanSpawner-node for instantiation and creation of ocean
+                _oceanSpawner = GetNode<Node3D>("%OceanSpawner");
+                if (_oceanSpawner == null) GD.PrintErr("OceanSpawner is null");
+                oceanSpawner = _oceanSpawner as OceanSpawner;
+
+                if (_ocean != null && IsInstanceValid(_ocean)) _ocean.QueueFree();
+                _ocean = oceanSpawner.GenerateOcean(Ocean, _resolution, scale, warmth);
+				if(_ocean != null) AddChild(_ocean); // _ocean will be null if too hot or cold
             }
-		}
+        }
 		
 		_atmosphere = GetNodeOrNull("Atmosphere");
 		_atmosphere?.Set("radius", _radius);
