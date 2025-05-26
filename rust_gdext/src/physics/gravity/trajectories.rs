@@ -66,6 +66,11 @@ pub struct SimulationInfo {
 
     /// Number of steps to simulate
     n_steps: usize,
+
+    /// Whether to use the leapfrog integration method for the simulation.
+    /// The leapfrog method is a symplectic integrator commonly used in physics
+    /// simulations for its stability and accuracy over long time periods.
+    leapfrog: bool,
 }
 
 /// Manages a background thread for trajectory calculations.
@@ -250,6 +255,7 @@ impl GravityController {
             delta,
             grav_const,
             n_steps,
+            leapfrog: self.leapfrog_integration,
         }
     }
 
@@ -273,11 +279,16 @@ impl GravityController {
             delta,
             grav_const,
             n_steps,
+            leapfrog,
         }: SimulationInfo,
     ) -> Vec<Trajectory> {
         for _ in 1..n_steps {
             // Step
-            Self::step_time(grav_const, delta, &mut bodies_sim);
+            if leapfrog {
+                Self::step_time_leapfrog(grav_const, delta, &mut bodies_sim);
+            } else {
+                Self::step_time(grav_const, delta, &mut bodies_sim);
+            }
 
             let offset = offset_info
                 .map(|(idx, init)| bodies_sim[idx].pos - init)

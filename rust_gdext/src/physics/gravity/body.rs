@@ -1,8 +1,8 @@
-use crate::from_glam_vec3;
-
 use super::controller::{
     __gdext_GravityController_Funcs as GravityController_Funcs, GravityController, SimulatedBody,
 };
+use crate::from_glam_vec3;
+use glam::Vec3A;
 use godot::{builtin::math::ApproxEq, classes::notify::Node3DNotification, prelude::*};
 use proc::editor;
 
@@ -29,6 +29,8 @@ pub struct GravityBody {
     #[export]
     #[var(get, set = set_velocity)]
     pub velocity: Vector3,
+
+    pub acc: Option<Vec3A>,
 
     /// The color used to render this body's trajectory
     #[export]

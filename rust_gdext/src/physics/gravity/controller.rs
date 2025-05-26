@@ -75,6 +75,11 @@ pub struct GravityController {
 
     /// Mesh instances representing the currently displayed trajectories
     pub trajectories: Vec<Gd<MeshInstance3D>>,
+
+    /// Whether to use leapfrog integration for trajectory calculations
+    #[export]
+    #[init(val = true)]
+    pub leapfrog_integration: bool,
 }
 
 /// Simulated representation of a [`GravityBody`] for physics calculations.
@@ -101,6 +106,9 @@ pub struct SimulatedBody {
 
     /// Current velocity vector
     pub vel: Vec3A,
+
+    /// Current acceleration vector
+    pub acc: Vec3A,
 }
 
 impl Spacial for SimulatedBody {
@@ -131,6 +139,7 @@ impl From<&Gd<GravityBody>> for SimulatedBody {
             mass: b.mass,
             vel: to_glam_vec3(b.velocity),
             pos: to_glam_vec3(body.get_position()),
+            acc: b.acc.unwrap_or_default(),
         }
     }
 }
@@ -179,6 +188,8 @@ impl GravityController {
         // Start recursive collection with the controller node
         collect_bodies_rec(self.to_gd().upcast(), &mut bodies);
 
+        self.calc_initial_accelerations();
+
         self.bodies = bodies;
     }
 
@@ -195,7 +206,6 @@ impl GravityController {
     /// - `grav_const`: The gravitational constant to use in calculations
     /// - `delta`: The time step duration in seconds
     /// - `bodies_sim`: The bodies to simulate, will be updated in-place
-    /// - `accelerations`: A reusable buffer for storing the calculated accelerations
     pub fn step_time(grav_const: f32, delta: f32, bodies_sim: &mut [SimulatedBody]) {
         // 1: Calculate accelerations
         let accelerations = match bodies_sim.len() {
@@ -214,6 +224,44 @@ impl GravityController {
                 body.vel += acc * delta;
                 body.pos += body.vel * delta;
             });
+    }
+
+    pub fn step_time_leapfrog(grav_const: f32, delta: f32, bodies_sim: &mut [SimulatedBody]) {
+        // 1: x_{i+1} = x_i + v_i * delta + 0.5 * a_i * delta^2
+        bodies_sim.iter_mut().for_each(|body| {
+            body.pos += body.vel * delta + 0.5 * body.acc * delta * delta;
+        });
+
+        // 2: Calculate accelerations (a_{i+1})
+        let a_next = if bodies_sim.len() < 100 {
+            // Use sequential direct summation for small number of bodies
+            DirectSummation::calculate_accelerations::<false>(grav_const, bodies_sim)
+        } else {
+            MortonBasedOctree::calculate_accelerations::<true>(grav_const, bodies_sim)
+        };
+
+        // 3: Update velocities and positions using leapfrog integration
+        bodies_sim.iter_mut().zip(a_next).for_each(|(body, a_ip1)| {
+            // v_{n+1} = v_n + 0.5 * (a_n + a_{n+1}) * delta
+            body.vel += 0.5 * (body.acc + a_ip1) * delta;
+            body.acc = a_ip1;
+        });
+    }
+
+    fn calc_initial_accelerations(&mut self) {
+        let bodies_sim = self.bodies.iter().map(SimulatedBody::from).collect_vec();
+
+        let a0 = if self.bodies.len() < 100 {
+            // Use sequential direct summation for small number of bodies
+            DirectSummation::calculate_accelerations::<false>(self.grav_const, &bodies_sim)
+        } else {
+            MortonBasedOctree::calculate_accelerations::<true>(self.grav_const, &bodies_sim)
+        };
+
+        self.bodies.iter_mut().zip(a0).for_each(|(body, acc)| {
+            let mut b = body.bind_mut();
+            b.acc = Some(acc);
+        });
     }
 }
 
@@ -252,7 +300,11 @@ impl INode3D for GravityController {
         let mut bodies_sim = self.bodies.iter().map(SimulatedBody::from).collect_vec();
 
         // Simulate a physics step
-        Self::step_time(self.grav_const, delta as f32, &mut bodies_sim);
+        if self.leapfrog_integration {
+            Self::step_time_leapfrog(self.grav_const, delta as f32, &mut bodies_sim);
+        } else {
+            Self::step_time(self.grav_const, delta as f32, &mut bodies_sim);
+        }
 
         if let Some(ov) = self.octree_visualizer.as_mut() {
             // Update the octree visualizer with the simulated bodies

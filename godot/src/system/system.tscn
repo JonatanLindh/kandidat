@@ -11,6 +11,7 @@ script = ExtResource("1_7my1l")
 simulation_steps = 1000
 simulation_step_delta = 0.1
 sim_center_body = NodePath("Star")
+leapfrog_integration = true
 script = ExtResource("6_wayc2")
 
 [node name="Star" parent="GravityController" groups=["gravity_body"] instance=ExtResource("5_5coes")]

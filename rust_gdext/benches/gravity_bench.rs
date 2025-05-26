@@ -43,6 +43,7 @@ pub fn create_bench_bodies(n: u32) -> Vec<SimulatedBody> {
                 radius * phi.cos(),
             ),
             vel: Vec3A::ZERO,
+            acc: Vec3A::ZERO,
         });
     }
 
