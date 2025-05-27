@@ -18,10 +18,9 @@ grow_vertical = 0
 
 [node name="TabContainer" type="TabContainer" parent="PanelContainer"]
 layout_mode = 2
-current_tab = 1
+current_tab = 0
 
 [node name="Info" type="VBoxContainer" parent="PanelContainer/TabContainer"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -171,6 +170,7 @@ text = "Planet count"
 clip_text = true
 
 [node name="Actions" type="VBoxContainer" parent="PanelContainer/TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
@@ -215,7 +215,23 @@ size_flags_horizontal = 8
 size_flags_vertical = 0
 text = "  X  "
 
-[node name="VisitButton" type="Button" parent="PanelContainer/TabContainer/Dev"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/TabContainer/Dev"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Galaxy seed:"
+
+[node name="GalaxySeedLabel" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VisitButton" type="Button" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 6
@@ -261,4 +277,4 @@ text = "Distance"
 [connection signal="toggled" from="PanelContainer/TabContainer/Actions/PlayerHUDCheckButton" to="." method="OnPlayerHUDVisibilityChanged"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Actions/TravelButton" to="." method="OnTravelButtonPressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Dev/CloseButton2" to="." method="OnCloseButtonPressed"]
-[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VisitButton" to="." method="OnVisitButtonPressed"]
+[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VBoxContainer/VisitButton" to="." method="OnVisitButtonPressed"]

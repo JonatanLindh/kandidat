@@ -13,6 +13,7 @@ public partial class GalaxyMap : Node3D
 	ScaleHandler scaleHandler;
 
 	Node3D player;
+	Node gameSettings;
 
 	[ExportCategory("Seamless Galaxy")]
 	[Export] bool useSeamlessGalaxy = true;
@@ -35,7 +36,12 @@ public partial class GalaxyMap : Node3D
 		else initPlayer = this; // Use the current node (galaxy center) as the player if no player is found
 		player = initPlayer;
 
+		gameSettings = GetNode<Node>("/root/GameSettings");
+
 		galaxy.SetPlayer(player);
+
+		uint seed = (uint)gameSettings.Get("SEED");
+		galaxy.SetSeed(seed);
 
 		scaleHandler.SetSystemHandler(systemHandler);
 		scaleHandler.SetPlayer(player);
