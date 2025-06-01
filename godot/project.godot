@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Kandidat"
-run/main_scene="res://src/main.tscn"
+run/main_scene="uid://dad6wvdj06krx"
 config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 PlayerVariables="*res://src/player/player_variables.gd"
 MarchingCubeDispatch="*res://src/marchingcubes/DispatchWork/MarchingCubeDispatch.cs"
 HudSignalBus="*res://src/player/hud_signal_bus.gd"
+GameSettings="*res://src/_main_menu/game_settings.gd"
 
 [dotnet]
 
