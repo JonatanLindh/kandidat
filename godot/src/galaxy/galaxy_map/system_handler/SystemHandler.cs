@@ -8,6 +8,9 @@ public partial class SystemHandler : Node
 
 	List<Node3D> activeSystems = new List<Node3D>();
 
+	Node hudSignalBus;
+	[Export] PackedScene customPhysicsBody;
+
 	// Must be greater than closeStarLateGenerateRadius. Will otherwise be clamped to closeStarLateGenerateRadius.
 	[Export] public float closeStarEarlyGenerateRadius { get; private set; } = 200;
 
@@ -31,6 +34,9 @@ public partial class SystemHandler : Node
 			GD.PrintErr($"SystemHandler: closeStarEarlyGenerateRadius must be greater than closeStarLateGenerateRadius. Setting closeStarEarlyGenerateRadius to {closeStarLateGenerateRadius} (closeStarLateGenerateRadius) instead.");
 			closeStarEarlyGenerateRadius = closeStarLateGenerateRadius;
 		}
+
+		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
+		hudSignalBus.Connect("add_physics_body", new Callable(this, nameof(OnAddPhysicsBody)));
 	}
 
 	public Node3D GenerateSystem(Star star)
@@ -102,5 +108,30 @@ public partial class SystemHandler : Node
 	public List<Node3D> GetActiveSystems()
 	{
 		return activeSystems;
+	}
+
+	private void OnAddPhysicsBody(float mass, Vector3 velocity, Vector3 position)
+	{
+		if(activeSystems.Count == 0)
+		{
+			GD.PrintErr("SystemHandler: No systems to add physics body to.");
+			return;
+		}
+
+		Node3D gravityController = null;
+		foreach (Node3D child in activeSystems[0].GetChildren())
+		{
+			if (child.Name == "GravityController")
+			{
+				gravityController = child;
+			}
+		}
+
+		Node3D newBody = customPhysicsBody.Instantiate<Node3D>();
+
+		newBody.Call("set_test_body_mass", mass);
+		newBody.Call("set_test_body_velocity", velocity);
+		gravityController.AddChild(newBody);
+		newBody.GlobalPosition = position;
 	}
 }

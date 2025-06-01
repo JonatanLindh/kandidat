@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class UISelectableStar : CanvasLayer
 {
@@ -36,7 +37,12 @@ public partial class UISelectableStar : CanvasLayer
 	ColorRect starColor;
 	Label planetCountLabel;
 	CheckButton visibleOrbitsCheckButton;
-	
+
+	TextEdit newBodyMass;
+	TextEdit newBodySpeed;
+	Label galaxySeedLabel;
+	Node gameSettings;
+
 	// System Scene To Be Used For Seed Evaluation
 	Node3D systemScene;
 
@@ -55,8 +61,17 @@ public partial class UISelectableStar : CanvasLayer
 		starColor = GetNode<ColorRect>("%StarColor");
 		planetCountLabel = GetNode<Label>("%PlanetCount");
 
+		newBodyMass = GetNode<TextEdit>("%TextEditMass");
+		newBodySpeed = GetNode<TextEdit>("%TextEditSpeed");
+
 		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
 		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
+
+		gameSettings = GetNode<Node>("/root/GameSettings");
+		uint seed = (uint)gameSettings.Get("SEED");
+		galaxySeedLabel = GetNode<Label>("%GalaxySeedLabel");
+		galaxySeedLabel.Text = seed.ToString();
+
 
 		systemScene = GetNode<Node3D>("../../System");
 		Hide();
@@ -331,5 +346,12 @@ public partial class UISelectableStar : CanvasLayer
 		{
 			player.Call("hud_visibility", visible);
 		}
+	}
+
+	private void OnAddPhysicsBodyButtonPressed()
+	{
+		float mass = float.Parse(newBodyMass.Text);
+		Vector3 velocity = Vector3.Forward * float.Parse(newBodySpeed.Text);
+		hudSignalBus.EmitSignal("add_physics_body", mass, velocity, player.GlobalPosition);
 	}
 }

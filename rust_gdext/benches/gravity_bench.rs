@@ -91,14 +91,14 @@ fn compute_accelerations(c: &mut Criterion) {
 
         group.bench_function(BenchmarkId::new("direct/sequential", size), |b| {
             b.iter(|| {
-                let accelerations = DirectSummation::calc_accs::<false>(GRAV_CONST, &bodies);
+                let accelerations = DirectSummation::new(&bodies).calc_accs::<false>(GRAV_CONST);
                 black_box(accelerations);
             });
         });
 
         group.bench_function(BenchmarkId::new("direct/parallel", size), |b| {
             b.iter(|| {
-                let accelerations = DirectSummation::calc_accs::<true>(GRAV_CONST, &bodies);
+                let accelerations = DirectSummation::new(&bodies).calc_accs::<true>(GRAV_CONST);
                 black_box(accelerations);
             });
         });
@@ -110,14 +110,14 @@ fn compute_accelerations(c: &mut Criterion) {
 
         group.bench_function(BenchmarkId::new("barnes_hut/sequential", size), |b| {
             b.iter(|| {
-                let accelerations = MortonBasedOctree::calc_accs::<false>(GRAV_CONST, &bodies);
+                let accelerations = MortonBasedOctree::new(&bodies).calc_accs::<false>(GRAV_CONST);
                 black_box(accelerations);
             });
         });
 
         group.bench_function(BenchmarkId::new("barnes_hut/parallel", size), |b| {
             b.iter(|| {
-                let accelerations = MortonBasedOctree::calc_accs::<true>(GRAV_CONST, &bodies);
+                let accelerations = MortonBasedOctree::new(&bodies).calc_accs::<true>(GRAV_CONST);
                 black_box(accelerations);
             });
         });

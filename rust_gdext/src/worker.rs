@@ -200,7 +200,7 @@ where
                 .or_else(|| e.downcast_ref::<&str>().copied())
                 .unwrap_or("unknown error");
 
-            eprintln!("Worker thread panicked: {:?}", message);
+            eprintln!("Worker thread panicked: {message:?}");
         }
     }
 
