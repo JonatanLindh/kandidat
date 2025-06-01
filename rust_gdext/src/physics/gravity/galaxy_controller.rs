@@ -1,4 +1,4 @@
-use super::{Massive, NBodyGravityCalculator, Spacial};
+use super::{HasMass, HasPosition, HasVelocity, NBodyGravityCalculator};
 use crate::{from_glam_vec3, octree::morton_based::MortonBasedOctree, to_glam_vec3};
 use glam::Vec3A;
 use godot::prelude::*;
@@ -33,17 +33,39 @@ struct StarData {
     mass: f32,
 }
 
-impl Spacial for StarData {
+impl HasPosition for StarData {
     #[inline(always)]
     fn get_pos(&self) -> Vec3A {
         self.position
     }
+
+    #[inline(always)]
+    fn set_pos(&mut self, pos: Vec3A) {
+        self.position = pos;
+    }
 }
 
-impl Massive for StarData {
+impl HasVelocity for StarData {
+    #[inline(always)]
+    fn get_vel(&self) -> Vec3A {
+        self.velocity
+    }
+
+    #[inline(always)]
+    fn set_vel(&mut self, vel: Vec3A) {
+        self.velocity = vel;
+    }
+}
+
+impl HasMass for StarData {
     #[inline(always)]
     fn get_mass(&self) -> f32 {
         self.mass
+    }
+
+    #[inline(always)]
+    fn set_mass(&mut self, mass: f32) {
+        self.mass = mass;
     }
 }
 
@@ -60,7 +82,7 @@ impl INode for GalaxyController {
             }
         };
 
-        let accs = MortonBasedOctree::calc_accs::<true>(self.grav_const, stars);
+        let accs = MortonBasedOctree::new(stars).calc_accs::<true>(self.grav_const);
         for (star, acc) in stars.iter_mut().zip(accs.iter()) {
             star.velocity += acc * delta as f32;
             star.position += star.velocity * delta as f32;

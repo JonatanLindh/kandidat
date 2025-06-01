@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://d3o381leslj0a"]
+
+[ext_resource type="Script" uid="uid://htyg0or8g21j" path="res://src/bodies/custom_body/custom_body.gd" id="1_4540q"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_8xyca"]
+radius = 50.0
+height = 100.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kmxym"]
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 1)
+
+[node name="CustomBody" type="GravityBody"]
+mass = 5000.0
+trajectory_color = Color(1, 1, 1, 1)
+script = ExtResource("1_4540q")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_8xyca")
+surface_material_override/0 = SubResource("StandardMaterial3D_kmxym")

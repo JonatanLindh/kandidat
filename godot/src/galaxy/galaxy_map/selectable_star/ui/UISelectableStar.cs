@@ -38,6 +38,8 @@ public partial class UISelectableStar : CanvasLayer
 	Label planetCountLabel;
 	CheckButton visibleOrbitsCheckButton;
 
+	TextEdit newBodyMass;
+	TextEdit newBodySpeed;
 	Label galaxySeedLabel;
 	Node gameSettings;
 
@@ -58,6 +60,9 @@ public partial class UISelectableStar : CanvasLayer
 		starTypeLabel = GetNode<Label>("%StarTypeLabel");
 		starColor = GetNode<ColorRect>("%StarColor");
 		planetCountLabel = GetNode<Label>("%PlanetCount");
+
+		newBodyMass = GetNode<TextEdit>("%TextEditMass");
+		newBodySpeed = GetNode<TextEdit>("%TextEditSpeed");
 
 		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
 		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
@@ -341,5 +346,12 @@ public partial class UISelectableStar : CanvasLayer
 		{
 			player.Call("hud_visibility", visible);
 		}
+	}
+
+	private void OnAddPhysicsBodyButtonPressed()
+	{
+		float mass = float.Parse(newBodyMass.Text);
+		Vector3 velocity = Vector3.Forward * float.Parse(newBodySpeed.Text);
+		hudSignalBus.EmitSignal("add_physics_body", mass, velocity, player.GlobalPosition);
 	}
 }

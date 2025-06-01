@@ -1,5 +1,5 @@
-use super::{NBodyGravityCalculator, Particle};
-use crate::octree::{GravityData, morton_based::MortonBasedOctree};
+use super::{GRAVITATIONAL_SOFTENING_SQUARED, NBodyGravityCalculator, PosMass, merge_radius}; // Added import
+use crate::octree::{BoundingBox, GravityData, morton_based::MortonBasedOctree};
 use glam::Vec3A;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use std::{assert_matches::debug_assert_matches, marker::Sync};
@@ -10,13 +10,9 @@ use std::{assert_matches::debug_assert_matches, marker::Sync};
 const THETA: f32 = 0.7;
 const THETA_SQ: f32 = THETA * THETA;
 
-/// Softening factor to prevent infinite forces at zero distance
-const EPSILON: f32 = 0.01;
-const EPSILON_SQ: f32 = EPSILON * EPSILON;
-
-impl<'a, T> NBodyGravityCalculator<'a, T> for MortonBasedOctree<'a, T>
+impl<'a, T> NBodyGravityCalculator<T> for MortonBasedOctree<'a, T>
 where
-    T: Particle + Sync,
+    T: PosMass + Sync,
 {
     /// Calculates the accelerations of particles using the Barnes-Hut algorithm.
     ///
@@ -24,30 +20,65 @@ where
     ///
     /// The PARALLEL constant determines whether the force calculations are done in parallel.
     /// The octree determines its own parallelism based on the number of particles.
-    fn calc_accs<const PARALLEL: bool>(g: f32, particles: &'a [T]) -> Vec<Vec3A> {
-        if particles.is_empty() {
+    fn calc_accs<const PARALLEL: bool>(&self, g: f32) -> Vec<Vec3A> {
+        if self.data_ref.is_empty() {
             return Vec::new();
         }
+        let n_bodies = self.data_ref.len();
 
         // --- Barnes-Hut Algorithm ---
-        // 1. Build the octree from the particles
-        let octree = MortonBasedOctree::new(particles);
+        // 1. Build the octree from the particles - already done
 
         // 2. For each particle, calculate the acceleration using the octree
         if PARALLEL {
-            (0..particles.len())
+            (0..n_bodies)
                 .into_par_iter()
-                .map(|i| octree.calculate_accel_on_particle(g, i))
+                .map(|i| self.calculate_accel_on_particle(g, i))
                 .collect()
         } else {
-            (0..particles.len())
-                .map(|i| octree.calculate_accel_on_particle(g, i))
+            (0..n_bodies)
+                .map(|i| self.calculate_accel_on_particle(g, i))
                 .collect()
         }
     }
+
+    fn detect_collisions(&self, merge_scaler: f32) -> Vec<(usize, usize)> {
+        // Check if the octree is empty or has no root node
+        let root_idx = match self.root_index {
+            Some(idx) if !self.data_ref.is_empty() => idx,
+            _ => return Vec::new(),
+        };
+
+        (0..self.data_ref.len())
+            .into_par_iter()
+            .flat_map_iter(|i| {
+                let body_a = &self.data_ref[i];
+                let body_a_pos = body_a.get_pos();
+                let body_a_mass = body_a.get_mass();
+
+                let body_a_aabb = BoundingBox {
+                    center: body_a_pos,
+                    half_width: merge_radius(merge_scaler, body_a_mass, body_a_mass),
+                };
+
+                let mut potential_collisions_a = Vec::new();
+                self.find_collisions_for_body_recursive(
+                    root_idx,
+                    i,
+                    &body_a_pos,
+                    body_a_mass,
+                    &body_a_aabb,
+                    merge_scaler,
+                    &mut potential_collisions_a,
+                );
+
+                potential_collisions_a.into_iter().map(move |j| (i, j))
+            })
+            .collect()
+    }
 }
 
-impl<'a, T: Particle + Sync> MortonBasedOctree<'a, T> {
+impl<'a, T: PosMass + Sync> MortonBasedOctree<'a, T> {
     /// Calculates the total acceleration on a single target particle using Barnes-Hut.
     #[inline]
     fn calculate_accel_on_particle(&self, g: f32, target_particle_index: usize) -> Vec3A {
@@ -95,7 +126,8 @@ impl<'a, T: Particle + Sync> MortonBasedOctree<'a, T> {
         let s_sq = node_width * node_width;
 
         // If distance is zero (or very small), skip interaction (might be self or coincident)
-        if dist_sq < EPSILON_SQ * 0.1 {
+        if dist_sq < GRAVITATIONAL_SOFTENING_SQUARED * 0.1 {
+            // Use common constant
             // Special case: If it's a leaf node containing *only* the target particle,
             // we definitely skip. Otherwise, if it's an internal node or a leaf
             // with other particles, the recursive calls/direct interactions below
@@ -115,7 +147,7 @@ impl<'a, T: Particle + Sync> MortonBasedOctree<'a, T> {
             // --- Node is far enough: Use approximation ---
             // Calculate acceleration contribution from this node's CoM
             // acc = G * M_node * delta_pos / (|delta_pos|^2 + eps^2)^(3/2)
-            let dist = (dist_sq + EPSILON_SQ).sqrt(); // Add softening
+            let dist = (dist_sq + GRAVITATIONAL_SOFTENING_SQUARED).sqrt(); // Add softening using common constant
             let dist_cubed = dist * dist * dist;
             if dist_cubed < 1e-18 {
                 return Vec3A::ZERO;
@@ -177,11 +209,12 @@ impl<'a, T: Particle + Sync> MortonBasedOctree<'a, T> {
                 let direct_dist_sq = direct_delta_pos.length_squared();
 
                 // Skip if coincident
-                if direct_dist_sq < EPSILON_SQ * 0.1 {
+                if direct_dist_sq < GRAVITATIONAL_SOFTENING_SQUARED * 0.1 {
+                    // Use common constant
                     return Vec3A::ZERO;
                 }
 
-                let direct_dist = (direct_dist_sq + EPSILON_SQ).sqrt(); // Softening
+                let direct_dist = (direct_dist_sq + GRAVITATIONAL_SOFTENING_SQUARED).sqrt(); // Softening using common constant
                 let direct_dist_cubed = direct_dist * direct_dist * direct_dist;
                 if direct_dist_cubed < 1e-18 {
                     return Vec3A::ZERO; // Avoid division by zero
