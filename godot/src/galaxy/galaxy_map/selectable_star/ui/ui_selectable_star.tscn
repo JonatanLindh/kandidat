@@ -18,10 +18,9 @@ grow_vertical = 0
 
 [node name="TabContainer" type="TabContainer" parent="PanelContainer"]
 layout_mode = 2
-current_tab = 2
+current_tab = 0
 
 [node name="Info" type="VBoxContainer" parent="PanelContainer/TabContainer"]
-visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -206,6 +205,7 @@ size_flags_vertical = 6
 text = "Travel"
 
 [node name="Dev" type="VBoxContainer" parent="PanelContainer/TabContainer"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
@@ -219,16 +219,19 @@ text = "  X  "
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Label3" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
 text = "Galaxy seed:"
 
-[node name="GalaxySeedLabel" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+[node name="GalaxySeedLabel" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "12345"
+size_flags_horizontal = 3
 
-[node name="HSeparator" type="HSeparator" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+[node name="HSeparator2" type="HSeparator" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
@@ -242,31 +245,34 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "50000"
+text = "10000"
 placeholder_text = "Mass"
 
 [node name="TextEditSpeed" type="TextEdit" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "2"
+text = "10"
 placeholder_text = "Speed"
 
 [node name="AddPhysicsBodyButton" type="Button" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Spawn"
 
-[node name="HSeparator2" type="HSeparator" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
 layout_mode = 2
-text = "Other:"
 
-[node name="VisitButton" type="Button" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+[node name="Label" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer3"]
 layout_mode = 2
-size_flags_horizontal = 4
-text = "Enter System Scene"
+text = "Enter system scene:"
+
+[node name="VisitButton" type="Button" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Enter"
 
 [node name="StarSelectContainer" type="PanelContainer" parent="."]
 unique_name_in_owner = true
@@ -309,4 +315,4 @@ text = "Distance"
 [connection signal="pressed" from="PanelContainer/TabContainer/Actions/TravelButton" to="." method="OnTravelButtonPressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Dev/CloseButton2" to="." method="OnCloseButtonPressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer/AddPhysicsBodyButton" to="." method="OnAddPhysicsBodyButtonPressed"]
-[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VBoxContainer/VisitButton" to="." method="OnVisitButtonPressed"]
+[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer3/VisitButton" to="." method="OnVisitButtonPressed"]

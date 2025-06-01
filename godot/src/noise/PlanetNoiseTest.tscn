@@ -11,16 +11,11 @@
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 32, 256)
 
 [node name="BasicPlanet" parent="." instance=ExtResource("1_ycu4v")]
-seed = 1761808417
-RandomizeSeed = false
+seed = 414393732
+RandomizeSeed = true
 
 [node name="RandomPlanet" parent="." instance=ExtResource("4_hnbm4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163.305, 0, 0)
-Octaves = 7
-Frequency = 0.28
-Amplitude = 6.8
-Lacunarity = 2.8
-Persistence = 0.25
 seed = 164119959
 
 [node name="Skybox" parent="." instance=ExtResource("3_1biuq")]
