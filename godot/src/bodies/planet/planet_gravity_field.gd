@@ -16,6 +16,8 @@ class_name PlanetGravityField
 
 @export var base_gravity: float = 9.82
 
+var player : Node3D
+
 var _player_inside_field := false
 
 var radius_scale := 2.5
@@ -23,16 +25,16 @@ var radius_scale := 2.5
 func _physics_process(delta: float) -> void:
 	if not planet:
 		return
-
-	gravity_point_center = planet.global_position
-	var player_position = PlayerVariables.player_position
-	gravity_direction = (gravity_point_center - player_position).normalized()
-	
+		
 	# adjust for planet's velocity
 	var relative_velocity = planet.velocity - get_player_velocity()
 	if _player_inside_field:
+		gravity_point_center = global_position
+		var player_position = PlayerVariables.player_position
+		gravity_direction = (gravity_point_center - player.global_position).normalized()
+		
 		PlayerVariables.planet_velocity = planet.velocity
-		PlayerVariables.planet_position = planet.global_transform.origin
+		PlayerVariables.planet_position = planet.global_position
 
 	
 func _ready() -> void:
@@ -51,6 +53,7 @@ func _on_body_entered(body):
 	if body is not Player:
 		return
 	elif body is Player:
+		player = body
 		body.on_gravity_field_entered(gravity, gravity_direction, planet.velocity)
 		_player_inside_field = true
 		PlayerVariables.gravity_field_radius = collision_shape_3d.shape.radius

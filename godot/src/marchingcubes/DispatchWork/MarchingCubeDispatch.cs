@@ -109,7 +109,19 @@ public sealed partial class MarchingCubeDispatch: Node
 
 		var meshInstance = request.CustomMeshInstance ?? new MeshInstance3D();
 		meshInstance.Mesh = mesh;
-		meshInstance.CreateMultipleConvexCollisions();
+		var settings = new MeshConvexDecompositionSettings
+		{
+			Resolution = 200000,
+			PlaneDownsampling = 1,
+			MaxConcavity = 0.5f,
+			MaxConvexHulls = 512,
+			MaxNumVerticesPerConvexHull = 1024,
+			MinVolumePerConvexHull = 0.00001f,
+			ProjectHullVertices = true
+		};
+
+		//meshInstance.CreateMultipleConvexCollisions(settings);
+		meshInstance.CreateConvexCollision();
 		meshInstance.Translate(request.Offset);
 
 		if (request.GeneratePlanetShader != null)
