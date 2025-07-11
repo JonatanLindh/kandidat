@@ -1,0 +1,1 @@
+godotengine.org/license
