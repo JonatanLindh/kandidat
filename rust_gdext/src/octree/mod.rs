@@ -2,7 +2,7 @@ pub mod morton_based;
 pub mod old_versions;
 pub mod visualize;
 
-use crate::physics::gravity::{Massive, Particle, Spacial, controller::SimulatedBody};
+use crate::physics::gravity::{HasMass, HasPosition, PosMass, controller::SimulatedBody};
 use core::array;
 use either::Either;
 use glam::Vec3A;
@@ -21,17 +21,27 @@ pub struct GravityData {
     pub center_of_mass: Vec3A,
 }
 
-impl Spacial for GravityData {
+impl HasPosition for GravityData {
     #[inline(always)]
     fn get_pos(&self) -> Vec3A {
         self.center_of_mass
     }
+
+    #[inline(always)]
+    fn set_pos(&mut self, pos: Vec3A) {
+        self.center_of_mass = pos;
+    }
 }
 
-impl Massive for GravityData {
+impl HasMass for GravityData {
     #[inline(always)]
     fn get_mass(&self) -> f32 {
         self.mass
+    }
+
+    #[inline(always)]
+    fn set_mass(&mut self, mass: f32) {
+        self.mass = mass;
     }
 }
 
@@ -46,7 +56,7 @@ impl From<&SimulatedBody> for GravityData {
 
 impl GravityData {
     #[inline]
-    pub fn merge_reduce_fn<T: Particle>(self, other: &T) -> Self {
+    pub fn merge_reduce_fn<T: PosMass>(self, other: &T) -> Self {
         let total_mass = self.mass + other.get_mass();
         Self {
             center_of_mass: (self.weighted_pos() + other.weighted_pos()) / total_mass,
@@ -55,7 +65,7 @@ impl GravityData {
     }
 
     #[inline]
-    pub fn merge<'a, T: Particle + 'a>(ds: impl IntoIterator<Item = &'a T>) -> Self {
+    pub fn merge<'a, T: PosMass + 'a>(ds: impl IntoIterator<Item = &'a T>) -> Self {
         ds.into_iter()
             .fold(Self::default(), |acc, v| acc.merge_reduce_fn(v))
     }
@@ -100,7 +110,7 @@ impl BoundingBox {
     }
 
     // Method to compute the bounding box of multiple bodies
-    pub fn containing<T: Spacial>(bodies: &[T]) -> Self {
+    pub fn containing<T: HasPosition>(bodies: &[T]) -> Self {
         let mut ps = bodies.iter().map(|b| b.get_pos());
 
         let p0 = match ps.next() {
@@ -217,5 +227,11 @@ impl BoundingBox {
 
     pub fn subdivide(&self) -> [Self; 8] {
         array::from_fn(|i| self.get_octant_bounds(i))
+    }
+
+    pub fn aabb_overlap(&self, other: &BoundingBox) -> bool {
+        let delta = (self.center - other.center).abs();
+        let total_half = self.half_width + other.half_width;
+        (delta.x <= total_half) && (delta.y <= total_half) && (delta.z <= total_half)
     }
 }

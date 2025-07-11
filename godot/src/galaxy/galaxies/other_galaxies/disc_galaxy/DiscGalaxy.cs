@@ -16,7 +16,7 @@ public partial class DiscGalaxy : Node3D
 	int starCount = 10000;
 
 	float baseISOLevel = 0.5f;
-	float radius = 1000;
+	float radius = 100000;
 
 	public override void _Ready()
 	{
@@ -49,7 +49,7 @@ public partial class DiscGalaxy : Node3D
 				TrueStar star = new TrueStar(
 					new Transform3D(Basis.Identity, point),
 					seedGen.GenerateSeed(seed, point),
-					10f,
+					2000f,
 					Vector3.Zero,
 					"Star"
 				);
@@ -101,5 +101,10 @@ public partial class DiscGalaxy : Node3D
 	public void RedrawStars(Transform3D[] stars)
 	{
 		starMultiMesh.RedrawStars(stars);
+	}
+
+	public void ColorStars(Color[] colors)
+	{
+		starMultiMesh.ColorStar(colors);
 	}
 }

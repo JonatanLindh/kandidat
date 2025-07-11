@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class UISelectableStar : CanvasLayer
 {
@@ -15,14 +16,14 @@ public partial class UISelectableStar : CanvasLayer
 
 	[ExportCategory("Star Select UI")]
 	[Export] float sidePadding = 10.0f;
-	[Export] float distanceOffsetStrength = 800;
+	[Export] float distanceOffsetStrength = 80000;
 	Vector3 targetPosition;
 
 	Node hudSignalBus;
 	bool orbits_visibility = false;
 
 	// Star Select UI
-	Panel starSelect;
+	PanelContainer starSelectContainer;
 	Label starNameLabel;
 	Label starDistanceLabel;
 
@@ -36,13 +37,18 @@ public partial class UISelectableStar : CanvasLayer
 	ColorRect starColor;
 	Label planetCountLabel;
 	CheckButton visibleOrbitsCheckButton;
-	
+
+	TextEdit newBodyMass;
+	TextEdit newBodySpeed;
+	Label galaxySeedLabel;
+	Node gameSettings;
+
 	// System Scene To Be Used For Seed Evaluation
 	Node3D systemScene;
 
 	public override void _Ready()
 	{
-		starSelect = GetNode<Panel>("%StarSelectPanel");
+		starSelectContainer = GetNode<PanelContainer>("%StarSelectContainer");
 		starNameLabel = GetNode<Label>("%StarName");
 		starDistanceLabel = GetNode<Label>("%StarDistance");
 
@@ -55,8 +61,16 @@ public partial class UISelectableStar : CanvasLayer
 		starColor = GetNode<ColorRect>("%StarColor");
 		planetCountLabel = GetNode<Label>("%PlanetCount");
 
+		newBodyMass = GetNode<TextEdit>("%TextEditMass");
+		newBodySpeed = GetNode<TextEdit>("%TextEditSpeed");
+
 		hudSignalBus = GetNode<Node>("/root/HudSignalBus");
 		hudSignalBus.Connect("query_orbits_visibility", new Callable(this, nameof(OnOrbitsVisibilityQuery)));
+
+		gameSettings = GetNode<Node>("/root/GameSettings");
+		uint seed = (uint)gameSettings.Get("SEED");
+		galaxySeedLabel = GetNode<Label>("%GalaxySeedLabel");
+		galaxySeedLabel.Text = seed.ToString();
 
 		systemScene = GetNode<Node3D>("../../System");
 		Hide();
@@ -80,7 +94,7 @@ public partial class UISelectableStar : CanvasLayer
 			Vector2 screenPosition = GetVector3ScreenPosition(targetPosition);
 
 			// Offset to center the star ui on the star
-			Vector2 posOffset = new Vector2(0, -starSelect.Size.Y / 2);
+			Vector2 posOffset = new Vector2(0, -starSelectContainer.Size.Y / 2);
 
 			// Offset based on the distance to the star
 			float distance = player.Position.DistanceTo(targetPosition);
@@ -89,12 +103,12 @@ public partial class UISelectableStar : CanvasLayer
 
 			// Proposed new UI position
 			Vector2 newPos = screenPosition + (distanceOffset + posOffset);
-			starSelect.Position = newPos;
+			starSelectContainer.Position = newPos;
 
 			// Make sure that the new position ensures that the entire panel is within screen bounds
 			newPos = GetClampedPositionIfOutside(newPos);
 
-			starSelect.Position = newPos;
+			starSelectContainer.Position = newPos;
 			starDistanceLabel.Text = "Distance: " + ((int)distance).ToString() + " AU";
 		}
 	}
@@ -165,7 +179,7 @@ public partial class UISelectableStar : CanvasLayer
 
 		// Check if the star select panel is fully visible on the screen
 		Rect2 screenSpace = GetViewport().GetVisibleRect();
-		Rect2 starSelectBounds = starSelect.GetGlobalRect();
+		Rect2 starSelectBounds = starSelectContainer.GetGlobalRect();
 
 		bool isOnScreen = IsFullyVisible(screenSpace, starSelectBounds);
 
@@ -178,14 +192,14 @@ public partial class UISelectableStar : CanvasLayer
 			{
 				clampedPos.X = dir.X > 0 ?
 					screenSpace.Position.X + sidePadding :
-					screenSpace.End.X - starSelect.Size.X - sidePadding;
+					screenSpace.End.X - starSelectContainer.Size.X - sidePadding;
 			}
 
 			if (dir.Y != 0)
 			{
 				clampedPos.Y = dir.Y > 0 ?
 					screenSpace.Position.Y + sidePadding :
-					screenSpace.End.Y - starSelect.Size.Y - sidePadding;
+					screenSpace.End.Y - starSelectContainer.Size.Y - sidePadding;
 			}
 		}
 
@@ -318,5 +332,25 @@ public partial class UISelectableStar : CanvasLayer
 	private void OnOrbitsVisibilityQuery()
 	{
 		hudSignalBus.EmitSignal("orbits_visibility", orbits_visibility);
+	}
+
+	private void OnFloatingStarOverlayVisibilityChanged(bool visible)
+	{
+		starSelectContainer.Visible = visible;
+	}
+
+	private void OnPlayerHUDVisibilityChanged(bool visible)
+	{
+		if (player != null)
+		{
+			player.Call("hud_visibility", visible);
+		}
+	}
+
+	private void OnAddPhysicsBodyButtonPressed()
+	{
+		float mass = float.Parse(newBodyMass.Text);
+		Vector3 velocity = Vector3.Forward * float.Parse(newBodySpeed.Text);
+		hudSignalBus.EmitSignal("add_physics_body", mass, velocity, player.GlobalPosition);
 	}
 }

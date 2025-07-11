@@ -1,9 +1,12 @@
+use std::collections::HashSet;
+
 use super::{
-    Massive, NBodyGravityCalculator, Spacial, body::GravityBody, direct_summation::DirectSummation,
-    trajectories::TrajectoryWorker,
+    HasMass, HasPosition, HasVelocity, NBodyGravityCalculator, body::GravityBody,
+    direct_summation::DirectSummation, trajectories::TrajectoryWorker,
 };
 use crate::{
     octree::{morton_based::MortonBasedOctree, visualize::OctreeVisualizer},
+    physics::gravity::VelMass,
     to_glam_vec3,
 };
 use glam::Vec3A;
@@ -45,6 +48,16 @@ pub struct GravityController {
     #[export]
     #[init(val = 1.0)]
     pub grav_const: f32,
+
+    /// When a collision is detected, this flag determines whether to merge the bodies
+    /// or to keep them separate.
+    #[export]
+    #[init(val = true)]
+    pub merge_on_collision: bool,
+
+    #[export]
+    #[init(val = 12.0)]
+    pub merge_scaler: f32,
 
     /// Collection of all gravity bodies managed by this controller
     pub bodies: Vec<Gd<GravityBody>>,
@@ -103,17 +116,39 @@ pub struct SimulatedBody {
     pub vel: Vec3A,
 }
 
-impl Spacial for SimulatedBody {
+impl HasPosition for SimulatedBody {
     #[inline(always)]
     fn get_pos(&self) -> Vec3A {
         self.pos
     }
+
+    #[inline(always)]
+    fn set_pos(&mut self, pos: Vec3A) {
+        self.pos = pos;
+    }
 }
 
-impl Massive for SimulatedBody {
+impl HasVelocity for SimulatedBody {
+    #[inline(always)]
+    fn get_vel(&self) -> Vec3A {
+        self.vel
+    }
+
+    #[inline(always)]
+    fn set_vel(&mut self, vel: Vec3A) {
+        self.vel = vel;
+    }
+}
+
+impl HasMass for SimulatedBody {
     #[inline(always)]
     fn get_mass(&self) -> f32 {
         self.mass
+    }
+
+    #[inline(always)]
+    fn set_mass(&mut self, mass: f32) {
+        self.mass = mass;
     }
 }
 
@@ -178,6 +213,7 @@ impl GravityController {
 
         // Start recursive collection with the controller node
         collect_bodies_rec(self.to_gd().upcast(), &mut bodies);
+        bodies.sort_by_key(|b| b.instance_id());
 
         self.bodies = bodies;
     }
@@ -198,11 +234,12 @@ impl GravityController {
     /// - `accelerations`: A reusable buffer for storing the calculated accelerations
     pub fn step_time(grav_const: f32, delta: f32, bodies_sim: &mut [SimulatedBody]) {
         // 1: Calculate accelerations
-        let accelerations = if bodies_sim.len() < 100 {
-            // Use sequential direct summation for small number of bodies
-            DirectSummation::calculate_accelerations::<false>(grav_const, bodies_sim)
-        } else {
-            MortonBasedOctree::calculate_accelerations::<true>(grav_const, bodies_sim)
+        let accelerations = match bodies_sim.len() {
+            // Thresholds are benchmarked
+            //          Algorithm                  Parallel
+            ..100 => DirectSummation::new(bodies_sim).calc_accs::<false>(grav_const),
+            100..440 => DirectSummation::new(bodies_sim).calc_accs::<true>(grav_const),
+            440.. => MortonBasedOctree::new(bodies_sim).calc_accs::<true>(grav_const),
         };
 
         // 2: Update velocities and positions
@@ -213,6 +250,32 @@ impl GravityController {
                 body.vel += acc * delta;
                 body.pos += body.vel * delta;
             });
+    }
+
+    pub fn merge_bodies(merge_scaler: f32, bodies_sim: &mut Vec<SimulatedBody>) -> Vec<InstanceId> {
+        let collisions = match bodies_sim.len() {
+            ..440 => DirectSummation::new(bodies_sim).detect_collisions(merge_scaler),
+            440.. => MortonBasedOctree::new(bodies_sim).detect_collisions(merge_scaler),
+        };
+
+        let mut instances_to_remove = HashSet::new();
+
+        for (idx_a, idx_b) in collisions {
+            // Keep the body with the higher mass, remove the other
+            let (keep_idx, remove_idx) = if bodies_sim[idx_a].mass >= bodies_sim[idx_b].mass {
+                (idx_a, idx_b)
+            } else {
+                (idx_b, idx_a)
+            };
+
+            let to_remove = &bodies_sim[remove_idx].clone();
+
+            instances_to_remove.insert(to_remove.body_instance_id);
+            bodies_sim[keep_idx].non_elastic_collision(to_remove);
+        }
+
+        bodies_sim.retain(|b| !instances_to_remove.contains(&b.body_instance_id));
+        instances_to_remove.into_iter().collect()
     }
 }
 
@@ -252,6 +315,26 @@ impl INode3D for GravityController {
 
         // Simulate a physics step
         Self::step_time(self.grav_const, delta as f32, &mut bodies_sim);
+
+        // Handle collisions and merging of bodies
+        if self.merge_on_collision {
+            let instances_to_remove = Self::merge_bodies(self.merge_scaler, &mut bodies_sim);
+
+            // Remove merged bodies from the scene
+            for instance_id in instances_to_remove {
+                if let Some(body) = self
+                    .bodies
+                    .iter_mut()
+                    .find(|b| b.instance_id() == instance_id)
+                {
+                    godot_print!("Merging body: {}", instance_id);
+                    body.queue_free();
+                }
+            }
+
+            // Rebuild the gravity bodies list after merging
+            self.get_gravity_bodies();
+        }
 
         if let Some(ov) = self.octree_visualizer.as_mut() {
             // Update the octree visualizer with the simulated bodies

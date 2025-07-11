@@ -12,15 +12,31 @@ pub mod trajectories;
 
 use glam::Vec3A;
 
-pub trait Spacial {
+/// Common softening factor for gravitational calculations to prevent singularities.
+/// This value is squared to avoid square roots in distance comparisons.
+const GRAVITATIONAL_SOFTENING: f32 = 1e-2;
+pub const GRAVITATIONAL_SOFTENING_SQUARED: f32 = GRAVITATIONAL_SOFTENING * GRAVITATIONAL_SOFTENING;
+
+pub fn merge_radius(scaler: f32, m1: f32, m2: f32) -> f32 {
+    scaler * (m1.log10() + m2.log10()).max(0.0) / 2.0
+}
+
+pub trait HasPosition {
     fn get_pos(&self) -> Vec3A;
+    fn set_pos(&mut self, pos: Vec3A);
 }
 
-pub trait Massive {
+pub trait HasVelocity {
+    fn get_vel(&self) -> Vec3A;
+    fn set_vel(&mut self, vel: Vec3A);
+}
+
+pub trait HasMass {
     fn get_mass(&self) -> f32;
+    fn set_mass(&mut self, mass: f32);
 }
 
-pub trait Particle: Spacial + Massive {
+pub trait PosMass: HasPosition + HasMass {
     #[inline]
     fn weighted_pos(&self) -> Vec3A {
         if self.get_mass() > 0.0 {
@@ -31,8 +47,31 @@ pub trait Particle: Spacial + Massive {
     }
 }
 
-impl<T: Spacial + Massive> Particle for T {}
+impl<T: HasPosition + HasMass> PosMass for T {}
 
-pub trait NBodyGravityCalculator<'a, T: Particle> {
-    fn calculate_accelerations<const PARALLEL: bool>(g: f32, particles: &'a [T]) -> Vec<Vec3A>;
+pub trait VelMass: HasVelocity + HasMass {
+    #[inline]
+    fn non_elastic_collision(&mut self, other: &Self) {
+        let m1 = self.get_mass();
+        let m2 = other.get_mass();
+        let v1 = self.get_vel();
+        let v2 = other.get_vel();
+
+        // Non-elastic collision: momentum conservation
+        let new_v1 = (m1 * v1 + m2 * v2) / (m1 + m2);
+        self.set_vel(new_v1);
+
+        // Update the mass of the current object
+        self.set_mass(m1 + m2);
+    }
+}
+
+impl<T: HasVelocity + HasMass> VelMass for T {}
+
+pub trait NBodyGravityCalculator<T>
+where
+    T: PosMass,
+{
+    fn calc_accs<const PARALLEL: bool>(&self, g: f32) -> Vec<Vec3A>;
+    fn detect_collisions(&self, merge_scaler: f32) -> Vec<(usize, usize)>;
 }

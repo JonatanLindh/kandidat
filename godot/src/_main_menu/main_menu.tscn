@@ -1,0 +1,94 @@
+[gd_scene load_steps=7 format=3 uid="uid://dad6wvdj06krx"]
+
+[ext_resource type="Script" uid="uid://dwmrh4yr0wcjg" path="res://src/_main_menu/main_menu.gd" id="1_guuao"]
+[ext_resource type="PackedScene" uid="uid://dru1frs0nrf78" path="res://src/system/system.tscn" id="2_bq8pk"]
+[ext_resource type="PackedScene" uid="uid://d3wlkwtb2exko" path="res://src/_main_menu/main.tscn" id="2_d3tmf"]
+[ext_resource type="PackedScene" uid="uid://d0p7x2w85q7qh" path="res://src/galaxy/skybox/skybox.tscn" id="3_6w7d7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y7ebi"]
+bg_color = Color(0.00392157, 0.00392157, 0.00392157, 0.298039)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_y7ebi"]
+
+[node name="MainMenu" type="Node3D"]
+script = ExtResource("1_guuao")
+start_scene = ExtResource("2_d3tmf")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.995223, 0.0337503, -0.0916122, -0.0194852, 0.988134, 0.152356, 0.0956672, -0.149843, 0.984071, -706.808, 288.591, 840.339)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Control2" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TitlePanelContainer" type="PanelContainer" parent="CanvasLayer/Control2"]
+layout_mode = 0
+offset_left = 55.0
+offset_top = 49.0
+offset_right = 568.0
+offset_bottom = 154.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_y7ebi")
+
+[node name="Label" type="Label" parent="CanvasLayer/Control2/TitlePanelContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 76
+text = "Galaxy Engine"
+
+[node name="Control" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 40.0
+grow_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Control"]
+layout_mode = 0
+offset_left = 55.0
+offset_top = -134.0
+offset_right = 355.0
+offset_bottom = -34.0
+
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/Control/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_y7ebi")
+
+[node name="StartButton" type="Button" parent="CanvasLayer/Control/VBoxContainer/PanelContainer"]
+layout_mode = 2
+text = "Start"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Control/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.9
+
+[node name="Label" type="Label" parent="CanvasLayer/Control/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.1
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+text = "Seed:"
+
+[node name="SeedTextEdit" type="TextEdit" parent="CanvasLayer/Control/VBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.9
+placeholder_text = "Leave blank for a random seed"
+
+[node name="System" parent="." instance=ExtResource("2_bq8pk")]
+
+[node name="Skybox" parent="." instance=ExtResource("3_6w7d7")]
+
+[connection signal="pressed" from="CanvasLayer/Control/VBoxContainer/PanelContainer/StartButton" to="." method="_on_start_button_pressed"]

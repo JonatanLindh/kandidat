@@ -7,7 +7,10 @@
 script = ExtResource("1_ppp1m")
 galaxyMap = NodePath("GalaxyMap")
 player = NodePath("Camera3D")
+speed = 5000.0
+seed = 1399
 
 [node name="Camera3D" type="Camera3D" parent="."]
+far = 200000.0
 
 [node name="GalaxyMap" parent="." instance=ExtResource("2_0cd5w")]

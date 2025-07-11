@@ -130,6 +130,11 @@ public partial class InfiniteGalaxy : Node3D
 		return seed;
 	}
 
+	public void SetSeed(uint seed)
+	{
+		this.seed = seed;
+	}
+
 	public void SetPlayer(Node3D player)
 	{
 		this.player = player;

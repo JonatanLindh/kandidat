@@ -10,8 +10,6 @@ public partial class DeterministicRandomPlanet : RandomCelestialBodyNoise
 
     protected override void RandomizeParameters(CelestialBodyParameters param)
     {
-        GD.Print("Planet seed: " + param.Seed);
-
         // Set seed of Random to system-seed to make deterministic
         random = new Random(param.Seed);
 

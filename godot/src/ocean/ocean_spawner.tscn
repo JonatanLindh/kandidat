@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6jvy1bfayo4j"]
+
+[ext_resource type="Script" uid="uid://omk5h5msbkn6" path="res://src/ocean/OceanSpawner.cs" id="1_n572c"]
+
+[node name="OceanSpawner" type="Node3D"]
+script = ExtResource("1_n572c")

@@ -12,6 +12,7 @@ script = ExtResource("1_8ccs1")
 
 [node name="InfiniteGalaxy" parent="." instance=ExtResource("2_3xdco")]
 unique_name_in_owner = true
+viewDistance = 2
 chunkSize = 30000
 starCount = 100
 

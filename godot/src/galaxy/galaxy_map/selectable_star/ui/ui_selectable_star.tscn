@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://c3a5ooproww5b" path="res://src/galaxy/galaxy_map/selectable_star/ui/UISelectableStar.cs" id="1_6q8y8"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_odo66"]
-bg_color = Color(0.192157, 0.192157, 0.192157, 0)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gvko3"]
+bg_color = Color(0.00392157, 0.00392157, 0.00392157, 0.298039)
 
 [node name="UiSelectableStar" type="CanvasLayer"]
 script = ExtResource("1_6q8y8")
@@ -99,12 +99,6 @@ size_flags_horizontal = 3
 text = "Planets:"
 horizontal_alignment = 1
 
-[node name="VSeparator" type="VSeparator" parent="PanelContainer/TabContainer/Info/HBoxContainer3"]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.01
-
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/TabContainer/Info/HBoxContainer3"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -190,6 +184,16 @@ text = "  X  "
 layout_mode = 2
 text = "Orbit Overlay"
 
+[node name="FloatingStarCheckButton" type="CheckButton" parent="PanelContainer/TabContainer/Actions"]
+layout_mode = 2
+button_pressed = true
+text = "Floating selected Overlay"
+
+[node name="PlayerHUDCheckButton" type="CheckButton" parent="PanelContainer/TabContainer/Actions"]
+layout_mode = 2
+button_pressed = true
+text = "Enable Player HUD"
+
 [node name="HSeparator" type="HSeparator" parent="PanelContainer/TabContainer/Actions"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -211,48 +215,104 @@ size_flags_horizontal = 8
 size_flags_vertical = 0
 text = "  X  "
 
-[node name="VisitButton" type="Button" parent="PanelContainer/TabContainer/Dev"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/TabContainer/Dev"]
 layout_mode = 2
-text = "Explore"
+size_flags_vertical = 3
 
-[node name="StarSelectPanel" type="Panel" parent="."]
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Galaxy seed:"
+
+[node name="GalaxySeedLabel" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
-offset_right = 160.0
-offset_bottom = 60.0
-mouse_filter = 1
-theme_override_styles/panel = SubResource("StyleBoxFlat_odo66")
+layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="StarSelectPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="HSeparator2" type="HSeparator" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
 
-[node name="StarName" type="Label" parent="StarSelectPanel/VBoxContainer"]
+[node name="Label" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+text = "Add custom celestial body:"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+
+[node name="TextEditMass" type="TextEdit" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "10000"
+placeholder_text = "Mass"
+
+[node name="TextEditSpeed" type="TextEdit" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "10"
+placeholder_text = "Speed"
+
+[node name="AddPhysicsBodyButton" type="Button" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Spawn"
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/TabContainer/Dev/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Enter system scene:"
+
+[node name="VisitButton" type="Button" parent="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Enter"
+
+[node name="StarSelectContainer" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+offset_right = 172.0
+offset_bottom = 58.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_gvko3")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="StarSelectContainer"]
+layout_mode = 2
+
+[node name="StarName" type="Label" parent="StarSelectContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 6
 size_flags_stretch_ratio = 0.47
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
 text = "Name"
 
-[node name="ColorRect" type="ColorRect" parent="StarSelectPanel/VBoxContainer"]
+[node name="ColorRect" type="ColorRect" parent="StarSelectContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.04
 color = Color(0.662745, 0.662745, 0.662745, 0.392157)
 
-[node name="StarDistance" type="Label" parent="StarSelectPanel/VBoxContainer"]
+[node name="StarDistance" type="Label" parent="StarSelectContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 6
 size_flags_stretch_ratio = 0.47
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
 text = "Distance"
 
 [connection signal="pressed" from="PanelContainer/TabContainer/Info/CloseButton2" to="." method="OnCloseButtonPressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Actions/CloseButton2" to="." method="OnCloseButtonPressed"]
 [connection signal="toggled" from="PanelContainer/TabContainer/Actions/OrbitsCheckButton" to="." method="OnOrbitsVisibilityChanged"]
+[connection signal="toggled" from="PanelContainer/TabContainer/Actions/FloatingStarCheckButton" to="." method="OnFloatingStarOverlayVisibilityChanged"]
+[connection signal="toggled" from="PanelContainer/TabContainer/Actions/PlayerHUDCheckButton" to="." method="OnPlayerHUDVisibilityChanged"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Actions/TravelButton" to="." method="OnTravelButtonPressed"]
 [connection signal="pressed" from="PanelContainer/TabContainer/Dev/CloseButton2" to="." method="OnCloseButtonPressed"]
-[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VisitButton" to="." method="OnVisitButtonPressed"]
+[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer/AddPhysicsBodyButton" to="." method="OnAddPhysicsBodyButtonPressed"]
+[connection signal="pressed" from="PanelContainer/TabContainer/Dev/VBoxContainer/HBoxContainer3/VisitButton" to="." method="OnVisitButtonPressed"]

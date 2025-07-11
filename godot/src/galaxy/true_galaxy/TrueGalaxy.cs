@@ -8,6 +8,14 @@ public partial class TrueGalaxy : Node3D
 	TrueStar[] stars;
 	bool starsInitialized = false;
 
+	[Export] bool useUniformStarColor = true;
+	[Export] Color uniformStarColor = new Color(
+		1.0f,
+		1.0f,
+		1.0f,
+		1.0f
+	);
+
 	TrueStarAdapter starAdapter = new TrueStarAdapter();
 
 	public override void _Ready()
@@ -19,6 +27,27 @@ public partial class TrueGalaxy : Node3D
 	private void InitializeStars()
 	{
 		stars = discGalaxy.GetStars();
+
+		Color[] colors = new Color[stars.Length];
+		for (int i = 0; i < stars.Length; i++)
+		{
+			if(useUniformStarColor)
+			{
+				colors[i] = uniformStarColor;
+			}
+
+			else
+			{
+				colors[i] = new Color(
+					GD.Randf(),
+					GD.Randf(),
+					GD.Randf(),
+					1.0f
+				);
+			}
+		}
+		discGalaxy.ColorStars(colors);
+
 		starsInitialized = true;
 	}
 
@@ -60,6 +89,8 @@ public partial class TrueGalaxy : Node3D
 		}
 
 		Transform3D[] newTransforms = new Transform3D[newVelocities.Length];
+		
+
 		for (int i = 0; i < stars.Length; i++)
 		{
 			Transform3D newTransform = new Transform3D(

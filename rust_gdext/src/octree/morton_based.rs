@@ -1,6 +1,7 @@
 use super::visualize::VisualizeOctree;
-use super::{BoundingBox, Particle, Spacial};
+use super::{BoundingBox, HasPosition};
 use crate::octree::GravityData;
+use crate::physics::gravity::{PosMass, merge_radius};
 use derivative::Derivative;
 use glam::{U64Vec3, Vec3A};
 use rayon::prelude::*;
@@ -156,7 +157,7 @@ pub struct Node {
 /// The resulting octree structure.
 /// Might evolve, but starts with nodes and bounds.
 #[derive(Debug)]
-pub struct MortonBasedOctree<'a, T: Spacial> {
+pub struct MortonBasedOctree<'a, T: HasPosition> {
     /// Arena storing the explicit node hierarchy built from the sorted list.
     /// Note: The 'Node' struct might need modification from the top-down
     /// version (e.g., explicit child pointers instead of n_subtree_nodes).
@@ -174,7 +175,7 @@ pub struct MortonBasedOctree<'a, T: Spacial> {
     pub root_index: Option<usize>,
 }
 
-impl<T: Spacial> VisualizeOctree for MortonBasedOctree<'_, T> {
+impl<T: HasPosition> VisualizeOctree for MortonBasedOctree<'_, T> {
     fn get_bounds_and_depths(&self) -> Vec<(BoundingBox, u32)> {
         self.nodes
             .iter()
@@ -185,9 +186,9 @@ impl<T: Spacial> VisualizeOctree for MortonBasedOctree<'_, T> {
 
 impl<'a, T> MortonBasedOctree<'a, T>
 where
-    T: Particle + Sync,
+    T: PosMass + Sync,
 {
-    const PARALLEL_ENCODE_THRESHOLD: usize = 3000;
+    const PARALLEL_ENCODE_THRESHOLD: usize = 4000;
 
     /// Main function to build the octree from body data using Morton codes.
     pub fn new(bodies: &'a [T]) -> Self {
@@ -390,5 +391,70 @@ where
         };
 
         range.start + sorted_bodies[range].partition_point(pred)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn find_collisions_for_body_recursive(
+        &self,
+        node_idx: usize,
+        i: usize,
+        target_pos: &Vec3A,
+        target_mass: f32,
+        target_aabb: &BoundingBox,
+        merge_scaler: f32,
+        colliding_indices: &mut Vec<usize>,
+    ) {
+        assert!(node_idx < self.nodes.len(), "Node index out of bounds");
+
+        let node = &self.nodes[node_idx];
+
+        // Broad phase: Check if target_aabb overlaps with the current octree node's bounds
+        if target_aabb.aabb_overlap(&node.bounds) {
+            return; // No overlap, prune this branch
+        }
+
+        // If it's an internal node, recurse into children
+        if let Some(children) = node.children {
+            // `children` is Option<[Option<NonZeroUsize>; 8]>
+            for child_idx in children.iter().flatten() {
+                self.find_collisions_for_body_recursive(
+                    child_idx.get(),
+                    i,
+                    target_pos,
+                    target_mass,
+                    target_aabb,
+                    merge_scaler,
+                    colliding_indices,
+                );
+            }
+        } else {
+            // It's a leaf node (or max depth reached, effectively a leaf for collision)
+            // Narrow phase for particles in this leaf
+            for morton_j in node.body_range.clone() {
+                let j = self
+                    .sorted_indices
+                    .get(morton_j)
+                    .expect("Index out of bounds")
+                    .item;
+
+                // 1. Skip self-collision and already checked pairs
+                //    (i.e., if i < j, we already checked (j,i) in a previous call)
+                if i <= j {
+                    continue;
+                }
+
+                let (other_pos, other_mass) = &self
+                    .data_ref
+                    .get(j)
+                    .map(|data| (data.get_pos(), data.get_mass()))
+                    .expect("Index out of bounds");
+
+                // Sphere-sphere overlap check
+                let dist_sq = target_pos.distance_squared(*other_pos);
+                if dist_sq < merge_radius(merge_scaler, target_mass, *other_mass) {
+                    colliding_indices.push(j);
+                }
+            }
+        }
     }
 }
