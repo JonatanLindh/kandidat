@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cc3fpt0u5jmex"]
+[gd_scene load_steps=5 format=3 uid="uid://cc3fpt0u5jmex"]
 
 [ext_resource type="Script" uid="uid://cnikwq6bgmy1k" path="res://src/noise/CelestialBodyNoise/PlanetNoise/CelestialBodyInput.cs" id="1_7ds2o"]
 [ext_resource type="PackedScene" uid="uid://d0cdpoktouwfj" path="res://src/marchingcubes/marchingcube.tscn" id="1_au8v0"]
 [ext_resource type="Script" uid="uid://3wf1c75vaqkp" path="res://src/noise/CelestialBodyNoise/PlanetNoise/BasicPlanet.cs" id="3_2amqi"]
+[ext_resource type="PackedScene" uid="uid://bofhg0a64o1ap" path="res://src/ocean/ocean.tscn" id="4_qqwt1"]
 
 [node name="BasicPlanet" type="Node3D"]
 script = ExtResource("1_7ds2o")
@@ -22,3 +23,6 @@ CelestialBody = NodePath("../BasicPlanet")
 
 [node name="BasicPlanet" type="Node" parent="."]
 script = ExtResource("3_2amqi")
+
+[node name="Ocean" parent="." instance=ExtResource("4_qqwt1")]
+radius = 58

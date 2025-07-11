@@ -1,6 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://d3o381leslj0a"]
+[gd_scene load_steps=6 format=3 uid="uid://d3o381leslj0a"]
 
 [ext_resource type="Script" uid="uid://htyg0or8g21j" path="res://src/bodies/custom_body/custom_body.gd" id="1_4540q"]
+[ext_resource type="PackedScene" uid="uid://du6jp713wv2h5" path="res://src/bodies/planet/planet_marching_cube.tscn" id="2_pp8p5"]
+[ext_resource type="PackedScene" uid="uid://5e7ris75mkdi" path="res://src/noise/CelestialBodyNoise/PlanetNoise/RandomPlanet.tscn" id="3_lsku7"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_8xyca"]
 radius = 50.0
@@ -16,5 +18,10 @@ trajectory_color = Color(1, 1, 1, 1)
 script = ExtResource("1_4540q")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
 mesh = SubResource("SphereMesh_8xyca")
 surface_material_override/0 = SubResource("StandardMaterial3D_kmxym")
+
+[node name="PlanetMarchingCube" parent="." instance=ExtResource("2_pp8p5")]
+Radius = 10.0
+Planet = ExtResource("3_lsku7")

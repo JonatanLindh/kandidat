@@ -72,7 +72,6 @@ public partial class UISelectableStar : CanvasLayer
 		galaxySeedLabel = GetNode<Label>("%GalaxySeedLabel");
 		galaxySeedLabel.Text = seed.ToString();
 
-
 		systemScene = GetNode<Node3D>("../../System");
 		Hide();
 	}
