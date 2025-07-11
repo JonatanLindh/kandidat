@@ -72,7 +72,7 @@ public partial class McChunkSpawner : Node
 		_loadedChunks = new Dictionary<string, MeshInstance3D>();
 		if (Engine.IsEditorHint())
 		{
-			_editorCamera = EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D();
+			//_editorCamera = EditorInterface.Singleton.GetEditorViewport3D().GetCamera3D();
 			_playerPosition = _editorCamera.GlobalTransform.Origin;
 		}
 		else

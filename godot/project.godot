@@ -10,10 +10,10 @@ config_version=5
 
 [application]
 
-config/name="Kandidat"
+config/name="Galaxy Engine"
 run/main_scene="uid://dad6wvdj06krx"
 config/features=PackedStringArray("4.4", "C#", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://ykkxopoaa8ix"
 
 [autoload]
 
