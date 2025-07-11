@@ -20,7 +20,7 @@ public partial class OceanSpawner : Node3D
 
     private bool isOceanSpawnable(double warmth)
     {
-        return warmth >= 0.4d || warmth <= 0.6d;
+        return warmth >= 0.4d && warmth <= 0.6d;
     }
 
     /// <summary>
